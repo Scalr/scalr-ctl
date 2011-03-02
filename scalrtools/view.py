@@ -5,7 +5,7 @@ Created on Feb 21th, 2011
 '''
 
 from prettytable import PrettyTable
-from objects import FarmRole
+from .types import FarmRole
 
 #TODO: Refactoring 
 class TableViewer:

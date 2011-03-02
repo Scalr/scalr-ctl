@@ -20,7 +20,7 @@ from urllib import urlencode, splitnport
 from urllib2 import urlopen, Request, URLError, HTTPError
 
 #XXX: How to import dozents of dummy objects right?
-from objects import *
+from types import *
 #XXX: Does it need to be splited into different modules at all? 
 #XXX: Need good names for modules and classes
 
@@ -484,7 +484,7 @@ class ScalrConnection(object):
 			self.last_transaction_id = self.get_transaction_id(response)
 			
 			if response.nodeName == 'Error':
-				raise ScalrAPIError.from_xml(response)
+				raise ScalrAPIError.fromxml(response)
 
 			if simple_response:
 				ret.append(cls.fromxml(response))
@@ -496,7 +496,7 @@ class ScalrConnection(object):
 							ret.append(cls.fromxml(node))
 						
 			if wrap_page:
-				page = Page.from_xml(response)
+				page = Page.fromxml(response)
 				page.scalr_objects = ret
 				return page
 
@@ -524,7 +524,7 @@ class ScalrConnection(object):
 class ScalrAPIError(Exception):
 	
 	@classmethod
-	def from_xml(cls, xml):
+	def fromxml(cls, xml):
 		child = get_items_first_child(xml, 'Message')
 		msg = child.nodeValue.strip() if child else 'Cannot parse document'
 		return ScalrAPIError(msg)

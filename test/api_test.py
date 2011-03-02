@@ -8,8 +8,8 @@ import unittest
 
 from xml.dom.minidom import parseString
 
-from lib import ScalrConnection, xml_strip, ScalrAPIError
-from viewer import TableViewer
+from scalrtools.api import ScalrConnection, xml_strip, ScalrAPIError
+from scalrtools.view import TableViewer
 
 key_id = '2f8c90dd4cbd948f'
 scalr_url='https://scalr-trunk.local.webta.net/api/api.php'

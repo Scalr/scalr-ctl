@@ -22,7 +22,7 @@ class Page(object):
 		self.scalr_objects = scalr_objects or []
 	
 	@classmethod	
-	def from_xml(cls,xml):
+	def fromxml(cls,xml):
 		get_value = lambda tag: get_items_first_child(xml, tag).nodeValue.strip()
 		page = Page()
 		page.total_records = get_value('TotalRecords')
