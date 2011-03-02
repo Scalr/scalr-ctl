@@ -1,0 +1,9 @@
+<?xml version="1.0" ?>
+<Error>
+	<TransactionID>
+		4eda3163-e369-45c1-a1ee-f2edcf7f066d
+	</TransactionID>
+	<Message>
+		Zone 'dfgdfg' not found in database
+	</Message>
+</Error>

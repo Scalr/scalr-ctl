@@ -1,0 +1,176 @@
+<?xml version="1.0" ?>
+<ScriptsListResponse>
+	<TransactionID>
+		72e2f745-9e9d-4d27-a750-a590c6dc6f1d
+	</TransactionID>
+	<ScriptSet>
+		<Item>
+			<ID>
+				1
+			</ID>
+			<Name>
+				SVN update
+			</Name>
+			<Description>
+				Update a working copy from SVN repository
+			</Description>
+			<LatestRevision>
+				1
+			</LatestRevision>
+		</Item>
+		<Item>
+			<ID>
+				2
+			</ID>
+			<Name>
+				SVN export
+			</Name>
+			<Description>
+				Export SVN repository to local directory
+			</Description>
+			<LatestRevision>
+				1
+			</LatestRevision>
+		</Item>
+		<Item>
+			<ID>
+				3
+			</ID>
+			<Name>
+				SVN checkout
+			</Name>
+			<Description>
+				Checkout from SVN repository
+			</Description>
+			<LatestRevision>
+				1
+			</LatestRevision>
+		</Item>
+		<Item>
+			<ID>
+				12
+			</ID>
+			<Name>
+				artemScript
+			</Name>
+			<Description>
+				Clone a git repository
+			</Description>
+			<LatestRevision>
+				3
+			</LatestRevision>
+		</Item>
+		<Item>
+			<ID>
+				22
+			</ID>
+			<Name>
+				test share script
+			</Name>
+			<Description>
+				test share script
+			</Description>
+			<LatestRevision>
+				2
+			</LatestRevision>
+		</Item>
+		<Item>
+			<ID>
+				24
+			</ID>
+			<Name>
+				phpinfo
+			</Name>
+			<Description>
+				view php info
+			</Description>
+			<LatestRevision>
+				8
+			</LatestRevision>
+		</Item>
+		<Item>
+			<ID>
+				30
+			</ID>
+			<Name>
+				perlinfo
+			</Name>
+			<Description>
+				Perl modules info
+			</Description>
+			<LatestRevision>
+				2
+			</LatestRevision>
+		</Item>
+		<Item>
+			<ID>
+				32
+			</ID>
+			<Name>
+				mysql-ebs start
+			</Name>
+			<Description>
+				Script that forces mysql-ebs instances to send hostUp
+			</Description>
+			<LatestRevision>
+				1
+			</LatestRevision>
+		</Item>
+		<Item>
+			<ID>
+				35
+			</ID>
+			<Name>
+				List RoleOptions
+			</Name>
+			<Description>
+				ListRoleOptions
+			</Description>
+			<LatestRevision>
+				1
+			</LatestRevision>
+		</Item>
+		<Item>
+			<ID>
+				46
+			</ID>
+			<Name>
+				SVN checkout
+			</Name>
+			<Description>
+				Checkout from SVN repository
+			</Description>
+			<LatestRevision>
+				2
+			</LatestRevision>
+		</Item>
+		<Item>
+			<ID>
+				47
+			</ID>
+			<Name>
+				SVN update
+			</Name>
+			<Description>
+				Update a working copy from SVN repository
+			</Description>
+			<LatestRevision>
+				1
+			</LatestRevision>
+		</Item>
+		<Item>
+			<ID>
+				48
+			</ID>
+			<Name>
+				Custom artemScript
+			</Name>
+			<Description>
+				Clone a git repository
+			</Description>
+			<LatestRevision>
+				2
+			</LatestRevision>
+		</Item>
+	</ScriptSet>
+</ScriptsListResponse>

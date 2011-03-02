@@ -1,0 +1,9 @@
+<?xml version="1.0" ?>
+<FarmTerminateResponse>
+	<TransactionID>
+		c7a43c70-29b5-4aa4-be8d-0a2bcfc186b4
+	</TransactionID>
+	<Result>
+		1
+	</Result>
+</FarmTerminateResponse>

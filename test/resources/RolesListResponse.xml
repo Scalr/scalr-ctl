@@ -1,0 +1,19 @@
+<?xml version="1.0" ?>
+<RolesListResponse>
+	<TransactionID>
+		49b94cb7-1013-4c2e-bd6e-03aac07d0259
+	</TransactionID>
+	<RoleSet>
+		<Item>
+			<Name>
+				euca2-base
+			</Name>
+			<Owner>
+				Jake Merge
+			</Owner>
+			<Architecture>
+				x86_64
+			</Architecture>
+		</Item>
+	</RoleSet>
+</RolesListResponse>
