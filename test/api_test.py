@@ -6,25 +6,22 @@ Created on Feb 21th, 2011
 
 import unittest
 
+import binascii
+import os
+
 from xml.dom.minidom import parseString
 
 from scalrtools.api import ScalrConnection, xml_strip, ScalrAPIError
 from scalrtools.view import TableViewer
-
-key_id = '2f8c90dd4cbd948f'
-scalr_url='https://scalr-trunk.local.webta.net/api/api.php'
-api_key = '+gxTjaN5b1jRcAsnc8vYZr3GObFM2b+tFE8Gx0rABntyhCTZhgW1oeVtAR350gmA8mUSLXQwinFnE+zjmb9P7usCAjZztWArWxIPymTbBg4Xv65ZxAYqebvZE73icQa40vmjI2U+X/DVPt531OpQfuoSxMT1Id6QkQJOhdgre0s='
-
-#scalr.net
-#key_id = '24cce3d24a4339d7'
-#api_key = 'pLaNwKz4l4z9g5+SN3F7MQcy9IvzgxGF7pc03gUqaOwT91oJeTU0iU+af8k6eHVoi/Ykg5/5dCA5e8s0JRIQcsgte4eyryFxhO5Si4XNCHAntKy1VBYRn8wu79zvdZPV6S68ZAvl5B8MpWYRyg3yAzo8wgJZnH3MAozgWN+zVG4='
-#scalr_url = 'https://scalr.net/api/api.php'
 
 
 class TestScalrConnection(unittest.TestCase):
 
 
 	def setUp(self):
+		scalr_url = os.environ['SCALR_URL']
+		key_id = os.environ['SCALR_KEY_ID']
+		api_key = os.environ['SCALR_API_KEY']
 		self.conn = ScalrConnection(url=scalr_url, key_id=key_id, access_key=api_key)
 
 
@@ -37,6 +34,17 @@ class TestScalrConnection(unittest.TestCase):
 		xml = xml_strip(parseString(response))
 		self.assertRaises(ScalrAPIError,self.conn._read_get_farm_stats_response,(xml))
 		#print self.conn._read_get_farm_stats_response(xml)
+
+
+	'''	
+	def test__read_launch_server_response(self):
+		response = open('test/resources/ServerlaunchResponse.xml').read()
+		xml = xml_strip(parseString(response))
+		response = self.conn._read_launch_server_response(xml)
+		print '\nLast TransactionID: %s' % self.conn.last_transaction_id
+		print TableViewer(response)
+		#self.assertEquals()
+	'''	
 
 
 	def test__read_get_farm_details_response(self):
@@ -347,11 +355,113 @@ class TestScalrConnection(unittest.TestCase):
 		print TableViewer(response)
 		
 	
-			
-	def test_fetch(self):
-		pass
+	def _test_fetch_from_local(self):
+
+		response = self.conn.fetch('FarmTerminate', FarmID='74',KeepEBS='0',KeepEIP='0',KeepDNSZone='0')
+		print response.toprettyxml()
+		file = open('test/resources/FarmTerminateResponse.xml','w')
+		file.write(response.toprettyxml())
+		file.close()	
 	
+		response = self.conn.fetch('FarmLaunch', FarmID='74')
+		print response.toprettyxml()
+		file = open('test/resources/FarmLaunchResponse.xml','w')
+		file.write(response.toprettyxml())
+		file.close()	
+		
+		response = self.conn.fetch('LogsList', FarmID='74', ServerID='d3963f4b-8f26-4d37-aefc-bcfe83fe998a')
+		print response.toprettyxml()
+		file = open('test/resources/LogsListResponse.xml','w')
+		file.write(response.toprettyxml())
+		file.close()
+			
+		response = self.conn.fetch('EventsList', FarmID='74')
+		print response.toprettyxml()
+		file = open('test/resources/EventsListResponse.xml','w')
+		file.write(response.toprettyxml())
+		file.close()		
+		
+		response = self.conn.fetch('ApacheVhostsList')
+		print response.toprettyxml()
+		file = open('test/resources/ApacheVhostsListResponse.xml','w')
+		file.write(response.toprettyxml())
+		file.close()
+		
+		response = self.conn.fetch('ScriptGetDetails', ScriptID='46')
+		print response.toprettyxml()
+		file = open('test/resources/ScriptGetDetailsResponse.xml','w')
+		file.write(response.toprettyxml())
+		file.close()
+		
+		response = self.conn.fetch('BundleTaskGetStatus', BundleTaskID='578')
+		print response.toprettyxml()
+		file = open('test/resources/BundleTaskGetStatusResponse.xml','w')
+		file.write(response.toprettyxml())
+		file.close()	
+		
+		response = self.conn.fetch('RolesList', Name='euca2-base')
+		print response.toprettyxml()
+		file = open('test/resources/RolesListResponse.xml','w')
+		file.write(response.toprettyxml())
+		file.close()	
+				
+		response = self.conn.fetch('ScriptsList')
+		print response.toprettyxml()
+		file = open('test/resources/ScriptsListResponse.xml','w')
+		file.write(response.toprettyxml())
+		file.close()
+		
+		response = self.conn.fetch('FarmsList')
+		print response.toprettyxml()
+		file = open('test/resources/FarmsListResponse.xml','w')
+		file.write(response.toprettyxml())
+		file.close()		
+		
+			
+	def test_fetch_from_scalr_test(self):
+	
+		#response = self.conn.fetch('FarmGetDetails', FarmID='5365')
+		#print response.toprettyxml()
+		
+		'''		
+		response = self.conn.fetch('ServerImageCreate', ServerID='1f72ece7-e732-4bfc-8d97-a9e0a4014946', RoleName='app-apache-ubuntu-ebs')
+		print response.toprettyxml()
+		file = open('test/resources/ServerImageCreateResponse.xml','w')
+		file.write(response.toprettyxml())
+		file.close()		
+		
+		response = self.conn.fetch('ScriptExecute', FarmID='5365', ScriptID='348',Timeout='60',Async='0')
+		print response.toprettyxml()
+		file = open('test/resources/ScriptExecuteResponse.xml','w')
+		file.write(response.toprettyxml())
+		file.close()
+			
+		ssl_private_key = open('test/resources/apache-cert/server.key').read()		
+ 		key = binascii.b2a_base64(ssl_private_key).strip()
+ 		
+ 		ssl_certificate = open('test/resources/apache-cert/server.crt').read()
+ 		cert = binascii.b2a_base64(ssl_certificate).strip()
+ 		
+		response = self.conn.fetch('ApacheVhostCreate', DomainName='ssl.dima-test.com', FarmID='5365',
+								FarmRoleID='16353',DocumentRootDir='/var/www',EnableSSL='1',
+								SSLPrivateKey=key,SSLCertificate=cert)
+		print response.toprettyxml()
+		file = open('test/resources/ApacheVhostCreateResponse.xml','w')
+		file.write(response.toprettyxml())
+		file.close()
 		'''
+		
+		'''		
+		response = self.conn.fetch('Serverlaunch',FarmRoleID='') #TODO:Add valid FarmRoleID
+		print response.toprettyxml()
+		file = open('test/resources/ServerlaunchResponse.xml','w')
+		file.write(response.toprettyxml())
+		file.close()
+		'''	
+	
+	
+	def _test_fetch_from_scalr_admin(self):
+
 		response = self.conn.fetch('FarmGetDetails', FarmID='1997')
 		print response.toprettyxml()
 		file = open('test/resources/FarmGetDetailsResponse.xml','w')
@@ -363,30 +473,6 @@ class TestScalrConnection(unittest.TestCase):
 		file = open('test/resources/StatisticsGetGraphURLResponse.xml','w')
 		file.write(response.toprettyxml())
 		file.close()	
-	
-		response = self.conn.fetch('FarmTerminate', FarmID='74',KeepEBS='0',KeepEIP='0',KeepDNSZone='0')
-		print response.toprettyxml()
-		file = open('test/resources/FarmTerminateResponse.xml','w')
-		file.write(response.toprettyxml())
-		file.close()	
-	
-		response = self.conn.fetch('FarmLaunch', FarmID='74')
-		print response.toprettyxml()
-		file = open('test/resources/FarmLaunchResponse.xml','w')
-		file.write(response.toprettyxml())
-		file.close()
-	
-		response = self.conn.fetch('BundleTaskGetStatus', BundleTaskID='578')
-		print response.toprettyxml()
-		file = open('test/resources/BundleTaskGetStatusResponse.xml','w')
-		file.write(response.toprettyxml())
-		file.close()
-		
-		response = self.conn.fetch('ScriptGetDetails', ScriptID='46')
-		print response.toprettyxml()
-		file = open('test/resources/ScriptGetDetailsResponse.xml','w')
-		file.write(response.toprettyxml())
-		file.close()
 			
 		response = self.conn.fetch('LogsList', FarmID='2607')
 		print response.toprettyxml()
@@ -400,33 +486,9 @@ class TestScalrConnection(unittest.TestCase):
 		file.write(response.toprettyxml())
 		file.close()
 			
-		response = self.conn.fetch('LogsList', FarmID='74', ServerID='d3963f4b-8f26-4d37-aefc-bcfe83fe998a')
-		print response.toprettyxml()
-		file = open('test/resources/LogsListResponse.xml','w')
-		file.write(response.toprettyxml())
-		file.close()
-			
-		response = self.conn.fetch('EventsList', FarmID='74')
-		print response.toprettyxml()
-		file = open('test/resources/EventsListResponse.xml','w')
-		file.write(response.toprettyxml())
-		file.close()
-			
 		response = self.conn.fetch('DNSZoneRecordsList', ZoneName='6ea60dba-a7a9-46cd-81ea-c62c74699951.scalr.ws')
 		print response.toprettyxml()
 		file = open('test/resources/DNSZoneRecordsListResponse.xml','w')
-		file.write(response.toprettyxml())
-		file.close()
-		
-		response = self.conn.fetch('RolesList', Name='euca2-base')
-		print response.toprettyxml()
-		file = open('test/resources/RolesListResponse.xml','w')
-		file.write(response.toprettyxml())
-		file.close()
-		
-		response = self.conn.fetch('ApacheVhostsList')
-		print response.toprettyxml()
-		file = open('test/resources/ApacheVhostsListResponse.xml','w')
 		file.write(response.toprettyxml())
 		file.close()
 		
@@ -434,69 +496,8 @@ class TestScalrConnection(unittest.TestCase):
 		print response.toprettyxml()
 		file = open('test/resources/DNSZonesListResponse.xml','w')
 		file.write(response.toprettyxml())
-		file.close()
 		
-		response = self.conn.fetch('ScriptsList')
-		print response.toprettyxml()
-		file = open('test/resources/ScriptsListResponse.xml','w')
-		file.write(response.toprettyxml())
-		file.close()
-		
-		response = self.conn.fetch('FarmsList')
-		print response.toprettyxml()
-		file = open('test/resources/FarmsListResponse.xml','w')
-		file.write(response.toprettyxml())
-		file.close()
-		'''
-		
-		
-		'''		
-		response = self.conn.fetch('Serverlaunch',FarmRoleID='') #TODO:Add valid FarmRoleID
-		print response.toprettyxml()
-		file = open('test/resources/ServerlaunchResponse.xml','w')
-		file.write(response.toprettyxml())
-		file.close()
-		'''
-	
-	
-	'''	
-	def __test__read_launch_server_response(self):
-		response = open('test/resources/ServerlaunchResponse.xml').read()
-		xml = xml_strip(parseString(response))
-		response = self.conn._read_launch_server_response(xml)
-		print '\nLast TransactionID: %s' % self.conn.last_transaction_id
-		print TableViewer(response)
-		#self.assertEquals()
-	'''			
 				
 				
 if __name__ == "__main__":
 	unittest.main()
-
-
-'''
-<?xml version="1.0" ?>
-<BundleTaskGetStatusResponse>
-	<TransactionID>
-		7a65bcad-d182-4531-be21-f63a334ec1d1
-	</TransactionID>
-	<BundleTaskStatus>
-		success
-	</BundleTaskStatus>
-</BundleTaskGetStatusResponse>
-'''
-
-'''
-<?xml version="1.0" ?>
-<BundleTaskGetStatusResponse>
-	<TransactionID>
-		e8dd0efe-7e6b-4199-82ab-69fd8f8f0e03
-	</TransactionID>
-	<BundleTaskStatus>
-		failed
-	</BundleTaskStatus>
-	<FailureReason>
-		Received RebundleFailed event from server
-	</FailureReason>
-</BundleTaskGetStatusResponse>
-'''
