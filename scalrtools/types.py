@@ -9,6 +9,8 @@ try:
 except ImportError:
 	import time
 
+from scalrtools.collections import OrderedDict
+		
 class Page(object):
 	total_records = None
 	start_from = None
@@ -44,7 +46,6 @@ class ScalrObject(object):
 	def parse_response(cls,xml):
 		result = {}
 		for key,tag in cls.__titles__.items():
-			
 			elements = xml.getElementsByTagName(tag)
 			
 			if not elements: 
@@ -82,18 +83,17 @@ class ScalrObject(object):
 
 
 class FarmRole(ScalrObject):
-	__titles__ = {
-			'id' : 'ID',
-			'role_id' : 'RoleID',
-			'name' : 'Name',
-			'platform' : 'Platform',
-			'category' : 'Category',
-			'cloud_location' : 'CloudLocation',
-			'scaling_properties' : 'ScalingProperties',
-			'platform_properties' : 'PlatformProperties',
-			'mysql_properties' : 'MySQLProperties',
-			'server_set' : 'ServerSet'
-			}
+	__titles__ = OrderedDict()
+	__titles__['id'] = 'ID'
+	__titles__['role_id'] = 'RoleID'
+	__titles__['name'] = 'Name'
+	__titles__['platform'] = 'Platform'
+	__titles__['category'] = 'Category'
+	__titles__['cloud_location'] = 'CloudLocation'
+	__titles__['scaling_properties'] = 'ScalingProperties'
+	__titles__['platform_properties'] = 'PlatformProperties'
+	__titles__['mysql_properties'] = 'MySQLProperties'
+	__titles__['server_set'] = 'ServerSet'
 	
 	id = None
 	role_id = None
@@ -119,14 +119,14 @@ class FarmRole(ScalrObject):
 		return hash(self.__dict__)
 		
 class Server(ScalrObject):
-	__titles__ = {
-			'server_id' : 'ServerID',
-			'platform_properties' : 'PlatformProperties',
-			'external_ip' : 'ExternalIP',
-			'internal_ip' : 'InternalIP',
-			'status' : 'Status',
-			'scalarizr_version' : 'ScalarizrVersion',
-			'uptime' : 'Uptime'}
+	__titles__ = OrderedDict()
+	__titles__['server_id'] = 'ServerID'
+	__titles__['platform_properties'] = 'PlatformProperties'
+	__titles__['external_ip'] = 'ExternalIP'
+	__titles__['internal_ip'] = 'InternalIP'
+	__titles__['status'] = 'Status'
+	__titles__['scalarizr_version'] = 'ScalarizrVersion'
+	__titles__['uptime'] = 'Uptime'
 	
 	server_id = None
 	platform_properties = None
@@ -158,20 +158,19 @@ class GraphURL(ScalrObject):
 	
 	
 class BundleTask(ScalrObject):
-	__titles__ = {
-			'bundle_task_status' : 'BundleTaskStatus',
-			'failure_reason':'FailureReason'}
+	__titles__ = OrderedDict()
+	__titles__['bundle_task_status'] = 'BundleTaskStatus'
+	__titles__['failure_reason'] = 'FailureReason'
 	
 	bundle_task_status = None
 	failure_reason = None
 
 
 class ScriptRevision(ScalrObject):
-	__titles__ = {
-		'revision' : 'Revision',
-		'date' : 'Date',
-		'config_variables' : 'ConfigVariables'
-	}
+	__titles__ = OrderedDict()
+	__titles__['revision'] = 'Revision'
+	__titles__['date'] = 'Date'
+	__titles__['config_variables'] = 'ConfigVariables'
 	
 	revision = None
 	date = None
@@ -179,13 +178,12 @@ class ScriptRevision(ScalrObject):
 	
 		
 class LogRecord(ScalrObject):
-	__titles__ = {
-		'server_id' : 'ServerID', 
-		'message' : 'Message',
-		'severity' : 'Severity',
-		'time_stamp' : 'Timestamp',
-		'source' : 'Source'
-	}
+	__titles__ = OrderedDict()
+	__titles__['server_id'] = 'ServerID'
+	__titles__['message'] = 'Message'
+	__titles__['severity'] = 'Severity'
+	__titles__['time_stamp'] = 'Timestamp'
+	__titles__['source'] = 'Source'
 	
 	server_id = None
 	message = None
@@ -204,12 +202,12 @@ class LogRecord(ScalrObject):
 
 
 class Event(ScalrObject):
-	__titles__ = {
-		'id' : 'ID',
-		'type' : 'Type',
-		'time_stamp' : 'Timestamp',
-		'message' : 'Message'
-	}
+	__titles__ = OrderedDict()
+	__titles__['id'] = 'ID'
+	__titles__['type'] = 'Type'
+	__titles__['time_stamp'] = 'Timestamp'
+	__titles__['message'] = 'Message'
+
 	id = None
 	type = None
 	time_stamp = None
@@ -223,11 +221,10 @@ class Event(ScalrObject):
 		
 			
 class Role(ScalrObject):
-	__titles__ = {
-		'name' : 'Name',
-		'owner' : 'Owner',
-		'architecture' : 'Architecture'
-	}
+	__titles__ = OrderedDict()
+	__titles__['name'] = 'Name'
+	__titles__['owner'] = 'Owner'
+	__titles__['architecture'] = 'Architecture'
 	
 	name = None
 	owner = None
@@ -235,13 +232,12 @@ class Role(ScalrObject):
 	
 	
 class FarmStat(ScalrObject):
-	__titles__ = {
-		'month' : 'Month', 
-		'year' : 'Year',
-		'bandwidth_in' : 'BandwidthIn',
-		'bandwidth_out' : 'BandwidthOut',
-		'bandwidth_total' : 'BandwidthTotal',
-	}
+	__titles__ = OrderedDict()
+	__titles__['month'] = 'Month'
+	__titles__['year'] = 'Year'
+	__titles__['bandwidth_in'] = 'BandwidthIn'
+	__titles__['bandwidth_out'] = 'BandwidthOut'
+	__titles__['bandwidth_total'] = 'BandwidthTotal'
 	
 	month = None
 	year = None
@@ -251,19 +247,16 @@ class FarmStat(ScalrObject):
 
 	
 class DnsZoneRecord(ScalrObject):
-	__titles__ = {
-		'id' : 'ID',
-		'type' : 'Type',
-		'ttl' : 'TTL',
-		'priority' : 'Priority',
-		'name' : 'Name',
-		'value' : 'Value',
-		'weight' : 'Weight',
-		'port' : 'Port',
-		'is_system' : 'IsSystem'
-	}
-	
-	__data__ = None
+	__titles__ = OrderedDict()
+	__titles__['id'] = 'ID'
+	__titles__['type'] = 'Type'
+	__titles__['ttl'] = 'TTL'
+	__titles__['priority'] = 'Priority'
+	__titles__['name'] = 'Name'
+	__titles__['value'] = 'Value'
+	__titles__['weight'] = 'Weight'
+	__titles__['port'] = 'Port'
+	__titles__['is_system'] = 'IsSystem'
 	
 	id = None
 	type = None
@@ -277,12 +270,11 @@ class DnsZoneRecord(ScalrObject):
 
 		
 class Farm(ScalrObject):
-	__titles__ = {
-		'id' : 'ID',
-		'name' : 'Name',
-		'comments' : 'Comments',
-		'status' : 'Status'
-	}
+	__titles__ = OrderedDict()
+	__titles__['id'] = 'ID'
+	__titles__['name'] = 'Name'
+	__titles__['comments'] = 'Comments'
+	__titles__['status'] = 'Status'
 	
 	id = None
 	name = None
@@ -291,12 +283,12 @@ class Farm(ScalrObject):
 
 
 class Script(ScalrObject): 
-	__titles__ = {
-		'id' : 'ID',
-		'name' : 'Name',
-		'description' : 'Description',
-		'latest_revision' : 'LatestRevision'
-	}
+	__titles__ =  OrderedDict()
+	__titles__['id'] = 'ID'
+	__titles__['name'] = 'Name'
+	__titles__['description'] = 'Description'
+	__titles__['latest_revision'] = 'LatestRevision'
+
 	
 	id = None
 	name = None
@@ -305,14 +297,13 @@ class Script(ScalrObject):
 	
 		
 class DNSZone(ScalrObject):
-	__titles__ = {
-		'zone_name' : 'ZoneName',
-		'farm_id' : 'FarmID',
-		'farm_role_id' : 'FarmRoleID',
-		'status' : 'Status',
-		'last_modified_at' : 'LastModifiedAt',
-		'ip_set' : 'IpSet'
-	}
+	__titles__ = OrderedDict()
+	__titles__['zone_name'] = 'ZoneName'
+	__titles__['farm_id'] = 'FarmID'
+	__titles__['farm_role_id'] = 'FarmRoleID'
+	__titles__['status'] = 'Status'
+	__titles__['last_modified_at'] = 'LastModifiedAt'
+	__titles__['ip_set'] = 'IpSet'
 	
 	zone_name = None
 	farm_id = None
@@ -323,13 +314,13 @@ class DNSZone(ScalrObject):
 		
 		
 class VirtualHost(ScalrObject):
-	__titles__ = {
-		'name' : 'Name',
-		'farm_id' : 'FarmID',
-		'farm_role_id' : 'FarmRoleID',
-		'is_ssl_enabled' : 'IsSSLEnabled',
-		'last_modified_at' : 'LastModifiedAt'
-	}
+	__titles__ = OrderedDict()
+
+	__titles__['name'] = 'Name'
+	__titles__['farm_id'] = 'FarmID'
+	__titles__['farm_role_id'] = 'FarmRoleID'
+	__titles__['is_ssl_enabled'] = 'IsSSLEnabled'
+	__titles__['last_modified_at'] = 'LastModifiedAt'
 	
 	name = None
 	farm_id = None

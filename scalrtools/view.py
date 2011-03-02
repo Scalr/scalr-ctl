@@ -7,7 +7,6 @@ Created on Feb 21th, 2011
 from prettytable import PrettyTable
 from .types import FarmRole
 
-#TODO: Refactoring 
 class TableViewer:
 	
 	data = None
@@ -50,7 +49,6 @@ class TableViewer:
 	
 	def prepare_table(self, objects):			
 			column_names = objects[0].__titles__.values()
-			
 			pt = PrettyTable(column_names, caching=False)
 			
 			for scalr_obj in objects:

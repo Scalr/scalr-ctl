@@ -272,7 +272,6 @@ class ScalrConnection(object):
 		params['FarmRoleID'] = farm_role_id
 		params['DocumentRootDir'] = document_root_dir
 		params['EnableSSL'] = enable_ssl
-		#TODO: Find out how to use SSL certs & keys and where to base64encode it. 
 		if ssl_private_key: params['SSLPrivateKey'] = binascii.b2a_base64(ssl_private_key).strip()
 		if ssl_certificate: params['SSLCertificate'] = binascii.b2a_base64(ssl_certificate).strip()
 		
@@ -368,7 +367,6 @@ class ScalrConnection(object):
 		params['Async'] = async
 		if farm_role_id: params['FarmRoleID'] = farm_role_id
 		if server_id: params['ServerID'] = server_id
-		#TODO: find out how to pass config variables
 		if config_variables: params['ConfigVariables'] = config_variables
 		if revision: params['Revision'] = revision
 		
