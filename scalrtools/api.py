@@ -19,9 +19,7 @@ from xml.dom.minidom import parseString
 from urllib import urlencode, splitnport
 from urllib2 import urlopen, Request, URLError, HTTPError
 
-#XXX: How to import dozents of dummy objects right?
-from types import *
-#XXX: Does it need to be splited into different modules at all? 
+import types
 #XXX: Need good names for modules and classes
 
 class ScalrConnection(object):
@@ -380,99 +378,99 @@ class ScalrConnection(object):
 			
 
 	def _read_get_script_details_response(self, xml):
-		return self._read_response(xml, node_name='ScriptRevisionSet', cls=ScriptRevision)
+		return self._read_response(xml, node_name='ScriptRevisionSet', cls=types.ScriptRevision)
 	
 			
 	def _read_apache_virtual_host_list_response(self, xml):
-		return self._read_response(xml, node_name='ApacheVhostSet', cls=VirtualHost)
+		return self._read_response(xml, node_name='ApacheVhostSet', cls=types.VirtualHost)
 		
 	
 	def _read_dns_zones_list_response(self, xml):
-		return self._read_response(xml, node_name='DNSZoneSet', cls=DNSZone)
+		return self._read_response(xml, node_name='DNSZoneSet', cls=types.DNSZone)
 	
 	
 	def _read_scripts_list_response(self, xml):
-		return self._read_response(xml, node_name='ScriptSet', cls=Script)
+		return self._read_response(xml, node_name='ScriptSet', cls=types.Script)
 	
 	
 	def _read_farms_list_response(self, xml):
-		return self._read_response(xml, node_name='FarmSet', cls=Farm)
+		return self._read_response(xml, node_name='FarmSet', cls=types.Farm)
 	
 	
 	def _read_roles_list_response(self, xml):
-		return self._read_response(xml, node_name='RoleSet', cls=Role)
+		return self._read_response(xml, node_name='RoleSet', cls=types.Role)
 	
 	
 	def _read_dns_zone_record_list_response(self, xml):
-		return self._read_response(xml, node_name='ZoneRecordSet', cls=DnsZoneRecord)
+		return self._read_response(xml, node_name='ZoneRecordSet', cls=types.DnsZoneRecord)
 	
 	
 	def _read_events_list_response(self, xml):
-		return self._read_response(xml, node_name='EventSet', cls=Event, wrap_page=True)
+		return self._read_response(xml, node_name='EventSet', cls=types.Event, wrap_page=True)
 	
 	
 	def _read_logs_list_response(self, xml):
-		return self._read_response(xml, node_name='LogSet', cls=LogRecord, wrap_page=True)
+		return self._read_response(xml, node_name='LogSet', cls=types.LogRecord, wrap_page=True)
 	
 	
 	def _read_get_farm_stats_response(self, xml):
-		return self._read_response(xml, node_name='StatisticsSet', cls=FarmStat)
+		return self._read_response(xml, node_name='StatisticsSet', cls=types.FarmStat)
 	
 
 	def _read_get_farm_details_response(self, xml):
-		return self._read_response(xml, node_name='FarmRoleSet', cls=FarmRole)
+		return self._read_response(xml, node_name='FarmRoleSet', cls=types.FarmRole)
 	
 	
 	def _read_get_bundle_task_status_response(self, xml):
-		return self._read_response(xml, node_name='BundleTaskGetStatusResponse', cls=BundleTask, simple_response=True)
+		return self._read_response(xml, node_name='BundleTaskGetStatusResponse', cls=types.BundleTask, simple_response=True)
 	
 	
 	def _read_create_server_image_response(self, xml):
-		return self._read_response(xml, node_name='ServerCreateImageResponse', cls=BundleTaskID, simple_response=True)
+		return self._read_response(xml, node_name='ServerCreateImageResponse', cls=types.BundleTaskID, simple_response=True)
 	
 	
 	def _read_launch_server_response(self, xml):
-		return self._read_response(xml, node_name='ServerLaunchResponse', cls=ServerID, simple_response=True)
+		return self._read_response(xml, node_name='ServerLaunchResponse', cls=types.ServerID, simple_response=True)
 	
 	
 	def _read_get_statistic_graph_URL_response(self, xml):
-		return self._read_response(xml, node_name='StatisticsGetGraphURLResponse', cls=GraphURL, simple_response=True)
+		return self._read_response(xml, node_name='StatisticsGetGraphURLResponse', cls=types.GraphURL, simple_response=True)
 	
 	
 	def _read_create_apache_vhost_response(self, xml):
-		return self._read_response(xml, node_name='ApacheVhostCreate', cls=Result, simple_response=True)
+		return self._read_response(xml, node_name='ApacheVhostCreate', cls=types.Result, simple_response=True)
 	
 	
 	def _read_create_dns_zone_response(self, xml):
-		return self._read_response(xml, node_name='DNSZoneCreateResponse', cls=Result, simple_response=True)
+		return self._read_response(xml, node_name='DNSZoneCreateResponse', cls=types.Result, simple_response=True)
 	
 	
 	def _read_add_dns_zone_record_response(self, xml):
-		return self._read_response(xml, node_name='DNSZoneRecordAddResponse', cls=Result, simple_response=True)
+		return self._read_response(xml, node_name='DNSZoneRecordAddResponse', cls=types.Result, simple_response=True)
 	
 
 	def _read_remove_dns_zone_record_response(self, xml):
-		return self._read_response(xml, node_name='DNSZoneRecodRemoveResponse', cls=Result, simple_response=True)
+		return self._read_response(xml, node_name='DNSZoneRecodRemoveResponse', cls=types.Result, simple_response=True)
 	
 
 	def _read_terminate_farm_response(self, xml):
-		return self._read_response(xml, node_name='FarmTerminateResponse', cls=Result, simple_response=True)
+		return self._read_response(xml, node_name='FarmTerminateResponse', cls=types.Result, simple_response=True)
 	
 	
 	def _read_launch_farm_response(self, xml):
-		return self._read_response(xml, node_name='FarmLaunchResponse', cls=Result, simple_response=True)
+		return self._read_response(xml, node_name='FarmLaunchResponse', cls=types.Result, simple_response=True)
 
 
 	def _read_reboot_server_response(self, xml):
-		return self._read_response(xml, node_name='ServerRebootResponse', cls=Result, simple_response=True)	
+		return self._read_response(xml, node_name='ServerRebootResponse', cls=types.Result, simple_response=True)	
 	
 	
 	def _read_terminate_server_response(self, xml):
-		return self._read_response(xml, node_name='TerminateInstanceResponse', cls=Result, simple_response=True)		
+		return self._read_response(xml, node_name='TerminateInstanceResponse', cls=types.Result, simple_response=True)		
 	
 	
 	def _read_execute_script_response(self, xml):
-		return self._read_response(xml, node_name='ExecuteScriptResponse', cls=Result, simple_response=True)	
+		return self._read_response(xml, node_name='ExecuteScriptResponse', cls=types.Result, simple_response=True)	
 	
 	
 
@@ -496,7 +494,7 @@ class ScalrConnection(object):
 							ret.append(cls.fromxml(node))
 						
 			if wrap_page:
-				page = Page.fromxml(response)
+				page = types.Page.fromxml(response)
 				page.scalr_objects = ret
 				return page
 
@@ -525,7 +523,7 @@ class ScalrAPIError(Exception):
 	
 	@classmethod
 	def fromxml(cls, xml):
-		child = get_items_first_child(xml, 'Message')
+		child = types.get_items_first_child(xml, 'Message')
 		msg = child.nodeValue.strip() if child else 'Cannot parse document'
 		return ScalrAPIError(msg)
 	
