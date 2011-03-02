@@ -20,7 +20,6 @@ from urllib import urlencode, splitnport
 from urllib2 import urlopen, Request, URLError, HTTPError
 
 import types
-#XXX: Need good names for modules and classes
 
 class ScalrConnection(object):
 	'''
