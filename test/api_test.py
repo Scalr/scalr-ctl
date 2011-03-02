@@ -34,22 +34,6 @@ class TestScalrConnection(unittest.TestCase):
 		xml = xml_strip(parseString(response))
 		self.assertRaises(ScalrAPIError,self.conn._read_get_farm_stats_response,(xml))
 		#print self.conn._read_get_farm_stats_response(xml)
-
-	
-	def test__read_create_dns_zone_response(self):
-		response = open('trunk/test/resources/DNSZoneCreateResponse.xml').read()
-		xml = xml_strip(parseString(response))
-		response = self.conn._read_create_dns_zone_response(xml)	
-		
-		self.assertEqual(len(response), 1)
-		
-		result = response[-1]
-		
-		self.assertEquals(result.result, '1')
-		self.assertEquals(self.conn.last_transaction_id, '9b36f3ab-1747-4a18-8bd7-a5fc8ee881f5')	
-			
-		print '\nLast TransactionID: %s' % self.conn.last_transaction_id
-		print TableViewer(response)	
 		
 
 	def test__read_add_dns_zone_record_response(self):
@@ -433,7 +417,7 @@ class TestScalrConnection(unittest.TestCase):
 		self.assertEqual(len(response), 1)
 
 		virtual_host = response[-1]
-
+		print virtual_host.farm_role_id
 		self.assertEquals(virtual_host.name, None)
 		self.assertEquals(virtual_host.farm_id, '74')
 		self.assertEquals(virtual_host.farm_role_id, '809')
