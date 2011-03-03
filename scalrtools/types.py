@@ -71,7 +71,7 @@ class ScalrObject(object):
 					for child in parent_node.childNodes:
 						if child.hasChildNodes and child.firstChild and '#text'==child.firstChild.nodeName:
 							value = child.firstChild.nodeValue.strip() 
-							internal_vars[child.nodeName] = value
+							internal_vars[str(child.nodeName)] = str(value)
 					result[key] = internal_vars
 		return result
 
@@ -332,5 +332,3 @@ class VirtualHost(ScalrObject):
 def get_items_first_child(xml,tag): 
 	elements = xml.getElementsByTagName(tag)
 	return elements[0].firstChild if elements else None
-
-#TODO: make __titles__ OrderedDict and check right order 
