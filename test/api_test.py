@@ -30,14 +30,14 @@ class TestScalrConnection(unittest.TestCase):
 
 
 	def test_error_response(self):
-		response = open('trunk/test/resources/Error.xml').read()
+		response = open('test/resources/Error.xml').read()
 		xml = xml_strip(parseString(response))
 		self.assertRaises(ScalrAPIError,self.conn._read_get_farm_stats_response,(xml))
 		#print self.conn._read_get_farm_stats_response(xml)
 		
 
 	def test__read_add_dns_zone_record_response(self):
-		response = open('trunk/test/resources/DNSZoneRecordAddResponse.xml').read()
+		response = open('test/resources/DNSZoneRecordAddResponse.xml').read()
 		xml = xml_strip(parseString(response))
 		response = self.conn._read_add_dns_zone_record_response(xml)	
 		
@@ -53,7 +53,7 @@ class TestScalrConnection(unittest.TestCase):
 		
 
 	def test__read_remove_dns_zone_record_response(self):
-		response = open('trunk/test/resources/DNSZoneRecordRemoveResponse.xml').read()
+		response = open('test/resources/DNSZoneRecordRemoveResponse.xml').read()
 		xml = xml_strip(parseString(response))
 		response = self.conn._read_remove_dns_zone_record_response(xml)	
 		
@@ -69,7 +69,7 @@ class TestScalrConnection(unittest.TestCase):
 				
 		
 	def test__read_execute_script_response(self):
-		response = open('trunk/test/resources/ScriptExecuteResponse.xml').read()
+		response = open('test/resources/ScriptExecuteResponse.xml').read()
 		xml = xml_strip(parseString(response))
 		response = self.conn._read_execute_script_response(xml)	
 		
@@ -85,7 +85,7 @@ class TestScalrConnection(unittest.TestCase):
 
 
 	def test__read_create_apache_vhost_response(self):
-		response = open('trunk/test/resources/ApacheVhostCreateResponse.xml').read()
+		response = open('test/resources/ApacheVhostCreateResponse.xml').read()
 		xml = xml_strip(parseString(response))
 		response = self.conn._read_create_apache_vhost_response(xml)	
 		
@@ -101,7 +101,7 @@ class TestScalrConnection(unittest.TestCase):
 
 
 	def test__read_create_server_image_response(self):
-		response = open('trunk/test/resources/ServerImageCreateResponse.xml').read()
+		response = open('test/resources/ServerImageCreateResponse.xml').read()
 		xml = xml_strip(parseString(response))
 		response = self.conn._read_create_server_image_response(xml)	
 		
@@ -117,7 +117,7 @@ class TestScalrConnection(unittest.TestCase):
 
 
 	def test__read_launch_server_response(self):
-		response = open('trunk/test/resources/ServerLaunchResponse.xml').read()
+		response = open('test/resources/ServerLaunchResponse.xml').read()
 		xml = xml_strip(parseString(response))
 		response = self.conn._read_launch_server_response(xml)	
 		
@@ -133,7 +133,7 @@ class TestScalrConnection(unittest.TestCase):
 
 
 	def test__read_reboot_server_response(self):
-		response = open('trunk/test/resources/ServerRebootResponse.xml').read()
+		response = open('test/resources/ServerRebootResponse.xml').read()
 		xml = xml_strip(parseString(response))
 		response = self.conn._read_reboot_server_response(xml)	
 		
@@ -149,7 +149,7 @@ class TestScalrConnection(unittest.TestCase):
 
 
 	def test__read_terminate_server_response(self):
-		response = open('trunk/test/resources/ServerTerminateResponse.xml').read()
+		response = open('test/resources/ServerTerminateResponse.xml').read()
 		xml = xml_strip(parseString(response))
 		response = self.conn._read_terminate_server_response(xml)	
 		
@@ -165,7 +165,7 @@ class TestScalrConnection(unittest.TestCase):
 
 
 	def test__read_create_dns_zone_response(self):
-		response = open('trunk/test/resources/DNSZoneCreateResponse.xml').read()
+		response = open('test/resources/DNSZoneCreateResponse.xml').read()
 		xml = xml_strip(parseString(response))
 		response = self.conn._read_create_dns_zone_response(xml)	
 		
@@ -181,7 +181,7 @@ class TestScalrConnection(unittest.TestCase):
 								
 		
 	def test__read_get_farm_details_response(self):
-		response = open('trunk/test/resources/FarmGetDetailsResponse.xml').read()
+		response = open('test/resources/FarmGetDetailsResponse.xml').read()
 		xml = xml_strip(parseString(response))
 		response = self.conn._read_get_farm_details_response(xml)
 		
@@ -219,7 +219,7 @@ class TestScalrConnection(unittest.TestCase):
 		
 		
 	def test__read_get_statistic_graph_URL_response(self):
-		response = open('trunk/test/resources/StatisticsGetGraphURLResponse.xml').read()
+		response = open('test/resources/StatisticsGetGraphURLResponse.xml').read()
 		xml = xml_strip(parseString(response))
 		response = self.conn._read_get_statistic_graph_URL_response(xml)	
 		
@@ -235,7 +235,7 @@ class TestScalrConnection(unittest.TestCase):
 		
 
 	def test__read_terminate_farm_response(self):
-		response = open('trunk/test/resources/FarmTerminateResponse.xml').read()
+		response = open('test/resources/FarmTerminateResponse.xml').read()
 		xml = xml_strip(parseString(response))
 		response = self.conn._read_terminate_farm_response(xml)	
 		
@@ -251,7 +251,7 @@ class TestScalrConnection(unittest.TestCase):
 		
 		
 	def test__read_launch_farm_response(self):
-		response = open('trunk/test/resources/FarmLaunchResponse.xml').read()
+		response = open('test/resources/FarmLaunchResponse.xml').read()
 		xml = xml_strip(parseString(response))
 		response = self.conn._read_launch_farm_response(xml)	
 		
@@ -267,7 +267,7 @@ class TestScalrConnection(unittest.TestCase):
 		
 		
 	def test__read_get_bundle_task_status_response(self):
-		response = open('trunk/test/resources/BundleTaskGetStatusResponse.xml').read()
+		response = open('test/resources/BundleTaskGetStatusResponse.xml').read()
 		xml = xml_strip(parseString(response))
 		response = self.conn._read_get_bundle_task_status_response(xml)
 		
@@ -284,7 +284,7 @@ class TestScalrConnection(unittest.TestCase):
 		
 				
 	def test__read_get_script_details_response(self):
-		response = open('trunk/test/resources/ScriptGetDetailsResponse.xml').read()
+		response = open('test/resources/ScriptGetDetailsResponse.xml').read()
 		xml = xml_strip(parseString(response))
 		response = self.conn._read_get_script_details_response(xml)
 
@@ -303,7 +303,7 @@ class TestScalrConnection(unittest.TestCase):
 
 
 	def test__read_get_farm_stats_response(self):
-		response = open('trunk/test/resources/FarmGetStatsResponse.xml').read()
+		response = open('test/resources/FarmGetStatsResponse.xml').read()
 		xml = xml_strip(parseString(response))
 		response = self.conn._read_get_farm_stats_response(xml)
 		
@@ -323,7 +323,7 @@ class TestScalrConnection(unittest.TestCase):
 
 
 	def test__read_logs_list_response(self):
-		response = open('trunk/test/resources/LogsListResponse.xml').read()
+		response = open('test/resources/LogsListResponse.xml').read()
 		xml = xml_strip(parseString(response))
 		response = self.conn._read_logs_list_response(xml)
 		
@@ -346,7 +346,7 @@ class TestScalrConnection(unittest.TestCase):
 		
 
 	def test__read_event_list_response(self):
-		response = open('trunk/test/resources/EventsListResponse.xml').read()
+		response = open('test/resources/EventsListResponse.xml').read()
 		xml = xml_strip(parseString(response))
 		response = self.conn._read_events_list_response(xml)
 		
@@ -368,7 +368,7 @@ class TestScalrConnection(unittest.TestCase):
 			
 	
 	def test__read_dns_zone_record_list_response(self):
-		response = open('trunk/test/resources/DNSZoneRecordsListResponse.xml').read()
+		response = open('test/resources/DNSZoneRecordsListResponse.xml').read()
 		xml = xml_strip(parseString(response))
 		response = self.conn._read_dns_zone_record_list_response(xml)
 		
@@ -392,7 +392,7 @@ class TestScalrConnection(unittest.TestCase):
 				
 				
 	def test__read_roles_list_response(self):
-		response = open('trunk/test/resources/RolesListResponse.xml').read()
+		response = open('test/resources/RolesListResponse.xml').read()
 		xml = xml_strip(parseString(response))
 		response = self.conn._read_roles_list_response(xml)
 		
@@ -410,7 +410,7 @@ class TestScalrConnection(unittest.TestCase):
 	
 	
 	def test__read_apache_virtual_host_list_response(self):
-		response = open('trunk/test/resources/ApacheVhostsListResponse.xml').read()
+		response = open('test/resources/ApacheVhostsListResponse.xml').read()
 		xml = xml_strip(parseString(response))
 		response = self.conn._read_apache_virtual_host_list_response(xml)
 		
@@ -430,7 +430,7 @@ class TestScalrConnection(unittest.TestCase):
 		
 		
 	def test__read_dns_zones_list_response(self):
-		response = open('trunk/test/resources/DNSZonesListResponse.xml').read()
+		response = open('test/resources/DNSZonesListResponse.xml').read()
 		xml = xml_strip(parseString(response))
 		response = self.conn._read_dns_zones_list_response(xml)
 		
@@ -451,7 +451,7 @@ class TestScalrConnection(unittest.TestCase):
 
 
 	def test__read_scripts_list_response(self):
-		response = open('trunk/test/resources/ScriptsListResponse.xml').read()
+		response = open('test/resources/ScriptsListResponse.xml').read()
 		xml = xml_strip(parseString(response))
 		response = self.conn._read_scripts_list_response(xml)
 		
@@ -470,7 +470,7 @@ class TestScalrConnection(unittest.TestCase):
 		
 
 	def test__read_farms_list_response(self):
-		response = open('trunk/test/resources/FarmsListResponse.xml').read()
+		response = open('test/resources/FarmsListResponse.xml').read()
 		xml = xml_strip(parseString(response))
 		response = self.conn._read_farms_list_response(xml)
 		
@@ -492,79 +492,79 @@ class TestScalrConnection(unittest.TestCase):
 
 		response = self.conn.fetch('DNSZoneRecordRemove', ZoneName='dima-test.com', RecordID='110')
 		print response.toprettyxml()
-		file = open('trunk/test/resources/DNSZoneRecordRemoveResponse.xml','w')
+		file = open('test/resources/DNSZoneRecordRemoveResponse.xml','w')
 		file.write(response.toprettyxml())
 		file.close()
 
 		response = self.conn.fetch('DNSZoneRecordAdd', ZoneName='dima-test.com', Type='CNAME', TTL='14400', Name='www', Value='dima-test.com')
 		print response.toprettyxml()
-		file = open('trunk/test/resources/DNSZoneRecordAddResponse.xml','w')
+		file = open('test/resources/DNSZoneRecordAddResponse.xml','w')
 		file.write(response.toprettyxml())
 		file.close()
 	
 		response = self.conn.fetch('DNSZoneCreate', DomainName='dima-test.com', FarmID='74', FarmRoleID='809')
 		print response.toprettyxml()
-		file = open('trunk/test/resources/DNSZoneCreateResponse.xml','w')
+		file = open('test/resources/DNSZoneCreateResponse.xml','w')
 		file.write(response.toprettyxml())
 		file.close()
 			
 		response = self.conn.fetch('FarmTerminate', FarmID='74',KeepEBS='0',KeepEIP='0',KeepDNSZone='0')
 		print response.toprettyxml()
-		file = open('trunk/test/resources/FarmTerminateResponse.xml','w')
+		file = open('test/resources/FarmTerminateResponse.xml','w')
 		file.write(response.toprettyxml())
 		file.close()	
 	
 		response = self.conn.fetch('FarmLaunch', FarmID='74')
 		print response.toprettyxml()
-		file = open('trunk/test/resources/FarmLaunchResponse.xml','w')
+		file = open('test/resources/FarmLaunchResponse.xml','w')
 		file.write(response.toprettyxml())
 		file.close()	
 		
 		response = self.conn.fetch('LogsList', FarmID='74', ServerID='d3963f4b-8f26-4d37-aefc-bcfe83fe998a')
 		print response.toprettyxml()
-		file = open('trunk/test/resources/LogsListResponse.xml','w')
+		file = open('test/resources/LogsListResponse.xml','w')
 		file.write(response.toprettyxml())
 		file.close()
 			
 		response = self.conn.fetch('EventsList', FarmID='74')
 		print response.toprettyxml()
-		file = open('trunk/test/resources/EventsListResponse.xml','w')
+		file = open('test/resources/EventsListResponse.xml','w')
 		file.write(response.toprettyxml())
 		file.close()		
 		
 		response = self.conn.fetch('ApacheVhostsList')
 		print response.toprettyxml()
-		file = open('trunk/test/resources/ApacheVhostsListResponse.xml','w')
+		file = open('test/resources/ApacheVhostsListResponse.xml','w')
 		file.write(response.toprettyxml())
 		file.close()
 		
 		response = self.conn.fetch('ScriptGetDetails', ScriptID='46')
 		print response.toprettyxml()
-		file = open('trunk/test/resources/ScriptGetDetailsResponse.xml','w')
+		file = open('test/resources/ScriptGetDetailsResponse.xml','w')
 		file.write(response.toprettyxml())
 		file.close()
 		
 		response = self.conn.fetch('BundleTaskGetStatus', BundleTaskID='578')
 		print response.toprettyxml()
-		file = open('trunk/test/resources/BundleTaskGetStatusResponse.xml','w')
+		file = open('test/resources/BundleTaskGetStatusResponse.xml','w')
 		file.write(response.toprettyxml())
 		file.close()	
 		
 		response = self.conn.fetch('RolesList', Name='euca2-base')
 		print response.toprettyxml()
-		file = open('trunk/test/resources/RolesListResponse.xml','w')
+		file = open('test/resources/RolesListResponse.xml','w')
 		file.write(response.toprettyxml())
 		file.close()	
 				
 		response = self.conn.fetch('ScriptsList')
 		print response.toprettyxml()
-		file = open('trunk/test/resources/ScriptsListResponse.xml','w')
+		file = open('test/resources/ScriptsListResponse.xml','w')
 		file.write(response.toprettyxml())
 		file.close()
 		
 		response = self.conn.fetch('FarmsList')
 		print response.toprettyxml()
-		file = open('trunk/test/resources/FarmsListResponse.xml','w')
+		file = open('test/resources/FarmsListResponse.xml','w')
 		file.write(response.toprettyxml())
 		file.close()		
 		
@@ -573,45 +573,45 @@ class TestScalrConnection(unittest.TestCase):
 	
 		response = self.conn.fetch('ServerTerminate', ServerID='1f72ece7-e732-4bfc-8d97-a9e0a4014946',DecreaseMinInstancesSetting='0')
 		print response.toprettyxml()
-		file = open('trunk/test/resources/ServerTerminateResponse.xml','w')
+		file = open('test/resources/ServerTerminateResponse.xml','w')
 		file.write(response.toprettyxml())
 		file.close()	
 	
 		response = self.conn.fetch('ServerReboot', ServerID='1f72ece7-e732-4bfc-8d97-a9e0a4014946')
 		print response.toprettyxml()
-		file = open('trunk/test/resources/ServerRebootResponse.xml','w')
+		file = open('test/resources/ServerRebootResponse.xml','w')
 		file.write(response.toprettyxml())
 		file.close()			
 		
 		response = self.conn.fetch('ServerLaunch', FarmRoleID='16353')
 		print response.toprettyxml()
-		file = open('trunk/test/resources/ServerlaunchResponse.xml','w')
+		file = open('test/resources/ServerlaunchResponse.xml','w')
 		file.write(response.toprettyxml())
 		file.close()
 	
 		response = self.conn.fetch('ServerImageCreate', ServerID='1f72ece7-e732-4bfc-8d97-a9e0a4014946', RoleName='app-apache-ubuntu-ebs')
 		print response.toprettyxml()
-		file = open('trunk/test/resources/ServerImageCreateResponse.xml','w')
+		file = open('test/resources/ServerImageCreateResponse.xml','w')
 		file.write(response.toprettyxml())
 		file.close()		
 		
 		response = self.conn.fetch('ScriptExecute', FarmID='5365', ScriptID='348',Timeout='60',Async='0')
 		print response.toprettyxml()
-		file = open('trunk/test/resources/ScriptExecuteResponse.xml','w')
+		file = open('test/resources/ScriptExecuteResponse.xml','w')
 		file.write(response.toprettyxml())
 		file.close()
 			
-		ssl_private_key = open('trunk/test/resources/apache-cert/server.key').read()		
+		ssl_private_key = open('test/resources/apache-cert/server.key').read()		
  		key = binascii.b2a_base64(ssl_private_key).strip()
  		
- 		ssl_certificate = open('trunk/test/resources/apache-cert/server.crt').read()
+ 		ssl_certificate = open('test/resources/apache-cert/server.crt').read()
  		cert = binascii.b2a_base64(ssl_certificate).strip()
  		
 		response = self.conn.fetch('ApacheVhostCreate', DomainName='ssl.dima-test.com', FarmID='5365',
 								FarmRoleID='16353',DocumentRootDir='/var/www',EnableSSL='1',
 								SSLPrivateKey=key,SSLCertificate=cert)
 		print response.toprettyxml()
-		file = open('trunk/test/resources/ApacheVhostCreateResponse.xml','w')
+		file = open('test/resources/ApacheVhostCreateResponse.xml','w')
 		file.write(response.toprettyxml())
 		file.close()
 	
@@ -620,37 +620,37 @@ class TestScalrConnection(unittest.TestCase):
 
 		response = self.conn.fetch('FarmGetDetails', FarmID='1997')
 		print response.toprettyxml()
-		file = open('trunk/test/resources/FarmGetDetailsResponse.xml','w')
+		file = open('test/resources/FarmGetDetailsResponse.xml','w')
 		file.write(response.toprettyxml())
 		file.close()		
 		
 		response = self.conn.fetch('StatisticsGetGraphURL', ObjectType='farm', ObjectID='1997', WatcherName='CPU',GraphType='monthly')
 		print response.toprettyxml()
-		file = open('trunk/test/resources/StatisticsGetGraphURLResponse.xml','w')
+		file = open('test/resources/StatisticsGetGraphURLResponse.xml','w')
 		file.write(response.toprettyxml())
 		file.close()	
 			
 		response = self.conn.fetch('LogsList', FarmID='2607')
 		print response.toprettyxml()
-		file = open('trunk/test/resources/LogsListResponse.xml','w')
+		file = open('test/resources/LogsListResponse.xml','w')
 		file.write(response.toprettyxml())
 		file.close()	
 
 		response = self.conn.fetch('FarmGetStats', FarmID='1997')
 		print response.toprettyxml()
-		file = open('trunk/test/resources/FarmGetStatsResponse.xml','w')
+		file = open('test/resources/FarmGetStatsResponse.xml','w')
 		file.write(response.toprettyxml())
 		file.close()
 			
 		response = self.conn.fetch('DNSZoneRecordsList', ZoneName='6ea60dba-a7a9-46cd-81ea-c62c74699951.scalr.ws')
 		print response.toprettyxml()
-		file = open('trunk/test/resources/DNSZoneRecordsListResponse.xml','w')
+		file = open('test/resources/DNSZoneRecordsListResponse.xml','w')
 		file.write(response.toprettyxml())
 		file.close()
 		
 		response = self.conn.fetch('DNSZonesList')
 		print response.toprettyxml()
-		file = open('trunk/test/resources/DNSZonesListResponse.xml','w')
+		file = open('test/resources/DNSZonesListResponse.xml','w')
 		file.write(response.toprettyxml())
 		
 				
