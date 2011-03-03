@@ -121,12 +121,12 @@ class FarmRole(ScalrObject):
 class Server(ScalrObject):
 	__titles__ = OrderedDict()
 	__titles__['server_id'] = 'ServerID'
-	__titles__['platform_properties'] = 'PlatformProperties'
 	__titles__['external_ip'] = 'ExternalIP'
 	__titles__['internal_ip'] = 'InternalIP'
 	__titles__['status'] = 'Status'
 	__titles__['scalarizr_version'] = 'ScalarizrVersion'
 	__titles__['uptime'] = 'Uptime'
+	__titles__['platform_properties'] = 'PlatformProperties'
 	
 	server_id = None
 	platform_properties = None
