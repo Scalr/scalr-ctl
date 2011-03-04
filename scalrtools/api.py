@@ -86,7 +86,7 @@ class ScalrConnection(object):
 		
 	
 		
-	def apache_virtual_host_list(self):
+	def apache_virtual_hosts_list(self):
 		"""
 		@return VirtualHost[]
 		"""
@@ -163,7 +163,7 @@ class ScalrConnection(object):
 		return self._request(command="LogsList", params=params, response_reader=self._read_logs_list_response)
 
 
-	def farm_get_stats(self, farm_id, date=None):
+	def get_farm_stats(self, farm_id, date=None):
 		"""
 		@return FarmStat[]
 		"""
@@ -175,7 +175,7 @@ class ScalrConnection(object):
 		return self._request(command="FarmGetStats", params=params, response_reader=self._read_get_farm_stats_response)	
 	
 	
-	def script_get_details(self,script_id):
+	def get_script_details(self,script_id):
 		"""
 		@return ScriptDetails
 		"""
@@ -197,7 +197,7 @@ class ScalrConnection(object):
 		return self._request(command="BundleTaskGetStatus", params=params, response_reader=self._read_get_bundle_task_status_response)	
 
 
-	def get_statistic_graph_URL(self, object_type, object_id, watcher_name, graph_type):
+	def get_statistics_graph_URL(self, object_type, object_id, watcher_name, graph_type):
 		"""
 		@return GraphURL
 		"""
