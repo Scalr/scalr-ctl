@@ -97,7 +97,7 @@ class ScalrConnection(object):
 		"""
 		@return DNSZone[]
 		"""
-		return self._request("DNSZonesListResponse", response_reader=self._read_dns_zones_list_response)
+		return self._request("DNSZonesList", response_reader=self._read_dns_zones_list_response)
 
 	
 	def scripts_list(self):
@@ -127,23 +127,22 @@ class ScalrConnection(object):
 		return self._request(command="RolesList", params=params, response_reader=self._read_roles_list_response)
 
 
-	def dns_zone_record_list(self, zone_name):
+	def dns_zone_records_list(self, zone_name):
 		"""
 		@return DnsZoneRecord[]
 		"""
 		params = {'ZoneName':zone_name} if zone_name else {}
 		
-		return self._request(command="DNSZoneRecordsList", params=params, response_reader=self._read_roles_list_response)	
+		return self._request(command="DNSZoneRecordsList", params=params, response_reader=self._read_dns_zone_record_list_response)	
 		
 	
-	def events_list(self, farm_id, name=None, start_from=None, records_limit=None):
+	def events_list(self, farm_id, start_from=None, records_limit=None):
 		"""
 		@return Event[]
 		"""
 		params = {}
 		
 		params['FarmID'] = farm_id
-		if name			 : params['Name'] 		  = name
 		if start_from	 : params['StartFrom'] 	  = start_from
 		if records_limit : params['RecordsLimit'] = records_limit
 		

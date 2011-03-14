@@ -17,6 +17,7 @@ from view import TableViewer
 
 class BaseHandler:
 	subcommand = None
+	config = None
 	help = None
 		
 	def __init__(self, config, *args):
@@ -199,7 +200,12 @@ class ApacheVhostsList(BaseHandler):
 	subcommand = 'apache-virtual-host-list'
 
 	def __init__(self, config, *args):
-		conn = config.get_connection()	
+		parser = OptionParser(usage=self.help)
+		self.options = parser.parse_args(list(args))[0]
+		self.config = config
+	
+	def run(self):
+		conn = self.config.get_connection()	
 		try:
 			print TableViewer(conn.apache_virtual_hosts_list())
 		except ScalrAPIError, e:
@@ -208,31 +214,85 @@ class ApacheVhostsList(BaseHandler):
 
 
 class DNSZonesList(BaseHandler):
-	subcommand = 'dns_zones_list'
+	subcommand = 'dns-zones-list'
 
 	def __init__(self, config, *args):
-		pass			
+		parser = OptionParser(usage=self.help)
+		self.options = parser.parse_args(list(args))[0]
+		self.config = config
+	
+	def run(self):
+		conn = self.config.get_connection()	
+		try:
+			print TableViewer(conn.dns_zones_list())
+		except ScalrAPIError, e:
+			print e
+			sys.exit()	
 
 
 class DNSZoneRecordsList(BaseHandler):
-	subcommand = 'dns_zone_record_list'
+	subcommand = 'dns-zone-records-list'
 
 	def __init__(self, config, *args):
-		pass			
+		parser = OptionParser(usage=self.help)
+		parser.add_option("-n", "--zone-name", dest="name", default=None, help="Zone (Domain) name")
+		self.options = parser.parse_args(list(args))[0]
+		
+		if not self.options.name:
+			print parser.format_help()
+			sys.exit()
+			
+		self.config = config
+	
+	def run(self):
+		conn = self.config.get_connection()	
+		try:
+			print TableViewer(conn.dns_zone_records_list(self.options.name))
+		except ScalrAPIError, e:
+			print e
+			sys.exit()			
 
 
 class EventsList(BaseHandler):
-	subcommand = 'events_list'
+	subcommand = 'events-list'
 
 	def __init__(self, config, *args):
-		pass			
+		parser = OptionParser(usage=self.help)
+		parser.add_option("-i", "--farm-id", dest="id", default=None, help="Farm ID")
+		parser.add_option("-s", "--start-from", dest="start", default=None, help="Start from specified event number (Can be used for paging)")
+		parser.add_option("-l", "--record-limit", dest="limit", default=None, help="Limit number of returned events (Can be used for paging)")
+		self.options = parser.parse_args(list(args))[0]
+		
+		if not self.options.id:
+			print parser.format_help()
+			sys.exit()
+			
+		self.config = config
+	
+	def run(self):
+		conn = self.config.get_connection()	
+		try:
+			print TableViewer(conn.events_list(self.options.id, self.options.start, self.options.limit))
+		except ScalrAPIError, e:
+			print e
+			sys.exit()				
 
 
 class FarmsList(BaseHandler):
-	subcommand = 'farms_list'
+	subcommand = 'farms-list'
 
 	def __init__(self, config, *args):
-		pass			
+		parser = OptionParser(usage=self.help)
+		self.options = parser.parse_args(list(args))[0]
+		self.config = config
+	
+	def run(self):
+		conn = self.config.get_connection()	
+		try:
+			print TableViewer(conn.farms_list())
+		except ScalrAPIError, e:
+			print e
+			sys.exit()			
 
 
 class LogsList(BaseHandler):
@@ -250,10 +310,20 @@ class RolesList(BaseHandler):
 
 
 class ScriptsList(BaseHandler):
-	subcommand = 'scripts_list'
+	subcommand = 'scripts-list'
 
 	def __init__(self, config, *args):
-		pass			
+		parser = OptionParser(usage=self.help)
+		self.options = parser.parse_args(list(args))[0]
+		self.config = config
+	
+	def run(self):
+		conn = self.config.get_connection()	
+		try:
+			print TableViewer(conn.scripts_list())
+		except ScalrAPIError, e:
+			print e
+			sys.exit()		
 
 
 class ScriptGetDetails(BaseHandler):
@@ -264,17 +334,49 @@ class ScriptGetDetails(BaseHandler):
 
 
 class BundleTaskGetStatus(BaseHandler):
-	subcommand = 'get_bundle_task_status'
+	subcommand = 'get-bundle-task-status'
 
 	def __init__(self, config, *args):
-		pass	
+		parser = OptionParser(usage=self.help)
+		parser.add_option("-i", "--bundle-task-id", dest="id", default=None, help="ID of the bundle task")
+		self.options = parser.parse_args(list(args))[0]
+		
+		if not self.options.id:
+			print parser.format_help()
+			sys.exit()
+			
+		self.config = config
+	
+	def run(self):
+		conn = self.config.get_connection()	
+		try:
+			print TableViewer(conn.get_bundle_task_status(self.options.id))
+		except ScalrAPIError, e:
+			print e
+			sys.exit()	
 			
 
 class FarmGetDetails(BaseHandler):
-	subcommand = 'get_farm_details'
+	subcommand = 'get-farm-details'
 
 	def __init__(self, config, *args):
-		pass			
+		parser = OptionParser(usage=self.help)
+		parser.add_option("-i", "--farm-id", dest="id", default=None, help="Farm ID")
+		self.options = parser.parse_args(list(args))[0]
+		
+		if not self.options.id:
+			print parser.format_help()
+			sys.exit()
+			
+		self.config = config
+	
+	def run(self):
+		conn = self.config.get_connection()	
+		try:
+			print TableViewer(conn.get_farm_details(self.options.id))
+		except ScalrAPIError, e:
+			print e
+			sys.exit()		
 
 
 class FarmGetStats(BaseHandler):
