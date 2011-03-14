@@ -10,7 +10,7 @@ import inspect
 from optparse import OptionParser
 
 import handlers
-from scalr_config import Configuration, ScalrCfgError, ScalrEnvError
+from config import Configuration, ScalrCfgError, ScalrEnvError
 
 
 def split_options(args):

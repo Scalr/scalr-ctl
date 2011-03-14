@@ -10,7 +10,10 @@ from ConfigParser import ConfigParser
 from optparse import OptionParser
 
 from prettytable import PrettyTable	
-from scalr_config import Environment, Repository, Application
+
+from config import Environment, Repository, Application
+from api import ScalrAPIError
+from view import TableViewer
 
 class BaseHandler:
 	subcommand = None
@@ -197,7 +200,12 @@ class ApacheVhostsList(BaseHandler):
 
 	def __init__(self, config, *args):
 		conn = config.get_connection()	
-		print conn.apache_virtual_hosts_list()
+		try:
+			print TableViewer(conn.apache_virtual_hosts_list())
+		except ScalrAPIError, e:
+			print e
+			sys.exit()
+
 
 class DNSZonesList(BaseHandler):
 	subcommand = 'dns_zones_list'

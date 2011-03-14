@@ -5,7 +5,7 @@ Created on Feb 21th, 2011
 '''
 
 from prettytable import PrettyTable
-from .types import FarmRole
+from scalr_types import FarmRole
 
 class TableViewer:
 	
