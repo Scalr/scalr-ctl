@@ -322,10 +322,24 @@ class LogsList(BaseHandler):
 
 
 class RolesList(BaseHandler):
-	subcommand = 'roles_list'
+	subcommand = 'roles-list'
 
 	def __init__(self, config, *args):
-		pass			
+		parser = OptionParser(usage=self.help)
+		parser.add_option("-p", "--platform", dest="platform", default=None, help="Cloud platform")
+		parser.add_option("-n", "--name", dest="name", default=None, help="List roles with specified role name.")
+		parser.add_option("-x", "--prefix", dest="prefix", default=None, help="List all roles begins with specified prefix.")
+		parser.add_option("-i", "--image-id", dest="image_id", default=None, help="List roles with specified image id.")
+		self.options = parser.parse_args(list(args))[0]
+		self.config = config
+	
+	def run(self):
+		conn = self.config.get_connection()	
+		try:
+			print TableViewer(conn.roles_list(self.options.platform, self.options.name, self.options.prefix, self.options.image_id))
+		except ScalrAPIError, e:
+			print e
+			sys.exit()				
 
 
 class ScriptsList(BaseHandler):
@@ -346,10 +360,26 @@ class ScriptsList(BaseHandler):
 
 
 class ScriptGetDetails(BaseHandler):
-	subcommand = 'get_script_details'
+	subcommand = 'get-script-details'
 
 	def __init__(self, config, *args):
-		pass			
+		parser = OptionParser(usage=self.help)
+		parser.add_option("-s", "--script-id", dest="id", default=None, help="Script ID")
+		self.options = parser.parse_args(list(args))[0]
+		
+		if not self.options.id:
+			print parser.format_help()
+			sys.exit()
+			
+		self.config = config
+	
+	def run(self):
+		conn = self.config.get_connection()	
+		try:
+			print TableViewer(conn.get_script_details(self.options.id))
+		except ScalrAPIError, e:
+			print e
+			sys.exit()				
 
 
 class BundleTaskGetStatus(BaseHandler):
@@ -399,17 +429,55 @@ class FarmGetDetails(BaseHandler):
 
 
 class FarmGetStats(BaseHandler):
-	subcommand = 'get_farm_stats'
+	subcommand = 'get-farm-stats'
 
 	def __init__(self, config, *args):
-		pass			
+		parser = OptionParser(usage=self.help)
+		parser.add_option("-f", "--farm-id", dest="id", default=None, help="Farm ID")
+		parser.add_option("-d", "--date", dest="date", default=None, help="Date (mm-yyyy)")
+		self.options = parser.parse_args(list(args))[0]
+		
+		if not self.options.id:
+			print parser.format_help()
+			sys.exit()
+			
+		self.config = config
+	
+	def run(self):
+		conn = self.config.get_connection()	
+		try:
+			print TableViewer(conn.get_farm_stats(self.options.id,self.options.date))
+		except ScalrAPIError, e:
+			print e
+			sys.exit()			
 
 
 class StatisticsGetGraphURL(BaseHandler):
-	subcommand = 'get_statistics_graph_URL'
+	subcommand = 'get-statistics-graph-url'
 
 	def __init__(self, config, *args):
-		pass			
+		id_help = "In case if object type is instance ObjectID shoudl be server id, in case if object type is role ObjectID should be role id \
+		and in case if object type is farm ObjectID should be farm id"
+		parser = OptionParser(usage=self.help)
+		parser.add_option("-o", "--object-type", dest="obj_type", default=None, help="Object type. Valid values are: role, server or farm")
+		parser.add_option("-i", "--object-id", dest="id", default=None, help=id_help)
+		parser.add_option("-n", "--watcher-name", dest="name", default=None, help="Watcher name could be CPU, NET, MEM or LA")
+		parser.add_option("-g", "--graph-type", dest="graph_type", default=None, help="Graph type could be daily, weekly, monthly or yearly")
+		self.options = parser.parse_args(list(args))[0]
+		
+		if not self.options.id or not self.options.obj_type or not self.options.name or not self.options.graph_type:
+			print parser.format_help()
+			sys.exit()
+			
+		self.config = config
+	
+	def run(self):
+		conn = self.config.get_connection()	
+		try:
+			print TableViewer(conn.get_statistics_graph_URL(self.options.obj_type, self.options.id, self.options.name, self.options.graph_type))
+		except ScalrAPIError, e:
+			print e
+			sys.exit()				
 
 
 class ServerLaunch(BaseHandler):
@@ -434,10 +502,29 @@ class ServerTerminate(BaseHandler):
 
 
 class FarmTerminate(BaseHandler):
-	subcommand = 'terminate_farm'
+	subcommand = 'terminate-farm'
 
 	def __init__(self, config, *args):
-		pass			
+		parser = OptionParser(usage=self.help)
+		parser.add_option("-f", "--farm-id", dest="id", default=None, help="The ID of farm that you want to terminate")
+		parser.add_option("-e", "--keep-ebs", dest="keep_ebs", default=None, help="Keep EBS volumes created for roles on this farm")
+		parser.add_option("-i", "--keep-eip", dest="keep_eip", default=None, help='Keep Elastic IPs created for roles on this farm')
+		parser.add_option("-d", "--keep-dns-zone", dest="keep_dns_zone", default=None, help="Keep DNS zone that assigned to this farm on nameservers")
+		self.options = parser.parse_args(list(args))[0]
+		
+		if not self.options.id or not self.options.keep_ebs or not self.options.keep_eip or not self.options.keep_dns_zone:
+			print parser.format_help()
+			sys.exit()
+			
+		self.config = config
+	
+	def run(self):
+		conn = self.config.get_connection()	
+		try:
+			print TableViewer(conn.terminate_farm(self.options.id, self.options.keep_ebs, self.options.keep_eip, self.options.keep_dns_zone))
+		except ScalrAPIError, e:
+			print e
+			sys.exit()			
 
 
 class DNSZoneRecordAdd(BaseHandler):
@@ -455,14 +542,55 @@ class DNSZoneRecordRemove(BaseHandler):
 
 
 class ScriptExecute(BaseHandler):
-	subcommand = 'execute_script'
+	subcommand = 'execute-script'
 
 	def __init__(self, config, *args):
-		pass			
+		id_help = "Script will be executed on all instances with this farm role ID. You can get this ID by using GetFarmDetails API call"
+		parser = OptionParser(usage=self.help)
+		parser.add_option("-i", "--farm-role-id", dest="farm_role_id", default=None, help=id_help)
+		parser.add_option("-s", "--server-id", dest="server_id", default=None, help="Script will be executed on this server")
+		parser.add_option("-f", "--farm-id", dest="farm_id", default=None, help="Execute script on specified farm")
+		parser.add_option("-e", "--script-id", dest="script_id", default=None, help="Script ID")
+		parser.add_option("-t", "--timeout", dest="timeout", default=None, help="Script execution timeout (seconds)")
+		parser.add_option("-a", "--async", dest="async", default=None, help="Excute script asynchronously (1) or synchronously (0)")
+		parser.add_option("-r", "--revision", dest="revision", default=None, help="Execute specified revision of script")
+		parser.add_option("-v", "--variables", dest="variables", default=None, help="Script variables")
+		self.options = parser.parse_args(list(args))[0]
+		
+		if not self.options.farm_id or not self.options.script_id or not self.options.async or not self.options.timeout:
+			print parser.format_help()
+			sys.exit()
+			
+		self.config = config
+	
+	def run(self):
+		conn = self.config.get_connection()	
+		try:
+			print TableViewer(conn.execute_script(self.options.farm_id, self.options.script_id, self.options.timeout \
+					, self.options.async, self.options.farm_role_id, self.options.server_id, self.options.revision, self.options.variables))
+		except ScalrAPIError, e:
+			print e
+			sys.exit()				
 
 
 class ServerReboot(BaseHandler):
-	subcommand = 'reboot_server'
+	subcommand = 'reboot-server'
 
 	def __init__(self, config, *args):
-		pass	
+		parser = OptionParser(usage=self.help)
+		parser.add_option("-s", "--server-id", dest="id", default=None, help="Server ID")
+		self.options = parser.parse_args(list(args))[0]
+		
+		if not self.options.id:
+			print parser.format_help()
+			sys.exit()
+			
+		self.config = config
+	
+	def run(self):
+		conn = self.config.get_connection()	
+		try:
+			print TableViewer(conn.reboot_server(self.options.id))
+		except ScalrAPIError, e:
+			print e
+			sys.exit()	
