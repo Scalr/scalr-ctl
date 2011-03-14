@@ -90,27 +90,27 @@ class ScalrConnection(object):
 		"""
 		@return VirtualHost[]
 		"""
-		return self._request("ApacheVhostsList", self._read_apache_virtual_host_list_response)
+		return self._request("ApacheVhostsList", response_reader=self._read_apache_virtual_host_list_response)
 	
 	
 	def dns_zones_list(self):
 		"""
 		@return DNSZone[]
 		"""
-		return self._request("DNSZonesListResponse", self._read_dns_zones_list_response)
+		return self._request("DNSZonesListResponse", response_reader=self._read_dns_zones_list_response)
 
 	
 	def scripts_list(self):
 		"""
 		@return Script[]
 		"""
-		return self._request("ScriptsList", self._read_scripts_list_response)
+		return self._request("ScriptsList", response_reader=self._read_scripts_list_response)
 	
 	def farms_list(self):
 		"""
 		@return Farm[]
 		"""
-		return self._request("FarmsList", self._read_farms_list_response)
+		return self._request("FarmsList", response_reader=self._read_farms_list_response)
 	
 	
 	def roles_list(self, platform=None, name=None, prefix=None, image_id=None):

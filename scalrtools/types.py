@@ -9,7 +9,7 @@ try:
 except ImportError:
 	import time
 
-from scalrtools.collections import OrderedDict
+from scalrtools.extensions import OrderedDict
 		
 class Page(object):
 	total_records = None
