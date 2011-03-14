@@ -19,7 +19,7 @@ from xml.dom.minidom import parseString
 from urllib import urlencode, splitnport
 from urllib2 import urlopen, Request, URLError, HTTPError
 
-import types
+import scalr_types as types
 
 class ScalrConnection(object):
 	'''

@@ -18,7 +18,7 @@ class ScalrCfgError(BaseException):
 class ScalrEnvError(ScalrCfgError):
 	pass
 
-
+	
 class ConfigSection(object):
 	config_name = None
 	options = {}
@@ -114,7 +114,7 @@ class Repository(ConfigSection):
 		url = 'url',
 		login = 'login',
 		password = 'password')
-	
+
 
 class Configuration:
 	base_path = None
@@ -141,3 +141,4 @@ class Configuration:
 		if self.environment:
 			conn = ScalrConnection(self.environment.url, self.environment.key_id, self.environment.key, self.environment.api_version)
 		return conn
+		

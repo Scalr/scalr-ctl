@@ -10,7 +10,7 @@ from ConfigParser import ConfigParser
 from optparse import OptionParser
 
 from prettytable import PrettyTable	
-from config import Environment, Repository, Application
+from scalr_config import Environment, Repository, Application
 
 class BaseHandler:
 	subcommand = None
@@ -193,11 +193,11 @@ class ServerImageCreate(BaseHandler):
 
 
 class ApacheVhostsList(BaseHandler):
-	subcommand = 'apache_virtual_host_list'
+	subcommand = 'apache-virtual-host-list'
 
 	def __init__(self, config, *args):
-		pass			
-
+		conn = config.get_connection()	
+		print conn.apache_virtual_hosts_list()
 
 class DNSZonesList(BaseHandler):
 	subcommand = 'dns_zones_list'

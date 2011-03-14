@@ -10,7 +10,7 @@ import inspect
 from optparse import OptionParser
 
 import handlers
-from config import Configuration, ScalrCfgError, ScalrEnvError
+from scalr_config import Configuration, ScalrCfgError, ScalrEnvError
 
 
 def split_options(args):
@@ -52,6 +52,7 @@ def main():
 
 	try:
 		c = Configuration(options.base_path)
+		c.set_environment(options.key, options.key_id, options.api_url)
 	except ScalrEnvError, e:
 		print "\nNo login information found."
 		print "Please specity options -a -u and -s, or run 'scalrtools configure-env help' to find out how to set login information permanently.\n"
