@@ -258,7 +258,7 @@ class EventsList(BaseHandler):
 
 	def __init__(self, config, *args):
 		parser = OptionParser(usage=self.help)
-		parser.add_option("-i", "--farm-id", dest="id", default=None, help="Farm ID")
+		parser.add_option("-f", "--farm-id", dest="id", default=None, help="Farm ID")
 		parser.add_option("-s", "--start-from", dest="start", default=None, help="Start from specified event number (Can be used for paging)")
 		parser.add_option("-l", "--record-limit", dest="limit", default=None, help="Limit number of returned events (Can be used for paging)")
 		self.options = parser.parse_args(list(args))[0]
@@ -296,10 +296,29 @@ class FarmsList(BaseHandler):
 
 
 class LogsList(BaseHandler):
-	subcommand = 'logs_list'
+	subcommand = 'logs-list'
 
 	def __init__(self, config, *args):
-		pass			
+		parser = OptionParser(usage=self.help)
+		parser.add_option("-f", "--farm-id", dest="id", default=None, help="Farm ID")
+		parser.add_option("-i", "--server-id", dest="server_id", default=None, help="Instance ID")
+		parser.add_option("-s", "--start-from", dest="start", default=None, help="Start from specified event number (Can be used for paging)")
+		parser.add_option("-l", "--record-limit", dest="limit", default=None, help="Limit number of returned events (Can be used for paging)")
+		self.options = parser.parse_args(list(args))[0]
+		
+		if not self.options.id:
+			print parser.format_help()
+			sys.exit()
+			
+		self.config = config
+	
+	def run(self):
+		conn = self.config.get_connection()	
+		try:
+			print TableViewer(conn.logs_list(self.options.id, self.options.server_id, self.options.start, self.options.limit))
+		except ScalrAPIError, e:
+			print e
+			sys.exit()				
 
 
 class RolesList(BaseHandler):
@@ -361,7 +380,7 @@ class FarmGetDetails(BaseHandler):
 
 	def __init__(self, config, *args):
 		parser = OptionParser(usage=self.help)
-		parser.add_option("-i", "--farm-id", dest="id", default=None, help="Farm ID")
+		parser.add_option("-f", "--farm-id", dest="id", default=None, help="Farm ID")
 		self.options = parser.parse_args(list(args))[0]
 		
 		if not self.options.id:

@@ -42,8 +42,7 @@ class TableViewer:
 						response.total_records, 
 						response.start_from, 
 						response.records_limit)
-				
-				self.data[self.prepare_table(objects)] = plain_text
+				self.data[self.prepare_table(objects) if objects else response.total_records] = plain_text
 				
 	
 	def prepare_table(self, objects):		
