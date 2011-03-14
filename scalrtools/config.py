@@ -10,11 +10,14 @@ from ConfigParser import ConfigParser
 
 from api import ScalrConnection
 
+
 class ScalrCfgError(BaseException):
 	pass
 
+
 class ScalrEnvError(ScalrCfgError):
 	pass
+
 
 class ConfigSection(object):
 	config_name = None
@@ -131,7 +134,7 @@ class Configuration:
 			self.environment = Environment.from_ini(self.base_path)
 		
 		if not self.environment or not self.environment.key or not self.environment.key_id or not self.environment.url:
-			raise ScalrEnvError('No environment set.')
+			raise ScalrEnvError('Environment not set.')
 	
 	def get_connection(self):
 		conn = None

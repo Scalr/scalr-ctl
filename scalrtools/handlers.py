@@ -163,37 +163,177 @@ class ReposList(BaseHandler):
 			pt.add_row(row)
 		print str(pt)
 			
-				
-api_calls = dict(
-		DNSZoneCreate 			= 'create_dns_zone',
-		ApacheVhostCreate 		= 'create_apache_vhost',
-		ServerImageCreate 		= 'create_server_image',
-		
-		ApacheVhostsList 		= 'apache_virtual_host_list',
-		DNSZonesList 			= 'dns_zones_list',
-		DNSZoneRecordsList 		= 'dns_zone_record_list',
-		EventsList 				= 'events_list',
-		FarmsList 				= 'farms_list',
-		LogsList 				= 'logs_list',
-		RolesList 				= 'roles_list',
-		ScriptsList				= 'scripts_list',
-		
-		ScriptGetDetails 		= 'get_script_details',
-		BundleTaskGetStatus 	= 'get_bundle_task_status',
-		FarmGetDetails 			= 'get_farm_details',
-		
-		FarmGetStats 			= 'get_farm_stats',
-		StatisticsGetGraphURL	= 'get_statistics_graph_URL',
-		
-		ServerLaunch 			= 'launch_server',
-		FarmLaunch 				= 'launch_farm',
-		
-		ServerTerminate 		= 'terminate_server',
-		FarmTerminate 			= 'terminate_farm',
-		
-		DNSZoneRecordAdd 		= 'add_dns_zone_record',
-		DNSZoneRecordRemove 	= 'remove_dns_zone_record',
-		
-		ScriptExecute 			= 'execute_script',
-		ServerReboot 			= 'reboot_server'
-		)
+
+class Deploy(BaseHandler):
+	subcommand = 'deploy'
+
+	def __init__(self, config, *args):
+		pass
+			
+
+class DNSZoneCreate(BaseHandler):
+	subcommand = 'create_dns_zone'
+
+	def __init__(self, config, *args):
+		pass			
+
+
+class ApacheVhostCreate(BaseHandler):
+	subcommand = 'create_apache_vhost'
+
+	def __init__(self, config, *args):
+		pass			
+
+
+class ServerImageCreate(BaseHandler):
+	subcommand = 'create_server_image'
+
+	def __init__(self, config, *args):
+		pass			
+
+
+class ApacheVhostsList(BaseHandler):
+	subcommand = 'apache_virtual_host_list'
+
+	def __init__(self, config, *args):
+		pass			
+
+
+class DNSZonesList(BaseHandler):
+	subcommand = 'dns_zones_list'
+
+	def __init__(self, config, *args):
+		pass			
+
+
+class DNSZoneRecordsList(BaseHandler):
+	subcommand = 'dns_zone_record_list'
+
+	def __init__(self, config, *args):
+		pass			
+
+
+class EventsList(BaseHandler):
+	subcommand = 'events_list'
+
+	def __init__(self, config, *args):
+		pass			
+
+
+class FarmsList(BaseHandler):
+	subcommand = 'farms_list'
+
+	def __init__(self, config, *args):
+		pass			
+
+
+class LogsList(BaseHandler):
+	subcommand = 'logs_list'
+
+	def __init__(self, config, *args):
+		pass			
+
+
+class RolesList(BaseHandler):
+	subcommand = 'roles_list'
+
+	def __init__(self, config, *args):
+		pass			
+
+
+class ScriptsList(BaseHandler):
+	subcommand = 'scripts_list'
+
+	def __init__(self, config, *args):
+		pass			
+
+
+class ScriptGetDetails(BaseHandler):
+	subcommand = 'get_script_details'
+
+	def __init__(self, config, *args):
+		pass			
+
+
+class BundleTaskGetStatus(BaseHandler):
+	subcommand = 'get_bundle_task_status'
+
+	def __init__(self, config, *args):
+		pass	
+			
+
+class FarmGetDetails(BaseHandler):
+	subcommand = 'get_farm_details'
+
+	def __init__(self, config, *args):
+		pass			
+
+
+class FarmGetStats(BaseHandler):
+	subcommand = 'get_farm_stats'
+
+	def __init__(self, config, *args):
+		pass			
+
+
+class StatisticsGetGraphURL(BaseHandler):
+	subcommand = 'get_statistics_graph_URL'
+
+	def __init__(self, config, *args):
+		pass			
+
+
+class ServerLaunch(BaseHandler):
+	subcommand = 'launch_server'
+
+	def __init__(self, config, *args):
+		pass			
+
+
+class FarmLaunch(BaseHandler):
+	subcommand = 'launch_farm'
+
+	def __init__(self, config, *args):
+		pass			
+
+
+class ServerTerminate(BaseHandler):
+	subcommand = 'terminate_server'
+
+	def __init__(self, config, *args):
+		pass			
+
+
+class FarmTerminate(BaseHandler):
+	subcommand = 'terminate_farm'
+
+	def __init__(self, config, *args):
+		pass			
+
+
+class DNSZoneRecordAdd(BaseHandler):
+	subcommand = 'add_dns_zone_record'
+
+	def __init__(self, config, *args):
+		pass			
+
+
+class DNSZoneRecordRemove(BaseHandler):
+	subcommand = 'remove_dns_zone_record'
+
+	def __init__(self, config, *args):
+		pass			
+
+
+class ScriptExecute(BaseHandler):
+	subcommand = 'execute_script'
+
+	def __init__(self, config, *args):
+		pass			
+
+
+class ServerReboot(BaseHandler):
+	subcommand = 'reboot_server'
+
+	def __init__(self, config, *args):
+		pass	
