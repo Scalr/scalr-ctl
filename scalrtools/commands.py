@@ -213,8 +213,66 @@ class StatisticsGetGraphURL(Command):
 	def run(self):
 		args = (self.options.obj_type, self.options.id, self.options.name, self.options.graph_type)
 		print self.api_call(self.config.get_connection().get_statistics_graph_URL, *args)	
-		
 
+
+class ServerTerminate(Command):
+	name = 'terminate-server'
+
+	def __init__(self, config, *args):
+		super(ServerTerminate, self).__init__(config, *args)
+		self.require(self.options.id)
+
+	def inject_options(self, parser):		
+		parser.add_option("-i", "--server-id", dest="id", default=None, help='ServerID')
+		parser.add_option("-d", "--decrease-min-instances", dest="decrease", default=None, help='Decrease MinInstances setting for role (Default: 0)')
+	
+	def run(self):
+		print self.api_call(self.config.get_connection().terminate_server, self.options.id, self.options.decrease)			
+
+
+class ServerImageCreate(Command):
+	name = 'create-server-image'
+
+	def __init__(self, config, *args):
+		super(ServerImageCreate, self).__init__(config, *args)
+		self.require(self.options.id, self.options.name)
+
+	def inject_options(self, parser):		
+		parser.add_option("-i", "--server-id", dest="id", default=None, help='ServerID')
+		parser.add_option("-n", "--role-name", dest="name", default=None, help='Name for the new role')
+		
+	def run(self):
+		print self.api_call(self.config.get_connection().create_server_image, self.options.id, self.options.name)	
+	
+	
+class ServerLaunch(Command):
+	name = 'launch-server'
+
+	def __init__(self, config, *args):
+		super(ServerLaunch, self).__init__(config, *args)
+		self.require(self.options.farm_role_id)
+
+	def inject_options(self, parser):		
+		parser.add_option("-i", "--farm-role-id", dest="farm_role_id", default=None, help='FarmRoleID on which scalr should launch new instance')
+	
+	def run(self):
+		print self.api_call(self.config.get_connection().launch_server, self.options.farm_role_id)
+	
+	
+class FarmLaunch(Command):
+	name = 'launch-farm'
+
+	def __init__(self, config, *args):
+		super(FarmLaunch, self).__init__(config, *args)
+		self.require(self.options.id)
+
+	def inject_options(self, parser):		
+		parser.add_option("-f", "--farm-id", dest="id", default=None, help="The ID of farm that you want to launch")
+	
+	def run(self):
+		print self.api_call(self.config.get_connection().launch_farm, self.options.id)	
+	
+	
 class FarmTerminate(Command):
 	name = 'terminate-farm'
 
@@ -384,10 +442,9 @@ class ReposList(Command):
 			a = Repository.from_ini(self.config.base_path, repo_name)
 			row = [a.name, a.type, a.url, a.login, a.password]
 			pt.add_row(row)
-		print str(pt)
-
-
-
+		print str(pt)		
+	
+	
 class DNSZoneRecordAdd(Command):
 	name = 'add_dns_zone_record'
 
@@ -411,39 +468,11 @@ class DNSZoneCreate(Command):
 
 class ApacheVhostCreate(Command):
 	name = 'create_apache_vhost'
-
 	def __init__(self, config, *args):
-		pass			
-
-
-class ServerImageCreate(Command):
-	name = 'create_server_image'
-
-	def __init__(self, config, *args):
-		pass		
+		#TODO: read SSL keys from files
+		pass	
 	
-
-class ServerLaunch(Command):
-	name = 'launch_server'
-
-	def __init__(self, config, *args):
-		pass			
-
-
-class FarmLaunch(Command):
-	name = 'launch_farm'
-
-	def __init__(self, config, *args):
-		pass			
-
-
-class ServerTerminate(Command):
-	name = 'terminate_server'
-
-	def __init__(self, config, *args):
-		pass			
-		
-			
+				
 class Deploy(Command):
 	name = 'deploy'
 
