@@ -4,12 +4,11 @@ Created on Feb 21th, 2011
 @author: Dmytro Korsakov
 '''
 
-import os
 import sys
 import inspect
 from optparse import OptionParser
 
-import handlers
+import commands
 from config import Configuration, ScalrCfgError, ScalrEnvError
 
 
@@ -24,16 +23,16 @@ def split_options(args):
 			return (args[1:index], arg, args[index+1:])			
 	return (args[1:], None, [])
 
-def get_handlers():
+def get_commands():
 	hs = []
-	for name, obj in inspect.getmembers(handlers):
-		if inspect.isclass(obj) and hasattr(obj, 'subcommand') and getattr(obj, 'subcommand'):
+	for name, obj in inspect.getmembers(commands):
+		if inspect.isclass(obj) and hasattr(obj, 'name') and getattr(obj, 'name'):
 			hs.append(obj)
 	return hs
 
 def main():
 
-	subcommands = 'Available subcommands:\n' + '\n'.join([action.subcommand for action in get_handlers()])
+	subcommands = 'Available subcommands:\n' + '\n'.join([command.name for command in get_commands()])
 	usage='''Usage: scalrtools [options] subcommand [args]'''
 	
 	parser = OptionParser(usage=usage)
@@ -63,9 +62,9 @@ def main():
 		print e 
 		sys.exit()
 		
-	for action in get_handlers():
-		if action.subcommand == cmd:
-			obj = action(c, *subargs)
+	for command in get_commands():
+		if command.name == cmd:
+			obj = command(c, *subargs)
 			obj.run()
 
 

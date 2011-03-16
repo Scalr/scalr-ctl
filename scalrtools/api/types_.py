@@ -9,7 +9,7 @@ try:
 except ImportError:
 	import time
 
-from extensions import OrderedDict
+from collections_ import OrderedDict
 		
 class Page(object):
 	total_records = None

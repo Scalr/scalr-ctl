@@ -4,7 +4,6 @@ Created on Feb 21th, 2011
 @author: Dmytro Korsakov
 '''
 import os
-import sys
 
 from ConfigParser import ConfigParser
 

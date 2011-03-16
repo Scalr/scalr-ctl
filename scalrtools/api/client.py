@@ -19,7 +19,7 @@ from xml.dom.minidom import parseString
 from urllib import urlencode, splitnport
 from urllib2 import urlopen, Request, URLError, HTTPError
 
-import scalr_types as types
+import types_ as types
 
 class ScalrConnection(object):
 	'''
@@ -82,38 +82,39 @@ class ScalrConnection(object):
 			xml = xml_strip(parseString(resp_body))
 		except (Exception, BaseException), e:
 			raise ScalrAPIError("Cannot parse XML. %s" % [str(e)])		
+		#print xml.toprettyxml()
 		return xml
 		
 	
 		
-	def apache_virtual_hosts_list(self):
+	def list_apache_virtual_hosts(self):
 		"""
 		@return VirtualHost[]
 		"""
-		return self._request("ApacheVhostsList", response_reader=self._read_apache_virtual_host_list_response)
+		return self._request("ApacheVhostsList", response_reader=self._read_list_apache_virtual_hosts_response)
 	
 	
-	def dns_zones_list(self):
+	def list_dns_zones(self):
 		"""
 		@return DNSZone[]
 		"""
-		return self._request("DNSZonesList", response_reader=self._read_dns_zones_list_response)
+		return self._request("DNSZonesList", response_reader=self._read_list_dns_zones_response)
 
 	
-	def scripts_list(self):
+	def list_scripts(self):
 		"""
 		@return Script[]
 		"""
-		return self._request("ScriptsList", response_reader=self._read_scripts_list_response)
+		return self._request("ScriptsList", response_reader=self._read_list_scripts_response)
 	
-	def farms_list(self):
+	def list_farms(self):
 		"""
 		@return Farm[]
 		"""
-		return self._request("FarmsList", response_reader=self._read_farms_list_response)
+		return self._request("FarmsList", response_reader=self._read_list_farms_response)
 	
 	
-	def roles_list(self, platform=None, name=None, prefix=None, image_id=None):
+	def list_roles(self, platform=None, name=None, prefix=None, image_id=None):
 		"""
 		@return Role[]
 		"""
@@ -124,19 +125,19 @@ class ScalrConnection(object):
 		if prefix	: params['Prefix'] 	= prefix
 		if image_id : params['ImageID'] = image_id
 		
-		return self._request(command="RolesList", params=params, response_reader=self._read_roles_list_response)
+		return self._request(command="RolesList", params=params, response_reader=self._read_list_roles_response)
 
 
-	def dns_zone_records_list(self, zone_name):
+	def list_dns_zone_records(self, zone_name):
 		"""
 		@return DnsZoneRecord[]
 		"""
 		params = {'ZoneName':zone_name} if zone_name else {}
 		
-		return self._request(command="DNSZoneRecordsList", params=params, response_reader=self._read_dns_zone_record_list_response)	
+		return self._request(command="DNSZoneRecordsList", params=params, response_reader=self._read_list_dns_zone_records_response)	
 		
 	
-	def events_list(self, farm_id, start_from=None, records_limit=None):
+	def list_events(self, farm_id, start_from=None, records_limit=None):
 		"""
 		@return Event[]
 		"""
@@ -146,9 +147,9 @@ class ScalrConnection(object):
 		if start_from	 : params['StartFrom'] 	  = start_from
 		if records_limit : params['RecordsLimit'] = records_limit
 		
-		return self._request(command="EventsList", params=params, response_reader=self._read_events_list_response)		
+		return self._request(command="EventsList", params=params, response_reader=self._read_list_events_response)		
 	
-	def logs_list(self, farm_id, server_id=None, start_from=None, records_limit=None):
+	def list_logs(self, farm_id, server_id=None, start_from=None, records_limit=None):
 		"""
 		@return LogRecord[]
 		"""
@@ -159,7 +160,7 @@ class ScalrConnection(object):
 		if start_from	 : params['StartFrom'] 	  = start_from
 		if records_limit : params['RecordsLimit'] = records_limit
 		
-		return self._request(command="LogsList", params=params, response_reader=self._read_logs_list_response)
+		return self._request(command="LogsList", params=params, response_reader=self._read_list_logs_response)
 
 
 	def get_farm_stats(self, farm_id, date=None):
@@ -377,35 +378,35 @@ class ScalrConnection(object):
 		return self._read_response(xml, node_name='ScriptRevisionSet', cls=types.ScriptRevision)
 	
 			
-	def _read_apache_virtual_host_list_response(self, xml):
+	def _read_list_apache_virtual_hosts_response(self, xml):
 		return self._read_response(xml, node_name='ApacheVhostSet', cls=types.VirtualHost)
 		
 	
-	def _read_dns_zones_list_response(self, xml):
+	def _read_list_dns_zones_response(self, xml):
 		return self._read_response(xml, node_name='DNSZoneSet', cls=types.DNSZone)
 	
 	
-	def _read_scripts_list_response(self, xml):
+	def _read_list_scripts_response(self, xml):
 		return self._read_response(xml, node_name='ScriptSet', cls=types.Script)
 	
 	
-	def _read_farms_list_response(self, xml):
+	def _read_list_farms_response(self, xml):
 		return self._read_response(xml, node_name='FarmSet', cls=types.Farm)
 	
 	
-	def _read_roles_list_response(self, xml):
+	def _read_list_roles_response(self, xml):
 		return self._read_response(xml, node_name='RoleSet', cls=types.Role)
 	
 	
-	def _read_dns_zone_record_list_response(self, xml):
+	def _read_list_dns_zone_records_response(self, xml):
 		return self._read_response(xml, node_name='ZoneRecordSet', cls=types.DnsZoneRecord)
 	
 	
-	def _read_events_list_response(self, xml):
+	def _read_list_events_response(self, xml):
 		return self._read_response(xml, node_name='EventSet', cls=types.Event, wrap_page=True)
 	
 	
-	def _read_logs_list_response(self, xml):
+	def _read_list_logs_response(self, xml):
 		return self._read_response(xml, node_name='LogSet', cls=types.LogRecord, wrap_page=True)
 	
 	
