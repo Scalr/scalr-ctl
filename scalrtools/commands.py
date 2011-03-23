@@ -590,8 +590,7 @@ class AppsList(Command):
 		config = ConfigParser()
 		path = os.path.join(self.config.base_path, Application.config_name)
 		config.read(path)
-		#TODO: fill column names automatically 
-		column_names = ['name', 'repo_name', 'farm_id', 'farm_role_id', 'remote_path']
+		column_names = ['name', 'repo name', 'farm id', 'farm role id', 'remote path']
 		pt = PrettyTable(column_names, caching=False)
 		for app_name in config.sections():
 			a = Application.from_ini(self.config.base_path, app_name)

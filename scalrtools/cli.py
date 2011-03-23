@@ -62,6 +62,7 @@ def main():
 	try:
 		c = Configuration(options.base_path)
 		c.set_environment(options.key, options.key_id, options.api_url)
+		
 		if options.debug:
 			c.set_logger(logger)
 			
