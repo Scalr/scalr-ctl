@@ -28,7 +28,11 @@ class TableViewer:
 						for property in entry.__titles__:
 							val = getattr(entry, property)
 							if property != 'server_set' and val:
-								plain_text += '\n%s=%s' % (property, val)
+								if isinstance(val, dict):
+									value = ';'.join(['%s=%s'%(k,v) for k,v in val.items()])
+								else:
+									value = val
+								plain_text += '\n%s = %s' % (property, value)
 						self.data[self.prepare_table(objects)if objects else entry.id] = plain_text
 				
 				else:
@@ -53,6 +57,10 @@ class TableViewer:
 			row = []
 			for attribute in scalr_obj.__titles__.keys():
 				cell = getattr(scalr_obj, attribute)
-				row.append(';'.join(cell) if isinstance(cell, list) else cell)
+				if isinstance(cell, list):
+					cell = ';'.join(cell)
+				elif isinstance(cell, dict):
+					cell = ';'.join(['%s=%s'%(k,v) for k,v in cell.items()])
+				row.append(cell)
 			pt.add_row(row)
 		return pt

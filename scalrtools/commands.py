@@ -7,7 +7,7 @@ import os
 import sys
 
 from ConfigParser import ConfigParser
-from optparse import OptionParser
+from optparse import OptionParser, TitledHelpFormatter
 
 from prettytable import PrettyTable	
 
@@ -42,12 +42,8 @@ class Command(object):
 			
 	def require(self, *args):
 		if not all(args):
-			print self.parser.format_help()
+			print self.parser.format_help(TitledHelpFormatter())
 			sys.exit()
-	
-	@property		
-	def connection(self):
-		return self.config.get_connection()
 	
 	@classmethod
 	def inject_options(cls, parser):
@@ -57,11 +53,16 @@ class Command(object):
 	def usage(cls):
 		parser = OptionParser(usage=cls.help) 
 		cls.inject_options(parser)
-		return parser.format_help()
+		return parser.format_help(TitledHelpFormatter())
 
-	
+	@property		
+	def connection(self):
+		return self.config.get_connection()
+
+		
 class ApacheVhostsList(Command):
 	name = 'list-apache-virtual-hosts'
+	help = 'scalr-tools list-apache-virtual-hosts'
 	
 	def run(self):
 		print self.api_call(self.connection.list_apache_virtual_hosts)
@@ -69,6 +70,7 @@ class ApacheVhostsList(Command):
 
 class DNSZonesList(Command):
 	name = 'list-dns-zones'
+	help = 'scalr-tools list-dns-zones'
 	
 	def run(self):
 		print self.api_call(self.connection.list_dns_zones)
@@ -76,6 +78,7 @@ class DNSZonesList(Command):
 
 class FarmsList(Command):
 	name = 'list-farms'
+	help = 'scalr-tools list-farms'
 
 	def run(self):
 		print self.api_call(self.connection.list_farms)
@@ -83,6 +86,7 @@ class FarmsList(Command):
 
 class ScriptsList(Command):
 	name = 'list-scripts'
+	help = 'scalr-tools list-scripts'
 	
 	def run(self):
 		print self.api_call(self.connection.list_scripts)
@@ -90,6 +94,7 @@ class ScriptsList(Command):
 		
 class DNSZoneRecordsList(Command):
 	name = 'list-dns-zone-records'
+	help = 'scalr-tools list-dns-zone-records -n name'
 
 	def __init__(self, config, *args):
 		super(DNSZoneRecordsList, self).__init__(config, *args)
@@ -105,6 +110,7 @@ class DNSZoneRecordsList(Command):
 
 class EventsList(Command):
 	name = 'list-events'
+	help = 'scalr-tools list-events -f farm-id [-s start-from -l limit]'
 
 	def __init__(self, config, *args):
 		super(EventsList, self).__init__(config, *args)
@@ -123,6 +129,8 @@ class EventsList(Command):
 
 class LogsList(Command):
 	name = 'list-logs'
+	help = 'scalr-tools list-logs -f farm-id [-i server-id -s start-from -l limit]'
+	
 	def __init__(self, config, *args):
 		super(LogsList, self).__init__(config, *args)
 		self.require(self.options.id)
@@ -141,6 +149,7 @@ class LogsList(Command):
 
 class RolesList(Command):
 	name = 'list-roles'
+	help = 'scalr-tools list-roles [-p platform -n name -x prefix -i image-id]'
 
 	@classmethod
 	def inject_options(cls, parser):
@@ -156,6 +165,7 @@ class RolesList(Command):
 
 class ScriptGetDetails(Command):
 	name = 'get-script-details'
+	help = 'scalr-tools get-script-details -s script-id'
 
 	def __init__(self, config, *args):
 		super(ScriptGetDetails, self).__init__(config, *args)
@@ -171,6 +181,7 @@ class ScriptGetDetails(Command):
 
 class BundleTaskGetStatus(Command):
 	name = 'get-bundle-task-status'
+	help = 'scalr-tools get-bundle-task-status -i bundle-task-id'
 	
 	def __init__(self, config, *args):
 		super(BundleTaskGetStatus, self).__init__(config, *args)
@@ -186,6 +197,7 @@ class BundleTaskGetStatus(Command):
 
 class FarmGetDetails(Command):
 	name = 'get-farm-details'
+	help = 'scalr-tools get-farm-details -f farm-id'
 
 	def __init__(self, config, *args):
 		super(FarmGetDetails, self).__init__(config, *args)
@@ -201,6 +213,7 @@ class FarmGetDetails(Command):
 
 class FarmGetStats(Command):
 	name = 'get-farm-stats'
+	help = 'scalr-tools get-farm-stats -f farm-id [-d date]'
 
 	def __init__(self, config, *args):
 		super(FarmGetStats, self).__init__(config, *args)
@@ -217,6 +230,7 @@ class FarmGetStats(Command):
 
 class StatisticsGetGraphURL(Command):
 	name = 'get-statistics-graph-url'
+	help = 'scalr-tools get-statistics-graph-url -o object-type -i object-id -n watcher-name -g graph-type'
 
 	def __init__(self, config, *args):
 		super(StatisticsGetGraphURL, self).__init__(config, *args)
@@ -238,6 +252,7 @@ class StatisticsGetGraphURL(Command):
 
 class ServerTerminate(Command):
 	name = 'terminate-server'
+	help = 'scalr-tools terminate-server -i server-id [-d decrease-min-instances-setting]'
 
 	def __init__(self, config, *args):
 		super(ServerTerminate, self).__init__(config, *args)
@@ -254,6 +269,7 @@ class ServerTerminate(Command):
 
 class ServerImageCreate(Command):
 	name = 'create-server-image'
+	help = 'scalr-tools create-server-image -i server-id -n role-name'
 
 	def __init__(self, config, *args):
 		super(ServerImageCreate, self).__init__(config, *args)
@@ -270,6 +286,7 @@ class ServerImageCreate(Command):
 	
 class ServerLaunch(Command):
 	name = 'launch-server'
+	help = 'scalr-tools launch-server -i farm-role-id'
 
 	def __init__(self, config, *args):
 		super(ServerLaunch, self).__init__(config, *args)
@@ -285,6 +302,7 @@ class ServerLaunch(Command):
 	
 class FarmLaunch(Command):
 	name = 'launch-farm'
+	help = 'scalr-tools launch-farm -f farm-id'
 
 	def __init__(self, config, *args):
 		super(FarmLaunch, self).__init__(config, *args)
@@ -300,6 +318,7 @@ class FarmLaunch(Command):
 	
 class FarmTerminate(Command):
 	name = 'terminate-farm'
+	help = 'scalr-tools terminate-farm -f farm-id -e keep-ebs, -i keep-eip -d keep-dns-zone'
 
 	def __init__(self, config, *args):
 		super(FarmTerminate, self).__init__(config, *args)
@@ -308,9 +327,9 @@ class FarmTerminate(Command):
 	@classmethod
 	def inject_options(cls, parser):		
 		parser.add_option("-f", "--farm-id", dest="id", default=None, help="The ID of farm that you want to terminate")
-		parser.add_option("-e", "--keep-ebs", dest="keep_ebs", default=None, help="Keep EBS volumes created for roles on this farm")
-		parser.add_option("-i", "--keep-eip", dest="keep_eip", default=None, help='Keep Elastic IPs created for roles on this farm')
-		parser.add_option("-d", "--keep-dns-zone", dest="keep_dns_zone", default=None, help="Keep DNS zone that assigned to this farm on nameservers")
+		parser.add_option("-e", "--keep-ebs", dest="keep_ebs", default=None, help="Keep EBS volumes created for roles on this farm 0|1")
+		parser.add_option("-i", "--keep-eip", dest="keep_eip", default=None, help='Keep Elastic IPs created for roles on this farm 0|1')
+		parser.add_option("-d", "--keep-dns-zone", dest="keep_dns_zone", default=None, help="Keep DNS zone that assigned to this farm on nameservers 0|1")
 	
 	def run(self):
 		args = (self.options.id, self.options.keep_ebs, self.options.keep_eip, self.options.keep_dns_zone)
@@ -319,6 +338,8 @@ class FarmTerminate(Command):
 		
 class ScriptExecute(Command):
 	name = 'execute-script'
+	help = 'scalr-tools execute-script --f farm-id -e script-id -a async -t timeout [-i farm-role-id -s server-id -r revision -v variables]'
+	#TODO: Test passing variables  
 
 	def __init__(self, config, *args):
 		super(ScriptExecute, self).__init__(config, *args)
@@ -344,6 +365,7 @@ class ScriptExecute(Command):
 
 class ServerReboot(Command):
 	name = 'reboot-server'
+	help = 'scalr-tools reboot-server -s server-id'
 
 	def __init__(self, config, *args):
 		super(ServerReboot, self).__init__(config, *args)
@@ -355,6 +377,109 @@ class ServerReboot(Command):
 	
 	def run(self):
 		print self.api_call(self.connection.reboot_server, self.options.id)	
+
+
+class DNSZoneCreate(Command):
+	name = 'create-dns-zone'
+	help = 'scalr-tools create-dns-zone -n domain-name [-f farm-id -i farm-role-id]'
+
+	def __init__(self, config, *args):
+		super(DNSZoneCreate, self).__init__(config, *args)
+		self.require(self.options.name)
+
+	@classmethod
+	def inject_options(cls, parser):
+		parser.add_option("-n", "--domain-name", dest="name", default=None, help="Domain (Application) name")
+		parser.add_option("-f", "--farm-id", dest="farm_id", default=None, help="Farm ID")
+		parser.add_option("-i", "--farm-role-id", dest="farm_role_id", default=None, help="Farm Role ID")
+	
+	def run(self):
+		print self.api_call(self.connection.create_dns_zone, self.options.name, self.options.farm_id, self.options.farm_role_id)		
+	
+	
+class DNSZoneRecordAdd(Command):
+	name = 'add-dns-zone-record'
+	help = 'scalr-tools add-dns-zone-record -z zone-name -t type -l ttl -n record-name -v record-value [-p priority -w weight -o port]'
+
+	def __init__(self, config, *args):
+		super(DNSZoneRecordAdd, self).__init__(config, *args)
+		self.require(self.options.zone_name, self.options.type, self.options.ttl, self.options.record_name, self.options.record_value)
+
+	@classmethod
+	def inject_options(cls, parser):
+		parser.add_option("-z", "--zone-name", dest="zone_name", default=None, help="Zone (Domain) name")
+		parser.add_option("-t", "--type", dest="type", default=None, help="Record type (A, MX, CNAME, NS, TXT, SRV)")
+		parser.add_option("-l", "--ttl", dest="ttl", default=None, help="Record TTL")
+		parser.add_option("-n", "--record-name", dest="record_name", default=None, help="Record name")
+		parser.add_option("-v", "--record-value", dest="record_value", default=None, help="Record value")
+		
+		parser.add_option("-p", "--priority", dest="priority", default=None, help="Priority (for MX records)")
+		parser.add_option("-w", "--weight", dest="weight", default=None, help="Weight (for SRV records)")
+		parser.add_option("-o", "--port", dest="port", default=None, help="Port (for SRV records)")		
+	
+	def run(self):
+		args = (self.options.zone_name, self.options.type, self.options.ttl, self.options.record_name, self.options.record_value,
+				self.options.priority, self.options.weight, self.options.port)
+		print self.api_call(self.connection.add_dns_zone_record, *args)	
+
+
+class DNSZoneRecordRemove(Command):
+	name = 'remove-dns-zone-record'
+	help = 'scalr-tools remove-dns-zone-record -n name -i record-id'
+
+	def __init__(self, config, *args):
+		super(DNSZoneRecordRemove, self).__init__(config, *args)
+		self.require(self.options.name, self.options.id)
+
+	@classmethod
+	def inject_options(cls, parser):
+		parser.add_option("-n", "--domain-name", dest="name", default=None, help="Domain (Application) name")
+		parser.add_option("-i", "--record-id", dest="id", default=None, help="Record ID")
+	
+	def run(self):
+		print self.api_call(self.connection.remove_dns_zone_record, self.options.name, self.options.id)			
+
+	
+class ApacheVhostCreate(Command):
+	name = 'create-apache-vhost'
+	help = 'scalr-tools create-apache-vhost -d domain-name -f farm-id -i farm-role-id -r document-root -s enable-ssl [-k key-path -c cert-path]'
+	
+	def __init__(self, config, *args):
+		super(ApacheVhostCreate, self).__init__(config, *args)
+		self.require(self.options.domain, self.options.farm_id, self.options.farm_role_id, self.options.document_root, self.options.enable_ssl)
+		pass			
+
+	@classmethod
+	def inject_options(cls, parser):
+		parser.add_option("-d", "--domain-name", dest="domain", default=None, help="Domain (Application) name")
+		parser.add_option("-f", "--farm-id", dest="farm_id", default=None, help="Farm ID")
+		parser.add_option("-i", "--farm-role-id", dest="farm_role_id", default=None, help="Farm Role ID")
+		parser.add_option("-r", "--document-root-dir", dest="document_root", default=None, help="Document root for virtualhost")
+		parser.add_option("-s", "--enable-ssl", dest="enable_ssl", default=None, help="EnableSSL (1 - yes, 0 - no)")
+		parser.add_option("-k", "--pk-path", dest="pk_path", default=None, help="Path to file with Private key for SSL")
+		parser.add_option("-c", "--cert-path", dest="cert_path", default=None, help="Path to file with Certificate for SSL")
+	
+	def run(self):
+		pk = None 
+		cert = None
+		
+		if self.options.enable_ssl and int(self.options.enable_ssl):
+			self.require(self.options.pk_path, self.options.cert_path)
+			
+			if not os.path.exists(self.options.cert_path):
+				print '%s : file with certificate not found.' % self.options.cert_path
+				sys.exit()
+			else: 
+				cert = open(self.options.cert_path, 'r').read()
+				
+			if not os.path.exists(self.options.pk_path):
+				print '%s : file with private key not found.' % self.options.pk_path
+				sys.exit()
+			else: 
+				pk = open(self.options.pk_path, 'r').read()
+				
+		args = (self.options.domain, self.options.farm_id, self.options.farm_role_id, self.options.document_root, self.options.enable_ssl, pk, cert)
+		print self.api_call(self.connection.create_apache_vhost, *args)	
 		
 	
 class ConfigureEnv(Command):
@@ -380,8 +505,12 @@ class ConfigureEnv(Command):
 		e.write(self.config.base_path)
 		
 		e = Environment.from_ini(self.config.base_path)
-		print 'URL:%s\nkey_id:%s\nkey:%s\napi_version:%s' % (e.url, e.key_id, e.key, e.api_version)
-		
+		table = PrettyTable(fields=('setting','value'))
+		table.add_row(('url', e.url))
+		table.add_row(('key', e.key[:40]+'...' if len(e.key)>40 else e.key))
+		table.add_row(('key id', e.key_id))
+		table.add_row(('version', e.api_version))
+		print table
 		
 class ConfigureRepo(Command):
 	name = 'configure-repo'
@@ -409,8 +538,14 @@ class ConfigureRepo(Command):
 		r.write(self.config.base_path, self.options.name)
 		
 		r = Repository.from_ini(self.config.base_path, self.options.name)
-		print 'Name:%s\nType:%s\nURL:%s\nLogin:%s\nPassword:%s\n' % (r.name, r.type, r.url, r.login, r.password)
-		
+
+		table = PrettyTable(fields=('setting','value'))
+		table.add_row(('name', r.name))
+		table.add_row(('type', r.type))
+		table.add_row(('url', r.url))
+		table.add_row(('login', r.login))
+		table.add_row(('password', r.password))
+		print table
 		
 class ConfigureApp(Command):
 	name = 'configure-app'
@@ -438,8 +573,14 @@ class ConfigureApp(Command):
 		a.write(self.config.base_path, self.options.name)
 		
 		a = Application.from_ini(self.config.base_path, self.options.name)
-		print 'Name:%s\nRepo:%s\nFarmID:%s\nFarmRoleID:%s\nRemotePath:%s\n' % (a.name, a.repo_name, a.farm_id, a.farm_role_id, a.remote_path)
 		
+		table = PrettyTable(fields=('setting','value'))
+		table.add_row(('name', a.name))
+		table.add_row(('repo name', a.repo_name))
+		table.add_row(('farm id', a.farm_id))
+		table.add_row(('farm role id', a.farm_role_id))
+		table.add_row(('remote path', a.remote_path))
+		print table
 		
 class AppsList(Command):
 	name = 'list-apps'
@@ -475,37 +616,10 @@ class ReposList(Command):
 			pt.add_row(row)
 		print str(pt)		
 	
-	
-class DNSZoneRecordAdd(Command):
-	name = 'add_dns_zone_record'
-
-	def __init__(self, config, *args):
-		pass			
-
-
-class DNSZoneRecordRemove(Command):
-	name = 'remove_dns_zone_record'
-
-	def __init__(self, config, *args):
-		pass			
-
-
-class DNSZoneCreate(Command):
-	name = 'create_dns_zone'
-
-	def __init__(self, config, *args):
-		pass			
-
-
-class ApacheVhostCreate(Command):
-	name = 'create_apache_vhost'
-	def __init__(self, config, *args):
-		#TODO: read SSL keys from files
-		pass	
-	
 						
 class Deploy(Command):
 	name = 'deploy'
+	help = 'scalr-tools deploy '
 
 	def __init__(self, config, *args):
 		pass

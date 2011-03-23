@@ -5,7 +5,7 @@ Created on Feb 21th, 2011
 '''
 import os
 
-from ConfigParser import ConfigParser
+from ConfigParser import ConfigParser, NoSectionError, NoOptionError
 
 from api import ScalrConnection
 
@@ -56,7 +56,10 @@ class ConfigSection(object):
 		setattr(obj, 'name', section)
 		
 		for option in cls.options:
-			setattr(obj, option, config.get(section, cls.options[option]))
+			try:
+				setattr(obj, option, config.get(section, cls.options[option]))
+			except (NoSectionError, NoOptionError), e:
+				raise ScalrCfgError('%s in %s'%(e, path))
 		return obj
 
 		
@@ -74,11 +77,11 @@ class Environment(ConfigSection):
 			key = 'scalr_api_key',
 			api_version = 'version')
 	
-	def write(self, base_path, section='API'):
+	def write(self, base_path, section='api'):
 		super(Environment, self).write(base_path, section)
 			
 	@classmethod
-	def from_ini(cls, base_path, section='API'):
+	def from_ini(cls, base_path, section='api'):
 		return super(Environment, cls).from_ini(base_path, section)
 		
 			
@@ -121,6 +124,7 @@ class Configuration:
 	environment = None
 	application = None
 	repository = None
+	scripts = None
 	
 	def __init__(self, base_path=None):
 		self.base_path = base_path or os.path.expanduser("~/.scalr/")

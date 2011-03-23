@@ -32,7 +32,7 @@ def get_commands():
 
 def main():
 
-	subcommands = 'Available subcommands:\n' + '\n'.join(sorted([command.name for command in get_commands()]))
+	subcommands = '\nAvailable subcommands:\n\n' + '\n'.join(sorted([command.name for command in get_commands()]))
 	usage='''Usage: scalrtools [options] subcommand [args]'''
 	
 	parser = OptionParser(usage=usage)
@@ -44,7 +44,7 @@ def main():
 	args, cmd, subargs = split_options(sys.argv)
 
 	options = parser.parse_args(args)[0]
-	help = parser.format_help() + subcommands
+	help = parser.format_help() + subcommands + "\n\nFor more information try 'scalrtools help <subcommand>'"
 	if not cmd:
 		print help
 		sys.exit()

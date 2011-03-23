@@ -59,6 +59,7 @@ class ScalrConnection(object):
 		request_body["Signature"] = signature	
 		
 		post_data = urlencode(request_body)
+		print post_data
 		
 		response = None
 		try:
@@ -75,7 +76,7 @@ class ScalrConnection(object):
 
 		resp_body = response.read()
 		self._logger.debug("Scalr response: %s", resp_body)
-
+		print resp_body
 		# Parse XML response
 		xml = None
 		try:
