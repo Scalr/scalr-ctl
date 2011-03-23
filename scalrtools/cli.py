@@ -19,7 +19,7 @@ def split_options(args):
 	for arg in args[1:]:
 		index = args.index(arg)
 		prev = args[args.index(arg)-1]		
-		if not arg.startswith('-') and (prev.startswith('-') or index == 1):
+		if not arg.startswith('-') and (prev.startswith('--') or not prev.startswith('-') or index == 1):
 			return (args[1:index], arg, args[index+1:])			
 	return (args[1:], None, [])
 
@@ -32,7 +32,7 @@ def get_commands():
 
 def main():
 
-	subcommands = 'Available subcommands:\n' + '\n'.join([command.name for command in get_commands()])
+	subcommands = 'Available subcommands:\n' + '\n'.join(sorted([command.name for command in get_commands()]))
 	usage='''Usage: scalrtools [options] subcommand [args]'''
 	
 	parser = OptionParser(usage=usage)
@@ -61,12 +61,19 @@ def main():
 	except ScalrCfgError, e:
 		print e 
 		sys.exit()
-		
+
+			
 	for command in get_commands():
+		if cmd == 'help' and len(subargs) == 1 and subargs[0] == command.name:
+			print command.usage()
+			sys.exit()
+			
 		if command.name == cmd:
 			obj = command(c, *subargs)
 			obj.run()
-
+			sys.exit()
+	else:
+		print help
 
 if __name__ == '__main__':
 	main()
