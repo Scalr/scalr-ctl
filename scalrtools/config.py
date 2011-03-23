@@ -119,6 +119,7 @@ class Repository(ConfigSection):
 
 
 class Configuration:
+	logger = None
 	base_path = None
 	
 	environment = None
@@ -126,8 +127,9 @@ class Configuration:
 	repository = None
 	scripts = None
 	
-	def __init__(self, base_path=None):
+	def __init__(self, base_path=None, logger=None):
 		self.base_path = base_path or os.path.expanduser("~/.scalr/")
+		self.logger = logger
 		
 	def set_environment(self, key, key_id, url):
 		if key and key_id and url:
@@ -138,10 +140,13 @@ class Configuration:
 		
 		if not self.environment or not self.environment.key or not self.environment.key_id or not self.environment.url:
 			raise ScalrEnvError('Environment not set.')
+		
+	def set_logger(self, logger):
+		self.logger = logger
 	
 	def get_connection(self):
 		conn = None
 		if self.environment:
-			conn = ScalrConnection(self.environment.url, self.environment.key_id, self.environment.key, self.environment.api_version)
+			conn = ScalrConnection(self.environment.url, self.environment.key_id, self.environment.key, self.environment.api_version, logger=self.logger)
 		return conn
 		

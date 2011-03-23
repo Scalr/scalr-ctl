@@ -6,6 +6,7 @@ Created on Feb 21th, 2011
 
 import sys
 import inspect
+import logging
 from optparse import OptionParser
 
 import commands
@@ -31,11 +32,20 @@ def get_commands():
 	return hs
 
 def main():
-
+	
+	logger = logging.getLogger(__name__)
+	logger.setLevel(logging.DEBUG)
+	handler = logging.StreamHandler()
+	handler.setLevel(logging.DEBUG)
+	fmt = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
+	handler.setFormatter(fmt)
+	logger.addHandler(handler)
+	
 	subcommands = '\nAvailable subcommands:\n\n' + '\n'.join(sorted([command.name for command in get_commands()]))
 	usage='''Usage: scalrtools [options] subcommand [args]'''
 	
 	parser = OptionParser(usage=usage)
+	parser.add_option("--debug", dest="debug", action="store_true", help="Enable debug output")
 	parser.add_option("-c", "--config-path", dest="base_path", default=None, help="Path to configuration files")
 	parser.add_option("-a", "--access-key", dest="key_id", default=None, help="Access key")
 	parser.add_option("-s", "--secret-key", dest="key", default=None, help="Secret key")
@@ -52,11 +62,15 @@ def main():
 	try:
 		c = Configuration(options.base_path)
 		c.set_environment(options.key, options.key_id, options.api_url)
+		if options.debug:
+			c.set_logger(logger)
+			
 	except ScalrEnvError, e:
-		print "\nNo login information found."
-		print "Please specity options -a -u and -s, or run 'scalrtools configure-env help' to find out how to set login information permanently.\n"
-		print help
-		sys.exit()
+		if not cmd.startswith('configure-'):
+			print "\nNo login information found."
+			print "Please specity options -a -u and -s, or run 'scalrtools configure-env help' to find out how to set login information permanently.\n"
+			print help
+			sys.exit()
 		
 	except ScalrCfgError, e:
 		print e 

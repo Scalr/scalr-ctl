@@ -26,14 +26,14 @@ class ScalrConnection(object):
 	implements Scalr API
 	'''
 
-	def __init__(self, url, key_id, access_key, api_version=None):
+	def __init__(self, url, key_id, access_key, api_version=None, logger=None):
 		self.url = url
 		self.key_id  = key_id
 		self.access_key = access_key
 		self.api_version = api_version or '2.1.0'
-		self._logger = logging.getLogger(__name__)
+		self._logger = logger or logging.getLogger(__name__)
 		self.last_transaction_id = None
-	
+		
 		
 	def fetch(self, command, **params):
 		"""
@@ -59,7 +59,9 @@ class ScalrConnection(object):
 		request_body["Signature"] = signature	
 		
 		post_data = urlencode(request_body)
-		print post_data
+		
+		self._logger.debug('POST URL: \n%s' % self.url)
+		self._logger.debug('POST DATA: \n%s' % post_data)
 		
 		response = None
 		try:
@@ -75,17 +77,19 @@ class ScalrConnection(object):
 						% (host, port, str(e)))
 
 		resp_body = response.read()
-		self._logger.debug("Scalr response: %s", resp_body)
-		print resp_body
+		
+		self._logger.debug("SCALR RESPONSE: \n%s", resp_body)
+		
 		# Parse XML response
 		xml = None
 		try:
 			xml = xml_strip(parseString(resp_body))
 		except (Exception, BaseException), e:
 			raise ScalrAPIError("Cannot parse XML. %s" % [str(e)])		
-		#print xml.toprettyxml()
-		return xml
 		
+		self._logger.debug('VALID XML: \n%s' % xml.toprettyxml())
+		
+		return xml
 	
 		
 	def list_apache_virtual_hosts(self):
