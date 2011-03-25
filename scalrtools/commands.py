@@ -8,6 +8,7 @@ import sys
 
 from ConfigParser import ConfigParser
 from optparse import OptionParser, TitledHelpFormatter
+from shutil import copyfile
 
 from prettytable import PrettyTable	
 
@@ -544,6 +545,9 @@ class ConfigureRepo(Command):
 		parser.add_option("-p", "--password", dest="password", default=None, help="Repository password")
 		parser.add_option("-n", "--name", dest="name", default=None, help="Repository name")
 		
+		parser.add_option("-c", "--cert-path", dest="cert_path", default=None, help="Path to certificate in case of using GIT")
+		parser.add_option("-k", "--pkey-path", dest="pk_path", default=None, help="Path to private key in case of using GIT")
+				
 	def run(self):		
 		r = Repository(name = self.options.name,
 				url = self.options.url,
@@ -553,6 +557,20 @@ class ConfigureRepo(Command):
 		
 		r.write(self.config.base_path, self.options.name)
 		
+		key_path = os.path.join(self.config.base_path, 'keys')
+		cert_path = os.path.join(key_path, self.options.name+'.cert')
+		pk_path = os.path.join(key_path, self.options.name+'.pk')
+		
+		if self.options.cert_path and self.options.pk_path:
+			if not os.path.exists(key_path):
+				os.makedirs(key_path)
+			try:
+				copyfile(self.options.cert_path, cert_path)
+				copyfile(self.options.pk_path, pk_path)
+			except IOError, e:
+				print e
+				sys.exit
+		
 		r = Repository.from_ini(self.config.base_path, self.options.name)
 
 		table = PrettyTable(fields=('setting','value'))
@@ -561,6 +579,8 @@ class ConfigureRepo(Command):
 		table.add_row(('url', r.url))
 		table.add_row(('login', r.login))
 		table.add_row(('password', r.password))
+		table.add_row(('cert', cert_path if cert_path and os.path.exists(cert_path) else None))
+		table.add_row(('pkey', pk_path if pk_path and os.path.exists(pk_path) else None))
 		print table
 		
 class ConfigureApp(Command):
