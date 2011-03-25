@@ -52,7 +52,7 @@ class ScalrConnection(object):
 						request_body['%s[%s]'%(key,k)] = v
 				else:
 					request_body[key] = value
-
+					
 		signature, timestamp = sign_http_request(request_body, self.access_key)	
 		
 		request_body["TimeStamp"] = timestamp	
@@ -365,7 +365,8 @@ class ScalrConnection(object):
 		@return Result
 		"""
 		params = {}
-		
+		#params['SysDebug'] = '1'
+		params['AuthVersion'] = '2'
 		params['FarmID'] = farm_id
 		params['ScriptID'] = script_id
 		params['Timeout'] = timeout
@@ -548,9 +549,9 @@ def sign_http_request(data, key, timestamp=None):
 	
 	return sign, date
 
-
+import string
 def get_canonical_string (params={}):
 	s = ""
-	for key, value in sorted(params.items()):
-		s = s + str(key) + str(value)
+	for key in sorted(params.keys(), key=str.lower):
+		s = s + str(key) + str(params[key])
 	return s

@@ -11,8 +11,8 @@ from optparse import OptionParser, TitledHelpFormatter
 
 from prettytable import PrettyTable	
 
-from config import Environment, Repository, Application
-from api import ScalrAPIError
+from config import Environment, Repository, Application, Scripts
+from api import ScalrConnection, ScalrAPIError
 from api.view import TableViewer
 
 
@@ -57,7 +57,14 @@ class Command(object):
 
 	@property		
 	def connection(self):
-		return self.config.get_connection()
+		conn = None
+		if self.config.environment:
+			conn = ScalrConnection(self.config.environment.url, 
+					self.config.environment.key_id, 
+					self.config.environment.key, 
+					self.config.environment.api_version, 
+					logger=self.config.logger)
+		return conn
 
 		
 class ApacheVhostsList(Command):
@@ -338,7 +345,7 @@ class FarmTerminate(Command):
 		
 class ScriptExecute(Command):
 	name = 'execute-script'
-	help = 'scalr-tools execute-script --f farm-id -e script-id -a async -t timeout [-i farm-role-id -s server-id -r revision -v variables]'
+	help = 'scalr-tools execute-script -f farm-id -e script-id -a async -t timeout [-i farm-role-id -s server-id -r revision -v variables]'
 	#TODO: Test passing variables  
 
 	def __init__(self, config, *args):
@@ -504,12 +511,21 @@ class ConfigureEnv(Command):
 		
 		e.write(self.config.base_path)
 		
+		s = Scripts(svn='1698', git='1700')
+		s.write(self.config.base_path)
+		
+		s = Scripts.from_ini(self.config.base_path)
+		
 		e = Environment.from_ini(self.config.base_path)
 		table = PrettyTable(fields=('setting','value'))
 		table.add_row(('url', e.url))
 		table.add_row(('key', e.key[:40]+'...' if len(e.key)>40 else e.key))
 		table.add_row(('key id', e.key_id))
 		table.add_row(('version', e.api_version))
+		
+		table.add_row(('svn', s.svn))
+		table.add_row(('git', s.git))		
+		
 		print table
 		
 class ConfigureRepo(Command):
@@ -518,7 +534,7 @@ class ConfigureRepo(Command):
 	
 	def __init__(self, config, *args):
 		super(ConfigureRepo, self).__init__(config, *args)
-		self.require(self.options.type, self.options.login, self.options.password, self.options.url, self.options.name)
+		self.require(self.options.type, self.options.url, self.options.name)
 		
 	@classmethod
 	def inject_options(cls, parser):		
@@ -618,7 +634,52 @@ class ReposList(Command):
 						
 class Deploy(Command):
 	name = 'deploy'
-	help = 'scalr-tools deploy '
+	help = 'scalr-tools deploy -n name'
 
 	def __init__(self, config, *args):
-		pass
+		super(Deploy, self).__init__(config, *args)
+		self.require(self.options.name)
+
+	@classmethod
+	def inject_options(cls, parser):
+		parser.add_option("-n", "--name", dest="name", default=None, help="Application name")
+	
+	def run(self):
+		print self.options.name
+		self.config.set_application(self.options.name)
+		
+		farm_id = self.config.application.farm_id
+		farm_role_id = self.config.application.farm_role_id
+		remote_path = self.config.application.remote_path
+		repo_name = self.config.application.repo_name
+		
+		self.config.set_repository(repo_name)
+		
+		url = self.config.repository.url
+		login = self.config.repository.login
+		password = self.config.repository.password
+		repo_type = self.config.repository.type
+		
+		self.config.set_scripts()
+		
+		script_id = getattr(self.config.scripts, repo_type.lower())
+		
+		timeout = '1200'
+		async = '0'
+		revision = '1'
+		
+		variables = dict(svn_repo_url = url,
+						svn_user = login,
+						svn_password = password,
+						svn_co_dir = remote_path)
+		
+		kwargs = dict(farm_id=farm_id, 
+				script_id=script_id, 
+				timeout=timeout, 
+				async=async, 
+				farm_role_id=farm_role_id, 
+				config_variables=variables, 
+				revision=revision)
+		
+		print self.api_call(self.connection.execute_script, **kwargs)	
+

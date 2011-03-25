@@ -32,7 +32,6 @@ def get_commands():
 	return hs
 
 def main():
-	
 	logger = logging.getLogger(__name__)
 	logger.setLevel(logging.DEBUG)
 	handler = logging.StreamHandler()
