@@ -49,12 +49,13 @@ def main():
 	parser.add_option("-a", "--access-key", dest="key_id", default=None, help="Access key")
 	parser.add_option("-s", "--secret-key", dest="key", default=None, help="Secret key")
 	parser.add_option("-u", "--api-url", dest="api_url", default=None, help="API URL")
+	#parser.add_option("-h", "--help", dest="help", action="store_true", help="Help")
 	
 	args, cmd, subargs = split_options(sys.argv)
 
 	options = parser.parse_args(args)[0]
 	help = parser.format_help() + subcommands + "\n\nFor more information try 'scalr-tools help <subcommand>'"
-	if not cmd:
+	if not cmd or options.help:
 		print help
 		sys.exit()
 

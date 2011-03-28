@@ -549,7 +549,7 @@ def sign_http_request(data, key, timestamp=None):
 	
 	return sign, date
 
-import string
+
 def get_canonical_string (params={}):
 	s = ""
 	for key in sorted(params.keys(), key=str.lower):
