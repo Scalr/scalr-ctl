@@ -492,7 +492,7 @@ class ApacheVhostCreate(Command):
 	
 class ConfigureEnv(Command):
 	name = 'configure-env'
-	help = 'scalrtools configure-env -a key_id -s key -u api_url'
+	help = 'scalr-tools configure-env -a key_id -s key -u api_url'
 		
 	def __init__(self, config, *args):
 		super(ConfigureEnv, self).__init__(config, *args)
@@ -531,7 +531,7 @@ class ConfigureEnv(Command):
 		
 class ConfigureRepo(Command):
 	name = 'configure-repo'
-	help = 'scalrtools configure-repo -n name -t svn|git -u repo_url -l login -p password'
+	help = 'scalr-tools configure-repo -n name -t svn|git -u repo_url -l login -p password'
 	
 	def __init__(self, config, *args):
 		super(ConfigureRepo, self).__init__(config, *args)
@@ -585,7 +585,7 @@ class ConfigureRepo(Command):
 		
 class ConfigureApp(Command):
 	name = 'configure-app'
-	help = 'scalrtools configure-app -n name -r repo-name -i farm-role-id -f farm-id -p remote-path'
+	help = 'scalr-tools configure-app -n name -r repo-name -i farm-role-id -f farm-id -p remote-path'
 	
 	def __init__(self, config, *args):
 		super(ConfigureApp, self).__init__(config, *args)
@@ -620,7 +620,7 @@ class ConfigureApp(Command):
 		
 class AppsList(Command):
 	name = 'list-apps'
-	help = 'scalrtools list-apps'
+	help = 'scalr-tools list-apps'
 	
 	def run(self):	
 		config = ConfigParser()
@@ -637,7 +637,7 @@ class AppsList(Command):
 			
 class ReposList(Command):
 	name = 'list-repos'
-	help = 'scalrtools list-repos'
+	help = 'scalr-tools list-repos'
 	
 	def run(self):	
 		config = ConfigParser()

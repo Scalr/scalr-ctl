@@ -41,7 +41,7 @@ def main():
 	logger.addHandler(handler)
 	
 	subcommands = '\nAvailable subcommands:\n\n' + '\n'.join(sorted([command.name for command in get_commands()]))
-	usage='''Usage: scalrtools [options] subcommand [args]'''
+	usage='''Usage: scalr-tools [options] subcommand [args]'''
 	
 	parser = OptionParser(usage=usage)
 	parser.add_option("--debug", dest="debug", action="store_true", help="Enable debug output")
@@ -53,7 +53,7 @@ def main():
 	args, cmd, subargs = split_options(sys.argv)
 
 	options = parser.parse_args(args)[0]
-	help = parser.format_help() + subcommands + "\n\nFor more information try 'scalrtools help <subcommand>'"
+	help = parser.format_help() + subcommands + "\n\nFor more information try 'scalr-tools help <subcommand>'"
 	if not cmd:
 		print help
 		sys.exit()
@@ -68,7 +68,7 @@ def main():
 	except ScalrEnvError, e:
 		if not cmd.startswith('configure-') and cmd != 'help':
 			print "\nNo login information found."
-			print "Please specity options -a -u and -s, or run 'scalrtools help configure-env' to find out how to set login information permanently.\n"
+			print "Please specity options -a -u and -s, or run 'scalr-tools help configure-env' to find out how to set login information permanently.\n"
 			print help
 			sys.exit()
 		
