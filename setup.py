@@ -4,7 +4,7 @@ Created on Feb 21th, 2011
 @author: Dmytro Korsakov
 '''
 
-from setuptools import setup, findall, find_packages
+from setuptools import setup, find_packages
 
 
 description = "Scalr-tools is a command-line interface to your Scalr account"
