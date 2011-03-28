@@ -525,7 +525,8 @@ class ConfigureEnv(Command):
 			table.set_field_align(field, 'l')		
 		
 		table.add_row(('url', e.url))
-		table.add_row(('key', e.key[:29]+'...' if len(e.key)>40 else e.key))
+		visible_length = 26
+		table.add_row(('key', e.key[:visible_length]+'...' if len(e.key)>40 else e.key))
 		table.add_row(('key id', e.key_id))
 		table.add_row(('version', e.api_version))
 		
