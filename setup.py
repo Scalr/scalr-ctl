@@ -5,8 +5,6 @@ Created on Feb 21th, 2011
 '''
 
 from setuptools import setup, findall, find_packages
-from distutils.command.install_data import install_data
-import platform
 
 
 description = "Scalr-tools is a command-line interface to your Scalr account"
