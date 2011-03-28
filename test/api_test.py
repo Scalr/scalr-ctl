@@ -11,8 +11,9 @@ import os
 
 from xml.dom.minidom import parseString
 
-from scalrtools.api import ScalrConnection, xml_strip, ScalrAPIError
-from scalrtools.view import TableViewer
+from scalrtools.api import ScalrConnection,ScalrAPIError
+from scalrtools.api.client import  xml_strip
+from scalrtools.api.view import TableViewer
 
 
 class TestScalrConnection(unittest.TestCase):
@@ -322,10 +323,10 @@ class TestScalrConnection(unittest.TestCase):
 		print TableViewer(response)
 
 
-	def test__read_logs_list_response(self):
+	def test__read_list_logs_response(self):
 		response = open('test/resources/LogsListResponse.xml').read()
 		xml = xml_strip(parseString(response))
-		response = self.conn._read_logs_list_response(xml)
+		response = self.conn._read_list_logs_response(xml)
 		
 		self.assertEqual(len(response.scalr_objects), 8)
 		
@@ -345,10 +346,10 @@ class TestScalrConnection(unittest.TestCase):
 		print TableViewer(response)
 		
 
-	def test__read_event_list_response(self):
+	def test__read_list_events_response(self):
 		response = open('test/resources/EventsListResponse.xml').read()
 		xml = xml_strip(parseString(response))
-		response = self.conn._read_events_list_response(xml)
+		response = self.conn._read_list_events_response(xml)
 		
 		self.assertEqual(len(response.scalr_objects), 20)
 		
@@ -367,10 +368,10 @@ class TestScalrConnection(unittest.TestCase):
 		print TableViewer(response)
 			
 	
-	def test__read_dns_zone_record_list_response(self):
+	def test__read_list_dns_zone_records_response(self):
 		response = open('test/resources/DNSZoneRecordsListResponse.xml').read()
 		xml = xml_strip(parseString(response))
-		response = self.conn._read_dns_zone_record_list_response(xml)
+		response = self.conn._read_list_dns_zone_records_response(xml)
 		
 		self.assertEqual(len(response), 2)
 		
@@ -391,10 +392,10 @@ class TestScalrConnection(unittest.TestCase):
 		print TableViewer(response)
 				
 				
-	def test__read_roles_list_response(self):
+	def test__read_list_roles_response(self):
 		response = open('test/resources/RolesListResponse.xml').read()
 		xml = xml_strip(parseString(response))
-		response = self.conn._read_roles_list_response(xml)
+		response = self.conn._read_list_roles_response(xml)
 		
 		self.assertEqual(len(response), 1)
 
@@ -409,10 +410,10 @@ class TestScalrConnection(unittest.TestCase):
 		print TableViewer(response)		
 	
 	
-	def test__read_apache_virtual_host_list_response(self):
+	def test__read_list_apache_virtual_hosts_response(self):
 		response = open('test/resources/ApacheVhostsListResponse.xml').read()
 		xml = xml_strip(parseString(response))
-		response = self.conn._read_apache_virtual_host_list_response(xml)
+		response = self.conn._read_list_apache_virtual_hosts_response(xml)
 		
 		self.assertEqual(len(response), 1)
 
@@ -429,10 +430,10 @@ class TestScalrConnection(unittest.TestCase):
 		print TableViewer(response)
 		
 		
-	def test__read_dns_zones_list_response(self):
+	def test__read_list_dns_zones_response(self):
 		response = open('test/resources/DNSZonesListResponse.xml').read()
 		xml = xml_strip(parseString(response))
-		response = self.conn._read_dns_zones_list_response(xml)
+		response = self.conn._read_list_dns_zones_response(xml)
 		
 		self.assertEqual(len(response), 1)
 
@@ -450,10 +451,10 @@ class TestScalrConnection(unittest.TestCase):
 		print TableViewer(response)
 
 
-	def test__read_scripts_list_response(self):
+	def test__read_list_scripts_response(self):
 		response = open('test/resources/ScriptsListResponse.xml').read()
 		xml = xml_strip(parseString(response))
-		response = self.conn._read_scripts_list_response(xml)
+		response = self.conn._read_list_scripts_response(xml)
 		
 		self.assertEqual(len(response), 12)
 		
@@ -469,10 +470,10 @@ class TestScalrConnection(unittest.TestCase):
 		print TableViewer(response)
 		
 
-	def test__read_farms_list_response(self):
+	def test__read_list_farms_response(self):
 		response = open('test/resources/FarmsListResponse.xml').read()
 		xml = xml_strip(parseString(response))
-		response = self.conn._read_farms_list_response(xml)
+		response = self.conn._read_list_farms_response(xml)
 		
 		self.assertEqual(len(response), 11)
 		
