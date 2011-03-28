@@ -1,0 +1,10 @@
+#!/usr/bin/python
+
+import sys
+try:
+	from scalrtools.cli import main
+except ImportError, e:
+	print >> sys.stderr, "error: %s\n\nPlease make sure that scalr-tools is properly installed" % (e)
+	sys.exit(1)
+
+main()

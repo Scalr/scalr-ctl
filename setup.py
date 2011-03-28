@@ -9,16 +9,12 @@ from distutils.command.install_data import install_data
 import platform
 
 
-description = "Scalarizr converts any server to Scalr-manageable node"
-
-
-data_files = []
-data_files.append(["/usr/local/bin", ["bin/scalarizr", 'bin/szradm']])
+description = "Scalr-tools is a command-line interface to your Scalr account"
 
 
 cfg = dict(
-	name = "scalarizr",
-	version = "0.7.0",	 
+	name = "scalr-tools",
+	version = "0.1.0",	 
 	description = description,
 	long_description = description,
 	author = "Scalr Inc.",
@@ -26,8 +22,8 @@ cfg = dict(
 	url = "https://scalr.net",
 	license = "GPL",
 	platforms = "any",
-	package_dir = {"" : "src"},
-	packages = find_packages(".n"),
+	packages = find_packages(),
+	scripts=['bin/scalr-tools'],
 	requires = ["prettytable"],
 )
 setup(**cfg)
