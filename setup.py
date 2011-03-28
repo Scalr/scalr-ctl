@@ -23,8 +23,8 @@ cfg = dict(
 	license = "GPL",
 	platforms = "any",
 	packages = find_packages(),
-	scripts=['bin/scalr-tools'],
-	requires = ["prettytable"],
+	scripts=['bin/scalrtools'],
+	install_requires = ["prettytable"],
 )
 setup(**cfg)
 
