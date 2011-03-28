@@ -518,7 +518,12 @@ class ConfigureEnv(Command):
 		s = Scripts.from_ini(self.config.base_path)
 		
 		e = Environment.from_ini(self.config.base_path)
-		table = PrettyTable(fields=('setting','value'))
+		
+		column_names = ('setting','value')
+		table = PrettyTable(column_names)
+		for field in column_names:
+			table.set_field_align(field, 'l')		
+		
 		table.add_row(('url', e.url))
 		table.add_row(('key', e.key[:40]+'...' if len(e.key)>40 else e.key))
 		table.add_row(('key id', e.key_id))
@@ -573,7 +578,12 @@ class ConfigureRepo(Command):
 		
 		r = Repository.from_ini(self.config.base_path, self.options.name)
 
-		table = PrettyTable(fields=('setting','value'))
+		
+		column_names = ('setting','value')
+		table = PrettyTable(column_names)
+		for field in column_names:
+			table.set_field_align(field, 'l')		
+		
 		table.add_row(('name', r.name))
 		table.add_row(('type', r.type))
 		table.add_row(('url', r.url))
@@ -610,7 +620,11 @@ class ConfigureApp(Command):
 		
 		a = Application.from_ini(self.config.base_path, self.options.name)
 		
-		table = PrettyTable(fields=('setting','value'))
+		column_names = ('setting','value')
+		table = PrettyTable(column_names)
+		for field in column_names:
+			table.set_field_align(field, 'l')		
+		
 		table.add_row(('name', a.name))
 		table.add_row(('repo name', a.repo_name))
 		table.add_row(('farm id', a.farm_id))
@@ -626,8 +640,12 @@ class AppsList(Command):
 		config = ConfigParser()
 		path = os.path.join(self.config.base_path, Application.config_name)
 		config.read(path)
+		
 		column_names = ['name', 'repo name', 'farm id', 'farm role id', 'remote path']
 		pt = PrettyTable(column_names, caching=False)
+		for field in column_names:
+			pt.set_field_align(field, 'l')
+		
 		for app_name in config.sections():
 			a = Application.from_ini(self.config.base_path, app_name)
 			row = [a.name, a.repo_name, a.farm_id, a.farm_role_id, a.remote_path]
@@ -643,8 +661,12 @@ class ReposList(Command):
 		config = ConfigParser()
 		path = os.path.join(self.config.base_path, Repository.config_name)
 		config.read(path)
+		
 		column_names = ['name', 'type', 'url', 'login', 'password']
 		pt = PrettyTable(column_names, caching=False)
+		for field in column_names:
+			pt.set_field_align(field, 'l')		
+		
 		for repo_name in config.sections():
 			a = Repository.from_ini(self.config.base_path, repo_name)
 			row = [a.name, a.type, a.url, a.login, a.password]

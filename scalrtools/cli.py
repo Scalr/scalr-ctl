@@ -43,13 +43,13 @@ def main():
 	subcommands = '\nAvailable subcommands:\n\n' + '\n'.join(sorted([command.name for command in get_commands()]))
 	usage='''Usage: scalr-tools [options] subcommand [args]'''
 	
-	parser = OptionParser(usage=usage)
+	parser = OptionParser(usage=usage, add_help_option=False)
 	parser.add_option("--debug", dest="debug", action="store_true", help="Enable debug output")
 	parser.add_option("-c", "--config-path", dest="base_path", default=None, help="Path to configuration files")
 	parser.add_option("-a", "--access-key", dest="key_id", default=None, help="Access key")
 	parser.add_option("-s", "--secret-key", dest="key", default=None, help="Secret key")
 	parser.add_option("-u", "--api-url", dest="api_url", default=None, help="API URL")
-	#parser.add_option("-h", "--help", dest="help", action="store_true", help="Help")
+	parser.add_option("-h", "--help", dest="help", action="store_true", help="Help")
 	
 	args, cmd, subargs = split_options(sys.argv)
 

@@ -53,6 +53,9 @@ class TableViewer:
 		column_names = objects[0].__titles__.values()
 		pt = PrettyTable(column_names, caching=False)
 		
+		for field in column_names:
+			pt.set_field_align(field, 'l')
+		
 		for scalr_obj in objects:
 			row = []
 			for attribute in scalr_obj.__titles__.keys():
