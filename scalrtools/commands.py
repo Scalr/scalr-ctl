@@ -59,6 +59,7 @@ class Command(object):
 	@property		
 	def connection(self):
 		conn = None
+		print 'self.config.environment.api_version', self.config.environment.api_version
 		if self.config.environment:
 			conn = ScalrConnection(self.config.environment.url, 
 					self.config.environment.key_id, 
@@ -74,6 +75,114 @@ class ApacheVhostsList(Command):
 	
 	def run(self):
 		print self.api_call(self.connection.list_apache_virtual_hosts)
+
+
+class DmCreateSource(Command):
+	name = 'dm-create-source'
+	help = 'scalr_tools dm-create_source -t [http|svn] -u url [-l login -p password]'
+
+	def __init__(self, config, *args):
+		super(DmCreateSource, self).__init__(config, *args)
+		self.require(self.options.type, self.options.url)
+
+	@classmethod
+	def inject_options(cls, parser):
+		parser.add_option("-t", "--type", dest="type", help="Source type [svn|http]")
+		parser.add_option("-u", "--url", dest="url", help="Source URL")
+		parser.add_option("-l", "--login", dest="auth_login", default=None, help="Source login")
+		parser.add_option("-p", "--password", dest="auth_password", default=None, help="Source password")
+	
+	def run(self):
+		args = (self.options.type, self.options.url, self.options.auth_login, self.options.auth_password)
+		print self.api_call(self.connection.dm_create_source, *args)
+
+
+class DmCreateApplication(Command):
+	name = 'dm-create-application'
+	help = 'scalr-tools dm-create-application -n name -s source-id [-b pre_deploy_script -a post_deploy_script]'
+
+	def __init__(self, config, *args):
+		super(DmCreateApplication, self).__init__(config, *args)
+		self.require(self.options.name, self.options.source_id)
+
+	@classmethod
+	def inject_options(cls, parser):
+		parser.add_option("-n", "--name", dest="name", help="Application name")
+		parser.add_option("-s", "--source-id", dest="source_id", help="Source ID")
+		parser.add_option("-b", "--pre-deploy script", dest="pre_deploy_script", default=None, help="Script to execute BEFORE deploy")
+		parser.add_option("-a", "--post-deploy script", dest="post_deploy_script", default=None, help="Script to execute AFTER deploy")
+	
+	def run(self):
+		args = (self.options.name, self.options.source_id, self.options.pre_deploy_script, self.options.post_deploy_script)
+		print self.api_call(self.connection.dm_create_application, *args)
+		
+
+class DmDeployApplication(Command):
+	name = 'dm-deploy-application'
+	help = 'scalr-tools dm-deploy-application -a app-id -r farm-role-id -p remote-path'
+
+	def __init__(self, config, *args):
+		super(DmDeployApplication, self).__init__(config, *args)
+		self.require(self.options.app_id, self.options.farm_role_id, self.options.remote_path)
+
+	@classmethod
+	def inject_options(cls, parser):
+		parser.add_option("-a", "--app-id", dest="app_id", help="Application ID")
+		parser.add_option("-r", "--farm-role-id", dest="farm_role_id", help="FarmRole ID")
+		parser.add_option("-p", "--remote-path", dest="remote_path", default=None, help="Remote path where to deploy the app")
+	
+	def run(self):
+		args = (self.options.app_id, self.options.farm_role_id, self.options.remote_path)
+		print self.api_call(self.connection.dm_deploy_application, *args)
+
+
+#DmDeploymentTasksList($FarmRoleID = null, $ApplicationID = null, $ServerID = null)
+
+class DmListDeploymentTasks(Command):
+	name = 'dm-list-deployment-tasks'
+	help = 'scalr-tools dm-list-deployment-tasks -r farm-role-id -a app-id -s server-id'
+
+	@classmethod
+	def inject_options(cls, parser):
+		parser.add_option("-a", "--app-id", dest="app_id", help="Application ID")
+		parser.add_option("-r", "--farm-role-id", dest="farm_role_id", help="FarmRole ID")
+		parser.add_option("-s", "--server-id", dest="server_id", default=None, help="Instance ID")
+	
+	def run(self):
+		args = ( self.options.farm_role_id, self.options.app_id, self.options.server_id)
+		print self.api_call(self.connection.dm_list_deployment_tasks, *args)
+		
+		
+class DmGetDeploymentTaskStatus(Command):
+	name = 'dm-get-deployment-task-status'
+	help = 'scalr-tools dm-get-deployment-task-status -t task-id'
+
+	def __init__(self, config, *args):
+		super(DmGetDeploymentTaskStatus, self).__init__(config, *args)
+		self.require(self.options.task_id)
+
+	@classmethod
+	def inject_options(cls, parser):
+		parser.add_option("-t", "--task-id", dest="task_id", help="Deployment task ID")
+	
+	def run(self):
+		print self.api_call(self.connection.dm_get_deployment_task_status, self.options.task_id)		
+		
+		
+class DmSourcesList(Command):
+	name = 'dm-list-sources'
+	help = 'scalr-tools list-dm-list-sources'
+	
+	def run(self):
+		print self.api_call(self.connection.dm_list_sources)
+		
+
+class DmApplicationsList(Command):
+	name = 'dm-list-applications'
+	help = 'scalr-tools dm-list-applications'
+	
+	def run(self):
+		print self.api_call(self.connection.dm_list_applications)
 
 
 class DNSZonesList(Command):
@@ -508,7 +617,7 @@ class ConfigureEnv(Command):
 		e = Environment(url=self.options.api_url,
 				key_id=self.options.key_id,
 				key=self.options.key,
-				api_version = '2.2.0')
+				api_version = '2.3.0')
 		
 		e.write(self.config.base_path)
 		

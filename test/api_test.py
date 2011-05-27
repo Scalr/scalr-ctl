@@ -23,7 +23,7 @@ class TestScalrConnection(unittest.TestCase):
 		scalr_url = os.environ['SCALR_URL']
 		key_id = os.environ['SCALR_KEY_ID']
 		api_key = os.environ['SCALR_API_KEY']
-		self.conn = ScalrConnection(url=scalr_url, key_id=key_id, access_key=api_key)
+		self.conn = ScalrConnection(url=scalr_url, key_id=key_id, access_key=api_key, api_version='2.3.0')
 
 
 	def tearDown(self):
@@ -37,7 +37,7 @@ class TestScalrConnection(unittest.TestCase):
 		#print self.conn._read_get_farm_stats_response(xml)
 		
 
-	def test__read_add_dns_zone_record_response(self):
+	def _test__read_add_dns_zone_record_response(self):
 		response = open('test/resources/DNSZoneRecordAddResponse.xml').read()
 		xml = xml_strip(parseString(response))
 		response = self.conn._read_add_dns_zone_record_response(xml)	
@@ -53,7 +53,7 @@ class TestScalrConnection(unittest.TestCase):
 		print TableViewer(response)	
 		
 
-	def test__read_remove_dns_zone_record_response(self):
+	def _test__read_remove_dns_zone_record_response(self):
 		response = open('test/resources/DNSZoneRecordRemoveResponse.xml').read()
 		xml = xml_strip(parseString(response))
 		response = self.conn._read_remove_dns_zone_record_response(xml)	
@@ -69,7 +69,7 @@ class TestScalrConnection(unittest.TestCase):
 		print TableViewer(response)
 				
 		
-	def test__read_execute_script_response(self):
+	def _test__read_execute_script_response(self):
 		response = open('test/resources/ScriptExecuteResponse.xml').read()
 		xml = xml_strip(parseString(response))
 		response = self.conn._read_execute_script_response(xml)	
@@ -85,7 +85,7 @@ class TestScalrConnection(unittest.TestCase):
 		print TableViewer(response)	
 
 
-	def test__read_create_apache_vhost_response(self):
+	def _test__read_create_apache_vhost_response(self):
 		response = open('test/resources/ApacheVhostCreateResponse.xml').read()
 		xml = xml_strip(parseString(response))
 		response = self.conn._read_create_apache_vhost_response(xml)	
@@ -101,7 +101,7 @@ class TestScalrConnection(unittest.TestCase):
 		print TableViewer(response)	
 
 
-	def test__read_create_server_image_response(self):
+	def _test__read_create_server_image_response(self):
 		response = open('test/resources/ServerImageCreateResponse.xml').read()
 		xml = xml_strip(parseString(response))
 		response = self.conn._read_create_server_image_response(xml)	
@@ -117,7 +117,7 @@ class TestScalrConnection(unittest.TestCase):
 		print TableViewer(response)
 
 
-	def test__read_launch_server_response(self):
+	def _test__read_launch_server_response(self):
 		response = open('test/resources/ServerLaunchResponse.xml').read()
 		xml = xml_strip(parseString(response))
 		response = self.conn._read_launch_server_response(xml)	
@@ -133,7 +133,7 @@ class TestScalrConnection(unittest.TestCase):
 		print TableViewer(response)
 
 
-	def test__read_reboot_server_response(self):
+	def _test__read_reboot_server_response(self):
 		response = open('test/resources/ServerRebootResponse.xml').read()
 		xml = xml_strip(parseString(response))
 		response = self.conn._read_reboot_server_response(xml)	
@@ -149,7 +149,7 @@ class TestScalrConnection(unittest.TestCase):
 		print TableViewer(response)
 
 
-	def test__read_terminate_server_response(self):
+	def _test__read_terminate_server_response(self):
 		response = open('test/resources/ServerTerminateResponse.xml').read()
 		xml = xml_strip(parseString(response))
 		response = self.conn._read_terminate_server_response(xml)	
@@ -165,7 +165,7 @@ class TestScalrConnection(unittest.TestCase):
 		print TableViewer(response)
 
 
-	def test__read_create_dns_zone_response(self):
+	def _test__read_create_dns_zone_response(self):
 		response = open('test/resources/DNSZoneCreateResponse.xml').read()
 		xml = xml_strip(parseString(response))
 		response = self.conn._read_create_dns_zone_response(xml)	
@@ -181,7 +181,7 @@ class TestScalrConnection(unittest.TestCase):
 		print TableViewer(response)
 								
 		
-	def test__read_get_farm_details_response(self):
+	def _test__read_get_farm_details_response(self):
 		response = open('test/resources/FarmGetDetailsResponse.xml').read()
 		xml = xml_strip(parseString(response))
 		response = self.conn._read_get_farm_details_response(xml)
@@ -219,7 +219,7 @@ class TestScalrConnection(unittest.TestCase):
 		print TableViewer(response)
 		
 		
-	def test__read_get_statistic_graph_URL_response(self):
+	def _test__read_get_statistic_graph_URL_response(self):
 		response = open('test/resources/StatisticsGetGraphURLResponse.xml').read()
 		xml = xml_strip(parseString(response))
 		response = self.conn._read_get_statistic_graph_URL_response(xml)	
@@ -235,7 +235,7 @@ class TestScalrConnection(unittest.TestCase):
 		print TableViewer(response)		
 		
 
-	def test__read_terminate_farm_response(self):
+	def _test__read_terminate_farm_response(self):
 		response = open('test/resources/FarmTerminateResponse.xml').read()
 		xml = xml_strip(parseString(response))
 		response = self.conn._read_terminate_farm_response(xml)	
@@ -251,7 +251,7 @@ class TestScalrConnection(unittest.TestCase):
 		print TableViewer(response)			
 		
 		
-	def test__read_launch_farm_response(self):
+	def _test__read_launch_farm_response(self):
 		response = open('test/resources/FarmLaunchResponse.xml').read()
 		xml = xml_strip(parseString(response))
 		response = self.conn._read_launch_farm_response(xml)	
@@ -267,7 +267,7 @@ class TestScalrConnection(unittest.TestCase):
 		print TableViewer(response)			
 		
 		
-	def test__read_get_bundle_task_status_response(self):
+	def _test__read_get_bundle_task_status_response(self):
 		response = open('test/resources/BundleTaskGetStatusResponse.xml').read()
 		xml = xml_strip(parseString(response))
 		response = self.conn._read_get_bundle_task_status_response(xml)
@@ -284,7 +284,7 @@ class TestScalrConnection(unittest.TestCase):
 		print TableViewer(response)
 		
 				
-	def test__read_get_script_details_response(self):
+	def _test__read_get_script_details_response(self):
 		response = open('test/resources/ScriptGetDetailsResponse.xml').read()
 		xml = xml_strip(parseString(response))
 		response = self.conn._read_get_script_details_response(xml)
@@ -303,7 +303,7 @@ class TestScalrConnection(unittest.TestCase):
 		print TableViewer(response)
 
 
-	def test__read_get_farm_stats_response(self):
+	def _test__read_get_farm_stats_response(self):
 		response = open('test/resources/FarmGetStatsResponse.xml').read()
 		xml = xml_strip(parseString(response))
 		response = self.conn._read_get_farm_stats_response(xml)
@@ -323,7 +323,7 @@ class TestScalrConnection(unittest.TestCase):
 		print TableViewer(response)
 
 
-	def test__read_list_logs_response(self):
+	def _test__read_list_logs_response(self):
 		response = open('test/resources/LogsListResponse.xml').read()
 		xml = xml_strip(parseString(response))
 		response = self.conn._read_list_logs_response(xml)
@@ -346,7 +346,7 @@ class TestScalrConnection(unittest.TestCase):
 		print TableViewer(response)
 		
 
-	def test__read_list_events_response(self):
+	def _test__read_list_events_response(self):
 		response = open('test/resources/EventsListResponse.xml').read()
 		xml = xml_strip(parseString(response))
 		response = self.conn._read_list_events_response(xml)
@@ -368,7 +368,7 @@ class TestScalrConnection(unittest.TestCase):
 		print TableViewer(response)
 			
 	
-	def test__read_list_dns_zone_records_response(self):
+	def _test__read_list_dns_zone_records_response(self):
 		response = open('test/resources/DNSZoneRecordsListResponse.xml').read()
 		xml = xml_strip(parseString(response))
 		response = self.conn._read_list_dns_zone_records_response(xml)
@@ -392,7 +392,7 @@ class TestScalrConnection(unittest.TestCase):
 		print TableViewer(response)
 				
 				
-	def test__read_list_roles_response(self):
+	def _test__read_list_roles_response(self):
 		response = open('test/resources/RolesListResponse.xml').read()
 		xml = xml_strip(parseString(response))
 		response = self.conn._read_list_roles_response(xml)
@@ -410,7 +410,7 @@ class TestScalrConnection(unittest.TestCase):
 		print TableViewer(response)		
 	
 	
-	def test__read_list_apache_virtual_hosts_response(self):
+	def _test__read_list_apache_virtual_hosts_response(self):
 		response = open('test/resources/ApacheVhostsListResponse.xml').read()
 		xml = xml_strip(parseString(response))
 		response = self.conn._read_list_apache_virtual_hosts_response(xml)
@@ -430,7 +430,7 @@ class TestScalrConnection(unittest.TestCase):
 		print TableViewer(response)
 		
 		
-	def test__read_list_dns_zones_response(self):
+	def _test__read_list_dns_zones_response(self):
 		response = open('test/resources/DNSZonesListResponse.xml').read()
 		xml = xml_strip(parseString(response))
 		response = self.conn._read_list_dns_zones_response(xml)
@@ -451,7 +451,7 @@ class TestScalrConnection(unittest.TestCase):
 		print TableViewer(response)
 
 
-	def test__read_list_scripts_response(self):
+	def _test__read_list_scripts_response(self):
 		response = open('test/resources/ScriptsListResponse.xml').read()
 		xml = xml_strip(parseString(response))
 		response = self.conn._read_list_scripts_response(xml)
@@ -470,7 +470,7 @@ class TestScalrConnection(unittest.TestCase):
 		print TableViewer(response)
 		
 
-	def test__read_list_farms_response(self):
+	def _test__read_list_farms_response(self):
 		response = open('test/resources/FarmsListResponse.xml').read()
 		xml = xml_strip(parseString(response))
 		response = self.conn._read_list_farms_response(xml)
@@ -488,7 +488,47 @@ class TestScalrConnection(unittest.TestCase):
 		print '\nLast TransactionID: %s' % self.conn.last_transaction_id
 		print TableViewer(response)
 		
+		
 	
+	def test_fetch_from_scalr_test_v3(self):
+		'''
+		response = self.conn.fetch('DmSourcesList')
+		print response.toprettyxml()
+		file = open('test/resources/DmSourcesListResponse.xml','w')
+		file.write(response.toprettyxml())
+		file.close()		
+	
+		response = self.conn.fetch('DmApplicationsList')
+		print response.toprettyxml()
+		file = open('test/resources/DmApplicationsListResponse.xml','w')
+		file.write(response.toprettyxml())
+		file.close()
+		
+		response = self.conn.fetch('DmSourceCreate', Type='svn', URL='https://pics-hunter.googlecode.com/svn/trunk/', AuthLogin='shaitanich@gmail.com', AuthPassword='Gf2SN5wR9Fr8')
+		print response.toprettyxml()
+		file = open('test/resources/DmSourceCreateResponse.xml','w')
+		file.write(response.toprettyxml())
+		file.close()
+		'''
+		pass
+	
+	
+	def test_fetch_from_local_v3(self):
+		'''
+		response = self.conn.fetch('DmApplicationCreate', Name='test_app_1', SourceID='4')
+		print response.toprettyxml()
+		file = open('test/resources/DmApplicationCreateResponse.xml','w')
+		file.write(response.toprettyxml())
+		file.close()
+		'''
+		
+		response = self.conn.fetch('DmSourceCreate', Type='svn', URL='https://pics-hunter.googlecode.com/svn/trunk/', AuthLogin='shaitanich@gmail.com', AuthPassword='Gf2SN5wR9Fr8')
+		print response.toprettyxml()
+		file = open('test/resources/DmSourceCreateResponse.xml','w')
+		file.write(response.toprettyxml())
+		file.close()
+		
+				
 	def _test_fetch_from_local(self):
 
 		response = self.conn.fetch('DNSZoneRecordRemove', ZoneName='dima-test.com', RecordID='110')
@@ -568,8 +608,8 @@ class TestScalrConnection(unittest.TestCase):
 		file = open('test/resources/FarmsListResponse.xml','w')
 		file.write(response.toprettyxml())
 		file.close()		
-		
-			
+
+
 	def _test_fetch_from_scalr_test(self):
 	
 		response = self.conn.fetch('ServerTerminate', ServerID='1f72ece7-e732-4bfc-8d97-a9e0a4014946',DecreaseMinInstancesSetting='0')

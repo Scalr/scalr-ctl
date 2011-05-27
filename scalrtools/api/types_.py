@@ -84,7 +84,7 @@ class ScalrObject(object):
 
 class FarmRole(ScalrObject):
 	__titles__ = OrderedDict()
-	__titles__['id'] = 'ID'
+	__titles__['farm_role_id'] = 'ID'
 	__titles__['role_id'] = 'RoleID'
 	__titles__['name'] = 'Name'
 	__titles__['platform'] = 'Platform'
@@ -95,7 +95,7 @@ class FarmRole(ScalrObject):
 	__titles__['mysql_properties'] = 'MySQLProperties'
 	__titles__['server_set'] = 'ServerSet'
 	
-	id = None
+	farm_role_id = None
 	role_id = None
 	name = None
 	platform = None
@@ -118,6 +118,7 @@ class FarmRole(ScalrObject):
 	def __hash__(self):
 		return hash(self.__dict__)
 		
+		
 class Server(ScalrObject):
 	__titles__ = OrderedDict()
 	__titles__['server_id'] = 'ServerID'
@@ -135,8 +136,67 @@ class Server(ScalrObject):
 	status = None
 	scalarizr_version = None
 	uptime = None
+
+
+class Source(ScalrObject):
+	__titles__ = OrderedDict()
+	__titles__['id'] = 'ID'
+	__titles__['type'] = 'Type'
+	__titles__['url'] = 'URL'
+	__titles__['auth_type'] = 'AuthType'
+	
+	id = None
+	type = None
+	url = None
+	auth_type = None
 	
 
+class SourceID(ScalrObject):
+	__titles__ = {'source_id' : 'SourceID'}
+	source_id = None
+	
+	
+class Application(ScalrObject):
+	#TODO: check members
+	__titles__ = OrderedDict()
+	__titles__['id'] = 'ID'
+	__titles__['name'] = 'Name'
+	__titles__['source_id'] = 'SourceID'
+	__titles__['pre_deploy_script'] = 'PreDeployScript'
+	__titles__['post_deploy_script'] = 'PostDeployScript'
+	
+	id = None
+	name = None
+	source_id = None
+	pre_deploy_script = None
+	post_deploy_script = None
+
+	
+class ApplicationID(ScalrObject):
+	__titles__ = {'app_id' : 'ApplicationID'}
+	app_id = None
+	
+
+class DeploymentTask(ScalrObject):
+	__titles__ = {'status' : 'DeploymentTaskStatus'}
+	status = None
+
+
+class DeploymentTaskResult(ScalrObject):
+	__titles__ = OrderedDict()
+	__titles__['server_id'] = 'ServerID'
+	__titles__['task_id'] = 'DeploymentTaskID'
+	__titles__['farm_role_id'] = 'FarmRoleID'
+	__titles__['remote_path'] = 'RemotePath'
+	__titles__['status'] = 'Status'
+	
+	task_id = None
+	server_id = None
+	farm_role_id = None
+	remote_path = None
+	status = None
+	
+	
 class Result(ScalrObject):
 	__titles__ = {'result' : 'Result'}
 	result = None
@@ -280,6 +340,12 @@ class Farm(ScalrObject):
 	name = None
 	comments = None
 	status = None	
+
+	@classmethod
+	def fromxml (cls, xml):	
+		kv = cls.parse_response(xml)
+		kv['status'] = 'Running' if '1'==kv['status'] else 'Stopped'
+		return cls(**kv)
 
 
 class Script(ScalrObject): 

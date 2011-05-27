@@ -30,7 +30,7 @@ class ScalrConnection(object):
 		self.url = url
 		self.key_id  = key_id
 		self.access_key = access_key
-		self.api_version = api_version or '2.1.0'
+		self.api_version = api_version 
 		self._logger = logger or logging.getLogger(__name__)
 		self.last_transaction_id = None
 		
@@ -44,6 +44,8 @@ class ScalrConnection(object):
 		request_body["Action"] = command
 		request_body["Version"] = self.api_version
 		request_body["KeyID"] = self.key_id
+		request_body['AuthVersion'] = '3'
+		request_body['SysDebug'] = '1'
 		
 		if {} != params :
 			for key, value in params.items():
@@ -53,13 +55,13 @@ class ScalrConnection(object):
 				else:
 					request_body[key] = value
 					
-		signature, timestamp = sign_http_request(request_body, self.access_key)	
+		signature, timestamp = sign_http_request_v3(request_body, self.key_id, self.access_key)	
 		
 		request_body["TimeStamp"] = timestamp	
 		request_body["Signature"] = signature	
 		
 		post_data = urlencode(request_body)
-		
+
 		self._logger.debug('POST URL: \n%s' % self.url)
 		self._logger.debug('POST DATA: \n%s' % post_data)
 		
@@ -90,7 +92,83 @@ class ScalrConnection(object):
 		self._logger.debug('VALID XML: \n%s' % xml.toprettyxml())
 		
 		return xml
+
+	def dm_create_source(self, type, url, auth_login=None, auth_password=None):
+		"""
+		@return Result[]
+		"""
+		params = {}
+		
+		params['Type'] = type
+		params['URL']  = url
+		if auth_login	: params['AuthLogin'] 	= auth_login
+		if auth_password: params['AuthPassword']= auth_password
+		
+		return self._request(command="DmSourceCreate", params=params, response_reader=self._read_dm_create_source_response)		
+		
+	def dm_create_application(self, name, source_id, pre_deploy_script=None, post_deploy_script=None):
+		"""
+		@return ApplicationID[]
+		"""
+		params = {}
+		
+		params['Name'] = name
+		params['SourceID']  = source_id
+		if pre_deploy_script	: params['PreDeployScript'] = pre_deploy_script
+		if post_deploy_script	: params['PostDeployScript']= post_deploy_script
+		
+		return self._request(command="DmApplicationCreate", params=params, response_reader=self._read_dm_create_application_response)	
 	
+		
+	def dm_list_sources(self):
+		"""
+		@return Source[]
+		"""
+		return self._request("DmSourcesList", response_reader=self._read_dm_list_sources_response)	
+	
+	
+	def dm_list_applications(self):
+		"""
+		@return Application[]
+		"""
+		return self._request("DmApplicationsList", response_reader=self._read_dm_list_applications_response)	
+	
+	
+	def dm_deploy_application(self, app_id, farm_role_id, remote_path):
+		"""
+		@return DeployTaskResult[]
+		"""
+		params = {}
+		
+		params['ApplicationID'] = app_id
+		params['FarmRoleID']  = farm_role_id
+		params['RemotePath'] = remote_path
+		
+		return self._request(command="DmApplicationDeploy", params=params, response_reader=self._read_dm_deploy_application_response)		
+	
+	
+	def dm_list_deployment_tasks(self, farm_role_id=None, app_id=None, server_id=None):
+		"""
+		@return ApplicationID[]
+		"""
+		params = {}
+		
+		if farm_role_id	: params['FarmRoleID'] = farm_role_id
+		if app_id		: params['ApplicationID'] = app_id
+		if server_id	: params['ServerID']= server_id
+		
+		return self._request(command="DmDeploymentTasksList", params=params, response_reader=self._read_dm_list_deployment_tasks_response)	
+	
+
+	def dm_get_deployment_task_status(self, task_id):
+		"""
+		@return DeployTaskResult[]
+		"""
+		params = {}
+		
+		params['DeploymentTaskID'] = task_id
+		
+		return self._request(command="DmDeploymentTaskGetStatus", params=params, response_reader=self._read_dm_get_deployment_task_status_response)		
 		
 	def list_apache_virtual_hosts(self):
 		"""
@@ -379,7 +457,34 @@ class ScalrConnection(object):
 		return self._request(command="ScriptExecute", params=params, response_reader=self._read_execute_script_response)
 			
 			
+	def _read_dm_create_source_response(self, xml):
+		return self._read_response(xml, node_name='SourceID', cls=types.SourceID, simple_response=True)
+	
+	
+	def _read_dm_create_application_response(self, xml):
+		return self._read_response(xml, node_name='ApplicationID', cls=types.ApplicationID, simple_response=True)
+	
+	
+	def _read_dm_deploy_application_response(self, xml):
+		return self._read_response(xml, node_name='DeploymentTasksSet', cls=types.DeploymentTaskResult, simple_response=True)
 
+	
+	def _read_dm_list_deployment_tasks_response(self, xml):
+		return self._read_response(xml, node_name='DeploymentTasksSet', cls=types.DeploymentTaskResult)		
+	
+	
+	def _read_dm_list_sources_response(self, xml):
+		return self._read_response(xml, node_name='SourceSet', cls=types.Source)			
+
+
+	def _read_dm_get_deployment_task_status_response(self, xml):
+		return self._read_response(xml, node_name='DeploymentTaskStatus', cls=types.DeploymentTask, simple_response=True)	
+	
+
+	def _read_dm_list_applications_response(self, xml):
+		return self._read_response(xml, node_name='ApplicationSet', cls=types.Application)
+	
+	
 	def _read_get_script_details_response(self, xml):
 		return self._read_response(xml, node_name='ScriptRevisionSet', cls=types.ScriptRevision)
 	
@@ -539,8 +644,17 @@ def xml_strip(el):
 			xml_strip(child)
 	return el	
 
+
+def sign_http_request_v3(data, key_id, access_key, timestamp=None):
+	date = time.strftime("%Y-%m-%dT%H:%M:%S.000Z", timestamp or time.gmtime())
+	data['TimeStamp']=date
+	canonical_string = 	"%s:%s:%s" % (data['Action'], key_id, data['TimeStamp'])
+	digest = hmac.new(access_key, canonical_string, hashlib.sha256).digest()
+	sign = binascii.b2a_base64(digest).strip()
+	return sign, date		
+
 		
-def sign_http_request(data, key, timestamp=None):
+def sign_http_request_v1(data, key, timestamp=None):
 	date = time.strftime("%Y-%m-%dT%H:%M:%S.000Z", timestamp or time.gmtime())
 	data['TimeStamp']=date
 	canonical_string = get_canonical_string(data) if hasattr(data, "__iter__") else data
