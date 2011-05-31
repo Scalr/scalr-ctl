@@ -182,6 +182,22 @@ class DeploymentTask(ScalrObject):
 	status = None
 
 
+class DMTaskLog(ScalrObject):
+	__titles__ = OrderedDict()
+	__titles__['time_stamp'] = 'Timestamp'
+	__titles__['message'] = 'Message'
+
+	id = None
+	type = None
+	time_stamp = None
+	message = None
+
+	@classmethod
+	def fromxml (cls, xml):	
+		kv = cls.parse_response(xml)
+		kv['time_stamp'] = time.strftime('%m.%d.%Y %X', time.gmtime(float(kv['time_stamp'])))
+		return DMTaskLog(**kv)	
+	
 class DeploymentTaskResult(ScalrObject):
 	__titles__ = OrderedDict()
 	__titles__['server_id'] = 'ServerID'

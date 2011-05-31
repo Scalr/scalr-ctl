@@ -12,7 +12,7 @@ from shutil import copyfile
 
 from prettytable import PrettyTable	
 
-from config import Environment, Repository, Application, Scripts
+from config import Environment
 from api import ScalrConnection, ScalrAPIError
 from api.view import TableViewer
 
@@ -59,7 +59,7 @@ class Command(object):
 	@property		
 	def connection(self):
 		conn = None
-		print 'self.config.environment.api_version', self.config.environment.api_version
+		#print 'self.config.environment.api_version', self.config.environment.api_version
 		if self.config.environment:
 			conn = ScalrConnection(self.config.environment.url, 
 					self.config.environment.key_id, 
@@ -183,6 +183,26 @@ class DmApplicationsList(Command):
 	
 	def run(self):
 		print self.api_call(self.connection.dm_list_applications)
+
+
+#($DeploymentTaskID, $StartFrom = 0, $RecordsLimit = 20)
+class DmGetDeploymentTaskLog(Command):
+	name = 'dm-get-deployment-task-log'
+	help = 'scalr-tools dm-get-deployment-task-log  -t task-id [-s start-from -l limit]'
+
+	def __init__(self, config, *args):
+		super(DmGetDeploymentTaskLog, self).__init__(config, *args)
+		self.require(self.options.task_id)
+
+	@classmethod
+	def inject_options(cls, parser):
+		parser.add_option("-t", "--task-id", dest="task_id", default=None, help="Task ID")
+		parser.add_option("-s", "--start-from", dest="start", default=None, help="Start from specified event number (Can be used for paging)")
+		parser.add_option("-l", "--record-limit", dest="limit", default=None, help="Limit number of returned events (Can be used for paging)")
+	
+	def run(self):
+		args = (self.options.task_id, self.options.start, self.options.limit)
+		print self.api_call(self.connection.dm_get_deployment_task_log, *args)
 
 
 class DNSZonesList(Command):
@@ -600,8 +620,8 @@ class ApacheVhostCreate(Command):
 		
 	
 class ConfigureEnv(Command):
-	name = 'configure-env'
-	help = 'scalr-tools configure-env -a key_id -s key -u api_url'
+	name = 'configure'
+	help = 'scalr-tools configure -a key_id -s key -u api_url'
 		
 	def __init__(self, config, *args):
 		super(ConfigureEnv, self).__init__(config, *args)
@@ -634,6 +654,7 @@ class ConfigureEnv(Command):
 			table.set_field_align(field, 'l')		
 		
 		table.add_row(('url', e.url))
+		
 		visible_length = 26
 		table.add_row(('key', e.key[:visible_length]+'...' if len(e.key)>40 else e.key))
 		table.add_row(('key id', e.key_id))
@@ -643,195 +664,3 @@ class ConfigureEnv(Command):
 		table.add_row(('git', s.git))		
 		
 		print table
-		
-class ConfigureRepo(Command):
-	name = 'configure-repo'
-	help = 'scalr-tools configure-repo -n name -t svn|git -u repo_url -l login -p password'
-	
-	def __init__(self, config, *args):
-		super(ConfigureRepo, self).__init__(config, *args)
-		self.require(self.options.type, self.options.url, self.options.name)
-		
-	@classmethod
-	def inject_options(cls, parser):		
-		parser.add_option("-t", "--type", dest="type", default=None, help="SVN or GIT")
-		parser.add_option("-u", "--url", dest="url", default=None, help="Repository URL")
-		parser.add_option("-l", "--login", dest="login", default=None, help="Repository username")
-		parser.add_option("-p", "--password", dest="password", default=None, help="Repository password")
-		parser.add_option("-n", "--name", dest="name", default=None, help="Repository name")
-		
-		parser.add_option("-c", "--cert-path", dest="cert_path", default=None, help="Path to certificate in case of using GIT")
-		parser.add_option("-k", "--pkey-path", dest="pk_path", default=None, help="Path to private key in case of using GIT")
-				
-	def run(self):		
-		r = Repository(name = self.options.name,
-				url = self.options.url,
-				type = self.options.type,
-				login = self.options.login,
-				password = self.options.password)
-		
-		r.write(self.config.base_path, self.options.name)
-		
-		key_path = os.path.join(self.config.base_path, 'keys')
-		cert_path = os.path.join(key_path, self.options.name+'.cert')
-		pk_path = os.path.join(key_path, self.options.name+'.pk')
-		
-		if self.options.cert_path and self.options.pk_path:
-			if not os.path.exists(key_path):
-				os.makedirs(key_path)
-			try:
-				copyfile(self.options.cert_path, cert_path)
-				copyfile(self.options.pk_path, pk_path)
-			except IOError, e:
-				print e
-				sys.exit
-		
-		r = Repository.from_ini(self.config.base_path, self.options.name)
-
-		
-		column_names = ('setting','value')
-		table = PrettyTable(column_names)
-		for field in column_names:
-			table.set_field_align(field, 'l')		
-		
-		table.add_row(('name', r.name))
-		table.add_row(('type', r.type))
-		table.add_row(('url', r.url))
-		table.add_row(('login', r.login))
-		table.add_row(('password', r.password))
-		table.add_row(('cert', cert_path if cert_path and os.path.exists(cert_path) else None))
-		table.add_row(('pkey', pk_path if pk_path and os.path.exists(pk_path) else None))
-		print table
-		
-class ConfigureApp(Command):
-	name = 'configure-app'
-	help = 'scalr-tools configure-app -n name -r repo-name -i farm-role-id -f farm-id -p remote-path'
-	
-	def __init__(self, config, *args):
-		super(ConfigureApp, self).__init__(config, *args)
-		self.require(self.options.name, self.options.repo_name, self.options.farm_id, self.options.farm_role_id, self.options.remote_path)
-		
-	@classmethod
-	def inject_options(cls, parser):
-		parser.add_option("-n", "--name", dest="name", default=None, help="Application name")
-		parser.add_option("-r", "--repo", dest="repo_name", default=None, help="Repository name")
-		parser.add_option("-f", "--farm-id", dest="farm_id", default=None, help="FarmID")
-		parser.add_option("-i", "--farm-role-id", dest="farm_role_id", default=None, help="FarmRoleID")
-		parser.add_option("-p", "--remote-path", dest="remote_path", default=None, help="Path on remote server where to deploy application")
-
-	def run(self):		
-		a = Application(name = self.options.name,
-				repo_name = self.options.repo_name,
-				farm_id = self.options.farm_id,
-				farm_role_id = self.options.farm_role_id,
-				remote_path = self.options.remote_path)
-		
-		a.write(self.config.base_path, self.options.name)
-		
-		a = Application.from_ini(self.config.base_path, self.options.name)
-		
-		column_names = ('setting','value')
-		table = PrettyTable(column_names)
-		for field in column_names:
-			table.set_field_align(field, 'l')		
-		
-		table.add_row(('name', a.name))
-		table.add_row(('repo name', a.repo_name))
-		table.add_row(('farm id', a.farm_id))
-		table.add_row(('farm role id', a.farm_role_id))
-		table.add_row(('remote path', a.remote_path))
-		print table
-		
-class AppsList(Command):
-	name = 'list-apps'
-	help = 'scalr-tools list-apps'
-	
-	def run(self):	
-		config = ConfigParser()
-		path = os.path.join(self.config.base_path, Application.config_name)
-		config.read(path)
-		
-		column_names = ['name', 'repo name', 'farm id', 'farm role id', 'remote path']
-		pt = PrettyTable(column_names, caching=False)
-		for field in column_names:
-			pt.set_field_align(field, 'l')
-		
-		for app_name in config.sections():
-			a = Application.from_ini(self.config.base_path, app_name)
-			row = [a.name, a.repo_name, a.farm_id, a.farm_role_id, a.remote_path]
-			pt.add_row(row)
-		print str(pt)
-			
-			
-class ReposList(Command):
-	name = 'list-repos'
-	help = 'scalr-tools list-repos'
-	
-	def run(self):	
-		config = ConfigParser()
-		path = os.path.join(self.config.base_path, Repository.config_name)
-		config.read(path)
-		
-		column_names = ['name', 'type', 'url', 'login', 'password']
-		pt = PrettyTable(column_names, caching=False)
-		for field in column_names:
-			pt.set_field_align(field, 'l')		
-		
-		for repo_name in config.sections():
-			a = Repository.from_ini(self.config.base_path, repo_name)
-			row = [a.name, a.type, a.url, a.login, a.password]
-			pt.add_row(row)
-		print str(pt)		
-	
-						
-class Deploy(Command):
-	name = 'deploy'
-	help = 'scalr-tools deploy -n name'
-
-	def __init__(self, config, *args):
-		super(Deploy, self).__init__(config, *args)
-		self.require(self.options.name)
-
-	@classmethod
-	def inject_options(cls, parser):
-		parser.add_option("-n", "--name", dest="name", default=None, help="Application name")
-	
-	def run(self):
-		print self.options.name
-		self.config.set_application(self.options.name)
-		
-		farm_id = self.config.application.farm_id
-		farm_role_id = self.config.application.farm_role_id
-		remote_path = self.config.application.remote_path
-		repo_name = self.config.application.repo_name
-		
-		self.config.set_repository(repo_name)
-		
-		url = self.config.repository.url
-		login = self.config.repository.login
-		password = self.config.repository.password
-		repo_type = self.config.repository.type
-		
-		self.config.set_scripts()
-		
-		script_id = getattr(self.config.scripts, repo_type.lower())
-		
-		timeout = '1200'
-		async = '0'
-		revision = '1'
-		
-		variables = dict(svn_repo_url = url,
-						svn_user = login,
-						svn_password = password,
-						svn_co_dir = remote_path)
-		
-		kwargs = dict(farm_id=farm_id, 
-				script_id=script_id, 
-				timeout=timeout, 
-				async=async, 
-				farm_role_id=farm_role_id, 
-				config_variables=variables, 
-				revision=revision)
-		
-		print self.api_call(self.connection.execute_script, **kwargs)	
-

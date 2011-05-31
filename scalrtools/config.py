@@ -63,21 +63,7 @@ class ConfigSection(object):
 				raise ScalrCfgError('%s in %s'%(e, path))
 		return obj
 
-
-class Scripts(ConfigSection):
-	svn=None
-	git=None
 	
-	config_name = 'config.ini'
-	options = {'svn':'svn', 'git':'git'}
-
-	def write(self, base_path, section='scripts'):
-		super(Scripts, self).write(base_path, section)
-			
-	@classmethod
-	def from_ini(cls, base_path, section='scripts'):
-		return super(Scripts, cls).from_ini(base_path, section)
-				
 class Environment(ConfigSection):
 	url=None
 	key_id=None
@@ -99,39 +85,6 @@ class Environment(ConfigSection):
 	def from_ini(cls, base_path, section='api'):
 		return super(Environment, cls).from_ini(base_path, section)
 	
-			
-class Application(ConfigSection):
-	
-	name = None
-	repo_name = None
-	farm_id = None
-	farm_role_id = None
-	remote_path = None 
-	
-	config_name = 'apps.ini'
-	
-	options = dict(
-		repo_name = 'repo_name',
-		farm_id = 'farm_id',
-		farm_role_id = 'farm_role_id',
-		remote_path = 'remote_path')
-
-
-class Repository(ConfigSection):		
-	name = None
-	type = None
-	url = None
-	login = None
-	password = None 
-
-	config_name = 'repos.ini'
-	
-	options = dict(
-		type = 'type',
-		url = 'url',
-		login = 'login',
-		password = 'password')
-
 
 class Configuration:
 	logger = None
@@ -160,21 +113,3 @@ class Configuration:
 		
 		if not self.environment or not self.environment.key or not self.environment.key_id or not self.environment.url:
 			raise ScalrEnvError('Environment not set.')
-		
-	def set_application(self, name):
-		try:
-			self.application = Application.from_ini(self.base_path, name)
-		except ScalrCfgError:
-			raise ScalrEnvError('Application settings are not set.')
-	
-	def set_repository(self, name):
-		try:
-			self.repository = Repository.from_ini(self.base_path, name)
-		except ScalrCfgError:
-			raise ScalrEnvError('Repository settings are not set.')
-		
-	def set_scripts(self):
-		try:
-			self.scripts = Scripts.from_ini(self.base_path)
-		except ScalrCfgError:
-			raise ScalrEnvError('Script settings are not set.')

@@ -45,7 +45,7 @@ class ScalrConnection(object):
 		request_body["Version"] = self.api_version
 		request_body["KeyID"] = self.key_id
 		request_body['AuthVersion'] = '3'
-		request_body['SysDebug'] = '1'
+		#request_body['SysDebug'] = '1'
 		
 		if {} != params :
 			for key, value in params.items():
@@ -132,6 +132,19 @@ class ScalrConnection(object):
 		@return Application[]
 		"""
 		return self._request("DmApplicationsList", response_reader=self._read_dm_list_applications_response)	
+	
+	
+	def dm_get_deployment_task_log(self, task_id, start_from=None, records_limit=None):
+		"""
+		@return DMTaskLog[]
+		"""
+		params = {}
+		
+		params['DeploymentTaskID'] = task_id
+		if start_from	 : params['StartFrom'] 	  = start_from
+		if records_limit : params['RecordsLimit'] = records_limit
+		
+		return self._request(command="DmDeploymentTaskGetLog", params=params, response_reader=self._dm_get_deployment_task_log_response)	
 	
 	
 	def dm_deploy_application(self, app_id, farm_role_id, remote_path):
@@ -443,7 +456,6 @@ class ScalrConnection(object):
 		@return Result
 		"""
 		params = {}
-		#params['SysDebug'] = '1'
 		params['AuthVersion'] = '2'
 		params['FarmID'] = farm_id
 		params['ScriptID'] = script_id
@@ -476,7 +488,10 @@ class ScalrConnection(object):
 	def _read_dm_list_sources_response(self, xml):
 		return self._read_response(xml, node_name='SourceSet', cls=types.Source)			
 
-
+	
+	def _dm_get_deployment_task_log_response(self, xml):
+		return self._read_response(xml, node_name='LogSet', cls=types.DMTaskLog, wrap_page=True)
+	
 	def _read_dm_get_deployment_task_status_response(self, xml):
 		return self._read_response(xml, node_name='DeploymentTaskStatus', cls=types.DeploymentTask, simple_response=True)	
 	

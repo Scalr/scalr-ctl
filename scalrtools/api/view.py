@@ -33,7 +33,7 @@ class TableViewer:
 								else:
 									value = val
 								plain_text += '\n%s = %s' % (property, value)
-						self.data[self.prepare_table(objects)if objects else entry.id] = plain_text
+						self.data[self.prepare_table(objects)if objects else entry.farm_role_id] = plain_text
 				
 				else:
 					objects = response

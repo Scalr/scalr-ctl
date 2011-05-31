@@ -67,7 +67,7 @@ def main():
 			c.set_logger(logger)
 			
 	except ScalrEnvError, e:
-		if not cmd.startswith('configure-') and cmd != 'help':
+		if not cmd.startswith('configure') and cmd != 'help':
 			print "\nNo login information found."
 			print "Please specify options -a -u and -s, or run 'scalr-tools help configure-env' to find out how to set login information permanently.\n"
 			print help
