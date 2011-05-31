@@ -5,7 +5,6 @@ Created on Feb 21th, 2011
 '''
 
 from prettytable import PrettyTable
-from types_ import FarmRole
 
 class TableViewer:
 	
@@ -20,25 +19,9 @@ class TableViewer:
 		if response:
 				
 			if isinstance(response, list):
-				
-				if isinstance(response[0], FarmRole):
-					for entry in response:
-						objects = entry.server_set
-						plain_text = ''
-						for property in entry.__titles__:
-							val = getattr(entry, property)
-							if property != 'server_set' and val:
-								if isinstance(val, dict):
-									value = ';'.join(['%s=%s'%(k,v) for k,v in val.items()])
-								else:
-									value = val
-								plain_text += '\n%s = %s' % (property, value)
-						self.data[self.prepare_table(objects)if objects else entry.farm_role_id] = plain_text
-				
-				else:
-					objects = response
-					plain_text = ''
-					self.data[self.prepare_table(objects)] = plain_text
+				objects = response
+				plain_text = ''
+				self.data[self.prepare_table(objects)] = plain_text
 				
 			else:
 				objects = response.scalr_objects

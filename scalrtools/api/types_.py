@@ -90,10 +90,7 @@ class FarmRole(ScalrObject):
 	__titles__['platform'] = 'Platform'
 	__titles__['category'] = 'Category'
 	__titles__['cloud_location'] = 'CloudLocation'
-	__titles__['scaling_properties'] = 'ScalingProperties'
-	__titles__['platform_properties'] = 'PlatformProperties'
-	__titles__['mysql_properties'] = 'MySQLProperties'
-	__titles__['server_set'] = 'ServerSet'
+	
 	
 	farm_role_id = None
 	role_id = None
@@ -101,23 +98,31 @@ class FarmRole(ScalrObject):
 	platform = None
 	category = None
 	cloud_location = None	
+	
+	
+class FarmRoleProperties(ScalrObject):
+	__titles__ = OrderedDict()	
+	__titles__['farm_role_id'] = 'ID'
+	__titles__['name'] = 'Name'
+	__titles__['scaling_properties'] = 'ScalingProperties'
+	__titles__['platform_properties'] = 'PlatformProperties'
+	__titles__['mysql_properties'] = 'MySQLProperties'
+	
+	name = None
+	farm_role_id = None	
 	platform_properties = None
 	mysql_properties = None
 	scaling_properties = None
-	server_set = None
 	
-
 	@classmethod
 	def fromxml (cls, xml):	
 		kv = cls.parse_response(xml)
-		servers = xml.getElementsByTagName('ServerSet')[0].childNodes
-		if servers:
-			kv['server_set'] = [Server.fromxml(child) for child in servers]
+		if kv and kv.has_key('mysql_properties'): 
+			mp = kv['mysql_properties']
+			if mp and mp.has_key('LastBackupTime'):
+				mp['LastBackupTime'] = pretty_time(mp['LastBackupTime'])
 		return cls(**kv)
 
-	def __hash__(self):
-		return hash(self.__dict__)
-		
 		
 class Server(ScalrObject):
 	__titles__ = OrderedDict()
@@ -128,7 +133,8 @@ class Server(ScalrObject):
 	__titles__['scalarizr_version'] = 'ScalarizrVersion'
 	__titles__['uptime'] = 'Uptime'
 	__titles__['platform_properties'] = 'PlatformProperties'
-	
+	__titles__['name'] = 'Name'
+	name = None
 	server_id = None
 	platform_properties = None
 	external_ip = None
@@ -195,7 +201,7 @@ class DMTaskLog(ScalrObject):
 	@classmethod
 	def fromxml (cls, xml):	
 		kv = cls.parse_response(xml)
-		kv['time_stamp'] = time.strftime('%m.%d.%Y %X', time.gmtime(float(kv['time_stamp'])))
+		kv['time_stamp'] = pretty_time(kv['time_stamp'])
 		return DMTaskLog(**kv)	
 	
 class DeploymentTaskResult(ScalrObject):
@@ -273,7 +279,7 @@ class LogRecord(ScalrObject):
 	def fromxml (cls, xml):	
 		kv = cls.parse_response(xml)
 		kv['severity'] = cls._log_levels.get(kv['severity'],None)
-		kv['time_stamp'] = time.strftime('%m.%d.%Y %X', time.gmtime(float(kv['time_stamp'])))
+		kv['time_stamp'] = pretty_time(kv['time_stamp'])
 		return LogRecord(**kv)
 
 
@@ -292,7 +298,7 @@ class Event(ScalrObject):
 	@classmethod
 	def fromxml (cls, xml):	
 		kv = cls.parse_response(xml)
-		kv['time_stamp'] = time.strftime('%m.%d.%Y %X', time.gmtime(float(kv['time_stamp'])))
+		kv['time_stamp'] = pretty_time(kv['time_stamp'])
 		return Event(**kv)
 		
 			
@@ -414,3 +420,6 @@ class VirtualHost(ScalrObject):
 def get_items_first_child(xml,tag): 
 	elements = xml.getElementsByTagName(tag)
 	return elements[0].firstChild if elements else None
+
+def pretty_time(stamp):
+	return time.strftime('%m.%d.%Y %X', time.gmtime(float(stamp)))

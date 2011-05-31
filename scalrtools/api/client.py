@@ -442,7 +442,7 @@ class ScalrConnection(object):
 	
 	def get_farm_details(self, farm_id):
 		"""
-		@return Result
+		@return FarmRole[]
 		"""
 		params = {}
 		
@@ -450,6 +450,28 @@ class ScalrConnection(object):
 		
 		return self._request(command="FarmGetDetails", params=params, response_reader=self._read_get_farm_details_response)	
 			
+	
+	def get_farm_role_properties(self, farm_id):
+		"""
+		@return FarmRoleProperties[]
+		"""
+		params = {}
+		
+		params['FarmID'] = farm_id
+		
+		return self._request(command="FarmGetDetails", params=params, response_reader=self._read_get_farm_role_properties_response)		
+	
+	
+	def list_servers(self, farm_id):
+		"""
+		@return Server[]
+		"""
+		params = {}
+		
+		params['FarmID'] = farm_id
+		
+		return self._request(command="FarmGetDetails", params=params, response_reader=self._read_list_servers_response)
+	
 		
 	def execute_script(self,farm_id,script_id,timeout,async,farm_role_id=None,server_id=None,config_variables=None,revision=None):
 		"""
@@ -544,6 +566,14 @@ class ScalrConnection(object):
 		return self._read_response(xml, node_name='FarmRoleSet', cls=types.FarmRole)
 	
 	
+	def _read_get_farm_role_properties_response(self, xml):
+		return self._read_response(xml, node_name='FarmRoleSet', cls=types.FarmRoleProperties)
+	
+	
+	def _read_list_servers_response(self, xml):
+		return self._read_response(xml, node_name='FarmRoleSet', cls=types.Server)	
+	
+		
 	def _read_get_bundle_task_status_response(self, xml):
 		return self._read_response(xml, node_name='BundleTaskGetStatusResponse', cls=types.BundleTask, simple_response=True)
 	

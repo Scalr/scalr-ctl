@@ -136,8 +136,6 @@ class DmDeployApplication(Command):
 		print self.api_call(self.connection.dm_deploy_application, *args)
 
 
-#DmDeploymentTasksList($FarmRoleID = null, $ApplicationID = null, $ServerID = null)
-
 class DmListDeploymentTasks(Command):
 	name = 'dm-list-deployment-tasks'
 	help = 'scalr-tools dm-list-deployment-tasks -r farm-role-id -a app-id -s server-id'
@@ -185,7 +183,6 @@ class DmApplicationsList(Command):
 		print self.api_call(self.connection.dm_list_applications)
 
 
-#($DeploymentTaskID, $StartFrom = 0, $RecordsLimit = 20)
 class DmGetDeploymentTaskLog(Command):
 	name = 'dm-get-deployment-task-log'
 	help = 'scalr-tools dm-get-deployment-task-log  -t task-id [-s start-from -l limit]'
@@ -348,6 +345,38 @@ class FarmGetDetails(Command):
 		print self.api_call(self.connection.get_farm_details, self.options.id)	
 
 
+class FarmRoleProperties(Command):
+	name = 'get-farm-role-properties'
+	help = 'scalr-tools get-farm-role-properties -f farm-id'
+
+	def __init__(self, config, *args):
+		super(FarmRoleProperties, self).__init__(config, *args)
+		self.require(self.options.id)
+
+	@classmethod
+	def inject_options(cls, parser):
+		parser.add_option("-f", "--farm-id", dest="id", default=None, help="Farm ID")
+	
+	def run(self):
+		print self.api_call(self.connection.get_farm_role_properties, self.options.id)	
+		
+		
+class ServerList(Command):
+	name = 'list-servers'
+	help = 'scalr-tools list-servers -f farm-id'
+
+	def __init__(self, config, *args):
+		super(ServerList, self).__init__(config, *args)
+		self.require(self.options.id)
+
+	@classmethod
+	def inject_options(cls, parser):
+		parser.add_option("-f", "--farm-id", dest="id", default=None, help="Farm ID")
+	
+	def run(self):
+		print self.api_call(self.connection.list_servers, self.options.id)	
+		
+				
 class FarmGetStats(Command):
 	name = 'get-farm-stats'
 	help = 'scalr-tools get-farm-stats -f farm-id [-d date]'
@@ -641,11 +670,6 @@ class ConfigureEnv(Command):
 		
 		e.write(self.config.base_path)
 		
-		s = Scripts(svn='1698', git='1700')
-		s.write(self.config.base_path)
-		
-		s = Scripts.from_ini(self.config.base_path)
-		
 		e = Environment.from_ini(self.config.base_path)
 		
 		column_names = ('setting','value')
@@ -659,8 +683,5 @@ class ConfigureEnv(Command):
 		table.add_row(('key', e.key[:visible_length]+'...' if len(e.key)>40 else e.key))
 		table.add_row(('key id', e.key_id))
 		table.add_row(('version', e.api_version))
-		
-		table.add_row(('svn', s.svn))
-		table.add_row(('git', s.git))		
 		
 		print table
