@@ -363,18 +363,19 @@ class FarmRoleProperties(Command):
 		
 class ServerList(Command):
 	name = 'list-servers'
-	help = 'scalr-tools list-servers -f farm-id'
+	help = 'scalr-tools list-servers -f farm-id -r farm-role-id'
 
 	def __init__(self, config, *args):
 		super(ServerList, self).__init__(config, *args)
-		self.require(self.options.id)
+		self.require(self.options.farm_id)
 
 	@classmethod
 	def inject_options(cls, parser):
-		parser.add_option("-f", "--farm-id", dest="id", default=None, help="Farm ID")
+		parser.add_option("-f", "--farm-id", dest="farm_id", default=None, help="Farm ID")
+		parser.add_option("-r", "--farm-role-id", dest="farm_role_id", default=None, help="Farm Role ID")
 	
 	def run(self):
-		print self.api_call(self.connection.list_servers, self.options.id)	
+		print self.api_call(self.connection.list_servers, self.options.farm_id, self.options.farm_role_id)	
 		
 				
 class FarmGetStats(Command):

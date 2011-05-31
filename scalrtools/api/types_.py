@@ -134,7 +134,8 @@ class Server(ScalrObject):
 	__titles__['uptime'] = 'Uptime'
 	__titles__['platform_properties'] = 'PlatformProperties'
 	__titles__['name'] = 'Name'
-	name = None
+	__titles__['farm_role_id'] = 'ID'
+	
 	server_id = None
 	platform_properties = None
 	external_ip = None
@@ -142,8 +143,11 @@ class Server(ScalrObject):
 	status = None
 	scalarizr_version = None
 	uptime = None
-
-
+	
+	name = None
+	farm_role_id = None	
+	
+	
 class Source(ScalrObject):
 	__titles__ = OrderedDict()
 	__titles__['id'] = 'ID'

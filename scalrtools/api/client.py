@@ -462,15 +462,19 @@ class ScalrConnection(object):
 		return self._request(command="FarmGetDetails", params=params, response_reader=self._read_get_farm_role_properties_response)		
 	
 	
-	def list_servers(self, farm_id):
+	def list_servers(self, farm_id, farm_role_id = None):
 		"""
 		@return Server[]
 		"""
 		params = {}
 		
 		params['FarmID'] = farm_id
-		
-		return self._request(command="FarmGetDetails", params=params, response_reader=self._read_list_servers_response)
+		servers = self._request(command="FarmGetDetails", params=params, response_reader=self._read_list_servers_response)
+		if farm_role_id:
+			for server in servers:
+				if server.farm_role_id != farm_role_id:
+					servers.remove(server) 
+		return servers
 	
 		
 	def execute_script(self,farm_id,script_id,timeout,async,farm_role_id=None,server_id=None,config_variables=None,revision=None):
