@@ -41,20 +41,20 @@ def main():
 	logger.addHandler(handler)
 	
 	subcommands = '\nAvailable subcommands:\n\n' + '\n'.join(sorted([command.name for command in get_commands()]))
-	usage='''Usage: scalr-tools [options] subcommand [args]'''
+	usage='Usage: %s [options] subcommand [args]' % commands.progname
 	
 	parser = OptionParser(usage=usage, add_help_option=False)
 	parser.add_option("--debug", dest="debug", action="store_true", help="Enable debug output")
 	parser.add_option("-c", "--config-path", dest="base_path", default=None, help="Path to configuration files")
-	parser.add_option("-a", "--access-key", dest="key_id", default=None, help="Access key")
-	parser.add_option("-s", "--secret-key", dest="key", default=None, help="Secret key")
-	parser.add_option("-u", "--api-url", dest="api_url", default=None, help="API URL")
+	parser.add_option("-i", "--key-id", dest="key_id", default=None, help="Scalr API key ID")
+	parser.add_option("-a", "--access-key", dest="key", default=None, help="Scalr API access key")
+	parser.add_option("-u", "--api-url", dest="api_url", default=None, help="Scalr API URL")
 	parser.add_option("-h", "--help", dest="help", action="store_true", help="Help")
 	
 	args, cmd, subargs = split_options(sys.argv)
 
 	options = parser.parse_args(args)[0]
-	help = parser.format_help() + subcommands + "\n\nFor more information try 'scalr-tools help <subcommand>'"
+	help = parser.format_help() + subcommands + "\n\nFor more information try '%s help <subcommand>'" % commands.progname
 	if not cmd or options.help:
 		print help
 		sys.exit()
@@ -69,8 +69,8 @@ def main():
 	except ScalrEnvError, e:
 		if not cmd.startswith('configure') and cmd != 'help':
 			print "\nNo login information found."
-			print "Please specify options -a -u and -s, or run 'scalr-tools help configure-env' to find out how to set login information permanently.\n"
-			print help
+			print "Please specify options -a -u and -s, or run '%s help configure' to find out how to set login information permanently.\n" % commands.progname
+			#print help
 			sys.exit()
 		
 	except ScalrCfgError, e:

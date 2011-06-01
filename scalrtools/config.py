@@ -31,7 +31,7 @@ class ConfigSection(object):
 		path = os.path.join(base_path, self.config_name)
 		if os.path.exists(path):
 			config.read(path)
-		else:
+		elif not os.path.exists(os.path.dirname(path)):
 			os.makedirs(os.path.dirname(path))
 			
 		if not config.has_section(section):

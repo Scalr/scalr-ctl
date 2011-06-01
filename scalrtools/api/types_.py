@@ -215,13 +215,14 @@ class DeploymentTaskResult(ScalrObject):
 	__titles__['farm_role_id'] = 'FarmRoleID'
 	__titles__['remote_path'] = 'RemotePath'
 	__titles__['status'] = 'Status'
+	__titles__['errmsg'] = 'ErrorMessage'
 	
 	task_id = None
 	server_id = None
 	farm_role_id = None
 	remote_path = None
 	status = None
-	
+	errmsg = None
 	
 class Result(ScalrObject):
 	__titles__ = {'result' : 'Result'}

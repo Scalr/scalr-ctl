@@ -16,10 +16,11 @@ from config import Environment
 from api import ScalrConnection, ScalrAPIError
 from api.view import TableViewer
 
+progname = 'pecha'
 
 class Command(object):
-	name = None
-	help = None
+	name = ''
+	help = ''
 	
 	config = None
 	parser = None
@@ -27,7 +28,7 @@ class Command(object):
 		
 	def __init__(self, config, *args):
 		self.config = config
-		self.parser = OptionParser(usage=self.help)
+		self.parser = OptionParser(usage='%s %s %s' % (progname, self.name, self.help))
 		self.inject_options(self.parser)
 		self.options = self.parser.parse_args(list(args))[0]
 			
@@ -52,7 +53,7 @@ class Command(object):
 		
 	@classmethod
 	def usage(cls):
-		parser = OptionParser(usage=cls.help) 
+		parser = OptionParser(usage='%s %s %s' % (progname, cls.name, cls.help)) 
 		cls.inject_options(parser)
 		return parser.format_help(TitledHelpFormatter())
 
@@ -71,7 +72,6 @@ class Command(object):
 		
 class ApacheVhostsList(Command):
 	name = 'list-apache-virtual-hosts'
-	help = 'scalr-tools list-apache-virtual-hosts'
 	
 	def run(self):
 		print self.api_call(self.connection.list_apache_virtual_hosts)
@@ -79,7 +79,7 @@ class ApacheVhostsList(Command):
 
 class DmCreateSource(Command):
 	name = 'dm-create-source'
-	help = 'scalr_tools dm-create_source -t [http|svn] -u url [-l login -p password]'
+	help = '-t [http|svn] -u url [-l login -p password]'
 
 	def __init__(self, config, *args):
 		super(DmCreateSource, self).__init__(config, *args)
@@ -99,7 +99,7 @@ class DmCreateSource(Command):
 
 class DmCreateApplication(Command):
 	name = 'dm-create-application'
-	help = 'scalr-tools dm-create-application -n name -s source-id [-b pre_deploy_script -a post_deploy_script]'
+	help = '-n name -s source-id [-b pre_deploy_script -a post_deploy_script]'
 
 	def __init__(self, config, *args):
 		super(DmCreateApplication, self).__init__(config, *args)
@@ -119,7 +119,7 @@ class DmCreateApplication(Command):
 
 class DmDeployApplication(Command):
 	name = 'dm-deploy-application'
-	help = 'scalr-tools dm-deploy-application -a app-id -r farm-role-id -p remote-path'
+	help = '-a app-id -r farm-role-id -p remote-path'
 
 	def __init__(self, config, *args):
 		super(DmDeployApplication, self).__init__(config, *args)
@@ -138,7 +138,7 @@ class DmDeployApplication(Command):
 
 class DmListDeploymentTasks(Command):
 	name = 'dm-list-deployment-tasks'
-	help = 'scalr-tools dm-list-deployment-tasks -r farm-role-id -a app-id -s server-id'
+	help = '-r farm-role-id -a app-id -s server-id'
 
 	@classmethod
 	def inject_options(cls, parser):
@@ -153,7 +153,7 @@ class DmListDeploymentTasks(Command):
 		
 class DmGetDeploymentTaskStatus(Command):
 	name = 'dm-get-deployment-task-status'
-	help = 'scalr-tools dm-get-deployment-task-status -t task-id'
+	help = '-t task-id'
 
 	def __init__(self, config, *args):
 		super(DmGetDeploymentTaskStatus, self).__init__(config, *args)
@@ -169,7 +169,6 @@ class DmGetDeploymentTaskStatus(Command):
 		
 class DmSourcesList(Command):
 	name = 'dm-list-sources'
-	help = 'scalr-tools list-dm-list-sources'
 	
 	def run(self):
 		print self.api_call(self.connection.dm_list_sources)
@@ -177,7 +176,6 @@ class DmSourcesList(Command):
 
 class DmApplicationsList(Command):
 	name = 'dm-list-applications'
-	help = 'scalr-tools dm-list-applications'
 	
 	def run(self):
 		print self.api_call(self.connection.dm_list_applications)
@@ -185,7 +183,7 @@ class DmApplicationsList(Command):
 
 class DmGetDeploymentTaskLog(Command):
 	name = 'dm-get-deployment-task-log'
-	help = 'scalr-tools dm-get-deployment-task-log  -t task-id [-s start-from -l limit]'
+	help = '-t task-id [-s start-from -l limit]'
 
 	def __init__(self, config, *args):
 		super(DmGetDeploymentTaskLog, self).__init__(config, *args)
@@ -204,7 +202,6 @@ class DmGetDeploymentTaskLog(Command):
 
 class DNSZonesList(Command):
 	name = 'list-dns-zones'
-	help = 'scalr-tools list-dns-zones'
 	
 	def run(self):
 		print self.api_call(self.connection.list_dns_zones)
@@ -212,7 +209,6 @@ class DNSZonesList(Command):
 
 class FarmsList(Command):
 	name = 'list-farms'
-	help = 'scalr-tools list-farms'
 
 	def run(self):
 		print self.api_call(self.connection.list_farms)
@@ -220,7 +216,6 @@ class FarmsList(Command):
 
 class ScriptsList(Command):
 	name = 'list-scripts'
-	help = 'scalr-tools list-scripts'
 	
 	def run(self):
 		print self.api_call(self.connection.list_scripts)
@@ -228,7 +223,7 @@ class ScriptsList(Command):
 		
 class DNSZoneRecordsList(Command):
 	name = 'list-dns-zone-records'
-	help = 'scalr-tools list-dns-zone-records -n name'
+	help = '-n name'
 
 	def __init__(self, config, *args):
 		super(DNSZoneRecordsList, self).__init__(config, *args)
@@ -244,7 +239,7 @@ class DNSZoneRecordsList(Command):
 
 class EventsList(Command):
 	name = 'list-events'
-	help = 'scalr-tools list-events -f farm-id [-s start-from -l limit]'
+	help = '-f farm-id [-s start-from -l limit]'
 
 	def __init__(self, config, *args):
 		super(EventsList, self).__init__(config, *args)
@@ -263,7 +258,7 @@ class EventsList(Command):
 
 class LogsList(Command):
 	name = 'list-logs'
-	help = 'scalr-tools list-logs -f farm-id [-i server-id -s start-from -l limit]'
+	help = '-f farm-id [-i server-id -s start-from -l limit]'
 	
 	def __init__(self, config, *args):
 		super(LogsList, self).__init__(config, *args)
@@ -283,7 +278,7 @@ class LogsList(Command):
 
 class RolesList(Command):
 	name = 'list-roles'
-	help = 'scalr-tools list-roles [-p platform -n name -x prefix -i image-id]'
+	help = '[-p platform -n name -x prefix -i image-id]'
 
 	@classmethod
 	def inject_options(cls, parser):
@@ -299,7 +294,7 @@ class RolesList(Command):
 
 class ScriptGetDetails(Command):
 	name = 'get-script-details'
-	help = 'scalr-tools get-script-details -s script-id'
+	help = '-s script-id'
 
 	def __init__(self, config, *args):
 		super(ScriptGetDetails, self).__init__(config, *args)
@@ -315,7 +310,7 @@ class ScriptGetDetails(Command):
 
 class BundleTaskGetStatus(Command):
 	name = 'get-bundle-task-status'
-	help = 'scalr-tools get-bundle-task-status -i bundle-task-id'
+	help = '-i bundle-task-id'
 	
 	def __init__(self, config, *args):
 		super(BundleTaskGetStatus, self).__init__(config, *args)
@@ -331,7 +326,7 @@ class BundleTaskGetStatus(Command):
 
 class FarmGetDetails(Command):
 	name = 'get-farm-details'
-	help = 'scalr-tools get-farm-details -f farm-id'
+	help = '-f farm-id'
 
 	def __init__(self, config, *args):
 		super(FarmGetDetails, self).__init__(config, *args)
@@ -347,7 +342,7 @@ class FarmGetDetails(Command):
 
 class FarmRoleProperties(Command):
 	name = 'get-farm-role-properties'
-	help = 'scalr-tools get-farm-role-properties -f farm-id'
+	help = '-f farm-id'
 
 	def __init__(self, config, *args):
 		super(FarmRoleProperties, self).__init__(config, *args)
@@ -363,7 +358,7 @@ class FarmRoleProperties(Command):
 		
 class ServerList(Command):
 	name = 'list-servers'
-	help = 'scalr-tools list-servers -f farm-id -r farm-role-id'
+	help = '-f farm-id -r farm-role-id'
 
 	def __init__(self, config, *args):
 		super(ServerList, self).__init__(config, *args)
@@ -380,7 +375,7 @@ class ServerList(Command):
 				
 class FarmGetStats(Command):
 	name = 'get-farm-stats'
-	help = 'scalr-tools get-farm-stats -f farm-id [-d date]'
+	help = '-f farm-id [-d date]'
 
 	def __init__(self, config, *args):
 		super(FarmGetStats, self).__init__(config, *args)
@@ -397,7 +392,7 @@ class FarmGetStats(Command):
 
 class StatisticsGetGraphURL(Command):
 	name = 'get-statistics-graph-url'
-	help = 'scalr-tools get-statistics-graph-url -o object-type -i object-id -n watcher-name -g graph-type'
+	help = '-o object-type -i object-id -n watcher-name -g graph-type'
 
 	def __init__(self, config, *args):
 		super(StatisticsGetGraphURL, self).__init__(config, *args)
@@ -419,7 +414,7 @@ class StatisticsGetGraphURL(Command):
 
 class ServerTerminate(Command):
 	name = 'terminate-server'
-	help = 'scalr-tools terminate-server -i server-id [-d decrease-min-instances-setting]'
+	help = '-i server-id [-d decrease-min-instances-setting]'
 
 	def __init__(self, config, *args):
 		super(ServerTerminate, self).__init__(config, *args)
@@ -436,7 +431,7 @@ class ServerTerminate(Command):
 
 class ServerImageCreate(Command):
 	name = 'create-server-image'
-	help = 'scalr-tools create-server-image -i server-id -n role-name'
+	help = '-i server-id -n role-name'
 
 	def __init__(self, config, *args):
 		super(ServerImageCreate, self).__init__(config, *args)
@@ -453,7 +448,7 @@ class ServerImageCreate(Command):
 	
 class ServerLaunch(Command):
 	name = 'launch-server'
-	help = 'scalr-tools launch-server -i farm-role-id'
+	help = '-i farm-role-id'
 
 	def __init__(self, config, *args):
 		super(ServerLaunch, self).__init__(config, *args)
@@ -469,7 +464,7 @@ class ServerLaunch(Command):
 	
 class FarmLaunch(Command):
 	name = 'launch-farm'
-	help = 'scalr-tools launch-farm -f farm-id'
+	help = '-f farm-id'
 
 	def __init__(self, config, *args):
 		super(FarmLaunch, self).__init__(config, *args)
@@ -485,7 +480,7 @@ class FarmLaunch(Command):
 	
 class FarmTerminate(Command):
 	name = 'terminate-farm'
-	help = 'scalr-tools terminate-farm -f farm-id -e keep-ebs, -i keep-eip -d keep-dns-zone'
+	help = '-f farm-id -e keep-ebs, -i keep-eip -d keep-dns-zone'
 
 	def __init__(self, config, *args):
 		super(FarmTerminate, self).__init__(config, *args)
@@ -505,7 +500,7 @@ class FarmTerminate(Command):
 		
 class ScriptExecute(Command):
 	name = 'execute-script'
-	help = 'scalr-tools execute-script -f farm-id -e script-id -a async -t timeout [-i farm-role-id -s server-id -r revision -v variables]'
+	help = '-f farm-id -e script-id -a async -t timeout [-i farm-role-id -s server-id -r revision -v variables]'
 	#TODO: Test passing variables  
 
 	def __init__(self, config, *args):
@@ -532,7 +527,7 @@ class ScriptExecute(Command):
 
 class ServerReboot(Command):
 	name = 'reboot-server'
-	help = 'scalr-tools reboot-server -s server-id'
+	help = '-s server-id'
 
 	def __init__(self, config, *args):
 		super(ServerReboot, self).__init__(config, *args)
@@ -548,7 +543,7 @@ class ServerReboot(Command):
 
 class DNSZoneCreate(Command):
 	name = 'create-dns-zone'
-	help = 'scalr-tools create-dns-zone -n domain-name [-f farm-id -i farm-role-id]'
+	help = '-n domain-name [-f farm-id -i farm-role-id]'
 
 	def __init__(self, config, *args):
 		super(DNSZoneCreate, self).__init__(config, *args)
@@ -566,7 +561,7 @@ class DNSZoneCreate(Command):
 	
 class DNSZoneRecordAdd(Command):
 	name = 'add-dns-zone-record'
-	help = 'scalr-tools add-dns-zone-record -z zone-name -t type -l ttl -n record-name -v record-value [-p priority -w weight -o port]'
+	help = '-z zone-name -t type -l ttl -n record-name -v record-value [-p priority -w weight -o port]'
 
 	def __init__(self, config, *args):
 		super(DNSZoneRecordAdd, self).__init__(config, *args)
@@ -592,7 +587,7 @@ class DNSZoneRecordAdd(Command):
 
 class DNSZoneRecordRemove(Command):
 	name = 'remove-dns-zone-record'
-	help = 'scalr-tools remove-dns-zone-record -n name -i record-id'
+	help = '-n name -i record-id'
 
 	def __init__(self, config, *args):
 		super(DNSZoneRecordRemove, self).__init__(config, *args)
@@ -609,7 +604,7 @@ class DNSZoneRecordRemove(Command):
 	
 class ApacheVhostCreate(Command):
 	name = 'create-apache-vhost'
-	help = 'scalr-tools create-apache-vhost -d domain-name -f farm-id -i farm-role-id -r document-root -s enable-ssl [-k key-path -c cert-path]'
+	help = '-d domain-name -f farm-id -i farm-role-id -r document-root -s enable-ssl [-k key-path -c cert-path]'
 	
 	def __init__(self, config, *args):
 		super(ApacheVhostCreate, self).__init__(config, *args)
@@ -651,7 +646,7 @@ class ApacheVhostCreate(Command):
 	
 class ConfigureEnv(Command):
 	name = 'configure'
-	help = 'scalr-tools configure -a key_id -s key -u api_url'
+	help = '-a key_id -s key -u api_url'
 		
 	def __init__(self, config, *args):
 		super(ConfigureEnv, self).__init__(config, *args)
