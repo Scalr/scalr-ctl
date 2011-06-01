@@ -16,7 +16,7 @@ from config import Environment
 from api import ScalrConnection, ScalrAPIError
 from api.view import TableViewer
 
-progname = 'pecha'
+progname = 'scalr'
 
 class Command(object):
 	name = ''
@@ -646,7 +646,7 @@ class ApacheVhostCreate(Command):
 	
 class ConfigureEnv(Command):
 	name = 'configure'
-	help = '-a key_id -s key -u api_url'
+	help = '-i key_id -a key -u api_url'
 		
 	def __init__(self, config, *args):
 		super(ConfigureEnv, self).__init__(config, *args)
@@ -654,9 +654,9 @@ class ConfigureEnv(Command):
 			
 	@classmethod
 	def inject_options(cls, parser):
-		parser.add_option("-a", "--access-key", dest="key_id", default=None, help="Access key")
-		parser.add_option("-s", "--secret-key", dest="key", default=None, help="Secret key")
-		parser.add_option("-u", "--api-url", dest="api_url", default=None, help="API URL")
+		parser.add_option("-i", "--key-id", dest="key_id", default=None, help="Scalr API key ID")
+		parser.add_option("-a", "--access-key", dest="key", default=None, help="Scalr API access key")
+		parser.add_option("-u", "--api-url", dest="api_url", default=None, help="Scalr API URL")
 		
 	def run(self):		
 		e = Environment(url=self.options.api_url,
@@ -676,7 +676,7 @@ class ConfigureEnv(Command):
 		table.add_row(('url', e.url))
 		
 		visible_length = 26
-		table.add_row(('key', e.key[:visible_length]+'...' if len(e.key)>40 else e.key))
+		table.add_row(('access key', e.key[:visible_length]+'...' if len(e.key)>40 else e.key))
 		table.add_row(('key id', e.key_id))
 		table.add_row(('version', e.api_version))
 		

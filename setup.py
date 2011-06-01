@@ -7,21 +7,21 @@ Created on Feb 21th, 2011
 from setuptools import setup, find_packages
 
 
-description = "Pecha is a command-line interface to your Scalr account"
+description = "Scalr is a command-line interface to your Scalr account"
 
 
 cfg = dict(
-	name = "pecha",
-	version = "0.3.2",	 
+	name = "scalr",
+	version = "0.3.5",	 
 	description = description,
 	long_description = description,
 	author = "Scalr Inc.",
-	author_email = "info@scalr.net",
+	author_email = "dmitry@scalr.com",
 	url = "https://scalr.net",
 	license = "GPL",
 	platforms = "any",
 	packages = find_packages(),
-	scripts=['bin/pecha'],
+	scripts=['bin/scalr'],
 	install_requires = ["prettytable"],
 )
 setup(**cfg)
