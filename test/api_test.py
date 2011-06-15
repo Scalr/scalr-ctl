@@ -28,7 +28,7 @@ class TestScalrConnection(unittest.TestCase):
 
 	def tearDown(self):
 		pass
-
+	
 
 	def test_error_response(self):
 		response = open('test/resources/Error.xml').read()
@@ -180,6 +180,12 @@ class TestScalrConnection(unittest.TestCase):
 		print '\nLast TransactionID: %s' % self.conn.last_transaction_id
 		print TableViewer(response)
 								
+		
+	def _test__read_get_list_servers_response(self):
+		response = open('test/resources/FarmGetDetailsResponse_local.xml').read()
+		xml = xml_strip(parseString(response))
+		response = self.conn._read_list_servers_response(xml)
+		print 'Got response:', response
 		
 	def _test__read_get_farm_details_response(self):
 		response = open('test/resources/FarmGetDetailsResponse.xml').read()
@@ -488,9 +494,40 @@ class TestScalrConnection(unittest.TestCase):
 		print '\nLast TransactionID: %s' % self.conn.last_transaction_id
 		print TableViewer(response)
 		
-		
 	
-	def test_fetch_from_scalr_test_v3(self):
+	def test_fetch_from_local_v4(self):
+			
+	    response = self.conn.fetch('ServerGetExtendedInformation', ServerID='ef883132-69be-4643-a705-0d2df10b2edd')
+	    print response.toprettyxml()
+	    file = open('test/resources/ServerGetExtendedInformationResponse.xml','w')
+	    file.write(response.toprettyxml())
+	    file.close()  
+	    
+   
+	def _test_fetch_from_local_v3(self):
+			
+	    response = self.conn.fetch('FarmGetDetails', FarmID='74')
+	    print response.toprettyxml()
+	    file = open('test/resources/FarmGetDetailsResponse_local.xml','w')
+	    file.write(response.toprettyxml())
+	    file.close()        
+	    
+	    response = self.conn.fetch('DmApplicationCreate', Name='test_app_1', SourceID='4')
+	    print response.toprettyxml()
+	    file = open('test/resources/DmApplicationCreateResponse.xml','w')
+	    file.write(response.toprettyxml())
+	    file.close()
+	    
+	    
+	    response = self.conn.fetch('DmSourceCreate', Type='svn', URL='https://pics-hunter.googlecode.com/svn/trunk/', AuthLogin='shaitanich@gmail.com', AuthPassword='Gf2SN5wR9Fr8')
+	    print response.toprettyxml()
+	    file = open('test/resources/DmSourceCreateResponse.xml','w')
+	    file.write(response.toprettyxml())
+	    file.close()
+
+              
+       	
+	def _test_fetch_from_scalr_test_v3(self):
 		'''
 		response = self.conn.fetch('DmSourcesList')
 		print response.toprettyxml()
@@ -512,23 +549,7 @@ class TestScalrConnection(unittest.TestCase):
 		'''
 		pass
 	
-	
-	def test_fetch_from_local_v3(self):
-		'''
-		response = self.conn.fetch('DmApplicationCreate', Name='test_app_1', SourceID='4')
-		print response.toprettyxml()
-		file = open('test/resources/DmApplicationCreateResponse.xml','w')
-		file.write(response.toprettyxml())
-		file.close()
-		'''
-		
-		response = self.conn.fetch('DmSourceCreate', Type='svn', URL='https://pics-hunter.googlecode.com/svn/trunk/', AuthLogin='shaitanich@gmail.com', AuthPassword='Gf2SN5wR9Fr8')
-		print response.toprettyxml()
-		file = open('test/resources/DmSourceCreateResponse.xml','w')
-		file.write(response.toprettyxml())
-		file.close()
-		
-				
+        				
 	def _test_fetch_from_local(self):
 
 		response = self.conn.fetch('DNSZoneRecordRemove', ZoneName='dima-test.com', RecordID='110')
