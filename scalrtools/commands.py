@@ -142,13 +142,12 @@ class DmCreateApplication(Command):
 
 class DmDeployApplication(Command):
 	name = 'dm-deploy-application'
-	help = '{-a app-id | -n app-name} -r farm-role-id -p remote-path'
+	help = '{-a app-id | -n app-name} -r farm-role-id -p remote-path [--non-interactive]'
 
+	test_url = 'https://scalr-test-deploy.googlecode.com/svn/trunk' 
+	test_app = 'ScalrDemoApp'
+	test_type = 'svn'
 	def __init__(self, config, *args):
-		
-		self.test_url = 'https://scalr-test-deploy.googlecode.com/svn/trunk' 
-		self.test_app = 'scalr_test_application'
-		self.test_type = 'svn'
 		
 		super(DmDeployApplication, self).__init__(config, *args)
 		if self.options.app_name == self.test_app:
@@ -158,79 +157,86 @@ class DmDeployApplication(Command):
 
 	@classmethod
 	def inject_options(cls, parser):
-		app_name_help = "The name of application could be used INSTEAD of ID. Use name 'scalr_test_application' to test deployment process on your role."
+		app_name_help = "The name of application could be used INSTEAD of ID. Use name %s to test deployment process on your role." % cls.test_app
 		parser.add_option("-n", "--app-name", dest="app_name", default=None, help=app_name_help)
 		parser.add_option("-a", "--app-id", dest="app_id", help="Application ID")
 		parser.add_option("-r", "--farm-role-id", dest="farm_role_id", help="FarmRole ID")
 		parser.add_option("-p", "--remote-path", dest="remote_path", default='/var/www/', help="Remote path where to deploy the app. Default is /var/www/")
+		parser.add_option("--non-interactive", dest="non_interactive", action="store_true", help="Use this option to avoid checking farm state")
 	
 	def run(self):
 		self.options.app_id = self.options.app_id or self.connection.get_application_id(self.options.app_name)
 		self.options.app_name = self.options.app_name or self.connection.get_application_name(self.options.app_id)
 		
 		if self.options.app_name == self.test_app:
-			self.run_test()
+			self.options.app_name = self.test_app
 			
-		else:
-			args = (self.options.app_id, self.options.farm_role_id, self.options.remote_path)
-			print self.pretty(self.connection.dm_deploy_application, *args)
+			#check sources
+			sources = [source for source in self.connection.dm_list_sources() if source.url==self.test_url]
+			if sources:
+				sid = sources[0].id
+			else:
+				result = self.call_api_method(self.connection.dm_create_source,self.test_type, self.test_url, None, None)
+				print TableViewer(result)
+				sid = result[0].source_id
 	
-	def run_test(self):
-		#check sources
-		sources = [source for source in self.connection.dm_list_sources() if source.url==self.test_url]
-		if sources:
-			sid = sources[0].id
-		else:
-			result = self.call_api_method(self.connection.dm_create_source,self.test_type, self.test_url, None, None)
-			print TableViewer(result)
-			sid = result[0].source_id
-
-		#check apps
-		apps = [app for app in self.connection.dm_list_applications() if app.source_id==sid]
-		if apps:
-			app_id = apps[0].id
-		else:
-			result = self.call_api_method(self.connection.dm_create_application,self.test_app, sid, None, None)
-			print TableViewer(result)
-			app_id = result[0].app_id
+			#check apps
+			apps = [app for app in self.connection.dm_list_applications() if app.source_id==sid]
+			if apps:
+				self.options.app_id = apps[0].id
+			else:
+				result = self.call_api_method(self.connection.dm_create_application,self.options.app_name, sid, None, None)
+				print TableViewer(result)
+				self.options.app_id = result[0].app_id
 
 		#deploy
-		args = (app_id, self.options.farm_role_id, self.options.remote_path)
+		args = (self.options.app_id, self.options.farm_role_id, self.options.remote_path)
 		tasks = self.call_api_method(self.connection.dm_deploy_application, *args)
 		print TableViewer(tasks)
 							
 		#check task status in loop
-		if not isinstance(tasks,ScalrAPIError) and tasks:
-			task = tasks[0]
-			for attempt in range(35):
-				try:
-					ts_list = self.connection.dm_get_deployment_task_status(task.task_id)
-					sys.stdout.write('.')
-					sys.stdout.flush()
-					if ts_list and ts_list[0].status == 'deployed':
-						pargs = (self.test_app, self.options.farm_role_id, self.options.remote_path)
-						print 'Test application %s has been successfully deployed on %s. You may check %s on instance to make shure.' % pargs
-						break
-					elif ts_list and ts_list[0].status == 'failed':
-						'Deployment process has failed.'
-						break
-					elif ts_list and ts_list[0].status == 'pending':
-						pass
-					elif ts_list and ts_list[0].status == 'deploying':
-						pass
-					elif ts_list:
-						print ts_list[0].status
-						
-					time.sleep(attempt)
-					
-				except (KeyboardInterrupt, SystemExit):
-					break
-			else:
-				print "Maximum number of attempts was reached. App has not been deployed yet."
+		if not self.options.non_interactive and not isinstance(tasks,ScalrAPIError) and tasks:
+			for task in tasks:
 				
-		#show log
-		print self.pretty(self.connection.dm_get_deployment_task_log,task.task_id)
-		
+				print 'Deploying %s on server %s (DeploymentTaskID: %s)' % (self.options.app_name, task.server_id, task.task_id)
+				
+				for attempt in range(35): #600s
+					try:
+						ts_list = self.connection.dm_get_deployment_task_status(task.task_id)
+						
+						sys.stdout.write('.')
+						sys.stdout.flush()
+												
+						if ts_list:
+							status = ts_list[0].status
+						
+							if status == 'deployed':
+								print "Test application has been successfully deployed on server %s." % task.server_id
+								break
+							
+							elif status == 'failed':
+								#show log
+								try:
+									print self.pretty(self.connection.dm_get_deployment_task_log,task.task_id)
+								finally:
+									print 'Deployment process has failed.'
+								break
+							
+							elif status == 'pending':
+								pass
+							elif status == 'deploying':
+								pass
+							else:
+								print status
+							
+						time.sleep(attempt)
+						
+					except (KeyboardInterrupt, SystemExit):
+						break
+				else:
+					print "Maximum number of attempts was reached. On server %s application has not been deployed." % task.server_id
+				print ''
+				
 		
 class DmDeployApplicationAlias(DmDeployApplication):
 	name = 'deploy'

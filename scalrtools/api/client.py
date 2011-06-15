@@ -566,7 +566,7 @@ class ScalrConnection(object):
 	
 	
 	def _read_dm_deploy_application_response(self, xml):
-		return self._read_response(xml, node_name='DeploymentTasksSet', cls=types.DeploymentTaskResult, simple_response=True)
+		return self._read_response(xml, node_name='DeploymentTasksSet', cls=types.DeploymentTaskResult)
 
 	
 	def _read_dm_list_deployment_tasks_response(self, xml):
