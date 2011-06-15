@@ -12,7 +12,7 @@ description = "Scalr is a command-line interface to your Scalr account"
 
 cfg = dict(
 	name = "scalr",
-	version = "0.3.5",	 
+	version = "0.3.14",	 
 	description = description,
 	long_description = description,
 	author = "Scalr Inc.",
@@ -25,5 +25,4 @@ cfg = dict(
 	install_requires = ["prettytable"],
 )
 setup(**cfg)
-
 
