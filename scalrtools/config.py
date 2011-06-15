@@ -7,6 +7,7 @@ import os
 
 from ConfigParser import ConfigParser, NoSectionError, NoOptionError
 
+from prettytable import PrettyTable	
 
 class ScalrCfgError(BaseException):
 	pass
@@ -84,6 +85,21 @@ class Environment(ConfigSection):
 	@classmethod
 	def from_ini(cls, base_path, section='api'):
 		return super(Environment, cls).from_ini(base_path, section)
+	
+	def __repr__(self):
+		column_names = ('setting','value')
+		table = PrettyTable(column_names)
+		
+		for field in column_names:
+			table.set_field_align(field, 'l')		
+		
+		visible_length = 26
+
+		table.add_row(('url', self.url))
+		table.add_row(('access key', self.key[:visible_length]+'...' if len(self.key)>40 else self.key))
+		table.add_row(('key id', self.key_id))
+		table.add_row(('version', self.api_version))
+		return str(table)
 	
 
 class Configuration:

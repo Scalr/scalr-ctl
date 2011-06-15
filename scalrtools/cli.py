@@ -11,6 +11,7 @@ from optparse import OptionParser
 
 import commands
 from config import Configuration, ScalrCfgError, ScalrEnvError
+from api.client import ScalrAPIError
 
 
 def split_options(args):
@@ -39,8 +40,7 @@ def main():
 	fmt = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
 	handler.setFormatter(fmt)
 	logger.addHandler(handler)
-	
-	subcommands = '\nAvailable subcommands:\n\n' + '\n'.join(sorted([command.name for command in get_commands()]))
+
 	usage='Usage: %s [options] subcommand [args]' % commands.progname
 	
 	parser = OptionParser(usage=usage, add_help_option=False)
@@ -48,13 +48,18 @@ def main():
 	parser.add_option("-c", "--config-path", dest="base_path", default=None, help="Path to configuration files")
 	parser.add_option("-i", "--key-id", dest="key_id", default=None, help="Scalr API key ID")
 	parser.add_option("-a", "--access-key", dest="key", default=None, help="Scalr API access key")
-	parser.add_option("-u", "--api-url", dest="api_url", default=None, help="Scalr API URL")
+	parser.add_option("-u", "--api-url", dest="api_url", default=commands.DEFAULT_API_URL, help="Scalr API URL (IF you use open source Scalr installation)")
 	parser.add_option("-h", "--help", dest="help", action="store_true", help="Help")
 	
 	args, cmd, subargs = split_options(sys.argv)
 
-	options = parser.parse_args(args)[0]
-	help = parser.format_help() + subcommands + "\n\nFor more information try '%s help <subcommand>'" % commands.progname
+	subcommands = sorted([command.name for command in get_commands() if not command.name.startswith('_')])
+	help = parser.format_help() + \
+			'\nAvailable subcommands:\n\n' + '\n'.join(subcommands) + \
+			"\n\nFor more information try '%s help <subcommand>'" % commands.progname
+			
+	options = parser.parse_args(args)[0]		
+			
 	if not cmd or options.help:
 		print help
 		sys.exit()
@@ -84,9 +89,13 @@ def main():
 			sys.exit()
 			
 		if command.name == cmd:
-			obj = command(c, *subargs)
-			obj.run()
-			sys.exit()
+			try:
+				obj = command(c, *subargs)
+				obj.run()
+			except (commands.ScalrError, ScalrAPIError), e:
+				print e
+			finally:
+				sys.exit()
 	else:
 		print help
 

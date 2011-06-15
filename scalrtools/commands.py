@@ -5,6 +5,8 @@ Created on Feb 21th, 2011
 '''
 import os
 import sys
+import time 
+import threading 
 
 from ConfigParser import ConfigParser
 from optparse import OptionParser, TitledHelpFormatter
@@ -17,6 +19,10 @@ from api import ScalrConnection, ScalrAPIError
 from api.view import TableViewer
 
 progname = 'scalr'
+DEFAULT_API_URL = 'https://api.scalr.net'
+
+class ScalrError(BaseException):
+	pass
 
 class Command(object):
 	name = ''
@@ -31,11 +37,28 @@ class Command(object):
 		self.parser = OptionParser(usage='%s %s %s' % (progname, self.name, self.help))
 		self.inject_options(self.parser)
 		self.options = self.parser.parse_args(list(args))[0]
+		
+		#Allowing user to use name instead of id if possible
+		if hasattr(self.options, 'farm_id') and not self.options.farm_id and self.options.farm_name:
+			self.options.farm_id = self.connection.get_farm_id(self.options.farm_name)
+			
+			if not self.options.farm_id:
+				raise ScalrError("Farm '%s' not found" % self.options.farm_name)
+			
+		if hasattr(self.options, 'farm_name') and not self.options.farm_name:
+			self.options.farm_name = self.connection.get_farm_name(self.options.farm_id)
 			
 	def run(self):
 		pass
 	
-	def api_call(self, callback, *args, **kwargs):
+	def call_api_method(self, callback, *args, **kwargs):
+		try:
+			return callback(*args, **kwargs)
+		except ScalrAPIError, e:
+			print e
+			sys.exit()	
+	
+	def pretty(self, callback, *args, **kwargs):
 		try:
 			return TableViewer(callback(*args, **kwargs))
 		except ScalrAPIError, e:
@@ -74,7 +97,7 @@ class ApacheVhostsList(Command):
 	name = 'list-apache-virtual-hosts'
 	
 	def run(self):
-		print self.api_call(self.connection.list_apache_virtual_hosts)
+		print self.pretty(self.connection.list_apache_virtual_hosts)
 
 
 class DmCreateSource(Command):
@@ -94,7 +117,7 @@ class DmCreateSource(Command):
 	
 	def run(self):
 		args = (self.options.type, self.options.url, self.options.auth_login, self.options.auth_password)
-		print self.api_call(self.connection.dm_create_source, *args)
+		print self.pretty(self.connection.dm_create_source, *args)
 
 
 class DmCreateApplication(Command):
@@ -114,28 +137,106 @@ class DmCreateApplication(Command):
 	
 	def run(self):
 		args = (self.options.name, self.options.source_id, self.options.pre_deploy_script, self.options.post_deploy_script)
-		print self.api_call(self.connection.dm_create_application, *args)
+		print self.pretty(self.connection.dm_create_application, *args)
 		
 
 class DmDeployApplication(Command):
 	name = 'dm-deploy-application'
-	help = '-a app-id -r farm-role-id -p remote-path'
+	help = '{-a app-id | -n app-name} -r farm-role-id -p remote-path'
 
 	def __init__(self, config, *args):
+		
+		self.test_url = 'https://scalr-test-deploy.googlecode.com/svn/trunk' 
+		self.test_app = 'scalr_test_application'
+		self.test_type = 'svn'
+		
 		super(DmDeployApplication, self).__init__(config, *args)
-		self.require(self.options.app_id, self.options.farm_role_id, self.options.remote_path)
+		if self.options.app_name == self.test_app:
+			self.require(self.options.app_id or self.options.app_name, self.options.farm_role_id)
+		else:
+			self.require(self.options.app_id or self.options.app_name, self.options.farm_role_id, self.options.remote_path)
 
 	@classmethod
 	def inject_options(cls, parser):
+		app_name_help = "The name of application could be used INSTEAD of ID. Use name 'scalr_test_application' to test deployment process on your role."
+		parser.add_option("-n", "--app-name", dest="app_name", default=None, help=app_name_help)
 		parser.add_option("-a", "--app-id", dest="app_id", help="Application ID")
 		parser.add_option("-r", "--farm-role-id", dest="farm_role_id", help="FarmRole ID")
-		parser.add_option("-p", "--remote-path", dest="remote_path", default=None, help="Remote path where to deploy the app")
+		parser.add_option("-p", "--remote-path", dest="remote_path", default='/var/www/', help="Remote path where to deploy the app. Default is /var/www/")
 	
 	def run(self):
-		args = (self.options.app_id, self.options.farm_role_id, self.options.remote_path)
-		print self.api_call(self.connection.dm_deploy_application, *args)
+		self.options.app_id = self.options.app_id or self.connection.get_application_id(self.options.app_name)
+		self.options.app_name = self.options.app_name or self.connection.get_application_name(self.options.app_id)
+		
+		if self.options.app_name == self.test_app:
+			self.run_test()
+			
+		else:
+			args = (self.options.app_id, self.options.farm_role_id, self.options.remote_path)
+			print self.pretty(self.connection.dm_deploy_application, *args)
+	
+	def run_test(self):
+		#check sources
+		sources = [source for source in self.connection.dm_list_sources() if source.url==self.test_url]
+		if sources:
+			sid = sources[0].id
+		else:
+			result = self.call_api_method(self.connection.dm_create_source,self.test_type, self.test_url, None, None)
+			print TableViewer(result)
+			sid = result[0].source_id
 
+		#check apps
+		apps = [app for app in self.connection.dm_list_applications() if app.source_id==sid]
+		if apps:
+			app_id = apps[0].id
+		else:
+			result = self.call_api_method(self.connection.dm_create_application,self.test_app, sid, None, None)
+			print TableViewer(result)
+			app_id = result[0].app_id
 
+		#deploy
+		args = (app_id, self.options.farm_role_id, self.options.remote_path)
+		tasks = self.call_api_method(self.connection.dm_deploy_application, *args)
+		print TableViewer(tasks)
+							
+		#check task status in loop
+		if not isinstance(tasks,ScalrAPIError) and tasks:
+			task = tasks[0]
+			for attempt in range(35):
+				try:
+					ts_list = self.connection.dm_get_deployment_task_status(task.task_id)
+					sys.stdout.write('.')
+					sys.stdout.flush()
+					if ts_list and ts_list[0].status == 'deployed':
+						pargs = (self.test_app, self.options.farm_role_id, self.options.remote_path)
+						print 'Test application %s has been successfully deployed on %s. You may check %s on instance to make shure.' % pargs
+						break
+					elif ts_list and ts_list[0].status == 'failed':
+						'Deployment process has failed.'
+						break
+					elif ts_list and ts_list[0].status == 'pending':
+						pass
+					elif ts_list and ts_list[0].status == 'deploying':
+						pass
+					elif ts_list:
+						print ts_list[0].status
+						
+					time.sleep(attempt)
+					
+				except (KeyboardInterrupt, SystemExit):
+					break
+			else:
+				print "Maximum number of attempts was reached. App has not been deployed yet."
+				
+		#show log
+		print self.pretty(self.connection.dm_get_deployment_task_log,task.task_id)
+		
+		
+class DmDeployApplicationAlias(DmDeployApplication):
+	name = 'deploy'
+	help = DmDeployApplication.help + '\nThis is an alias to dm-deploy-application command.'
+				
+	
 class DmListDeploymentTasks(Command):
 	name = 'dm-list-deployment-tasks'
 	help = '-r farm-role-id -a app-id -s server-id'
@@ -148,7 +249,7 @@ class DmListDeploymentTasks(Command):
 	
 	def run(self):
 		args = ( self.options.farm_role_id, self.options.app_id, self.options.server_id)
-		print self.api_call(self.connection.dm_list_deployment_tasks, *args)
+		print self.pretty(self.connection.dm_list_deployment_tasks, *args)
 		
 		
 class DmGetDeploymentTaskStatus(Command):
@@ -164,21 +265,21 @@ class DmGetDeploymentTaskStatus(Command):
 		parser.add_option("-t", "--task-id", dest="task_id", help="Deployment task ID")
 	
 	def run(self):
-		print self.api_call(self.connection.dm_get_deployment_task_status, self.options.task_id)		
+		print self.pretty(self.connection.dm_get_deployment_task_status, self.options.task_id)		
 		
 		
 class DmSourcesList(Command):
 	name = 'dm-list-sources'
 	
 	def run(self):
-		print self.api_call(self.connection.dm_list_sources)
+		print self.pretty(self.connection.dm_list_sources)
 		
 
 class DmApplicationsList(Command):
 	name = 'dm-list-applications'
 	
 	def run(self):
-		print self.api_call(self.connection.dm_list_applications)
+		print self.pretty(self.connection.dm_list_applications)
 
 
 class DmGetDeploymentTaskLog(Command):
@@ -197,28 +298,28 @@ class DmGetDeploymentTaskLog(Command):
 	
 	def run(self):
 		args = (self.options.task_id, self.options.start, self.options.limit)
-		print self.api_call(self.connection.dm_get_deployment_task_log, *args)
+		print self.pretty(self.connection.dm_get_deployment_task_log, *args)
 
 
 class DNSZonesList(Command):
 	name = 'list-dns-zones'
 	
 	def run(self):
-		print self.api_call(self.connection.list_dns_zones)
+		print self.pretty(self.connection.list_dns_zones)
 
 
 class FarmsList(Command):
 	name = 'list-farms'
 
 	def run(self):
-		print self.api_call(self.connection.list_farms)
+		print self.pretty(self.connection.list_farms)
 		
 
 class ScriptsList(Command):
 	name = 'list-scripts'
 	
 	def run(self):
-		print self.api_call(self.connection.list_scripts)
+		print self.pretty(self.connection.list_scripts)
 		
 		
 class DNSZoneRecordsList(Command):
@@ -234,46 +335,48 @@ class DNSZoneRecordsList(Command):
 		parser.add_option("-n", "--zone-name", dest="name", default=None, help="Zone (Domain) name")
 	
 	def run(self):
-		print self.api_call(self.connection.list_dns_zone_records, self.options.name)
+		print self.pretty(self.connection.list_dns_zone_records, self.options.name)
 
 
 class EventsList(Command):
 	name = 'list-events'
-	help = '-f farm-id [-s start-from -l limit]'
+	help = '{-f farm-id | -n name} [-s start-from -l limit]'
 
 	def __init__(self, config, *args):
 		super(EventsList, self).__init__(config, *args)
-		self.require(self.options.id)
+		self.require(self.options.farm_id)
 
 	@classmethod
 	def inject_options(cls, parser):
-		parser.add_option("-f", "--farm-id", dest="id", default=None, help="Farm ID")
+		parser.add_option("-f", "--farm-id", dest="farm_id", default=None, help="Farm ID")
+		parser.add_option("-n", "--farm-name", dest="farm_name", default=None, help="The name of farm could be used INSTEAD of ID")
 		parser.add_option("-s", "--start-from", dest="start", default=None, help="Start from specified event number (Can be used for paging)")
 		parser.add_option("-l", "--record-limit", dest="limit", default=None, help="Limit number of returned events (Can be used for paging)")
 	
 	def run(self):
-		args = (self.options.id, self.options.start, self.options.limit)
-		print self.api_call(self.connection.list_events, *args)
+		args = (self.options.farm_id, self.options.start, self.options.limit)
+		print self.pretty(self.connection.list_events, *args)
 
 
 class LogsList(Command):
 	name = 'list-logs'
-	help = '-f farm-id [-i server-id -s start-from -l limit]'
+	help = '{-f farm-id | -n name} [-i server-id -s start-from -l limit]'
 	
 	def __init__(self, config, *args):
 		super(LogsList, self).__init__(config, *args)
-		self.require(self.options.id)
+		self.require(self.options.farm_id)
 
 	@classmethod
 	def inject_options(cls, parser):
-		parser.add_option("-f", "--farm-id", dest="id", default=None, help="Farm ID")
+		parser.add_option("-f", "--farm-id", dest="farm_id", default=None, help="Farm ID")
+		parser.add_option("-n", "--farm-name", dest="farm_name", default=None, help="The name of farm could be used INSTEAD of ID")
 		parser.add_option("-i", "--server-id", dest="server_id", default=None, help="Instance ID")
 		parser.add_option("-s", "--start-from", dest="start", default=None, help="Start from specified event number (Can be used for paging)")
 		parser.add_option("-l", "--record-limit", dest="limit", default=None, help="Limit number of returned events (Can be used for paging)")
 	
 	def run(self):
-		args = (self.options.id, self.options.server_id, self.options.start, self.options.limit)
-		print self.api_call(self.connection.list_logs, *args)
+		args = (self.options.farm_id, self.options.server_id, self.options.start, self.options.limit)
+		print self.pretty(self.connection.list_logs, *args)
 
 
 class RolesList(Command):
@@ -289,7 +392,7 @@ class RolesList(Command):
 	
 	def run(self):
 		args = (self.options.platform, self.options.name, self.options.prefix, self.options.image_id)
-		print self.api_call(self.connection.list_roles, *args)
+		print self.pretty(self.connection.list_roles, *args)
 
 
 class ScriptGetDetails(Command):
@@ -298,14 +401,14 @@ class ScriptGetDetails(Command):
 
 	def __init__(self, config, *args):
 		super(ScriptGetDetails, self).__init__(config, *args)
-		self.require(self.options.id)
+		self.require(self.options.script_id)
 
 	@classmethod
 	def inject_options(cls, parser):
-		parser.add_option("-s", "--script-id", dest="id", default=None, help="Script ID")
+		parser.add_option("-s", "--script-id", dest="script_id", default=None, help="Script ID")
 	
 	def run(self):
-		print self.api_call(self.connection.get_script_details, self.options.id)
+		print self.pretty(self.connection.get_script_details, self.options.script_id)
 		
 
 class BundleTaskGetStatus(Command):
@@ -314,51 +417,53 @@ class BundleTaskGetStatus(Command):
 	
 	def __init__(self, config, *args):
 		super(BundleTaskGetStatus, self).__init__(config, *args)
-		self.require(self.options.id)
+		self.require(self.options.bt_id)
 
 	@classmethod
 	def inject_options(cls, parser):
-		parser.add_option("-i", "--bundle-task-id", dest="id", default=None, help="ID of the bundle task")
+		parser.add_option("-i", "--bundle-task-id", dest="bt_id", default=None, help="ID of the bundle task")
 	
 	def run(self):
-		print self.api_call(self.connection.get_bundle_task_status, self.options.id)
+		print self.pretty(self.connection.get_bundle_task_status, self.options.bt_id)
 		
 
 class FarmGetDetails(Command):
-	name = 'get-farm-details'
-	help = '-f farm-id'
+	name = 'list-farm-roles'
+	help = '{-f farm-id | -n name}'
 
 	def __init__(self, config, *args):
 		super(FarmGetDetails, self).__init__(config, *args)
-		self.require(self.options.id)
+		self.require(self.options.farm_id or self.options.farm_name)
 
 	@classmethod
 	def inject_options(cls, parser):
-		parser.add_option("-f", "--farm-id", dest="id", default=None, help="Farm ID")
+		parser.add_option("-f", "--farm-id", dest="farm_id", default=None, help="Farm ID")
+		parser.add_option("-n", "--farm-name", dest="farm_name", default=None, help="The name of farm could be used INSTEAD of ID")
 	
 	def run(self):
-		print self.api_call(self.connection.get_farm_details, self.options.id)	
+		print self.pretty(self.connection.get_farm_details, self.options.farm_id)
 
 
 class FarmRoleProperties(Command):
 	name = 'get-farm-role-properties'
-	help = '-f farm-id'
+	help = '{-f farm-id | -n name}'
 
 	def __init__(self, config, *args):
 		super(FarmRoleProperties, self).__init__(config, *args)
-		self.require(self.options.id)
+		self.require(self.options.farm_id)
 
 	@classmethod
 	def inject_options(cls, parser):
-		parser.add_option("-f", "--farm-id", dest="id", default=None, help="Farm ID")
+		parser.add_option("-f", "--farm-id", dest="farm_id", default=None, help="Farm ID")
+		parser.add_option("-n", "--farm-name", dest="farm_name", default=None, help="The name of farm could be used INSTEAD of ID")
 	
 	def run(self):
-		print self.api_call(self.connection.get_farm_role_properties, self.options.id)	
+		print self.pretty(self.connection.get_farm_role_properties, self.options.farm_id)	
 		
 		
 class ServerList(Command):
 	name = 'list-servers'
-	help = '-f farm-id -r farm-role-id'
+	help = '{-f farm-id | -n name} [-r farm-role-id]'
 
 	def __init__(self, config, *args):
 		super(ServerList, self).__init__(config, *args)
@@ -367,27 +472,29 @@ class ServerList(Command):
 	@classmethod
 	def inject_options(cls, parser):
 		parser.add_option("-f", "--farm-id", dest="farm_id", default=None, help="Farm ID")
+		parser.add_option("-n", "--farm-name", dest="farm_name", default=None, help="The name of farm could be used INSTEAD of ID")
 		parser.add_option("-r", "--farm-role-id", dest="farm_role_id", default=None, help="Farm Role ID")
 	
 	def run(self):
-		print self.api_call(self.connection.list_servers, self.options.farm_id, self.options.farm_role_id)	
+		print self.pretty(self.connection.list_servers, self.options.farm_id, self.options.farm_role_id)	
 		
 				
 class FarmGetStats(Command):
 	name = 'get-farm-stats'
-	help = '-f farm-id [-d date]'
+	help = '{-f farm-id | -n name} [-d date]'
 
 	def __init__(self, config, *args):
 		super(FarmGetStats, self).__init__(config, *args)
-		self.require(self.options.id)
+		self.require(self.options.farm_id)
 
 	@classmethod
 	def inject_options(cls, parser):
-		parser.add_option("-f", "--farm-id", dest="id", default=None, help="Farm ID")
+		parser.add_option("-f", "--farm-id", dest="farm_id", default=None, help="Farm ID")
+		parser.add_option("-n", "--farm-name", dest="farm_name", default=None, help="The name of farm could be used INSTEAD of ID")
 		parser.add_option("-d", "--date", dest="date", default=None, help="Date (mm-yyyy)")
 	
 	def run(self):
-		print self.api_call(self.connection.get_farm_stats, self.options.id,self.options.date)	
+		print self.pretty(self.connection.get_farm_stats, self.options.farm_id,self.options.date)	
 		
 
 class StatisticsGetGraphURL(Command):
@@ -396,20 +503,20 @@ class StatisticsGetGraphURL(Command):
 
 	def __init__(self, config, *args):
 		super(StatisticsGetGraphURL, self).__init__(config, *args)
-		self.require(self.options.obj_type, self.options.id, self.options.name, self.options.graph_type)
+		self.require(self.options.obj_type, self.options.obj_id, self.options.name, self.options.graph_type)
 
 	@classmethod
 	def inject_options(cls, parser):		
 		id_help = "In case if object type is instance ObjectID shoudl be server id, in case if object type is role ObjectID should be role id \
 		and in case if object type is farm ObjectID should be farm id"
 		parser.add_option("-o", "--object-type", dest="obj_type", default=None, help="Object type. Valid values are: role, server or farm")
-		parser.add_option("-i", "--object-id", dest="id", default=None, help=id_help)
+		parser.add_option("-i", "--object-id", dest="obj_id", default=None, help=id_help)
 		parser.add_option("-n", "--watcher-name", dest="name", default=None, help="Watcher name could be CPU, NET, MEM or LA")
 		parser.add_option("-g", "--graph-type", dest="graph_type", default=None, help="Graph type could be daily, weekly, monthly or yearly")
 	
 	def run(self):
-		args = (self.options.obj_type, self.options.id, self.options.name, self.options.graph_type)
-		print self.api_call(self.connection.get_statistics_graph_URL, *args)	
+		args = (self.options.obj_type, self.options.obj_id, self.options.name, self.options.graph_type)
+		print self.pretty(self.connection.get_statistics_graph_URL, *args)	
 
 
 class ServerTerminate(Command):
@@ -418,15 +525,15 @@ class ServerTerminate(Command):
 
 	def __init__(self, config, *args):
 		super(ServerTerminate, self).__init__(config, *args)
-		self.require(self.options.id)
+		self.require(self.options.server_id)
 
 	@classmethod
 	def inject_options(cls, parser):		
-		parser.add_option("-i", "--server-id", dest="id", default=None, help='ServerID')
+		parser.add_option("-i", "--server-id", dest="server_id", default=None, help='ServerID')
 		parser.add_option("-d", "--decrease-min-instances", dest="decrease", default=None, help='Decrease MinInstances setting for role (Default: 0)')
 	
 	def run(self):
-		print self.api_call(self.connection.terminate_server, self.options.id, self.options.decrease)			
+		print self.pretty(self.connection.terminate_server, self.options.server_id, self.options.decrease)			
 
 
 class ServerImageCreate(Command):
@@ -435,20 +542,20 @@ class ServerImageCreate(Command):
 
 	def __init__(self, config, *args):
 		super(ServerImageCreate, self).__init__(config, *args)
-		self.require(self.options.id, self.options.name)
+		self.require(self.options.server_id, self.options.name)
 
 	@classmethod
 	def inject_options(cls, parser):		
-		parser.add_option("-i", "--server-id", dest="id", default=None, help='ServerID')
+		parser.add_option("-i", "--server-id", dest="server_id", default=None, help='ServerID')
 		parser.add_option("-n", "--role-name", dest="name", default=None, help='Name for the new role')
 		
 	def run(self):
-		print self.api_call(self.connection.create_server_image, self.options.id, self.options.name)	
+		print self.pretty(self.connection.create_server_image, self.options.server_id, self.options.name)	
 	
 	
 class ServerLaunch(Command):
 	name = 'launch-server'
-	help = '-i farm-role-id'
+	help = '-i farm-role-id [--increase-max-instances]'
 
 	def __init__(self, config, *args):
 		super(ServerLaunch, self).__init__(config, *args)
@@ -457,50 +564,91 @@ class ServerLaunch(Command):
 	@classmethod
 	def inject_options(cls, parser):		
 		parser.add_option("-i", "--farm-role-id", dest="farm_role_id", default=None, help='FarmRoleID on which scalr should launch new instance')
+		parser.add_option("--increase-max-instances", dest="increase_max_instances", action="store_true", help='Increase min instances for this role')
 	
 	def run(self):
-		print self.api_call(self.connection.launch_server, self.options.farm_role_id)
+		print self.pretty(self.connection.launch_server, self.options.farm_role_id, self.options.increase_max_instances)
 	
-	
+		
 class FarmLaunch(Command):
 	name = 'launch-farm'
-	help = '-f farm-id'
+	help = '{-f farm-id | -n farm-name} [--non-interactive]'
 
 	def __init__(self, config, *args):
 		super(FarmLaunch, self).__init__(config, *args)
-		self.require(self.options.id)
+		self.require(self.options.farm_id)
 
 	@classmethod
 	def inject_options(cls, parser):		
-		parser.add_option("-f", "--farm-id", dest="id", default=None, help="The ID of farm that you want to launch")
-	
+		parser.add_option("-f", "--farm-id", dest="farm_id", default=None, help="The ID of farm that you want to launch")
+		parser.add_option("-n", "--farm-name", dest="farm_name", default=None, help="The name of farm could be used INSTEAD of ID")
+		parser.add_option("--non-interactive", dest="non_interactive", action="store_true", help="Use this option to avoid checking farm state")
+		
 	def run(self):
-		print self.api_call(self.connection.launch_farm, self.options.id)	
-	
-	
+		result = self.pretty(self.connection.launch_farm, self.options.farm_id)	
+		
+		if self.options.non_interactive:
+			print result
+		
+		elif not isinstance(result,ScalrAPIError):
+			print "Starting farm '%s'.." % self.options.farm_name,
+			for seconds in waits(60):
+				try:
+					status = self.connection.get_farm_status(self.options.farm_id)
+					sys.stdout.write('.')
+					sys.stdout.flush()
+					if status == 'Running':
+						print 'Started.' 
+						break
+					time.sleep(seconds)
+				except (KeyboardInterrupt, SystemExit):
+					break
+			else: 
+				print 'Cannot start farm. Please try again.'
+
 class FarmTerminate(Command):
 	name = 'terminate-farm'
-	help = '-f farm-id -e keep-ebs, -i keep-eip -d keep-dns-zone'
+	help = '{-f farm-id | -n farm-name} -e keep-ebs, -i keep-eip -d keep-dns-zone [--non-interactive]'
 
 	def __init__(self, config, *args):
 		super(FarmTerminate, self).__init__(config, *args)
-		self.require(self.options.id, self.options.keep_ebs, self.options.keep_eip, self.options.keep_dns_zone)
+		self.require(self.options.farm_id or self.options.farm_name, self.options.keep_ebs, self.options.keep_eip, self.options.keep_dns_zone)
 
 	@classmethod
 	def inject_options(cls, parser):		
-		parser.add_option("-f", "--farm-id", dest="id", default=None, help="The ID of farm that you want to terminate")
+		parser.add_option("-f", "--farm-id", dest="farm_id", default=None, help="The ID of farm that you want to terminate")
+		parser.add_option("-n", "--farm-name", dest="farm_name", default=None, help="The name of farm could be used INSTEAD of ID")
 		parser.add_option("-e", "--keep-ebs", dest="keep_ebs", default=None, help="Keep EBS volumes created for roles on this farm 0|1")
 		parser.add_option("-i", "--keep-eip", dest="keep_eip", default=None, help='Keep Elastic IPs created for roles on this farm 0|1')
 		parser.add_option("-d", "--keep-dns-zone", dest="keep_dns_zone", default=None, help="Keep DNS zone that assigned to this farm on nameservers 0|1")
+		parser.add_option("--non-interactive", dest="non_interactive", action="store_true", help="Use this option to avoid checking farm state")
 	
 	def run(self):
-		args = (self.options.id, self.options.keep_ebs, self.options.keep_eip, self.options.keep_dns_zone)
-		print self.api_call(self.connection.terminate_farm, *args)	
+		args = (self.options.farm_id, self.options.keep_ebs, self.options.keep_eip, self.options.keep_dns_zone)
+		result = self.pretty(self.connection.terminate_farm, *args)	
+
+		if self.options.non_interactive:
+			print result
 		
+		elif not isinstance(result,ScalrAPIError):
+			print "Stopping farm '%s'.." % self.options.farm_name,
+			for seconds in waits(60):
+				try:
+					status = self.connection.get_farm_status(self.options.farm_id)
+					sys.stdout.write('.')
+					sys.stdout.flush()
+					if status == 'Stopped':
+						print 'Stopped.'
+						break
+					time.sleep(seconds)
+				except (KeyboardInterrupt, SystemExit):
+					break
+			else: 
+				print 'Cannot stop farm. Please try again.'
 		
 class ScriptExecute(Command):
 	name = 'execute-script'
-	help = '-f farm-id -e script-id -a async -t timeout [-i farm-role-id -s server-id -r revision -v variables]'
+	help = '{-f farm-id | -n name} -e script-id -a async -t timeout [-i farm-role-id -s server-id -r revision -v variables]'
 	#TODO: Test passing variables  
 
 	def __init__(self, config, *args):
@@ -513,6 +661,7 @@ class ScriptExecute(Command):
 		parser.add_option("-i", "--farm-role-id", dest="farm_role_id", default=None, help=id_help)
 		parser.add_option("-s", "--server-id", dest="server_id", default=None, help="Script will be executed on this server")
 		parser.add_option("-f", "--farm-id", dest="farm_id", default=None, help="Execute script on specified farm")
+		parser.add_option("-n", "--farm-name", dest="farm_name", default=None, help="The name of farm could be used INSTEAD of ID")
 		parser.add_option("-e", "--script-id", dest="script_id", default=None, help="Script ID")
 		parser.add_option("-t", "--timeout", dest="timeout", default=None, help="Script execution timeout (seconds)")
 		parser.add_option("-a", "--async", dest="async", default=None, help="Excute script asynchronously (1) or synchronously (0)")
@@ -522,7 +671,7 @@ class ScriptExecute(Command):
 	def run(self):
 		args = (self.options.farm_id, self.options.script_id, self.options.timeout \
 					, self.options.async, self.options.farm_role_id, self.options.server_id, self.options.revision, self.options.variables)
-		print self.api_call(self.connection.execute_script, *args)	
+		print self.pretty(self.connection.execute_script, *args)	
 
 
 class ServerReboot(Command):
@@ -531,19 +680,19 @@ class ServerReboot(Command):
 
 	def __init__(self, config, *args):
 		super(ServerReboot, self).__init__(config, *args)
-		self.require(self.options.id)
+		self.require(self.options.server_id)
 
 	@classmethod
 	def inject_options(cls, parser):
-		parser.add_option("-s", "--server-id", dest="id", default=None, help="Server ID")
+		parser.add_option("-s", "--server-id", dest="server_id", default=None, help="Server ID")
 	
 	def run(self):
-		print self.api_call(self.connection.reboot_server, self.options.id)	
+		print self.pretty(self.connection.reboot_server, self.options.server_id)	
 
 
 class DNSZoneCreate(Command):
 	name = 'create-dns-zone'
-	help = '-n domain-name [-f farm-id -i farm-role-id]'
+	help = '-d domain-name [{-f farm-id | -n farm-name} -i farm-role-id]'
 
 	def __init__(self, config, *args):
 		super(DNSZoneCreate, self).__init__(config, *args)
@@ -551,12 +700,13 @@ class DNSZoneCreate(Command):
 
 	@classmethod
 	def inject_options(cls, parser):
-		parser.add_option("-n", "--domain-name", dest="name", default=None, help="Domain (Application) name")
+		parser.add_option("-d", "--domain-name", dest="name", default=None, help="Domain (Application) name")
 		parser.add_option("-f", "--farm-id", dest="farm_id", default=None, help="Farm ID")
+		parser.add_option("-n", "--farm-name", dest="farm_name", default=None, help="The name of farm could be used INSTEAD of ID")
 		parser.add_option("-i", "--farm-role-id", dest="farm_role_id", default=None, help="Farm Role ID")
 	
 	def run(self):
-		print self.api_call(self.connection.create_dns_zone, self.options.name, self.options.farm_id, self.options.farm_role_id)		
+		print self.pretty(self.connection.create_dns_zone, self.options.name, self.options.farm_id, self.options.farm_role_id)		
 	
 	
 class DNSZoneRecordAdd(Command):
@@ -582,7 +732,7 @@ class DNSZoneRecordAdd(Command):
 	def run(self):
 		args = (self.options.zone_name, self.options.type, self.options.ttl, self.options.record_name, self.options.record_value,
 				self.options.priority, self.options.weight, self.options.port)
-		print self.api_call(self.connection.add_dns_zone_record, *args)	
+		print self.pretty(self.connection.add_dns_zone_record, *args)	
 
 
 class DNSZoneRecordRemove(Command):
@@ -591,20 +741,20 @@ class DNSZoneRecordRemove(Command):
 
 	def __init__(self, config, *args):
 		super(DNSZoneRecordRemove, self).__init__(config, *args)
-		self.require(self.options.name, self.options.id)
+		self.require(self.options.name, self.options.record_id)
 
 	@classmethod
 	def inject_options(cls, parser):
 		parser.add_option("-n", "--domain-name", dest="name", default=None, help="Domain (Application) name")
-		parser.add_option("-i", "--record-id", dest="id", default=None, help="Record ID")
+		parser.add_option("-i", "--record-id", dest="record_id", default=None, help="Record ID")
 	
 	def run(self):
-		print self.api_call(self.connection.remove_dns_zone_record, self.options.name, self.options.id)			
+		print self.pretty(self.connection.remove_dns_zone_record, self.options.name, self.options.record_id)			
 
 	
 class ApacheVhostCreate(Command):
 	name = 'create-apache-vhost'
-	help = '-d domain-name -f farm-id -i farm-role-id -r document-root -s enable-ssl [-k key-path -c cert-path]'
+	help = '-d domain-name {-f farm-id | -n name} -i farm-role-id -r document-root -s enable-ssl [-k key-path -c cert-path]'
 	
 	def __init__(self, config, *args):
 		super(ApacheVhostCreate, self).__init__(config, *args)
@@ -615,6 +765,7 @@ class ApacheVhostCreate(Command):
 	def inject_options(cls, parser):
 		parser.add_option("-d", "--domain-name", dest="domain", default=None, help="Domain (Application) name")
 		parser.add_option("-f", "--farm-id", dest="farm_id", default=None, help="Farm ID")
+		parser.add_option("-n", "--farm-name", dest="farm_name", default=None, help="The name of farm could be used INSTEAD of ID")
 		parser.add_option("-i", "--farm-role-id", dest="farm_role_id", default=None, help="Farm Role ID")
 		parser.add_option("-r", "--document-root-dir", dest="document_root", default=None, help="Document root for virtualhost")
 		parser.add_option("-s", "--enable-ssl", dest="enable_ssl", default=None, help="EnableSSL (1 - yes, 0 - no)")
@@ -641,7 +792,7 @@ class ApacheVhostCreate(Command):
 				pk = open(self.options.pk_path, 'r').read()
 				
 		args = (self.options.domain, self.options.farm_id, self.options.farm_role_id, self.options.document_root, self.options.enable_ssl, pk, cert)
-		print self.api_call(self.connection.create_apache_vhost, *args)	
+		print self.pretty(self.connection.create_apache_vhost, *args)	
 		
 	
 class ConfigureEnv(Command):
@@ -656,7 +807,7 @@ class ConfigureEnv(Command):
 	def inject_options(cls, parser):
 		parser.add_option("-i", "--key-id", dest="key_id", default=None, help="Scalr API key ID")
 		parser.add_option("-a", "--access-key", dest="key", default=None, help="Scalr API access key")
-		parser.add_option("-u", "--api-url", dest="api_url", default=None, help="Scalr API URL")
+		parser.add_option("-u", "--api-url", dest="api_url", default=DEFAULT_API_URL, help="Scalr API URL (IF you use open source Scalr installation)")
 		
 	def run(self):		
 		e = Environment(url=self.options.api_url,
@@ -665,19 +816,49 @@ class ConfigureEnv(Command):
 				api_version = '2.3.0')
 		
 		e.write(self.config.base_path)
-		
 		e = Environment.from_ini(self.config.base_path)
+		print e
+
+
+class ShowConfig(Command):
+	name = 'show-config'
 		
-		column_names = ('setting','value')
-		table = PrettyTable(column_names)
-		for field in column_names:
-			table.set_field_align(field, 'l')		
+	def run(self):		
+		e = Environment.from_ini(self.config.base_path)
+		print e
 		
-		table.add_row(('url', e.url))
 		
-		visible_length = 26
-		table.add_row(('access key', e.key[:visible_length]+'...' if len(e.key)>40 else e.key))
-		table.add_row(('key id', e.key_id))
-		table.add_row(('version', e.api_version))
-		
-		print table
+def waits(n):
+	num = 0
+	sum = 0
+	while sum <= n:
+		yield num
+		num += 1
+		sum += num
+
+'''
+class CountDownTimer(threading.Thread):
+
+	def __init__(self, seconds):
+		self.runTime = seconds
+		threading.Thread.__init__(self)
+
+	def run(self):
+		counter = self.runTime
+		for sec in range(self.runTime):
+			print counter
+			time.sleep(1.0)
+			counter -= 1
+		else:
+			pass
+	
+	def stop(self):
+		pass
+
+class BasicProgressBar(object):
+	def __init__(self, callback=None, callback_kwargs=None, counts=None, sleeptime=None, exithook=None, hook_kwargs=None):
+		t = CountDownTimer(counts)
+		t.run()
+		result = callback(**callback_kwargs)
+		t.stop()
+'''

@@ -35,13 +35,14 @@ class Page(object):
 
 class ScalrObject(object):
 	__titles__ = None
+	__aliases__ = None
 	
 	def __init__(self, **kwargs):
 		for key, value in kwargs.items():
 			if hasattr(self, key):
 				setattr(self, key, value)
 	
-	
+
 	@classmethod
 	def parse_response(cls,xml):
 		result = {}
@@ -82,6 +83,91 @@ class ScalrObject(object):
 		return cls(**kv)
 
 
+class DynamicScalrObject(ScalrObject):
+	data = None
+	__title__ = None
+
+	@classmethod
+	def parse_response(cls,xml):
+		elements = xml.getElementsByTagName(cls.__title__)
+		
+		if not elements: 
+			return {}
+		
+		parent_node = elements[0]
+		
+		if parent_node.hasChildNodes and parent_node.firstChild:
+				
+			internal_vars = {}
+			for child in parent_node.childNodes:
+				if child.hasChildNodes and child.firstChild and '#text'==child.firstChild.nodeName:
+					value = child.firstChild.nodeValue.strip() 
+					internal_vars[str(child.nodeName)] = str(value)
+			return internal_vars
+	
+
+class ServerPlatformProperties(DynamicScalrObject):
+	__title__ = 'ServerPlatformProperties'
+	
+	
+class ServerInfo(ScalrObject):
+	__titles__ = OrderedDict()
+	__titles__['server_id'] = 'ServerID'
+	__titles__['platform'] = 'Platform'
+	__titles__['remote_ip'] = 'RemoteIP'
+	__titles__['local_ip'] = 'LocalIP'
+	__titles__['status'] = 'Status'
+	__titles__['index'] = 'Index'
+	__titles__['added_at'] = 'AddedAt'
+	
+	
+	server_id = None
+	platform = None
+	remote_ip = None
+	local_ip = None
+	status = None
+	index = None	
+	added_at = None	
+
+'''
+class ServerPlatformProperties(ScalrObject):
+	
+	__titles__ = OrderedDict()
+	__titles__['instance_id'] = 'InstanceID'
+	__titles__['owner_id'] = 'OwnerID'
+	__titles__['imageid_ami'] = 'ImageIDAMI'
+	__titles__['public_dns_name'] = 'PublicDNSname'
+	__titles__['private_dns_name'] = 'PrivateDNSname'
+	__titles__['public_ip'] = 'PublicIP'
+	__titles__['private_ip'] = 'PrivateIP'
+	__titles__['keyname'] = 'Keyname'
+	__titles__['ami_launch_index'] = 'AMIlaunchindex'
+	__titles__['instance_type'] = 'Instancetype'
+	__titles__['launch_time'] = 'Launchtime'
+	__titles__['architecture'] = 'Architecture'
+	__titles__['root_device_type'] = 'Rootdevicetype'
+	__titles__['instance_state'] = 'Instancestate'
+	__titles__['placement'] = 'Placement'
+	__titles__['security_groups'] = 'Securitygroups'	
+	
+	instance_id = None
+	owner_id = None
+	imageid_ami = None
+	public_dns_name = None
+	private_dns_name = None
+	public_ip = None	
+	private_ip = None	
+	keyname = None
+	ami_launch_index = None
+	instance_type = None
+	launch_time = None
+	architecture = None
+	root_device_type = None	
+	instance_state = None	
+	placement = None	
+	security_groups = None	
+'''
+
 class FarmRole(ScalrObject):
 	__titles__ = OrderedDict()
 	__titles__['farm_role_id'] = 'ID'
@@ -113,28 +199,35 @@ class FarmRoleProperties(ScalrObject):
 	platform_properties = None
 	mysql_properties = None
 	scaling_properties = None
-	
+	servers = None
+			
 	@classmethod
 	def fromxml (cls, xml):	
 		kv = cls.parse_response(xml)
+		
+		servers = xml.getElementsByTagName('ServerSet')[0].childNodes
+		if servers:
+			kv['servers'] = [Server.fromxml(child) for child in servers]
+			
 		if kv and kv.has_key('mysql_properties'): 
 			mp = kv['mysql_properties']
 			if mp and mp.has_key('LastBackupTime'):
 				mp['LastBackupTime'] = pretty_time(mp['LastBackupTime'])
+				
 		return cls(**kv)
 
 		
 class Server(ScalrObject):
 	__titles__ = OrderedDict()
-	__titles__['server_id'] = 'ServerID'
 	__titles__['external_ip'] = 'ExternalIP'
 	__titles__['internal_ip'] = 'InternalIP'
-	__titles__['status'] = 'Status'
-	__titles__['scalarizr_version'] = 'ScalarizrVersion'
-	__titles__['uptime'] = 'Uptime'
-	__titles__['platform_properties'] = 'PlatformProperties'
+	__titles__['server_id'] = 'ServerID'
 	__titles__['name'] = 'Name'
 	__titles__['farm_role_id'] = 'ID'
+	__titles__['status'] = 'Status'
+	__titles__['uptime'] = 'Uptime'
+	__titles__['scalarizr_version'] = 'ScalarizrVersion'
+	__titles__['platform_properties'] = 'PlatformProperties'
 	
 	server_id = None
 	platform_properties = None
@@ -146,6 +239,42 @@ class Server(ScalrObject):
 	
 	name = None
 	farm_role_id = None	
+	
+	__aliases__ = dict(ScalarizrVersion = 'Agent')
+
+	@classmethod
+	def parse_response(cls,xml):
+		result = {}
+		for key,tag in cls.__titles__.items():
+			elements = xml.getElementsByTagName(tag)
+			#print elements
+			
+			if not elements: 
+				continue 
+			
+			parent_node = elements[0]
+			if parent_node.hasChildNodes and parent_node.firstChild:
+				
+				#parent node has only one text child 
+				if '#text' == parent_node.firstChild.nodeName:
+					result[key] = parent_node.firstChild.nodeValue.strip() if parent_node else None
+				
+				#parent node has has many Items, each has one child with text child node	
+				elif 'Item' == parent_node.firstChild.nodeName:
+					vars = []
+					for item in parent_node.childNodes:
+						vars.append(item.firstChild.firstChild.nodeValue.strip())
+					result[key] = vars
+					
+				#parent node has has many childs, each has one text child	
+				else:
+					internal_vars = {}
+					for child in parent_node.childNodes:
+						if child.hasChildNodes and child.firstChild and '#text'==child.firstChild.nodeName:
+							value = child.firstChild.nodeValue.strip() 
+							internal_vars[str(child.nodeName)] = str(value)
+					result[key] = internal_vars
+		return result	
 	
 	
 class Source(ScalrObject):
@@ -167,7 +296,6 @@ class SourceID(ScalrObject):
 	
 	
 class Application(ScalrObject):
-	#TODO: check members
 	__titles__ = OrderedDict()
 	__titles__['id'] = 'ID'
 	__titles__['name'] = 'Name'
@@ -228,6 +356,12 @@ class Result(ScalrObject):
 	__titles__ = {'result' : 'Result'}
 	result = None
 
+	@classmethod
+	def fromxml (cls, xml):	
+		kv = cls.parse_response(xml)
+		if kv['result'] == '1':
+			kv['result'] = 'Success'
+		return Result(**kv)	
 
 class ServerID(ScalrObject):
 	__titles__ = {'server_id' : 'ServerID'}

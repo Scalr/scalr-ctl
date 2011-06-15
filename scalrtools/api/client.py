@@ -79,7 +79,6 @@ class ScalrConnection(object):
 						% (host, port, str(e)))
 
 		resp_body = response.read()
-		
 		self._logger.debug("SCALR RESPONSE: \n%s", resp_body)
 		
 		# Parse XML response
@@ -203,13 +202,65 @@ class ScalrConnection(object):
 		"""
 		return self._request("ScriptsList", response_reader=self._read_list_scripts_response)
 	
+	
 	def list_farms(self):
 		"""
 		@return Farm[]
 		"""
 		return self._request("FarmsList", response_reader=self._read_list_farms_response)
+			
+			
+	def get_farm_status(self, id=None, name=None):
+		"""
+		@return String
+		"""
+		assert id or name
+		for farm in self.list_farms():
+			if farm.id == id or (name and farm.name == name):
+				return farm.status
+		return None
 	
 	
+	def get_farm_id(self, name):
+		"""
+		@return String
+		"""
+		for farm in self.list_farms():
+			if farm.name == name:
+				return farm.id
+		return None
+	
+	
+	def get_farm_name(self, id):
+		"""
+		@return String
+		"""
+		for farm in self.list_farms():
+			if farm.id == id:
+				return farm.name
+		return None
+	
+	
+	def get_application_id(self, name):
+		"""
+		@return String
+		"""
+		for app in self.dm_list_applications():
+			if app.name == name:
+				return app.id
+		return None
+	
+	
+	def get_application_name(self, name):
+		"""
+		@return String
+		"""
+		for app in self.dm_list_applications():
+			if app.id == name:
+				return app.name
+		return None
+	
+			
 	def list_roles(self, platform=None, name=None, prefix=None, image_id=None):
 		"""
 		@return Role[]
@@ -345,13 +396,14 @@ class ScalrConnection(object):
 		return self._request(command="ServerImageCreate", params=params, response_reader=self._read_create_server_image_response)	
 	
 		
-	def launch_server(self, farm_role_id):
+	def launch_server(self, farm_role_id, increase_max_instances=False):
 		"""
 		@return ServerID
 		"""
 		params = {}
 		
 		params['FarmRoleID']= farm_role_id
+		params['IncreaseMaxInstances'] = '1' if increase_max_instances else '0'
 		
 		return self._request(command="ServerLaunch", params=params, response_reader=self._read_launch_server_response)	
 
@@ -469,7 +521,17 @@ class ScalrConnection(object):
 		params = {}
 		
 		params['FarmID'] = farm_id
-		servers = self._request(command="FarmGetDetails", params=params, response_reader=self._read_list_servers_response)
+		#servers = self._request(command="FarmGetDetails", params=params, response_reader=self._read_list_servers_response)
+		roles = self._request(command="FarmGetDetails", params=params, response_reader=self._read_get_farm_role_properties_response)
+		servers = []
+		for role in roles:
+			if role.servers:
+				for server in role.servers:
+					server.name = role.name
+					server.farm_role_id = role.farm_role_id
+					servers.append(server)
+				
+			
 		if farm_role_id:
 			for server in servers:
 				if server.farm_role_id != farm_role_id:
@@ -575,7 +637,7 @@ class ScalrConnection(object):
 	
 	
 	def _read_list_servers_response(self, xml):
-		return self._read_response(xml, node_name='FarmRoleSet', cls=types.Server)	
+		return self._read_response(xml, node_name='ServerSet', cls=types.Server) # FarmRoleSet
 	
 		
 	def _read_get_bundle_task_status_response(self, xml):
@@ -643,18 +705,27 @@ class ScalrConnection(object):
 
 			if simple_response:
 				ret.append(cls.fromxml(response))
-			else:			
+			else:
+				#utterly experimental, can ruin everything
+				for node in xml.getElementsByTagName(node_name):
+					for child in node.childNodes:
+						ret.append(cls.fromxml(child))
+						
+				'''	
+				#this block of code was substituted by experemental one
 				for child in response.childNodes:
+					
 					if node_name == child.nodeName:
 						obj_set = child.childNodes
 						for node in obj_set:
 							ret.append(cls.fromxml(node))
+				'''
 						
 			if wrap_page:
 				page = types.Page.fromxml(response)
 				page.scalr_objects = ret
 				return page
-
+		#print ret
 		return ret
 
 				
