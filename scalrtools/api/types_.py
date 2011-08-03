@@ -177,6 +177,7 @@ class FarmRole(ScalrObject):
 	__titles__['category'] = 'Category'
 	__titles__['cloud_location'] = 'CloudLocation'
 	
+	__aliases__ = dict(ID = 'FarmRoleID')
 	
 	farm_role_id = None
 	role_id = None

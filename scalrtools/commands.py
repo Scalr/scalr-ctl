@@ -211,7 +211,7 @@ class DmDeployApplication(Command):
 							status = ts_list[0].status
 						
 							if status == 'deployed':
-								print "Test application has been successfully deployed on server %s." % task.server_id
+								print "Application '%' has been successfully deployed on server %s." % (self.options.app_name, task.server_id)
 								break
 							
 							elif status == 'failed':
