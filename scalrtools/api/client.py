@@ -544,7 +544,7 @@ class ScalrConnection(object):
 		@return Result
 		"""
 		params = {}
-		params['AuthVersion'] = '2'
+		#params['AuthVersion'] = '2'
 		params['FarmID'] = farm_id
 		params['ScriptID'] = script_id
 		params['Timeout'] = timeout
