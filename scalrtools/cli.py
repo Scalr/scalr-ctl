@@ -49,6 +49,7 @@ def main():
 	parser.add_option("-i", "--key-id", dest="key_id", default=None, help="Scalr API key ID")
 	parser.add_option("-a", "--access-key", dest="key", default=None, help="Scalr API access key")
 	parser.add_option("-u", "--api-url", dest="api_url", default=commands.DEFAULT_API_URL, help="Scalr API URL (IF you use open source Scalr installation)")
+	parser.add_option("-e", "--env-id", dest="env_id", default=None, help="Scalr Environment ID")
 	parser.add_option("-h", "--help", dest="help", action="store_true", help="Help")
 	
 	args, cmd, subargs = split_options(sys.argv)
@@ -66,7 +67,7 @@ def main():
 
 	try:
 		c = Configuration(options.base_path)
-		c.set_environment(options.key, options.key_id, options.api_url)
+		c.set_environment(options.key, options.key_id, options.api_url, options.env_id)
 		
 		if options.debug:
 			c.set_logger(logger)

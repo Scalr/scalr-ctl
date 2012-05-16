@@ -26,10 +26,11 @@ class ScalrConnection(object):
 	implements Scalr API
 	'''
 
-	def __init__(self, url, key_id, access_key, api_version=None, logger=None):
+	def __init__(self, url, key_id, access_key, env_id=None, api_version=None, logger=None):
 		self.url = url
 		self.key_id  = key_id
 		self.access_key = access_key
+		self.env_id = env_id
 		self.api_version = api_version 
 		self._logger = logger or logging.getLogger(__name__)
 		self.last_transaction_id = None
@@ -45,6 +46,8 @@ class ScalrConnection(object):
 		request_body["Version"] = self.api_version
 		request_body["KeyID"] = self.key_id
 		request_body['AuthVersion'] = '3'
+		if self.env_id:
+			request_body['EnvID'] = self.env_id
 		#request_body['SysDebug'] = '1'
 		
 		if {} != params :
@@ -555,6 +558,13 @@ class ScalrConnection(object):
 		if revision: params['Revision'] = revision
 		
 		return self._request(command="ScriptExecute", params=params, response_reader=self._read_execute_script_response)
+
+	
+	def list_environments(self):
+		"""
+		@return Environment[]
+		"""
+		return self._request("EnvironmentsList", response_reader=self._read_list_environments_response)
 			
 			
 	def _read_dm_create_source_response(self, xml):
@@ -692,6 +702,9 @@ class ScalrConnection(object):
 		return self._read_response(xml, node_name='ExecuteScriptResponse', cls=types.Result, simple_response=True)	
 	
 	
+	def _read_list_environments_response(self, xml):
+		return self._read_response(xml, node_name='EnvironmentSet', cls=types.Environment)
+		
 
 	def _read_response(self, xml, node_name, cls, wrap_page=False, simple_response=False):
 		response = xml.documentElement

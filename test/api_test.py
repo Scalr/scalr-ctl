@@ -30,7 +30,7 @@ class TestScalrConnection(unittest.TestCase):
 		pass
 	
 
-	def test_error_response(self):
+	def _test_error_response(self):
 		response = open('test/resources/Error.xml').read()
 		xml = xml_strip(parseString(response))
 		self.assertRaises(ScalrAPIError,self.conn._read_get_farm_stats_response,(xml))
@@ -493,9 +493,25 @@ class TestScalrConnection(unittest.TestCase):
 		
 		print '\nLast TransactionID: %s' % self.conn.last_transaction_id
 		print TableViewer(response)
+
+
+	def test__read_list_environments_response(self):
+		response = open('test/resources/EnvironmentsListResponse.xml').read()
+		xml = xml_strip(parseString(response))
+		response = self.conn._read_list_environments_response(xml)
 		
-	
-	def test_fetch_from_local_v4(self):
+		self.assertEqual(len(response), 7)
+		
+		env = response[-1]
+
+		self.assertEquals(env.name, 'Eucalyptus')
+		self.assertEquals(env.id, '7691')
+
+		print '\nLast TransactionID: %s' % self.conn.last_transaction_id
+		print TableViewer(response)
+		
+			
+	def _test_fetch_from_local_v4(self):
 			
 	    response = self.conn.fetch('ServerGetExtendedInformation', ServerID='ef883132-69be-4643-a705-0d2df10b2edd')
 	    print response.toprettyxml()
@@ -549,7 +565,6 @@ class TestScalrConnection(unittest.TestCase):
 		'''
 		pass
 	
-        				
 	def _test_fetch_from_local(self):
 
 		response = self.conn.fetch('DNSZoneRecordRemove', ZoneName='dima-test.com', RecordID='110')
@@ -676,7 +691,16 @@ class TestScalrConnection(unittest.TestCase):
 		file = open('test/resources/ApacheVhostCreateResponse.xml','w')
 		file.write(response.toprettyxml())
 		file.close()
-	
+
+
+	def _test_fetch_from_scalr_test_v2(self):		
+		response = self.conn.fetch('EnvironmentsList')
+		print response.toprettyxml()
+		file = open('test/resources/EnvironmentsListResponse.xml','w')
+		file.write(response.toprettyxml())
+		file.close()	
+		
+		
 	
 	def _test_fetch_from_scalr_admin(self):
 
@@ -715,7 +739,6 @@ class TestScalrConnection(unittest.TestCase):
 		file = open('test/resources/DNSZonesListResponse.xml','w')
 		file.write(response.toprettyxml())
 		
-				
 				
 if __name__ == "__main__":
 	unittest.main()

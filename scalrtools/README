@@ -1,0 +1,8 @@
+Scalr is a command-line interface to your Scalr account
+
+version 0.3.19
+codename: shawarma
+[+] added list-environments command
+[+] added scalr environment id as configuration parameter
+[+] added parameter --env-id parameter
+[+] fixed: cmd parameters must have priority over parameters in config

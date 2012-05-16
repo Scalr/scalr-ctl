@@ -9,10 +9,9 @@ from setuptools import setup, find_packages
 
 description = "Scalr is a command-line interface to your Scalr account"
 
-
 cfg = dict(
 	name = "scalr",
-	version = "0.3.17",	 
+	version = "0.3.19",	 
 	description = description,
 	long_description = description,
 	author = "Scalr Inc.",
@@ -23,6 +22,7 @@ cfg = dict(
 	packages = find_packages(),
 	scripts=['bin/scalr'],
 	install_requires = ["prettytable"],
+	long_description=read('README')
 )
 setup(**cfg)
 

@@ -556,6 +556,15 @@ class VirtualHost(ScalrObject):
 	is_ssl_enabled = None
 	last_modified_at = None
 	
+	
+class Environment(ScalrObject):
+	__titles__ = OrderedDict()
+	__titles__['id'] = 'ID'
+	__titles__['name'] = 'Name'
+	
+	id = None
+	name = None
+	
 
 def get_items_first_child(xml,tag): 
 	elements = xml.getElementsByTagName(tag)

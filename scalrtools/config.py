@@ -47,21 +47,19 @@ class ConfigSection(object):
 			
 	@classmethod
 	def from_ini(cls, base_path, section):
+		obj = cls()
 		path = os.path.join(base_path, cls.config_name)
 		
-		if not os.path.exists(path):
-			raise ScalrCfgError('%s: Config file not found.' % path)
+		if os.path.exists(path):
+			config = ConfigParser()	
+			config.read(path)
+			setattr(obj, 'name', section)
 		
-		config = ConfigParser()	
-		config.read(path)
-		obj = cls()
-		setattr(obj, 'name', section)
-		
-		for option in cls.options:
-			try:
-				setattr(obj, option, config.get(section, cls.options[option]))
-			except (NoSectionError, NoOptionError), e:
-				raise ScalrCfgError('%s in %s'%(e, path))
+			for option in cls.options:
+				try:
+					setattr(obj, option, config.get(section, cls.options[option]))
+				except (NoSectionError, NoOptionError), e:
+						continue
 		return obj
 
 	
@@ -69,6 +67,7 @@ class Environment(ConfigSection):
 	url=None
 	key_id=None
 	key=None
+	env_id = None
 	api_version = None	
 	
 	config_name = 'config.ini'
@@ -77,6 +76,7 @@ class Environment(ConfigSection):
 			url = 'scalr_url',
 			key_id = 'scalr_key_id',
 			key = 'scalr_api_key',
+			env_id = 'env_id',
 			api_version = 'version')
 	
 	def write(self, base_path, section='api'):
@@ -98,6 +98,7 @@ class Environment(ConfigSection):
 		table.add_row(('url', self.url))
 		table.add_row(('access key', self.key[:visible_length]+'...' if len(self.key)>40 else self.key))
 		table.add_row(('key id', self.key_id))
+		table.add_row(('environment id', self.env_id))
 		table.add_row(('version', self.api_version))
 		return str(table)
 	
@@ -117,15 +118,17 @@ class Configuration:
 
 	def set_logger(self, logger):
 		self.logger = logger
-				
-	def set_environment(self, key, key_id, url):
-		if key and key_id and url:
-			self.environment = Environment(key=key, key_id=key_id, url=url)
-	
-		try:
-			self.environment = Environment.from_ini(self.base_path)
-		except ScalrCfgError:
-			raise ScalrEnvError('Environment not set.')
+
+	def set_environment(self, key, key_id, url, env_id=None):	
+		self.environment = Environment.from_ini(self.base_path)
+		if key:
+			self.environment.key = key
+		if key_id:
+			self.environment.key_id = key_id
+		if url:
+			self.environment.url = url
+		if env_id:
+			self.environment.env_id = env_id
 		
-		if not self.environment or not self.environment.key or not self.environment.key_id or not self.environment.url:
+		if not self.environment.key or not self.environment.key_id or not self.environment.url:
 			raise ScalrEnvError('Environment not set.')
