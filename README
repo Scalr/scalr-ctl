@@ -1,8 +1,30 @@
-Scalr is a command-line interface to your Scalr account
+version 0.3.21
+codename: baklava
+
+[+] fixed variables in 'execute-script' command
+
+
+-------------
+
+
+version 0.3.20
+codename: samsa
+
+[+] minor fixes
+
+[+] fixed description
+
+
+--------------
+
 
 version 0.3.19
 codename: shawarma
+
 [+] added list-environments command
+
 [+] added scalr environment id as configuration parameter
+
 [+] added parameter --env-id parameter
+
 [+] fixed: cmd parameters must have priority over parameters in config

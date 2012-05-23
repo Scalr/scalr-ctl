@@ -677,7 +677,7 @@ class ScriptExecute(Command):
 	
 	def run(self):
 		args = (self.options.farm_id, self.options.script_id, self.options.timeout \
-					, self.options.async, self.options.farm_role_id, self.options.server_id, self.options.revision, self.options.variables)
+					, self.options.async, self.options.farm_role_id, self.options.server_id, self.options.variables, self.options.revision)
 		print self.pretty(self.connection.execute_script, *args)	
 
 
