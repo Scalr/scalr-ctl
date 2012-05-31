@@ -1,3 +1,26 @@
+
+version 0.3.23
+codename: Khachapuri
+
+[+] handful of fixes
+
+
+-------------
+
+
+version 0.3.22
+codename: belyashi
+
+[+] new format for 'execute-script' variables. 
+
+Example: scalr execute-script <...> -v k1=v1,k2=v2
+
+[+] Help command fixed
+
+
+-------------
+
+
 version 0.3.21
 codename: baklava
 

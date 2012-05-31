@@ -660,7 +660,7 @@ class ScriptExecute(Command):
 
 	def __init__(self, config, *args):
 		super(ScriptExecute, self).__init__(config, *args)
-		self.require(self.options.farm_id, self.options.script_id, self.options.async, self.options.timeout)
+		self.require(self.options.farm_id, self.options.script_id, self.options.mode, self.options.timeout)
 
 	@classmethod
 	def inject_options(cls, parser):		
@@ -671,13 +671,25 @@ class ScriptExecute(Command):
 		parser.add_option("-n", "--farm-name", dest="farm_name", default=None, help="The name of farm could be used INSTEAD of ID")
 		parser.add_option("-e", "--script-id", dest="script_id", default=None, help="Script ID")
 		parser.add_option("-t", "--timeout", dest="timeout", default=None, help="Script execution timeout (seconds)")
-		parser.add_option("-a", "--async", dest="async", default=None, help="Excute script asynchronously (1) or synchronously (0)")
+		parser.add_option("-a", "--async", dest="mode", default=None, help="Excute script asynchronously (1) or synchronously (0)")
 		parser.add_option("-r", "--revision", dest="revision", default=None, help="Execute specified revision of script")
-		parser.add_option("-v", "--variables", dest="variables", default=None, help="Script variables")
+		parser.add_option("-v", "--variables", dest="variables", default=None, help="Script variables.Example: key1=value1,key2=value2")
+	
+	def parse_variables(self, vars):
+		'''
+		k1=v1;k2=v2 -> dict(k1=v1,k2=v2)
+		'''
+		
+		s = {}
+		for pair in vars.split(','):
+			k,v = pair.split('=')
+			s[k] = v
+		return s
+
 	
 	def run(self):
 		args = (self.options.farm_id, self.options.script_id, self.options.timeout \
-					, self.options.async, self.options.farm_role_id, self.options.server_id, self.options.variables, self.options.revision)
+				, self.options.mode, self.options.farm_role_id, self.options.server_id, self.parse_variables(self.options.variables), self.options.revision)
 		print self.pretty(self.connection.execute_script, *args)	
 
 
