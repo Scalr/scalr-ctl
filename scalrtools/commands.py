@@ -12,8 +12,6 @@ from ConfigParser import ConfigParser
 from optparse import OptionParser, TitledHelpFormatter
 from shutil import copyfile
 
-from prettytable import PrettyTable	
-
 from config import Environment
 from api import ScalrConnection, ScalrAPIError
 from api.view import TableViewer

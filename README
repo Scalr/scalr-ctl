@@ -1,4 +1,14 @@
 
+version 0.3.24
+codename: Manti
+
+[+] PrettyTable 0.6 support
+[+] Fixed bug in configuration when 'environment' parameter is left blank
+
+
+-------------
+
+
 version 0.3.23
 codename: Khachapuri
 

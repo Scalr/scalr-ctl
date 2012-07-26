@@ -81,8 +81,12 @@ class TableViewer:
 		pt = PrettyTable(column_names, caching=False)
 		
 		#set left allign to all columns
-		for field in column_names:
-			pt.set_field_align(field, 'l')
+		#prettytable 0.5/0.6 support
+		if hasattr(pt, 'align'):
+			pt.align = 'l'
+		else:
+			for field in column_names:
+				pt.set_field_align(field, 'l')
 		
 		#filling the table 
 		for scalr_obj in objects:

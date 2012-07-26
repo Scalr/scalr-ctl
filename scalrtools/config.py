@@ -9,6 +9,7 @@ from ConfigParser import ConfigParser, NoSectionError, NoOptionError
 
 from prettytable import PrettyTable	
 
+
 class ScalrCfgError(BaseException):
 	pass
 
@@ -57,7 +58,8 @@ class ConfigSection(object):
 		
 			for option in cls.options:
 				try:
-					setattr(obj, option, config.get(section, cls.options[option]))
+					value = config.get(section, cls.options[option])
+					setattr(obj, option, value)
 				except (NoSectionError, NoOptionError), e:
 						continue
 		return obj
@@ -89,18 +91,24 @@ class Environment(ConfigSection):
 	def __repr__(self):
 		column_names = ('setting','value')
 		table = PrettyTable(column_names)
-		
-		for field in column_names:
-			table.set_field_align(field, 'l')		
+		#prettytable 0.5/0.6 support
+		if hasattr(table, 'align'):
+			table.align = 'l'
+		else:
+			for field in column_names:
+				table.set_field_align(field, 'l')		
 		
 		visible_length = 26
-
+		
 		table.add_row(('url', self.url))
 		table.add_row(('access key', self.key[:visible_length]+'...' if len(self.key)>40 else self.key))
 		table.add_row(('key id', self.key_id))
 		table.add_row(('environment id', self.env_id))
 		table.add_row(('version', self.api_version))
-		return str(table)
+		
+		res = str(table)
+		print 'b'
+		return res
 	
 
 class Configuration:

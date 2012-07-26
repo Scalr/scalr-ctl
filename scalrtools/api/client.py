@@ -46,7 +46,7 @@ class ScalrConnection(object):
 		request_body["Version"] = self.api_version
 		request_body["KeyID"] = self.key_id
 		request_body['AuthVersion'] = '3'
-		if self.env_id:
+		if self.env_id and self.env_id != 'None':
 			request_body['EnvID'] = self.env_id
 		#request_body['SysDebug'] = '1'
 		
