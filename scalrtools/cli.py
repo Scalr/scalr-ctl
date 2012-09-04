@@ -48,7 +48,7 @@ def main():
 	parser.add_option("-c", "--config-path", dest="base_path", default=None, help="Path to configuration files")
 	parser.add_option("-i", "--key-id", dest="key_id", default=None, help="Scalr API key ID")
 	parser.add_option("-a", "--access-key", dest="key", default=None, help="Scalr API access key")
-	parser.add_option("-u", "--api-url", dest="api_url", default=commands.DEFAULT_API_URL, help="Scalr API URL (IF you use open source Scalr installation)")
+	parser.add_option("-u", "--api-url", dest="api_url", default=None, help="Scalr API URL (IF you use open source Scalr installation)")
 	parser.add_option("-e", "--env-id", dest="env_id", default=None, help="Scalr Environment ID")
 	parser.add_option("-h", "--help", dest="help", action="store_true", help="Help")
 	
