@@ -35,7 +35,6 @@ class Command(object):
 		self.parser = OptionParser(usage='%s %s %s' % (progname, self.name, self.help))
 		self.inject_options(self.parser)
 		self.options = self.parser.parse_args(list(args))[0]
-		
 		#Allowing user to use name instead of id if possible
 		if hasattr(self.options, 'farm_id') and not self.options.farm_id and self.options.farm_name:
 			self.options.farm_id = self.connection.get_farm_id(self.options.farm_name)
@@ -677,11 +676,11 @@ class ScriptExecute(Command):
 		'''
 		k1=v1;k2=v2 -> dict(k1=v1,k2=v2)
 		'''
-		
 		s = {}
-		for pair in vars.split(','):
-			k,v = pair.split('=')
-			s[k] = v
+		if vars:
+			for pair in vars.split(','):
+				k,v = pair.split('=')
+				s[k] = v
 		return s
 
 	

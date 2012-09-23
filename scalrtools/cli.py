@@ -88,13 +88,14 @@ def main():
 		if cmd == 'help' and len(subargs) == 1 and subargs[0] == command.name:
 			print command.usage()
 			sys.exit()
-			
 		if command.name == cmd:
 			try:
 				obj = command(c, *subargs)
 				obj.run()
 			except (commands.ScalrError, ScalrAPIError), e:
 				print e
+			except BaseException, e:
+				print 'Scalr-tools internal error: %s' % e
 			finally:
 				sys.exit()
 	else:

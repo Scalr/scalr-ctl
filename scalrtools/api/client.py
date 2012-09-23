@@ -80,7 +80,9 @@ class ScalrConnection(object):
 				host, port = splitnport(req.host, req.port or 443)
 				raise ScalrAPIError("Cannot connect to Scalr on %s:%s. %s" 
 						% (host, port, str(e)))
-
+		except BaseException,e:
+			raise ScalrAPIError("Cannot connect to Scalr: %s" % str(e))
+			
 		resp_body = response.read()
 		self._logger.debug("SCALR RESPONSE: \n%s", resp_body)
 		
