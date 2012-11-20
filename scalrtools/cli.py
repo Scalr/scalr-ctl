@@ -95,6 +95,7 @@ def main():
 			except (commands.ScalrError, ScalrAPIError), e:
 				print e
 			except BaseException, e:
+				logger.debug(str(sys.exc_info()))
 				print 'Scalr-tools internal error: %s' % e
 			finally:
 				sys.exit()
