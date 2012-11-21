@@ -53,19 +53,19 @@ class Command(object):
 			return callback(*args, **kwargs)
 		except ScalrAPIError, e:
 			print e
-			sys.exit()	
+			sys.exit(1)
 	
 	def pretty(self, callback, *args, **kwargs):
 		try:
 			return TableViewer(callback(*args, **kwargs))
 		except ScalrAPIError, e:
 			return e
-			sys.exit()
+			sys.exit(1)
 			
 	def require(self, *args):
 		if not all(args):
 			print self.parser.format_help(TitledHelpFormatter())
-			sys.exit()
+			sys.exit(1)
 	
 	@classmethod
 	def inject_options(cls, parser):
@@ -797,13 +797,13 @@ class ApacheVhostCreate(Command):
 			
 			if not os.path.exists(self.options.cert_path):
 				print '%s : file with certificate not found.' % self.options.cert_path
-				sys.exit()
+				sys.exit(1)
 			else: 
 				cert = open(self.options.cert_path, 'r').read()
 				
 			if not os.path.exists(self.options.pk_path):
 				print '%s : file with private key not found.' % self.options.pk_path
-				sys.exit()
+				sys.exit(1)
 			else: 
 				pk = open(self.options.pk_path, 'r').read()
 				

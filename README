@@ -1,11 +1,32 @@
 
+version 0.3.29
+codename: Pastırma
+
+[+] Introduced exit codes
+
+
+-------------
+
+
+version 0.3.28
+codename: Lavash
+
+[+] reach debug output
+
+
+-------------
+
+
 version 0.3.27
 codename: Dumplings
 
-[+] better error handling 
+[+] better error handling
+
 [+] Fixed: execute-script command failed when used without script variables
 
+
 -------------
+
 
 version 0.3.26
 codename: Pierogi
@@ -14,6 +35,7 @@ codename: Pierogi
 
 
 -------------
+
 
 version 0.3.25
 codename: Khinkali

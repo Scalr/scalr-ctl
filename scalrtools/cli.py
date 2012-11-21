@@ -7,6 +7,8 @@ Created on Feb 21th, 2011
 import sys
 import inspect
 import logging
+import traceback
+import exceptions
 from optparse import OptionParser
 
 import commands
@@ -63,7 +65,7 @@ def main():
 			
 	if not cmd or options.help:
 		print help
-		sys.exit()
+		sys.exit(1)
 
 	try:
 		c = Configuration(options.base_path)
@@ -77,11 +79,11 @@ def main():
 			print "\nNo login information found."
 			print "Please specify options -a -u and -s, or run '%s help configure' to find out how to set login information permanently.\n" % commands.progname
 			#print help
-			sys.exit()
+			sys.exit(1)
 		
 	except ScalrCfgError, e:
 		print e 
-		sys.exit()
+		sys.exit(1)
 
 			
 	for command in get_commands():
@@ -94,11 +96,17 @@ def main():
 				obj.run()
 			except (commands.ScalrError, ScalrAPIError), e:
 				print e
+				sys.exit(1)
+			except exceptions.SystemExit, e:
+				sys.exit(e.code)
 			except BaseException, e:
-				logger.debug(str(sys.exc_info()))
-				print 'Scalr-tools internal error: %s' % e
-			finally:
+				print 'Scalr-tools internal error: %s' % type(e)
+				if options.debug:
+					logger.debug(traceback.format_exc(sys.exc_info()[2]))
+				sys.exit(1)
+			else:
 				sys.exit()
+
 	else:
 		print help
 

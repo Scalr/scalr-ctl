@@ -129,44 +129,6 @@ class ServerInfo(ScalrObject):
 	index = None	
 	added_at = None	
 
-'''
-class ServerPlatformProperties(ScalrObject):
-	
-	__titles__ = OrderedDict()
-	__titles__['instance_id'] = 'InstanceID'
-	__titles__['owner_id'] = 'OwnerID'
-	__titles__['imageid_ami'] = 'ImageIDAMI'
-	__titles__['public_dns_name'] = 'PublicDNSname'
-	__titles__['private_dns_name'] = 'PrivateDNSname'
-	__titles__['public_ip'] = 'PublicIP'
-	__titles__['private_ip'] = 'PrivateIP'
-	__titles__['keyname'] = 'Keyname'
-	__titles__['ami_launch_index'] = 'AMIlaunchindex'
-	__titles__['instance_type'] = 'Instancetype'
-	__titles__['launch_time'] = 'Launchtime'
-	__titles__['architecture'] = 'Architecture'
-	__titles__['root_device_type'] = 'Rootdevicetype'
-	__titles__['instance_state'] = 'Instancestate'
-	__titles__['placement'] = 'Placement'
-	__titles__['security_groups'] = 'Securitygroups'	
-	
-	instance_id = None
-	owner_id = None
-	imageid_ami = None
-	public_dns_name = None
-	private_dns_name = None
-	public_ip = None	
-	private_ip = None	
-	keyname = None
-	ami_launch_index = None
-	instance_type = None
-	launch_time = None
-	architecture = None
-	root_device_type = None	
-	instance_state = None	
-	placement = None	
-	security_groups = None	
-'''
 
 class FarmRole(ScalrObject):
 	__titles__ = OrderedDict()
