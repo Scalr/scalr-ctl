@@ -1,4 +1,13 @@
 
+version 0.3.30
+codename: Achma
+
+[+] Fixed DmDeployApplication
+
+
+-------------
+
+
 version 0.3.29
 codename: Pastırma
 
@@ -67,7 +76,7 @@ codename: Khachapuri
 
 
 version 0.3.22
-codename: belyashi
+codename: Bselyashi
 
 [+] new format for 'execute-script' variables. 
 
@@ -80,7 +89,7 @@ Example: scalr execute-script <...> -v k1=v1,k2=v2
 
 
 version 0.3.21
-codename: baklava
+codename: Baklava
 
 [+] fixed variables in 'execute-script' command
 
@@ -89,7 +98,7 @@ codename: baklava
 
 
 version 0.3.20
-codename: samsa
+codename: Samsa
 
 [+] minor fixes
 
@@ -100,7 +109,7 @@ codename: samsa
 
 
 version 0.3.19
-codename: shawarma
+codename: Shawarma
 
 [+] added list-environments command
 
