@@ -155,7 +155,7 @@ class DmDeployApplication(Command):
 
 	@classmethod
 	def inject_options(cls, parser):
-		app_name_help = "The name of application could be used INSTEAD of ID. Use name %s to test deployment process on your role." % cls.test_app
+		app_name_help = "The name of application can be used INSTEAD of ID. Use name %s to test deployment process on your role." % cls.test_app
 		parser.add_option("-n", "--app-name", dest="app_name", default=None, help=app_name_help)
 		parser.add_option("-a", "--app-id", dest="app_id", help="Application ID")
 		parser.add_option("-r", "--farm-role-id", dest="farm_role_id", help="FarmRole ID")
@@ -192,6 +192,9 @@ class DmDeployApplication(Command):
 		tasks = self.call_api_method(self.connection.dm_deploy_application, *args)
 		print TableViewer(tasks)
 							
+
+		failed_tasks = []
+		done_tasks = []
 		#check task status in loop
 		if not self.options.non_interactive and not isinstance(tasks,ScalrAPIError) and tasks:
 			for task in tasks:
@@ -209,15 +212,23 @@ class DmDeployApplication(Command):
 							status = ts_list[0].status
 						
 							if status == 'deployed':
+								task.status = 'deployed' #changing old status
+								done_tasks.append(task)
 								print "Application '%s' has been successfully deployed on server %s." % (self.options.app_name, task.server_id)
 								break
 							
 							elif status == 'failed':
+								task.status = 'failed' #changing old status
+								failed_tasks.append(task) #task
 								#show log
 								try:
-									print self.pretty(self.connection.dm_get_deployment_task_log,task.task_id)
+									log = self.connection.dm_get_deployment_task_log(task.task_id)
+									print TableViewer(log)
+
+									if log.scalr_objects:
+										task.errmsg = log.scalr_objects[0].message
 								finally:
-									print 'Deployment process has failed.'
+									print 'Deployment process %s has failed on server %s.' % (task.task_id, task.server_id)
 								break
 							
 							elif status == 'pending':
@@ -230,10 +241,22 @@ class DmDeployApplication(Command):
 						time.sleep(attempt)
 						
 					except (KeyboardInterrupt, SystemExit):
+						#stops cheking current server and proceeds to the next
 						break
 				else:
 					print "Maximum number of attempts was reached. On server %s application has not been deployed." % task.server_id
 				print ''
+
+			if done_tasks:
+				print 'Completed tasks:'
+				print TableViewer(done_tasks)
+
+			if failed_tasks:
+				print 'Failed tasks:'
+				print TableViewer(failed_tasks)
+				sys.exit(1)
+			else:
+				print 'All deployment tasks have finished successfully.'
 				
 		
 class DmDeployApplicationAlias(DmDeployApplication):

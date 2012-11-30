@@ -100,7 +100,7 @@ def main():
 			except exceptions.SystemExit, e:
 				sys.exit(e.code)
 			except BaseException, e:
-				print 'Scalr-tools internal error: %s' % type(e)
+				print 'Scalr-tools internal error: %s' % str(e)
 				if options.debug:
 					logger.debug(traceback.format_exc(sys.exc_info()[2]))
 				sys.exit(1)

@@ -13,7 +13,7 @@ description = "Scalr is a command-line interface to your Scalr account"
 
 cfg = dict(
 	name = "scalr",
-	version = "0.3.30",
+	version = "0.3.31",
 	description = description,
 	author = "Scalr Inc.",
 	author_email = "dmitry@scalr.com",

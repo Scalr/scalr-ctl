@@ -725,17 +725,7 @@ class ScalrConnection(object):
 				for node in xml.getElementsByTagName(node_name):
 					for child in node.childNodes:
 						ret.append(cls.fromxml(child))
-						
-				'''	
-				#this block of code was substituted by experemental one
-				for child in response.childNodes:
-					
-					if node_name == child.nodeName:
-						obj_set = child.childNodes
-						for node in obj_set:
-							ret.append(cls.fromxml(node))
-				'''
-						
+
 			if wrap_page:
 				page = types.Page.fromxml(response)
 				page.scalr_objects = ret
