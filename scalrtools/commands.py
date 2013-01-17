@@ -943,30 +943,3 @@ def waits(n):
 		yield num
 		num += 1
 		sum += num
-
-'''
-class CountDownTimer(threading.Thread):
-
-	def __init__(self, seconds):
-		self.runTime = seconds
-		threading.Thread.__init__(self)
-
-	def run(self):
-		counter = self.runTime
-		for sec in range(self.runTime):
-			print counter
-			time.sleep(1.0)
-			counter -= 1
-		else:
-			pass
-	
-	def stop(self):
-		pass
-
-class BasicProgressBar(object):
-	def __init__(self, callback=None, callback_kwargs=None, counts=None, sleeptime=None, exithook=None, hook_kwargs=None):
-		t = CountDownTimer(counts)
-		t.run()
-		result = callback(**callback_kwargs)
-		t.stop()
-'''
