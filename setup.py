@@ -9,11 +9,11 @@ from setuptools import setup, find_packages
 def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
 
-description = "Scalr is a command-line interface to your Scalr account"
+description = "Scalr-tools is a command-line interface to your Scalr account"
 
 cfg = dict(
 	name = "scalr",
-	version = "0.3.31",
+	version = "0.3.32",
 	description = description,
 	author = "Scalr Inc.",
 	author_email = "dmitry@scalr.com",

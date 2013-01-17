@@ -97,6 +97,20 @@ class ScalrConnection(object):
 		
 		return xml
 
+
+	def update_farm_role_parameter(self, farm_role_id, param_name, param_value):
+		"""
+		@return Result[]
+		"""
+		params = {}
+		#, ,
+		params['FarmRoleID'] = farm_role_id
+		params['ParamName']  = param_name
+		params['ParamValue'] 	= param_value
+
+		return self._request(command="FarmRoleUpdateParameterValue", params=params, response_reader=self._read_update_farm_role_parameter)
+
+
 	def dm_create_source(self, type, url, auth_login=None, auth_password=None):
 		"""
 		@return Result[]
@@ -300,19 +314,34 @@ class ScalrConnection(object):
 		if records_limit : params['RecordsLimit'] = records_limit
 		
 		return self._request(command="EventsList", params=params, response_reader=self._read_list_events_response)		
-	
+
+
 	def list_logs(self, farm_id, server_id=None, start_from=None, records_limit=None):
 		"""
 		@return LogRecord[]
 		"""
 		params = {}
-		
+
 		params['FarmID'] = farm_id
 		if server_id	 : params['ServerID'] = server_id
 		if start_from	 : params['StartFrom'] 	  = start_from
 		if records_limit : params['RecordsLimit'] = records_limit
-		
+
 		return self._request(command="LogsList", params=params, response_reader=self._read_list_logs_response)
+
+
+	def scripting_list_logs(self, farm_id, server_id=None, start_from=None, records_limit=None):
+		"""
+		@return LogRecord[]
+		"""
+		params = {}
+
+		params['FarmID'] = farm_id
+		if server_id	 : params['ServerID'] = server_id
+		if start_from	 : params['StartFrom'] 	  = start_from
+		if records_limit : params['RecordsLimit'] = records_limit
+
+		return self._request(command="ScriptingLogsList", params=params, response_reader=self._read_scripting_list_logs_response)
 
 
 	def get_farm_stats(self, farm_id, date=None):
@@ -567,8 +596,12 @@ class ScalrConnection(object):
 		@return Environment[]
 		"""
 		return self._request("EnvironmentsList", response_reader=self._read_list_environments_response)
-			
-			
+
+
+	def _read_update_farm_role_parameter(self, xml):
+		return self._read_response(xml, node_name='FarmRoleUpdateParameterValueResponse', cls=types.Result, simple_response=True)
+
+
 	def _read_dm_create_source_response(self, xml):
 		return self._read_response(xml, node_name='SourceID', cls=types.SourceID, simple_response=True)
 	
@@ -630,12 +663,16 @@ class ScalrConnection(object):
 	
 	def _read_list_events_response(self, xml):
 		return self._read_response(xml, node_name='EventSet', cls=types.Event, wrap_page=True)
-	
-	
+
+
 	def _read_list_logs_response(self, xml):
 		return self._read_response(xml, node_name='LogSet', cls=types.LogRecord, wrap_page=True)
-	
-	
+
+
+	def _read_scripting_list_logs_response(self, xml):
+		return self._read_response(xml, node_name='LogSet', cls=types.ScriptingLogRecord, wrap_page=True)
+
+
 	def _read_get_farm_stats_response(self, xml):
 		return self._read_response(xml, node_name='StatisticsSet', cls=types.FarmStat)
 	

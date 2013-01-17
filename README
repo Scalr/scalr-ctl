@@ -1,4 +1,15 @@
 
+version 0.3.32
+codename: Obwarzanki
+
+[+] New API methods: FarmRoleUpdateParameterValue, ScriptingLogsList
+
+[+] New commands: update-farm-role-parameter, list-scripting-logs, check-updates
+
+
+-------------
+
+
 version 0.3.31
 codename: Puff pastry
 

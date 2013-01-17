@@ -256,7 +256,7 @@ class Source(ScalrObject):
 class SourceID(ScalrObject):
 	__titles__ = {'source_id' : 'SourceID'}
 	source_id = None
-	
+
 	
 class Application(ScalrObject):
 	__titles__ = OrderedDict()
@@ -359,8 +359,8 @@ class ScriptRevision(ScalrObject):
 	revision = None
 	date = None
 	config_variables = None
-	
-		
+
+
 class LogRecord(ScalrObject):
 	__titles__ = OrderedDict()
 	__titles__['server_id'] = 'ServerID'
@@ -368,21 +368,49 @@ class LogRecord(ScalrObject):
 	__titles__['severity'] = 'Severity'
 	__titles__['time_stamp'] = 'Timestamp'
 	__titles__['source'] = 'Source'
-	
+
 	server_id = None
 	message = None
 	severity = None
 	time_stamp = None
 	source = None
-	
+
 	_log_levels = {'1':'debug','2':'info','3':'warning','4':'error','5':'fatal'}
-	
+
 	@classmethod
-	def fromxml (cls, xml):	
+	def fromxml (cls, xml):
 		kv = cls.parse_response(xml)
 		kv['severity'] = cls._log_levels.get(kv['severity'],None)
 		kv['time_stamp'] = pretty_time(kv['time_stamp'])
 		return LogRecord(**kv)
+
+
+class ScriptingLogRecord(ScalrObject):
+	__titles__ = OrderedDict()
+	__titles__['server_id'] = 'ServerID'
+	__titles__['message'] = 'Message'
+	__titles__['time_stamp'] = 'Timestamp'
+	__titles__['source'] = 'Source'
+	__titles__['script_name'] = 'ScriptName'
+	__titles__['exec_time'] = 'ExecTime'
+	__titles__['exec_exit_code'] = 'ExecExitCode'
+	__titles__['event'] = 'Event'
+
+	server_id = None
+	message = None
+	time_stamp = None
+	source = None
+	script_name = None
+	exec_time = None
+	exec_exit_code = None
+	event = None
+
+
+	@classmethod
+	def fromxml (cls, xml):
+		kv = cls.parse_response(xml)
+		kv['time_stamp'] = pretty_time(kv['time_stamp'])
+		return ScriptingLogRecord(**kv)
 
 
 class Event(ScalrObject):

@@ -5,12 +5,10 @@ Created on Feb 21th, 2011
 '''
 import os
 import sys
-import time 
-import threading 
-
-from ConfigParser import ConfigParser
+import time
+import xmlrpclib
 from optparse import OptionParser, TitledHelpFormatter
-from shutil import copyfile
+from pkg_resources import parse_version, working_set
 
 from config import Environment
 from api import ScalrConnection, ScalrAPIError
@@ -89,6 +87,25 @@ class Command(object):
 					api_version=self.config.environment.api_version, 
 					logger=self.config.logger)
 		return conn
+
+
+class FarmRoleUpdateParameterValue(Command):
+	name = 'update-farm-role-parameter'
+	help = '-r farm-role-id -n param-name -v param-value'
+
+	def __init__(self, config, *args):
+		super(FarmRoleUpdateParameterValue, self).__init__(config, *args)
+		self.require(self.options.farm_role_id, self.options.param_name, self.options.param_value)
+
+	@classmethod
+	def inject_options(cls, parser):
+		parser.add_option("-r", "--farm-role-id", dest="farm_role_id", help="FarmRoleID")
+		parser.add_option("-n", "--param-name", dest="param_name", help="Parameter Name")
+		parser.add_option("-v", "--value", dest="param_value", help="Parameter Value")
+
+	def run(self):
+		args = (self.options.farm_role_id, self.options.param_name, self.options.param_value)
+		print self.pretty(self.connection.update_farm_role_parameter, *args)
 
 		
 class ApacheVhostsList(Command):
@@ -388,10 +405,10 @@ class EventsList(Command):
 class LogsList(Command):
 	name = 'list-logs'
 	help = '{-f farm-id | -n name} [-i server-id -s start-from -l limit]'
-	
+
 	def __init__(self, config, *args):
 		super(LogsList, self).__init__(config, *args)
-		self.require(self.options.farm_id)
+		self.require(self.options.farm_id or self.options.farm_name)
 
 	@classmethod
 	def inject_options(cls, parser):
@@ -400,10 +417,31 @@ class LogsList(Command):
 		parser.add_option("-i", "--server-id", dest="server_id", default=None, help="Instance ID")
 		parser.add_option("-s", "--start-from", dest="start", default=None, help="Start from specified event number (Can be used for paging)")
 		parser.add_option("-l", "--record-limit", dest="limit", default=None, help="Limit number of returned events (Can be used for paging)")
-	
+
 	def run(self):
 		args = (self.options.farm_id, self.options.server_id, self.options.start, self.options.limit)
 		print self.pretty(self.connection.list_logs, *args)
+
+
+class ScriptingLogsList(Command):
+	name = 'list-scripting-logs'
+	help = '{-f farm-id | -n name} [-i server-id -s start-from -l limit]'
+
+	def __init__(self, config, *args):
+		super(ScriptingLogsList, self).__init__(config, *args)
+		self.require(self.options.farm_id or self.options.farm_name)
+
+	@classmethod
+	def inject_options(cls, parser):
+		parser.add_option("-f", "--farm-id", dest="farm_id", default=None, help="Farm ID")
+		parser.add_option("-n", "--farm-name", dest="farm_name", default=None, help="The name of farm could be used INSTEAD of ID")
+		parser.add_option("-i", "--server-id", dest="server_id", default=None, help="Instance ID")
+		parser.add_option("-s", "--start-from", dest="start", default=None, help="Start from specified event number (Can be used for paging)")
+		parser.add_option("-l", "--record-limit", dest="limit", default=None, help="Limit number of returned events (Can be used for paging)")
+
+	def run(self):
+		args = (self.options.farm_id, self.options.server_id, self.options.start, self.options.limit)
+		print self.pretty(self.connection.scripting_list_logs, *args)
 
 
 class RolesList(Command):
@@ -866,16 +904,38 @@ class EnvironmentsList(Command):
 
 	def run(self):
 		print self.pretty(self.connection.list_environments)
-		
-		
+
+
 class ShowConfig(Command):
 	name = 'show-config'
-		
-	def run(self):		
+
+	def run(self):
 		e = Environment.from_ini(self.config.base_path)
 		print e
-		
-		
+
+
+class CheckUpdates(Command):
+	name = 'check-updates'
+
+	def run(self):
+		versions = dict([(d.key, d.version) for d in working_set])
+		installed = versions['scalr']
+		print 'Installed version: %s' % (installed)
+
+		repo = 'http://pypi.python.org/pypi'
+		pypi = xmlrpclib.ServerProxy(repo)
+		available = pypi.package_releases('scalr')
+
+		if available:
+			latest = available[-1]
+			print 'Latest version in repo %s: %s' % (repo, latest)
+			if cmp(parse_version(installed), parse_version(latest)):
+				print 'Update available.'
+				print "You can update scalr-tools by executing 'sudo easy_install --upgrade scalr' in Linux/OSX console."
+			else:
+				print 'No updates available.'
+
+
 def waits(n):
 	num = 0
 	sum = 0
