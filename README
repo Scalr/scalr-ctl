@@ -1,17 +1,37 @@
 
-version 0.3.32
-codename: Obwarzanki
+version 0.3.41
+codename: Zippy Zapiekanka
+
+[+] New API method: FarmRoleParametersList
+
+[+] New command: get-farm-role-properties
+
+[+] list-servers command output now includes indexes
+
+[+] list-servers command now features --columns option to filter output
+
+[+] FarmTerminate command gained RackSpace support
+
+[+] Bunch of small fixes
+
+-------------
+
+
+version 0.3.33
+codename: Outstanding Obwarzanki
 
 [+] New API methods: FarmRoleUpdateParameterValue, ScriptingLogsList
 
 [+] New commands: update-farm-role-parameter, list-scripting-logs, check-updates
+
+[+] Code cleaned
 
 
 -------------
 
 
 version 0.3.31
-codename: Puff pastry
+codename: Puzzling Puff pastry
 
 [+] Deployments: better output
 
@@ -22,7 +42,7 @@ codename: Puff pastry
 
 
 version 0.3.30
-codename: Achma
+codename: Aberrant Achma
 
 [+] Fixed DmDeployApplication
 
@@ -31,7 +51,7 @@ codename: Achma
 
 
 version 0.3.29
-codename: Pastırma
+codename: Prosperous Pastırma
 
 [+] Introduced exit codes
 
@@ -40,7 +60,7 @@ codename: Pastırma
 
 
 version 0.3.28
-codename: Lavash
+codename: Lavish Lavash
 
 [+] reach debug output
 
@@ -49,7 +69,7 @@ codename: Lavash
 
 
 version 0.3.27
-codename: Dumplings
+codename: Deceiving Dumplings
 
 [+] better error handling
 
@@ -60,7 +80,7 @@ codename: Dumplings
 
 
 version 0.3.26
-codename: Pierogi
+codename: Precious Pierogi
 
 [+] Better URL validation
 
@@ -69,7 +89,7 @@ codename: Pierogi
 
 
 version 0.3.25
-codename: Khinkali
+codename: Kooky Khinkali
 
 [+] Added support for open source Scalr installations 
 
@@ -78,7 +98,7 @@ codename: Khinkali
 
 
 version 0.3.24
-codename: Manti
+codename: Magnificent Manti
 
 [+] PrettyTable 0.6 support
 
@@ -89,7 +109,7 @@ codename: Manti
 
 
 version 0.3.23
-codename: Khachapuri
+codename: King-sized Khachapuri
 
 [+] handful of fixes
 
@@ -98,7 +118,7 @@ codename: Khachapuri
 
 
 version 0.3.22
-codename: Belyashi
+codename: Bizarre Belyashi
 
 [+] new format for 'execute-script' variables. 
 
@@ -111,7 +131,7 @@ Example: scalr execute-script <...> -v k1=v1,k2=v2
 
 
 version 0.3.21
-codename: Baklava
+codename: Bewildering Baklava
 
 [+] fixed variables in 'execute-script' command
 
@@ -120,7 +140,7 @@ codename: Baklava
 
 
 version 0.3.20
-codename: Samsa
+codename: Scandalous Samsa
 
 [+] minor fixes
 
@@ -131,7 +151,7 @@ codename: Samsa
 
 
 version 0.3.19
-codename: Shawarma
+codename: Shocking Shawarma
 
 [+] added list-environments command
 

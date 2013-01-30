@@ -89,6 +89,23 @@ class Command(object):
 		return conn
 
 
+
+class FarmRoleParametersList(Command):
+	name = 'list-farm-role-parameters'
+	help = '-r farm-role-id'
+
+	def __init__(self, config, *args):
+		super(FarmRoleParametersList, self).__init__(config, *args)
+		self.require(self.options.farm_role_id)
+
+	@classmethod
+	def inject_options(cls, parser):
+		parser.add_option("-r", "--farm-role-id", dest="farm_role_id", help="FarmRoleID")
+
+	def run(self):
+		print self.pretty(self.connection.list_farm_role_parameters, self.options.farm_role_id)
+
+
 class FarmRoleUpdateParameterValue(Command):
 	name = 'update-farm-role-parameter'
 	help = '-r farm-role-id -n param-name -v param-value'
@@ -534,14 +551,22 @@ class ServerList(Command):
 		super(ServerList, self).__init__(config, *args)
 		self.require(self.options.farm_id)
 
+	def parse_variables(self, vars):
+		'''
+		v1,v2 -> list(v1,v2)
+		'''
+		return vars.split(',') if vars else []
+
 	@classmethod
 	def inject_options(cls, parser):
 		parser.add_option("-f", "--farm-id", dest="farm_id", default=None, help="Farm ID")
 		parser.add_option("-n", "--farm-name", dest="farm_name", default=None, help="The name of farm could be used INSTEAD of ID")
 		parser.add_option("-r", "--farm-role-id", dest="farm_role_id", default=None, help="Farm Role ID")
+		parser.add_option("-c", "--columns", dest="columns", default=None, help="Columns to show. Example: -c ExternalIP,Status,Agent")
 	
 	def run(self):
-		print self.pretty(self.connection.list_servers, self.options.farm_id, self.options.farm_role_id)	
+		args = (self.options.farm_id, self.options.farm_role_id, self.parse_variables(self.options.columns))
+		print self.pretty(self.connection.list_servers, *args)
 		
 				
 class FarmGetStats(Command):
@@ -677,7 +702,7 @@ class FarmTerminate(Command):
 
 	def __init__(self, config, *args):
 		super(FarmTerminate, self).__init__(config, *args)
-		self.require(self.options.farm_id or self.options.farm_name, self.options.keep_ebs, self.options.keep_eip, self.options.keep_dns_zone)
+		self.require(self.options.farm_id or self.options.farm_name)
 
 	@classmethod
 	def inject_options(cls, parser):		

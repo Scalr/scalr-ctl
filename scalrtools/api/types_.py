@@ -191,6 +191,7 @@ class Server(ScalrObject):
 	__titles__['uptime'] = 'Uptime'
 	__titles__['scalarizr_version'] = 'ScalarizrVersion'
 	__titles__['platform_properties'] = 'PlatformProperties'
+	__titles__['index'] = 'Index'
 	
 	server_id = None
 	platform_properties = None
@@ -201,9 +202,10 @@ class Server(ScalrObject):
 	uptime = None
 	
 	name = None
-	farm_role_id = None	
+	farm_role_id = None
+	index = None
 	
-	__aliases__ = dict(ScalarizrVersion = 'Agent')
+	__aliases__ = dict(ScalarizrVersion = 'Agent', ID = 'FarmRoleID')
 
 	@classmethod
 	def parse_response(cls,xml):
@@ -298,7 +300,8 @@ class DMTaskLog(ScalrObject):
 		kv = cls.parse_response(xml)
 		kv['time_stamp'] = pretty_time(kv['time_stamp'])
 		return DMTaskLog(**kv)	
-	
+
+
 class DeploymentTaskResult(ScalrObject):
 	__titles__ = OrderedDict()
 	__titles__['server_id'] = 'ServerID'
@@ -314,7 +317,8 @@ class DeploymentTaskResult(ScalrObject):
 	remote_path = None
 	status = None
 	errmsg = None
-	
+
+
 class Result(ScalrObject):
 	__titles__ = {'result' : 'Result'}
 	result = None
@@ -325,6 +329,18 @@ class Result(ScalrObject):
 		if kv['result'] == '1':
 			kv['result'] = 'Success'
 		return Result(**kv)	
+
+
+class FarmRoleParameter(ScalrObject):
+	__titles__ = OrderedDict()
+	__titles__['name'] = 'Name'
+	__titles__['value'] = 'Value'
+	__titles__['full_name'] = 'FullName'
+
+	name = None
+	value = None
+	full_name = None
+
 
 class ServerID(ScalrObject):
 	__titles__ = {'server_id' : 'ServerID'}

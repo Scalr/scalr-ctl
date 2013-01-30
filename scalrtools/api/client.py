@@ -8,6 +8,7 @@ import binascii
 import hashlib
 import logging
 import hmac
+import sys
 
 
 try:
@@ -96,6 +97,15 @@ class ScalrConnection(object):
 		self._logger.debug('VALID XML: \n%s' % xml.toprettyxml())
 		
 		return xml
+
+
+	def list_farm_role_parameters(self, farm_role_id):
+		"""
+		@return FarmRoleParameter[]
+		"""
+		params = {'FarmRoleID':farm_role_id}
+
+		return self._request(command="FarmRoleParametersList", params=params, response_reader=self._read_list_farm_role_parameters)
 
 
 	def update_farm_role_parameter(self, farm_role_id, param_name, param_value):
@@ -548,14 +558,13 @@ class ScalrConnection(object):
 		return self._request(command="FarmGetDetails", params=params, response_reader=self._read_get_farm_role_properties_response)		
 	
 	
-	def list_servers(self, farm_id, farm_role_id = None):
+	def list_servers(self, farm_id, farm_role_id=None, columns=None):
 		"""
 		@return Server[]
 		"""
 		params = {}
 		
 		params['FarmID'] = farm_id
-		#servers = self._request(command="FarmGetDetails", params=params, response_reader=self._read_list_servers_response)
 		roles = self._request(command="FarmGetDetails", params=params, response_reader=self._read_get_farm_role_properties_response)
 		servers = []
 		for role in roles:
@@ -565,11 +574,25 @@ class ScalrConnection(object):
 					server.farm_role_id = role.farm_role_id
 					servers.append(server)
 				
-			
+
 		if farm_role_id:
-			for server in servers:
+			for server in list(servers):
 				if server.farm_role_id != farm_role_id:
-					servers.remove(server) 
+					servers.remove(server)
+
+
+		if columns:
+			for server in servers:
+				if server.__titles__:
+					for variable, column_name in server.__titles__.items():
+						if column_name not in columns:
+							if column_name in server.__aliases__:
+								var = server.__aliases__[column_name]
+								if var not in columns:
+									del server.__titles__[variable]
+									del server.__aliases__[column_name]
+							else:
+								del server.__titles__[variable]
 		return servers
 	
 		
@@ -598,13 +621,16 @@ class ScalrConnection(object):
 		return self._request("EnvironmentsList", response_reader=self._read_list_environments_response)
 
 
+	def _read_list_farm_role_parameters(self, xml):
+		return self._read_response(xml, node_name='ParamSet', cls=types.FarmRoleParameter)
+
 	def _read_update_farm_role_parameter(self, xml):
 		return self._read_response(xml, node_name='FarmRoleUpdateParameterValueResponse', cls=types.Result, simple_response=True)
 
 
 	def _read_dm_create_source_response(self, xml):
-		return self._read_response(xml, node_name='SourceID', cls=types.SourceID, simple_response=True)
-	
+			return self._read_response(xml, node_name='SourceID', cls=types.SourceID, simple_response=True)
+
 	
 	def _read_dm_create_application_response(self, xml):
 		return self._read_response(xml, node_name='ApplicationID', cls=types.ApplicationID, simple_response=True)

@@ -179,14 +179,24 @@ class TestScalrConnection(unittest.TestCase):
 			
 		print '\nLast TransactionID: %s' % self.conn.last_transaction_id
 		print TableViewer(response)
-								
-		
+
+
 	def _test__read_get_list_servers_response(self):
 		response = open('test/resources/FarmGetDetailsResponse_local.xml').read()
 		xml = xml_strip(parseString(response))
 		response = self.conn._read_list_servers_response(xml)
 		print 'Got response:', response
-		
+
+
+	def test__read_get_list_servers_response_bo(self):
+		response = open('test/resources/FarmGetDetailsResponse_branchout.xml').read()
+		xml = xml_strip(parseString(response))
+		response = self.conn._read_get_farm_role_properties_response(xml)
+		print 'Got response:', response, len(response)
+		for server in response:
+			print server.__dict__
+
+
 	def _test__read_get_farm_details_response(self):
 		response = open('test/resources/FarmGetDetailsResponse.xml').read()
 		xml = xml_strip(parseString(response))
@@ -701,17 +711,23 @@ class TestScalrConnection(unittest.TestCase):
 		file.close()
 
 
-	def test_fetch_from_scalr_test_v3(self):
+	def _test_fetch_from_scalr_test_v3(self):
 		'''
 		response = self.conn.fetch('FarmRoleUpdateParameterValue', FarmRoleID='44049', ParamName='var1', ParamValue='val0001')
 		print response.toprettyxml()
 		file = open('test/resources/FarmRoleUpdateParameterValueResponse.xml','w')
 		file.write(response.toprettyxml())
 		file.close()
-		'''
+
 		response = self.conn.fetch('ScriptingLogsList', FarmID='5365')
 		print response.toprettyxml()
 		file = open('test/resources/ScriptingLogsListResponse.xml','w')
+		file.write(response.toprettyxml())
+		file.close()
+		'''
+		response = self.conn.fetch('FarmRoleParametersList', FarmRoleID='44049')
+		print response.toprettyxml()
+		file = open('test/resources/FarmRoleParametersListResponse.xml','w')
 		file.write(response.toprettyxml())
 		file.close()
 
