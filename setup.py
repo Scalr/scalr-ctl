@@ -26,4 +26,3 @@ cfg = dict(
 	long_description=read('README')
 )
 setup(**cfg)
-
