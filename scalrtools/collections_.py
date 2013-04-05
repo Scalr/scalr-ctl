@@ -38,7 +38,7 @@ def namedtuple(typename, field_names, verbose=False, rename=False):
             if (not min(c.isalnum() or c=='_' for c in name) or _iskeyword(name)
                 or not name or name[0].isdigit() or name.startswith('_')
                 or name in seen):
-                    names[i] = '_%d' % i
+                names[i] = '_%d' % i
             seen.add(name)
         field_names = tuple(names)
     for name in (typename,) + field_names:
@@ -104,15 +104,15 @@ def namedtuple(typename, field_names, verbose=False, rename=False):
     # where the named tuple is created.  Bypass this step in enviroments where
     # sys._getframe is not defined (Jython for example) or sys._getframe is not
     # defined for arguments greater than 0 (IronPython).
-    
+
     #try:
     #    result.__module__ = _sys._getframe(1).f_globals.get('__name__', '__main__')
     #except (AttributeError, ValueError):
     #    pass
 
     return result
-   
-   
+
+
 class OrderedDict(dict, MutableMapping):
     'Dictionary that remembers insertion order'
     # An inherited dict maps keys to values.

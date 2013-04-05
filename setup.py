@@ -12,17 +12,17 @@ def read(fname):
 description = "Scalr-tools is a command-line interface to your Scalr account"
 
 cfg = dict(
-	name = "scalr",
-	version = read("VERSION"),
-	description = description,
-	author = "Scalr Inc.",
-	author_email = "dmitry@scalr.com",
-	url = "https://scalr.net",
-	license = "GPL",
-	platforms = "any",
-	packages = find_packages(),
-	scripts=['bin/scalr'],
-	install_requires = ["prettytable"],
-	long_description=read('README')
+        name = "scalr",
+        version = read("VERSION"),
+        description = description,
+        author = "Scalr Inc.",
+        author_email = "dmitry@scalr.com",
+        url = "https://scalr.net",
+        license = "GPL",
+        platforms = "any",
+        packages = find_packages(),
+        scripts=['bin/scalr'],
+        install_requires = ["prettytable"],
+        long_description=read('README')
 )
 setup(**cfg)
