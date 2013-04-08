@@ -1,1 +1,37 @@
-{"upper_level": ["TransactionID"], "aliases": {}, "descr": ["Month", "Year", "Statistics/BandwidthIn", "Statistics/BandwidthOut", "Statistics/BandwidthTotal"], "row_path": "StatisticsSet/Item"}
+{
+    "command": {
+        "cmd_name": "get-farm-stats",
+        "cmd_help": "{-f farm-id | -n name} [-d date]",
+        "required_options": [{"all":"farm_id"}],
+        "cmd_options":
+            [
+                [
+                    {"short":"-f"},
+                    {"long":"--farm-id"},
+                    {"help": "Farm ID"},
+                    {"dest":"farm_id"},
+                    {"default": ""},
+                ],
+                [
+                    {"short":"-f"},
+                    {"long":"--farm-name"},
+                    {"help": "The name of farm could be used INSTEAD of ID"},
+                    {"dest":"farm_name"},
+                    {"default": ""},
+                ],
+                [
+                    {"short":"-d"},
+                    {"long":"--date"},
+                    {"help": "Date (mm-yyyy)"},
+                    {"dest":"date"},
+                    {"default": ""},
+                ],
+            ]
+    },
+    "table": {
+        "upper_level": ["TransactionID"],
+        "aliases": {},
+        "descr": ["Month", "Year", "Statistics/BandwidthIn", "Statistics/BandwidthOut", "Statistics/BandwidthTotal"],
+        "row_path": "StatisticsSet/Item"
+    }
+}
