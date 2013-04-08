@@ -1,1 +1,33 @@
-{"upper_level": ["TransactionID"], "aliases": {}, "descr": ["ID", "Type", "TTL", "Priority", "Name", "Value", "Weight", "Port", "IsSystem"], "row_path": "ZoneRecordSet/Item"}
+{
+    "table": {
+        "upper_level": [
+            "TransactionID"
+        ], 
+        "descr": [
+            "ID", 
+            "Type", 
+            "TTL", 
+            "Priority", 
+            "Name", 
+            "Value", 
+            "Weight", 
+            "Port", 
+            "IsSystem"
+        ], 
+        "row_path": "ZoneRecordSet/Item", 
+        "aliases": {}
+    }, 
+    "command": {
+        "cmd_name": "list-dns-zone-records", 
+        "cmd_options": [
+            {
+                "dest": "name", 
+                "default": "", 
+                "short": "-n", 
+                "help": "Zone (Domain) name", 
+                "long": "--zone-name"
+            }
+        ], 
+        "cmd_help": "-n name"
+    }
+}

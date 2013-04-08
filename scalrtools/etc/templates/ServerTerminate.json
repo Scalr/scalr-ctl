@@ -1,1 +1,32 @@
-{"upper_level": ["TransactionID"], "aliases": {}, "descr": ["Result"], "row_path": "."}
+{
+    "table": {
+        "upper_level": [
+            "TransactionID"
+        ], 
+        "descr": [
+            "Result"
+        ], 
+        "row_path": ".", 
+        "aliases": {}
+    }, 
+    "command": {
+        "cmd_name": "terminate-server", 
+        "cmd_options": [
+            {
+                "dest": "server_id", 
+                "default": null, 
+                "short": "-i", 
+                "help": "ServerID", 
+                "long": "--server-id"
+            }, 
+            {
+                "dest": "decrease", 
+                "default": null, 
+                "short": "-d", 
+                "help": "Decrease MinInstances setting for role (Default: 0)", 
+                "long": "--decrease-min-instances"
+            }
+        ], 
+        "cmd_help": "-i server-id [-d decrease-min-instances-setting]"
+    }
+}

@@ -1,1 +1,12 @@
-{"upper_level": ["TransactionID"], "aliases": {}, "descr": ["Result"], "row_path": "."}
+{
+    "table": {
+        "upper_level": [
+            "TransactionID"
+        ], 
+        "row_path": ".", 
+        "descr": [
+            "Result"
+        ], 
+        "aliases": {}
+    }
+}

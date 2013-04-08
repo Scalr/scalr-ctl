@@ -1,1 +1,46 @@
-{"upper_level": ["TransactionID"], "aliases": {}, "descr": ["GraphURL"], "row_path": "."}
+{
+    "table": {
+        "upper_level": [
+            "TransactionID"
+        ], 
+        "descr": [
+            "GraphURL"
+        ], 
+        "row_path": ".", 
+        "aliases": {}
+    }, 
+    "command": {
+        "cmd_name": "get-statistics-graph-url", 
+        "cmd_options": [
+            {
+                "dest": "obj_type", 
+                "default": null, 
+                "short": "-o", 
+                "help": "Object type. Valid values are: role, server or farm", 
+                "long": "--object-type"
+            }, 
+            {
+                "dest": "obj_id", 
+                "default": null, 
+                "short": "-i", 
+                "help": "In case if object type is instance ObjectID shoudl be server id, in case if object type is role ObjectID should be role id and in case if object type is farm ObjectID should be farm id", 
+                "long": "--object-id"
+            }, 
+            {
+                "dest": "name", 
+                "default": null, 
+                "short": "-n", 
+                "help": "Watcher name could be CPU, NET, MEM or LA", 
+                "long": "--watcher-name"
+            }, 
+            {
+                "dest": "graph_type", 
+                "default": null, 
+                "short": "-g", 
+                "help": "Graph type could be daily, weekly, monthly or yearly", 
+                "long": "--graph-type"
+            }
+        ], 
+        "cmd_help": "-o object-type -i object-id -n watcher-name -g graph-type"
+    }
+}

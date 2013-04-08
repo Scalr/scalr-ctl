@@ -1,1 +1,48 @@
-{"upper_level": ["TransactionID"], "aliases": {}, "descr": ["Name", "Owner", "Architecture"], "row_path": "RoleSet/Item"}
+{
+    "table": {
+        "upper_level": [
+            "TransactionID"
+        ], 
+        "descr": [
+            "Name", 
+            "Owner", 
+            "Architecture"
+        ], 
+        "row_path": "RoleSet/Item", 
+        "aliases": {}
+    }, 
+    "command": {
+        "cmd_name": "list-roles", 
+        "cmd_options": [
+            {
+                "dest": "platform", 
+                "default": null, 
+                "short": "-p", 
+                "help": "Cloud platform", 
+                "long": "--platform"
+            }, 
+            {
+                "dest": "name", 
+                "default": null, 
+                "short": "-n", 
+                "help": "List roles with specified role name.", 
+                "long": "--name"
+            }, 
+            {
+                "dest": "prefix", 
+                "default": null, 
+                "short": "-x", 
+                "help": "List all roles begins with specified prefix.", 
+                "long": "--prefix"
+            }, 
+            {
+                "dest": "image_id", 
+                "default": null, 
+                "short": "-i", 
+                "help": "List roles with specified image id.", 
+                "long": "--image-id"
+            }
+        ], 
+        "cmd_help": "[-p platform -n name -x prefix -i image-id]"
+    }
+}

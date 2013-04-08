@@ -1,1 +1,37 @@
-{"upper_level": ["TransactionID"], "aliases": {}, "descr": ["ID", "RoleID", "Name", "Platform", "Category", "CloudLocation"], "row_path": "FarmRoleSet/Item"}
+{
+    "table": {
+        "upper_level": [
+            "TransactionID"
+        ], 
+        "row_path": "FarmRoleSet/Item", 
+        "descr": [
+            "ID", 
+            "RoleID", 
+            "Name", 
+            "Platform", 
+            "Category", 
+            "CloudLocation"
+        ], 
+        "aliases": {}
+    }, 
+    "command": {
+        "cmd_name": "list-farm-roles", 
+        "cmd_options": [
+            {
+                "dest": "farm_id", 
+                "default": null, 
+                "short": "-f", 
+                "help": "Farm ID", 
+                "long": "--farm-id"
+            }, 
+            {
+                "dest": "farm_name", 
+                "default": null, 
+                "short": "-n", 
+                "help": "The name of farm could be used INSTEAD of ID", 
+                "long": "--farm-name"
+            }
+        ], 
+        "cmd_help": "{-f farm-id | -n name}"
+    }
+}

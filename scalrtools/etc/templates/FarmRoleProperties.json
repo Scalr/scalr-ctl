@@ -1,1 +1,38 @@
-{"upper_level": ["TransactionID"], "aliases": {}, "descr": ["ID", "Name"], "row_path": "FarmRoleSet/Item", "dynamic": ["ScalingProperties/","PlatformProperties/","MySQLProperties/"]}
+{
+    "table": {
+        "upper_level": [
+            "TransactionID"
+        ], 
+        "dynamic": [
+            "ScalingProperties/", 
+            "PlatformProperties/", 
+            "MySQLProperties/"
+        ], 
+        "descr": [
+            "ID", 
+            "Name"
+        ], 
+        "row_path": "FarmRoleSet/Item", 
+        "aliases": {}
+    }, 
+    "command": {
+        "cmd_name": "get-farm-role-properties", 
+        "cmd_options": [
+            {
+                "dest": "farm_id", 
+                "default": null, 
+                "short": "-f", 
+                "help": "Farm ID", 
+                "long": "--farm-id"
+            }, 
+            {
+                "dest": "farm_name", 
+                "default": null, 
+                "short": "-n", 
+                "help": "The name of farm could be used INSTEAD of ID", 
+                "long": "--farm-name"
+            }
+        ], 
+        "cmd_help": "{-f farm-id | -n name}"
+    }
+}

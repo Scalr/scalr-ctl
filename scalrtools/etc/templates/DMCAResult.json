@@ -1,1 +1,46 @@
-{"upper_level": ["TransactionID"], "aliases": {}, "descr": ["AplicationID"], "row_path": "."}
+{
+    "table": {
+        "upper_level": [
+            "TransactionID"
+        ], 
+        "descr": [
+            "AplicationID"
+        ], 
+        "row_path": ".", 
+        "aliases": {}
+    }, 
+    "command": {
+        "cmd_name": "dm-create-application", 
+        "cmd_options": [
+            {
+                "dest": "name", 
+                "default": "", 
+                "short": "-n", 
+                "help": "Application name", 
+                "long": "--name"
+            }, 
+            {
+                "dest": "source_id", 
+                "default": "", 
+                "short": "-s", 
+                "help": "Source ID", 
+                "long": "--source-id"
+            }, 
+            {
+                "dest": "pre_deploy_script", 
+                "default": "", 
+                "short": "-b", 
+                "help": "Script to execute BEFORE deploy", 
+                "long": "--pre-deploy script"
+            }, 
+            {
+                "dest": "post_deploy_script", 
+                "default": "", 
+                "short": "-a", 
+                "help": "Script to execute AFTER deploy", 
+                "long": "--post-deploy script"
+            }
+        ], 
+        "cmd_help": "-n name -s source-id [-b pre_deploy_script -a post_deploy_script]"
+    }
+}

@@ -1,1 +1,50 @@
-{"upper_level": ["TransactionID"], "aliases": {}, "descr": ["ExternalIP", "InternalIP", "ServerID", "Name", "ID", "Status", "Uptime", "Index", "ScalarizrVersion"], "row_path": "FarmRoleSet/*/ServerSet/Item", "dynamic": ["PlatformProperties/"]}
+{
+    "table": {
+        "upper_level": [
+            "TransactionID"
+        ], 
+        "dynamic": [
+            "PlatformProperties/"
+        ], 
+        "descr": [
+            "ExternalIP", 
+            "InternalIP", 
+            "ServerID", 
+            "Name", 
+            "ID", 
+            "Status", 
+            "Uptime", 
+            "Index", 
+            "ScalarizrVersion"
+        ], 
+        "row_path": "FarmRoleSet/*/ServerSet/Item", 
+        "aliases": {}
+    }, 
+    "command": {
+        "cmd_name": "list-servers", 
+        "cmd_options": [
+            {
+                "dest": "farm_id", 
+                "default": null, 
+                "short": "-f", 
+                "help": "Farm ID", 
+                "long": "--farm-id"
+            }, 
+            {
+                "dest": "farm_name", 
+                "default": null, 
+                "short": "-n", 
+                "help": "The name of farm could be used INSTEAD of ID", 
+                "long": "--farm-name"
+            }, 
+            {
+                "dest": "farm_role_id", 
+                "default": null, 
+                "short": "-r", 
+                "help": "Farm Role ID", 
+                "long": "--farm-role-id"
+            }
+        ], 
+        "cmd_help": "{-f farm-id | -n name} [-r farm-role-id]"
+    }
+}

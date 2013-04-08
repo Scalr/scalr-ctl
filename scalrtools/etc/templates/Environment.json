@@ -1,1 +1,13 @@
-{"upper_level": ["TransactionID"], "aliases": {}, "descr": ["ID", "Name"], "row_path": "EnvironmentSet/Item"}
+{
+    "table": {
+        "upper_level": [
+            "TransactionID"
+        ], 
+        "row_path": "EnvironmentSet/Item", 
+        "descr": [
+            "ID", 
+            "Name"
+        ], 
+        "aliases": {}
+    }
+}

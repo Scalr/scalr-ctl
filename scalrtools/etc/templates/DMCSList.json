@@ -1,1 +1,20 @@
-{"upper_level": ["TransactionID"], "aliases": {}, "descr": ["ID", "Type", "URL", "AuthType"], "row_path": "SourceSet/Item"}
+{
+    "table": {
+        "upper_level": [
+            "TransactionID"
+        ], 
+        "descr": [
+            "ID", 
+            "Type", 
+            "URL", 
+            "AuthType"
+        ], 
+        "row_path": "SourceSet/Item", 
+        "aliases": {}
+    }, 
+    "command": {
+        "cmd_name": "dm-list-sources", 
+        "cmd_options": [], 
+        "cmd_help": ""
+    }
+}

@@ -1,1 +1,25 @@
-{"upper_level": ["TransactionID"], "aliases": {}, "descr": ["Result"], "row_path": "."}
+{
+    "table": {
+        "upper_level": [
+            "TransactionID"
+        ], 
+        "descr": [
+            "Result"
+        ], 
+        "row_path": ".", 
+        "aliases": {}
+    }, 
+    "command": {
+        "cmd_name": "reboot-server", 
+        "cmd_options": [
+            {
+                "dest": "server_id", 
+                "default": null, 
+                "short": "-s", 
+                "help": "Server ID", 
+                "long": "--server-id"
+            }
+        ], 
+        "cmd_help": "-s server-id"
+    }
+}

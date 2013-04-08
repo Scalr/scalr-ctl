@@ -1,1 +1,46 @@
-{"upper_level": ["TransactionID"], "aliases": {}, "descr": ["SourceID"], "row_path": "."}
+{
+    "table": {
+        "upper_level": [
+            "TransactionID"
+        ], 
+        "descr": [
+            "SourceID"
+        ], 
+        "row_path": ".", 
+        "aliases": {}
+    }, 
+    "command": {
+        "cmd_name": "dm-create-source", 
+        "cmd_options": [
+            {
+                "dest": "type", 
+                "default": "", 
+                "short": "-t", 
+                "help": "Source type [svn|http]", 
+                "long": "--type"
+            }, 
+            {
+                "dest": "url", 
+                "default": "",
+                "short": "-u", 
+                "help": "Source URL", 
+                "long": "--url"
+            }, 
+            {
+                "dest": "auth_login", 
+                "default": "", 
+                "short": "-l",
+                "help": "Source login", 
+                "long": "--login"
+            }, 
+            {
+                "dest": "auth_password", 
+                "default": "", 
+                "short": "-p", 
+                "help": "Source password", 
+                "long": "--password"
+            }
+        ], 
+        "cmd_help": "-t [http|svn] -u url [-l login -p password]"
+    }
+}

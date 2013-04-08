@@ -619,8 +619,8 @@ class ServerTerminate(Command):
 
     @classmethod
     def inject_options(cls, parser):
-        parser.add_option("-i", "--server-id", dest="server_id", default=None, help='ServerID')
-        parser.add_option("-d", "--decrease-min-instances", dest="decrease", default=None, help='Decrease MinInstances setting for role (Default: 0)')
+        parser.add_option("-i", "--server-id", dest="server_id", default=None, help="ServerID")
+        parser.add_option("-d", "--decrease-min-instances", dest="decrease", default=None, help="Decrease MinInstances setting for role (Default: 0)")
 
     def run(self):
         print self.pretty(self.connection.terminate_server, self.options.server_id, self.options.decrease)
@@ -636,8 +636,8 @@ class ServerImageCreate(Command):
 
     @classmethod
     def inject_options(cls, parser):
-        parser.add_option("-i", "--server-id", dest="server_id", default=None, help='ServerID')
-        parser.add_option("-n", "--role-name", dest="name", default=None, help='Name for the new role')
+        parser.add_option("-i", "--server-id", dest="server_id", default=None, help="ServerID")
+        parser.add_option("-n", "--role-name", dest="name", default=None, help="Name for the new role")
 
     def run(self):
         print self.pretty(self.connection.create_server_image, self.options.server_id, self.options.name)
@@ -653,8 +653,8 @@ class ServerLaunch(Command):
 
     @classmethod
     def inject_options(cls, parser):
-        parser.add_option("-i", "--farm-role-id", dest="farm_role_id", default=None, help='FarmRoleID on which scalr should launch new instance')
-        parser.add_option("--increase-max-instances", dest="increase_max_instances", action="store_true", help='Increase min instances for this role')
+        parser.add_option("-i", "--farm-role-id", dest="farm_role_id", default=None, help="FarmRoleID on which scalr should launch new instance")
+        parser.add_option("--increase-max-instances", dest="increase_max_instances", action="store_true", help="Increase min instances for this role")
 
     def run(self):
         print self.pretty(self.connection.launch_server, self.options.farm_role_id, self.options.increase_max_instances)

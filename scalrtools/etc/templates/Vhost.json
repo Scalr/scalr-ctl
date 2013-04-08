@@ -1,1 +1,78 @@
-{"upper_level": ["TransactionID"], "aliases": {}, "descr": ["Name", "FarmID", "FarmRoleID", "IsSSLEnabled", "LastModifiedAt"], "row_path": "ApacheVhostSet/Item"}
+{
+    "table": {
+        "upper_level": [
+            "TransactionID"
+        ], 
+        "descr": [
+            "Name", 
+            "FarmID", 
+            "FarmRoleID", 
+            "IsSSLEnabled", 
+            "LastModifiedAt"
+        ], 
+        "row_path": "ApacheVhostSet/Item", 
+        "aliases": {}
+    }, 
+    "command": {
+        "cmd_name": "create-apache-vhost", 
+        "cmd_options": [
+            {
+                "dest": "domain", 
+                "default": null, 
+                "short": "-d", 
+                "help": "Domain (Application) name", 
+                "long": "--domain-name"
+            }, 
+            {
+                "dest": "farm_id", 
+                "default": null, 
+                "short": "-f", 
+                "help": "Farm ID", 
+                "long": "--farm-id"
+            }, 
+            {
+                "dest": "farm_name", 
+                "default": null, 
+                "short": "-n", 
+                "help": "The name of farm could be used INSTEAD of ID", 
+                "long": "--farm-name"
+            }, 
+            {
+                "dest": "farm_role_id", 
+                "default": null, 
+                "short": "-i", 
+                "help": "Farm Role ID", 
+                "long": "--farm-role-id"
+            }, 
+            {
+                "dest": "document_root", 
+                "default": null, 
+                "short": "-r", 
+                "help": "Document root for virtualhost", 
+                "long": "--document-root-dir"
+            }, 
+            {
+                "dest": "enable_ssl", 
+                "default": null, 
+                "short": "-s", 
+                "help": "EnableSSL (1 - yes, 0 - no)", 
+                "long": "--enable-ssl"
+            }, 
+            {
+                "dest": "pk_path", 
+                "default": null, 
+                "short": "-k", 
+                "help": "Path to file with Private key for SSL", 
+                "long": "--pk-path"
+            }, 
+            {
+                "dest": "cert_path", 
+                "default": null, 
+                "short": "-c", 
+                "help": "Path to file with Certificate for SSL", 
+                "long": "--cert-path"
+            }
+        ], 
+        "cmd_help": "-d domain-name {-f farm-id | -n name} -i farm-role-id -r document-root -s enable-ssl [-k key-path -c cert-path]"
+    }
+}

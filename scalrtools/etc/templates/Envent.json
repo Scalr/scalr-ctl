@@ -1,1 +1,0 @@
-{"upper_level": ["TransactionID", "TotalRecords", "StartFrom", "RecordsLimit"], "aliases": {}, "descr": ["ID", "Type", "Timestamp", "Message"], "row_path": "EventSet/Item"}

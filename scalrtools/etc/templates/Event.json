@@ -7,54 +7,46 @@
             "RecordsLimit"
         ], 
         "descr": [
-            "ServerID", 
-            "Message", 
-            "Severity", 
+            "ID", 
+            "Type", 
             "Timestamp", 
-            "Source"
+            "Message"
         ], 
-        "row_path": "LogSet/Item", 
+        "row_path": "EventSet/Item", 
         "aliases": {}
     }, 
     "command": {
-        "cmd_name": "list-logs", 
+        "cmd_name": "list-events", 
         "cmd_options": [
             {
                 "dest": "farm_id", 
-                "default": null, 
+                "default": "", 
                 "short": "-f", 
                 "help": "Farm ID", 
                 "long": "--farm-id"
             }, 
             {
                 "dest": "farm_name", 
-                "default": null, 
+                "default": "", 
                 "short": "-n", 
                 "help": "The name of farm could be used INSTEAD of ID", 
                 "long": "--farm-name"
             }, 
             {
-                "dest": "server_id", 
-                "default": null, 
-                "short": "-i", 
-                "help": "Instance ID", 
-                "long": "--server-id"
-            }, 
-            {
                 "dest": "start", 
-                "default": null, 
+                "default": "", 
                 "short": "-s", 
                 "help": "Start from specified event number (Can be used for paging)", 
                 "long": "--start-from"
             }, 
             {
                 "dest": "limit", 
-                "default": null, 
+                "default": "", 
                 "short": "-l", 
                 "help": "Limit number of returned events (Can be used for paging)", 
                 "long": "--record-limit"
             }
         ], 
-        "cmd_help": "{-f farm-id | -n name} [-i server-id -s start-from -l limit]"
+        "cmd_help": "{-f farm-id | -n name} [-s start-from -l limit]"
     }
 }

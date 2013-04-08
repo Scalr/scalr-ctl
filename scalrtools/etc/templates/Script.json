@@ -1,1 +1,20 @@
-{"upper_level": ["TransactionID"], "aliases": {}, "descr": ["Name", "ID", "Description", "LatestRevision"], "row_path": "ScriptSet/Item"}
+{
+    "table": {
+        "upper_level": [
+            "TransactionID"
+        ], 
+        "descr": [
+            "Name", 
+            "ID", 
+            "Description", 
+            "LatestRevision"
+        ], 
+        "row_path": "ScriptSet/Item", 
+        "aliases": {}
+    }, 
+    "command": {
+        "cmd_name": "list-scripts", 
+        "cmd_options": [], 
+        "cmd_help": ""
+    }
+}

@@ -1,1 +1,20 @@
-{"upper_level": ["TransactionID"], "aliases": {}, "descr": ["ID", "Type", "URL", "AuthType"], "row_path": "ApplicationSet/Item"}
+{
+    "table": {
+        "upper_level": [
+            "TransactionID"
+        ], 
+        "descr": [
+            "ID", 
+            "Type", 
+            "URL", 
+            "AuthType"
+        ], 
+        "row_path": "ApplicationSet/Item", 
+        "aliases": {}
+    }, 
+    "command": {
+        "cmd_name": "dm-list-applications", 
+        "cmd_options": [], 
+        "cmd_help": ""
+    }
+}

@@ -1,1 +1,29 @@
-{"upper_level": ["TransactionID"], "descr": ["Revision", "Date"], "row_path": "ScriptRevisionSet/Item", "dynamic": [".//Name"], "aliases": {}}
+{
+    "table": {
+        "upper_level": [
+            "TransactionID"
+        ], 
+        "dynamic": [
+            ".//Name"
+        ], 
+        "descr": [
+            "Revision", 
+            "Date"
+        ], 
+        "row_path": "ScriptRevisionSet/Item", 
+        "aliases": {}
+    }, 
+    "command": {
+        "cmd_name": "get-script-details", 
+        "cmd_options": [
+            {
+                "dest": "script_id", 
+                "default": null, 
+                "short": "-s", 
+                "help": "Script ID", 
+                "long": "--script-id"
+            }
+        ], 
+        "cmd_help": "-s script-id"
+    }
+}
