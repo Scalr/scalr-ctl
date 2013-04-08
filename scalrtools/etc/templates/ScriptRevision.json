@@ -1,1 +1,1 @@
-{"descr": ["Revision", "Date"], "dynamic":[".//Name"], "aliases": {}, "row_path" : "ScriptRevisionSet/Item", "format" : "base"}
+{"upper_level": ["TransactionID"], "descr": ["Revision", "Date"], "row_path": "ScriptRevisionSet/Item", "dynamic": [".//Name"], "aliases": {}}

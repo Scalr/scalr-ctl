@@ -1,1 +1,1 @@
-{"descr": ["BundleTaskID"], "aliases": {}, "row_path" : ".", "format" : "base"}
+{"upper_level": ["TransactionID"], "aliases": {}, "descr": ["BundleTaskID"], "row_path": "."}

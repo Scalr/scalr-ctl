@@ -1,1 +1,1 @@
-{"descr": ["ID", "Type", "Timestamp", "Message"], "aliases": {}, "row_path" : "EventSet/Item", "format" : "paged"}
+{"upper_level": ["TransactionID", "TotalRecords", "StartFrom", "RecordsLimit"], "aliases": {}, "descr": ["ID", "Type", "Timestamp", "Message"], "row_path": "EventSet/Item"}

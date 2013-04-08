@@ -1,1 +1,1 @@
-{"descr": ["ServerID"], "aliases": {}, "row_path" : ".", "format" : "base"}
+{"upper_level": ["TransactionID"], "aliases": {}, "descr": ["ServerID"], "row_path": "."}

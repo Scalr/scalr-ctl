@@ -1,1 +1,1 @@
-{"descr": ["ZoneName", "FarmID", "FarmRoleID", "Status", "LastModifiedAt"], "aliases": {}, "row_path" : "DNSZoneSet/Item", "format" : "base"}
+{"upper_level": ["TransactionID"], "aliases": {}, "descr": ["ZoneName", "FarmID", "FarmRoleID", "Status", "LastModifiedAt"], "row_path": "DNSZoneSet/Item"}

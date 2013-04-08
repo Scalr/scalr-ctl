@@ -1,0 +1,1 @@
+{"upper_level": ["TransactionID"], "aliases": {}, "descr": ["ExternalIP", "InternalIP", "ServerID", "Name", "ID", "Status", "Uptime", "Index", "ScalarizrVersion"], "row_path": "FarmRoleSet/*/ServerSet/Item", "dynamic": ["PlatformProperties/"]}

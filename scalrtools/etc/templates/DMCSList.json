@@ -1,1 +1,1 @@
-{"descr": ["ID", "Type", "URL", "AuthType"], "aliases": {}, "row_path" : "SourceSet/Item", "format" : "base"}
+{"upper_level": ["TransactionID"], "aliases": {}, "descr": ["ID", "Type", "URL", "AuthType"], "row_path": "SourceSet/Item"}

@@ -1,1 +1,1 @@
-{"descr": ["Name", "FarmID", "FarmRoleID", "IsSSLEnabled", "LastModifiedAt"], "aliases": {}, "row_path" : "ApacheVhostSet/Item", "format" : "base"}
+{"upper_level": ["TransactionID"], "aliases": {}, "descr": ["Name", "FarmID", "FarmRoleID", "IsSSLEnabled", "LastModifiedAt"], "row_path": "ApacheVhostSet/Item"}

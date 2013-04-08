@@ -1,1 +1,1 @@
-{"descr": ["ServerID", "Message", "Severity", "Timestamp", "Source"], "aliases": {}, "row_path" : "LogSet/Item", "format" : "paged"}
+{"upper_level": ["TransactionID", "TotalRecords", "StartFrom", "RecordsLimit"], "aliases": {}, "descr": ["ServerID", "Message", "Severity", "Timestamp", "Source"], "row_path": "LogSet/Item"}

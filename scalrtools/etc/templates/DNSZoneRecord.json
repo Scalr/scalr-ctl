@@ -1,1 +1,1 @@
-{"descr": ["ID", "Type", "TTL", "Priority", "Name", "Value", "Weight", "Port", "IsSystem"], "aliases": {}, "row_path" : "ZoneRecordSet/Item", "format" : "base"}
+{"upper_level": ["TransactionID"], "aliases": {}, "descr": ["ID", "Type", "TTL", "Priority", "Name", "Value", "Weight", "Port", "IsSystem"], "row_path": "ZoneRecordSet/Item"}

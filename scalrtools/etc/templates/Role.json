@@ -1,1 +1,1 @@
-{"descr": ["Name", "Owner", "Architecture"], "aliases": {}, "row_path" : "RoleSet/Item", "format" : "base"}
+{"upper_level": ["TransactionID"], "aliases": {}, "descr": ["Name", "Owner", "Architecture"], "row_path": "RoleSet/Item"}

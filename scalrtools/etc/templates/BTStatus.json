@@ -1,1 +1,1 @@
-{"descr": ["BundleTaskStatus", "FailureReason"], "aliases": {}, "row_path" : ".", "format" : "base"}
+{"upper_level": ["TransactionID"], "aliases": {}, "descr": ["BundleTaskStatus", "FailureReason"], "row_path": "."}

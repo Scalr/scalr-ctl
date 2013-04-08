@@ -1,1 +1,1 @@
-{"descr": [], "dynamic":["ServerInfo/", "PlatformProperties/", "ScalrProperties/"], "aliases": {}, "row_path" : ".", "format" : "base"}
+{"upper_level": ["TransactionID"], "descr": [], "row_path": ".", "dynamic": ["ServerInfo/", "PlatformProperties/", "ScalrProperties/"], "aliases": {}}

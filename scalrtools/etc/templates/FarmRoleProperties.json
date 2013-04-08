@@ -1,0 +1,1 @@
+{"upper_level": ["TransactionID"], "aliases": {}, "descr": ["ID", "Name"], "row_path": "FarmRoleSet/Item", "dynamic": ["ScalingProperties/","PlatformProperties/","MySQLProperties/"]}

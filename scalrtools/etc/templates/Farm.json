@@ -1,1 +1,1 @@
-{"descr": ["Name", "Status", "Comments", "ID"], "aliases": {}, "row_path" : "FarmSet/Item", "format" : "base"}
+{"upper_level": ["TransactionID"], "aliases": {}, "descr": ["Name", "Status", "Comments", "ID"], "row_path": "FarmSet/Item"}

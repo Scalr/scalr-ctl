@@ -1,37 +1,33 @@
 __author__ = 'Dmytro Korsakov'
 
 
-def xml_to_dict(root, row_path, attributes, format='base', dynamic_attrs=None):
+def xml_to_dict(root, row_xpath, columns, upper_level, dynamic_attrs=None):
     '''
     schema = None #JSON
-    attributes = schema['descr']
-    row_path = schema['row_path']
+    columns = schema['descr']
+    row_xpath = schema['row_xpath']
     format = schema['format']
+    upper_level = schema['upper_level']
     '''
-    upper_level = ['TransactionID',]
     data = dict()
     rows = []
 
-    if format in ('base', 'paged'):
-        for row in root.findall(row_path):
-            d = dict()
+    for row in root.findall(row_xpath):
+        d = dict()
 
-            for attr in attributes:
-                obj = row.find(attr)
-                if hasattr(obj,'text') and obj.text is not None:
-                    d[attr] = obj.text.strip()
-                else:
-                    d[attr] = None
+        for attr in columns:
+            obj = row.find(attr)
+            if hasattr(obj,'text') and obj.text is not None:
+                d[attr] = obj.text.strip()
+            else:
+                d[attr] = None
 
-            if dynamic_attrs:
-                for dattr in dynamic_attrs:
-                    objects = row.findall(dattr)
-                    d[dattr] = [(object.tag, object.text.strip()) for object in objects]
+        if dynamic_attrs:
+            for dattr in dynamic_attrs:
+                objects = row.findall(dattr)
+                d[dattr] = [(object.tag, object.text.strip()) for object in objects]
 
-            rows.append(d)
-
-    if format == 'paged':
-        upper_level += ('TotalRecords', 'StartFrom', 'RecordsLimit')
+        rows.append(d)
 
     data['upper_level'] = dict()
     for path in upper_level:

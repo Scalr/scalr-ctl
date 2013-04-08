@@ -1,1 +1,1 @@
-{"descr": ["Name", "ID", "Description", "LatestRevision"], "aliases": {}, "row_path" : "ScriptSet/Item", "format" : "base"}
+{"upper_level": ["TransactionID"], "aliases": {}, "descr": ["Name", "ID", "Description", "LatestRevision"], "row_path": "ScriptSet/Item"}
