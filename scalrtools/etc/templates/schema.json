@@ -1,0 +1,1433 @@
+[
+    {
+        "table": {
+            "upper_level": [
+                "TransactionID"
+            ], 
+            "row_path": "ApplicationSet/Item", 
+            "descr": [
+                "ID", 
+                "Type", 
+                "URL", 
+                "AuthType"
+            ], 
+            "aliases": {}
+        }, 
+        "command": {
+            "required_options": [], 
+            "cmd_name": "dm-list-applications", 
+            "cmd_options": [], 
+            "api_method_name": "DmApplicationsList", 
+            "cmd_help": ""
+        }
+    }, 
+    {
+        "table": {
+            "upper_level": [
+                "TransactionID"
+            ], 
+            "row_path": ".", 
+            "descr": [
+                "BundleTaskStatus", 
+                "FailureReason"
+            ], 
+            "aliases": {}
+        }, 
+        "command": {
+            "required_options": [
+                {
+                    "all": [
+                        "bt_id"
+                    ]
+                }
+            ], 
+            "cmd_name": "get-bundle-task-status", 
+            "cmd_options": [
+                {
+                    "dest": "bt_id", 
+                    "default": "", 
+                    "short": "-i", 
+                    "help": "ID of the bundle task", 
+                    "long": "--bundle-task-id"
+                }
+            ], 
+            "api_method_name": "BundleTaskGetStatus", 
+            "cmd_help": "-i bundle-task-id"
+        }
+    }, 
+    {
+        "table": {
+            "upper_level": [
+                "TransactionID"
+            ], 
+            "row_path": ".", 
+            "descr": [
+                "AplicationID"
+            ], 
+            "aliases": {}
+        }, 
+        "command": {
+            "cmd_options": [
+                {
+                    "dest": "name", 
+                    "default": "", 
+                    "short": "-n", 
+                    "help": "Application name", 
+                    "long": "--name"
+                }, 
+                {
+                    "dest": "source_id", 
+                    "default": "", 
+                    "short": "-s", 
+                    "help": "Source ID", 
+                    "long": "--source-id"
+                }, 
+                {
+                    "dest": "pre_deploy_script", 
+                    "default": "", 
+                    "short": "-b", 
+                    "help": "Script to execute BEFORE deploy", 
+                    "long": "--pre-deploy script"
+                }, 
+                {
+                    "dest": "post_deploy_script", 
+                    "default": "", 
+                    "short": "-a", 
+                    "help": "Script to execute AFTER deploy", 
+                    "long": "--post-deploy script"
+                }
+            ], 
+            "cmd_name": "dm-create-application", 
+            "required_options": [
+                {
+                    "all": [
+                        "name", 
+                        "source_id"
+                    ]
+                }
+            ], 
+            "api_method_name": "DmApplicationCreate", 
+            "cmd_help": "-n name -s source-id [-b pre_deploy_script -a post_deploy_script]"
+        }
+    }, 
+    {
+        "table": {
+            "upper_level": [
+                "TransactionID"
+            ], 
+            "row_path": "SourceSet/Item", 
+            "descr": [
+                "ID", 
+                "Type", 
+                "URL", 
+                "AuthType"
+            ], 
+            "aliases": {}
+        }, 
+        "command": {
+            "cmd_options": [], 
+            "cmd_name": "dm-list-sources", 
+            "required_options": [], 
+            "api_method_name": "DmSourcesList", 
+            "cmd_help": ""
+        }
+    }, 
+    {
+        "table": {
+            "upper_level": [
+                "TransactionID"
+            ], 
+            "row_path": ".", 
+            "descr": [
+                "SourceID"
+            ], 
+            "aliases": {}
+        }, 
+        "command": {
+            "cmd_options": [
+                {
+                    "dest": "type", 
+                    "default": "", 
+                    "short": "-t", 
+                    "help": "Source type [svn|http]", 
+                    "long": "--type"
+                }, 
+                {
+                    "dest": "url", 
+                    "default": "", 
+                    "short": "-u", 
+                    "help": "Source URL", 
+                    "long": "--url"
+                }, 
+                {
+                    "dest": "auth_login", 
+                    "default": "", 
+                    "short": "-l", 
+                    "help": "Source login", 
+                    "long": "--login"
+                }, 
+                {
+                    "dest": "auth_password", 
+                    "default": "", 
+                    "short": "-p", 
+                    "help": "Source password", 
+                    "long": "--password"
+                }
+            ], 
+            "cmd_name": "dm-create-source", 
+            "required_options": [
+                {
+                    "all": [
+                        "type", 
+                        "url"
+                    ]
+                }
+            ], 
+            "api_method_name": "DmSourceCreate", 
+            "cmd_help": "-t [http|svn] -u url [-l login -p password]"
+        }
+    }, 
+    {
+        "table": {
+            "upper_level": [
+                "TransactionID"
+            ], 
+            "row_path": "DNSZoneSet/Item", 
+            "descr": [
+                "ZoneName", 
+                "FarmID", 
+                "FarmRoleID", 
+                "Status", 
+                "LastModifiedAt"
+            ], 
+            "aliases": {}
+        }, 
+        "command": {
+            "cmd_options": [], 
+            "cmd_name": "list-dns-zones", 
+            "required_options": [], 
+            "api_method_name": "DNSZonesList", 
+            "cmd_help": ""
+        }
+    }, 
+    {
+        "table": {
+            "upper_level": [
+                "TransactionID"
+            ], 
+            "row_path": ".", 
+            "descr": [
+                "Result"
+            ], 
+            "aliases": {}
+        }, 
+        "command": {
+            "required_options": [
+                {
+                    "all": [
+                        "name"
+                    ]
+                }
+            ], 
+            "cmd_name": "create-dns-zone", 
+            "cmd_options": [
+                {
+                    "dest": "name", 
+                    "default": null, 
+                    "short": "-d", 
+                    "help": "Domain (Application) name", 
+                    "long": "--domain-name"
+                }, 
+                {
+                    "dest": "farm_id", 
+                    "default": null, 
+                    "short": "-f", 
+                    "help": "Farm ID", 
+                    "long": "--farm-id"
+                }, 
+                {
+                    "dest": "farm_name", 
+                    "default": null, 
+                    "short": "-n", 
+                    "help": "The name of farm could be used INSTEAD of ID", 
+                    "long": "--farm-name"
+                }, 
+                {
+                    "dest": "farm_role_id", 
+                    "default": null, 
+                    "short": "-i", 
+                    "help": "Farm Role ID", 
+                    "long": "--farm-role-id"
+                }
+            ], 
+            "api_method_name": "DNSZoneCreate", 
+            "cmd_help": "-d domain-name [{-f farm-id | -n farm-name} -i farm-role-id]"
+        }
+    }, 
+    {
+        "table": {
+            "upper_level": [
+                "TransactionID"
+            ], 
+            "row_path": "ZoneRecordSet/Item", 
+            "descr": [
+                "ID", 
+                "Type", 
+                "TTL", 
+                "Priority", 
+                "Name", 
+                "Value", 
+                "Weight", 
+                "Port", 
+                "IsSystem"
+            ], 
+            "aliases": {}
+        }, 
+        "command": {
+            "required_options": [
+                {
+                    "all": [
+                        "name"
+                    ]
+                }
+            ], 
+            "cmd_name": "list-dns-zone-records", 
+            "cmd_options": [
+                {
+                    "dest": "name", 
+                    "default": "", 
+                    "short": "-n", 
+                    "help": "Zone (Domain) name", 
+                    "long": "--zone-name"
+                }
+            ], 
+            "api_method_name": "DNSZoneRecordsList", 
+            "cmd_help": "-n name"
+        }
+    }, 
+    {
+        "table": {
+            "upper_level": [
+                "TransactionID"
+            ], 
+            "row_path": ".", 
+            "descr": [
+                "Result"
+            ], 
+            "aliases": {}
+        }, 
+        "command": {
+            "required_options": [
+                {
+                    "all": [
+                        "zone_name", 
+                        "type", 
+                        "ttl", 
+                        "record_name", 
+                        "record_value"
+                    ]
+                }
+            ], 
+            "cmd_name": "add-dns-zone-record", 
+            "cmd_options": [
+                {
+                    "dest": "zone_name", 
+                    "default": null, 
+                    "short": "-z", 
+                    "help": "Zone (Domain) name", 
+                    "long": "--zone-name"
+                }, 
+                {
+                    "dest": "type", 
+                    "default": null, 
+                    "short": "-t", 
+                    "help": "Record type (A, MX, CNAME, NS, TXT, SRV)", 
+                    "long": "--type"
+                }, 
+                {
+                    "dest": "ttl", 
+                    "default": null, 
+                    "short": "-l", 
+                    "help": "Record TTL", 
+                    "long": "--ttl"
+                }, 
+                {
+                    "dest": "record_name", 
+                    "default": null, 
+                    "short": "-n", 
+                    "help": "Record name", 
+                    "long": "--record-name"
+                }, 
+                {
+                    "dest": "record_value", 
+                    "default": null, 
+                    "short": "-v", 
+                    "help": "Record value", 
+                    "long": "--record-value"
+                }, 
+                {
+                    "dest": "priority", 
+                    "default": null, 
+                    "short": "-p", 
+                    "help": "Priority (for MX records)", 
+                    "long": "--priority"
+                }, 
+                {
+                    "dest": "weight", 
+                    "default": null, 
+                    "short": "-w", 
+                    "help": "Weight (for SRV records)", 
+                    "long": "--weight"
+                }, 
+                {
+                    "dest": "port", 
+                    "default": null, 
+                    "short": "-o", 
+                    "help": "Port (for SRV records)", 
+                    "long": "--port"
+                }
+            ], 
+            "api_method_name": "DNSZoneRecordAdd", 
+            "cmd_help": "-z zone-name -t type -l ttl -n record-name -v record-value [-p priority -w weight -o port]"
+        }
+    }, 
+    {
+        "table": {
+            "upper_level": [
+                "TransactionID"
+            ], 
+            "row_path": ".", 
+            "descr": [
+                "Result"
+            ], 
+            "aliases": {}
+        }, 
+        "command": {
+            "required_options": [
+                {
+                    "all": [
+                        "name", 
+                        "record_id"
+                    ]
+                }
+            ], 
+            "cmd_name": "remove-dns-zone-record", 
+            "cmd_options": [
+                {
+                    "dest": "name", 
+                    "default": null, 
+                    "short": "-n", 
+                    "help": "Domain (Application) name", 
+                    "long": "--domain-name"
+                }, 
+                {
+                    "dest": "record_id", 
+                    "default": null, 
+                    "short": "-i", 
+                    "help": "Record ID", 
+                    "long": "--record-id"
+                }
+            ], 
+            "api_method_name": "DNSZoneRecordRemove", 
+            "cmd_help": "-n name -i record-id"
+        }
+    }, 
+    {
+        "table": {
+            "upper_level": [
+                "TransactionID"
+            ], 
+            "descr": [
+                "ID", 
+                "Name"
+            ], 
+            "row_path": "EnvironmentSet/Item", 
+            "aliases": {}
+        }, 
+        "command": {
+            "required_options": [], 
+            "cmd_name": "list-environments", 
+            "cmd_options": [], 
+            "api_method_name": "EnvironmentsList", 
+            "cmd_help": ""
+        }
+    }, 
+    {
+        "table": {
+            "upper_level": [
+                "TransactionID", 
+                "TotalRecords", 
+                "StartFrom", 
+                "RecordsLimit"
+            ], 
+            "row_path": "EventSet/Item", 
+            "descr": [
+                "ID", 
+                "Type", 
+                "Timestamp", 
+                "Message"
+            ], 
+            "aliases": {}
+        }, 
+        "command": {
+            "required_options": [
+                {
+                    "all": [
+                        "farm_id"
+                    ]
+                }
+            ], 
+            "cmd_name": "list-events", 
+            "cmd_options": [
+                {
+                    "dest": "farm_id", 
+                    "default": "", 
+                    "short": "-f", 
+                    "help": "Farm ID", 
+                    "long": "--farm-id"
+                }, 
+                {
+                    "dest": "farm_name", 
+                    "default": "", 
+                    "short": "-n", 
+                    "help": "The name of farm could be used INSTEAD of ID", 
+                    "long": "--farm-name"
+                }, 
+                {
+                    "dest": "start", 
+                    "default": "", 
+                    "short": "-s", 
+                    "help": "Start from specified event number (Can be used for paging)", 
+                    "long": "--start-from"
+                }, 
+                {
+                    "dest": "limit", 
+                    "default": "", 
+                    "short": "-l", 
+                    "help": "Limit number of returned events (Can be used for paging)", 
+                    "long": "--record-limit"
+                }
+            ], 
+            "api_method_name": "EventsList", 
+            "cmd_help": "{-f farm-id | -n name} [-s start-from -l limit]"
+        }
+    }, 
+    {
+        "table": {
+            "upper_level": [
+                "TransactionID"
+            ], 
+            "row_path": "FarmSet/Item", 
+            "descr": [
+                "Name", 
+                "Status", 
+                "Comments", 
+                "ID"
+            ], 
+            "aliases": {}
+        }, 
+        "command": {
+            "required_options": [], 
+            "cmd_name": "list-farms", 
+            "cmd_options": [], 
+            "api_method_name": "FarmsList", 
+            "cmd_help": ""
+        }
+    }, 
+    {
+        "table": {
+            "upper_level": [
+                "TransactionID"
+            ], 
+            "row_path": ".", 
+            "descr": [
+                "Result"
+            ], 
+            "aliases": {}
+        }, 
+        "command": {
+            "required_options": [
+                {
+                    "all": [
+                        "farm_id"
+                    ]
+                }
+            ], 
+            "cmd_name": "launch-farm", 
+            "cmd_options": [
+                {
+                    "dest": "farm_id", 
+                    "default": null, 
+                    "short": "-f", 
+                    "help": "The ID of farm that you want to launch", 
+                    "long": "--farm-id"
+                }, 
+                {
+                    "dest": "farm_name", 
+                    "default": null, 
+                    "short": "-n", 
+                    "help": "The name of farm could be used INSTEAD of ID", 
+                    "long": "--farm-name"
+                }, 
+                {
+                    "dest": "non_interactive", 
+                    "action": "store_true", 
+                    "short": "-a", 
+                    "help": "Use this option to avoid checking farm state", 
+                    "long": "--non-interactive"
+                }
+            ], 
+            "api_method_name": "FarmLaunch", 
+            "cmd_help": "{-f farm-id | -n farm-name} [--non-interactive]"
+        }
+    }, 
+    {
+        "table": {
+            "upper_level": [
+                "TransactionID"
+            ], 
+            "descr": [
+                "ID", 
+                "RoleID", 
+                "Name", 
+                "Platform", 
+                "Category", 
+                "CloudLocation"
+            ], 
+            "row_path": "FarmRoleSet/Item", 
+            "aliases": {}
+        }, 
+        "command": {
+            "cmd_options": [
+                {
+                    "dest": "farm_id", 
+                    "default": null, 
+                    "short": "-f", 
+                    "help": "Farm ID", 
+                    "long": "--farm-id"
+                }, 
+                {
+                    "dest": "farm_name", 
+                    "default": null, 
+                    "short": "-n", 
+                    "help": "The name of farm could be used INSTEAD of ID", 
+                    "long": "--farm-name"
+                }
+            ], 
+            "cmd_name": "list-farm-roles", 
+            "required_options": [
+                {
+                    "or": [
+                        "farm_id", 
+                        "farm_name"
+                    ]
+                }
+            ], 
+            "api_method_name": "FarmGetDetails", 
+            "cmd_help": "{-f farm-id | -n name}"
+        }
+    }, 
+    {
+        "table": {
+            "upper_level": [
+                "TransactionID"
+            ], 
+            "dynamic": [
+                "ScalingProperties/", 
+                "PlatformProperties/", 
+                "MySQLProperties/"
+            ], 
+            "row_path": "FarmRoleSet/Item", 
+            "descr": [
+                "ID", 
+                "Name"
+            ], 
+            "aliases": {}
+        }, 
+        "command": {
+            "required_options": [
+                {
+                    "all": [
+                        "farm_id"
+                    ]
+                }
+            ], 
+            "cmd_name": "get-farm-role-properties", 
+            "cmd_options": [
+                {
+                    "dest": "farm_id", 
+                    "default": null, 
+                    "short": "-f", 
+                    "help": "Farm ID", 
+                    "long": "--farm-id"
+                }, 
+                {
+                    "dest": "farm_name", 
+                    "default": null, 
+                    "short": "-n", 
+                    "help": "The name of farm could be used INSTEAD of ID", 
+                    "long": "--farm-name"
+                }
+            ], 
+            "api_method_name": "FarmGetDetails", 
+            "cmd_help": "{-f farm-id | -n name}"
+        }
+    }, 
+    {
+        "table": {
+            "upper_level": [
+                "TransactionID"
+            ], 
+            "row_path": ".", 
+            "descr": [
+                "Result"
+            ], 
+            "aliases": {}
+        }, 
+        "command": {
+            "required_options": [
+                {
+                    "or": [
+                        "farm_id", 
+                        "farm_name"
+                    ]
+                }
+            ], 
+            "cmd_name": "terminate-farm", 
+            "cmd_options": [
+                {
+                    "dest": "farm_id", 
+                    "default": null, 
+                    "short": "-f", 
+                    "help": "The ID of farm that you want to terminate", 
+                    "long": "--farm-id"
+                }, 
+                {
+                    "dest": "farm_name", 
+                    "default": null, 
+                    "short": "-n", 
+                    "help": "The name of farm could be used INSTEAD of ID", 
+                    "long": "--farm-name"
+                }, 
+                {
+                    "dest": "keep_ebs", 
+                    "default": null, 
+                    "short": "-e", 
+                    "help": "Keep EBS volumes created for roles on this farm 0|1", 
+                    "long": "--keep-ebs"
+                }, 
+                {
+                    "dest": "keep_eip", 
+                    "default": null, 
+                    "short": "-i", 
+                    "help": "Keep Elastic IPs created for roles on this farm 0|1", 
+                    "long": "--keep-eip"
+                }, 
+                {
+                    "dest": "keep_dns_zone", 
+                    "default": null, 
+                    "short": "-d", 
+                    "help": "Keep DNS zone that assigned to this farm on nameservers 0|1", 
+                    "long": "--keep-dns-zone"
+                }, 
+                {
+                    "dest": "non_interactive", 
+                    "action": "store_true", 
+                    "short": "-a", 
+                    "help": "Use this option to avoid checking farm state", 
+                    "long": "--non-interactive"
+                }
+            ], 
+            "api_method_name": "FarmTerminate", 
+            "cmd_help": "{-f farm-id | -n farm-name} -e keep-ebs, -i keep-eip -d keep-dns-zone [--non-interactive]"
+        }
+    }, 
+    {
+        "table": {
+            "upper_level": [
+                "TransactionID"
+            ], 
+            "row_path": ".", 
+            "descr": [
+                "BundleTaskID"
+            ], 
+            "aliases": {}
+        }, 
+        "command": {
+            "cmd_options": [
+                {
+                    "dest": "server_id", 
+                    "default": null, 
+                    "short": "-i", 
+                    "help": "ServerID", 
+                    "long": "--server-id"
+                }, 
+                {
+                    "dest": "name", 
+                    "default": null, 
+                    "short": "-n", 
+                    "help": "Name for the new role", 
+                    "long": "--role-name"
+                }
+            ], 
+            "cmd_name": "create-server-image", 
+            "required_options": [
+                {
+                    "all": [
+                        "server_id", 
+                        "name"
+                    ]
+                }
+            ], 
+            "api_method_name": "ServerImageCreate", 
+            "cmd_help": "-i server-id -n role-name"
+        }
+    }, 
+    {
+        "table": {
+            "upper_level": [
+                "TransactionID", 
+                "TotalRecords", 
+                "StartFrom", 
+                "RecordsLimit"
+            ], 
+            "row_path": "LogSet/Item", 
+            "descr": [
+                "ServerID", 
+                "Message", 
+                "Severity", 
+                "Timestamp", 
+                "Source"
+            ], 
+            "aliases": {}
+        }, 
+        "command": {
+            "cmd_options": [
+                {
+                    "dest": "farm_id", 
+                    "default": null, 
+                    "short": "-f", 
+                    "help": "Farm ID", 
+                    "long": "--farm-id"
+                }, 
+                {
+                    "dest": "farm_name", 
+                    "default": null, 
+                    "short": "-n", 
+                    "help": "The name of farm could be used INSTEAD of ID", 
+                    "long": "--farm-name"
+                }, 
+                {
+                    "dest": "server_id", 
+                    "default": null, 
+                    "short": "-i", 
+                    "help": "Instance ID", 
+                    "long": "--server-id"
+                }, 
+                {
+                    "dest": "start", 
+                    "default": null, 
+                    "short": "-s", 
+                    "help": "Start from specified event number (Can be used for paging)", 
+                    "long": "--start-from"
+                }, 
+                {
+                    "dest": "limit", 
+                    "default": null, 
+                    "short": "-l", 
+                    "help": "Limit number of returned events (Can be used for paging)", 
+                    "long": "--record-limit"
+                }
+            ], 
+            "cmd_name": "list-logs", 
+            "required_options": [
+                {
+                    "or": [
+                        "farm_id", 
+                        "farm_name"
+                    ]
+                }
+            ], 
+            "api_method_name": "LogsList", 
+            "cmd_help": "{-f farm-id | -n name} [-i server-id -s start-from -l limit]"
+        }
+    }, 
+    {
+        "table": {
+            "upper_level": [
+                "TransactionID"
+            ], 
+            "row_path": "RoleSet/Item", 
+            "descr": [
+                "Name", 
+                "Owner", 
+                "Architecture"
+            ], 
+            "aliases": {}
+        }, 
+        "command": {
+            "cmd_options": [
+                {
+                    "dest": "platform", 
+                    "default": null, 
+                    "short": "-p", 
+                    "help": "Cloud platform", 
+                    "long": "--platform"
+                }, 
+                {
+                    "dest": "name", 
+                    "default": null, 
+                    "short": "-n", 
+                    "help": "List roles with specified role name.", 
+                    "long": "--name"
+                }, 
+                {
+                    "dest": "prefix", 
+                    "default": null, 
+                    "short": "-x", 
+                    "help": "List all roles begins with specified prefix.", 
+                    "long": "--prefix"
+                }, 
+                {
+                    "dest": "image_id", 
+                    "default": null, 
+                    "short": "-i", 
+                    "help": "List roles with specified image id.", 
+                    "long": "--image-id"
+                }
+            ], 
+            "cmd_name": "list-roles", 
+            "required_options": [], 
+            "api_method_name": "RolesList", 
+            "cmd_help": "[-p platform -n name -x prefix -i image-id]"
+        }
+    }, 
+    {
+        "table": {
+            "upper_level": [
+                "TransactionID"
+            ], 
+            "row_path": "ScriptSet/Item", 
+            "descr": [
+                "Name", 
+                "ID", 
+                "Description", 
+                "LatestRevision"
+            ], 
+            "aliases": {}
+        }, 
+        "command": {
+            "cmd_options": [], 
+            "cmd_name": "list-scripts", 
+            "required_options": [], 
+            "api_method_name": "ScriptsList", 
+            "cmd_help": ""
+        }
+    }, 
+    {
+        "table": {
+            "upper_level": [
+                "TransactionID"
+            ], 
+            "row_path": ".", 
+            "descr": [
+                "Result"
+            ], 
+            "aliases": {}
+        }, 
+        "command": {
+            "cmd_options": [
+                {
+                    "dest": "farm_role_id", 
+                    "default": null, 
+                    "short": "-i", 
+                    "help": "Script will be executed on all instances with this farm role ID. You can get this ID by using GetFarmDetails API call", 
+                    "long": "--farm-role-id"
+                }, 
+                {
+                    "dest": "server_id", 
+                    "default": null, 
+                    "short": "-s", 
+                    "help": "Script will be executed on this server", 
+                    "long": "--server-id"
+                }, 
+                {
+                    "dest": "farm_id", 
+                    "default": null, 
+                    "short": "-f", 
+                    "help": "Execute script on specified farm", 
+                    "long": "--farm-id"
+                }, 
+                {
+                    "dest": "farm_name", 
+                    "default": null, 
+                    "short": "-n", 
+                    "help": "The name of farm could be used INSTEAD of ID", 
+                    "long": "--farm-name"
+                }, 
+                {
+                    "dest": "script_id", 
+                    "default": null, 
+                    "short": "-e", 
+                    "help": "Script ID", 
+                    "long": "--script-id"
+                }, 
+                {
+                    "dest": "timeout", 
+                    "default": null, 
+                    "short": "-t", 
+                    "help": "Script execution timeout (seconds)", 
+                    "long": "--timeout"
+                }, 
+                {
+                    "dest": "mode", 
+                    "default": null, 
+                    "short": "-a", 
+                    "help": "Excute script asynchronously (1) or synchronously (0)", 
+                    "long": "--async"
+                }, 
+                {
+                    "dest": "revision", 
+                    "default": null, 
+                    "short": "-r", 
+                    "help": "Execute specified revision of script", 
+                    "long": "--revision"
+                }, 
+                {
+                    "dest": "variables", 
+                    "default": null, 
+                    "short": "-v", 
+                    "help": "Script variables.Example: key1=value1,key2=value2", 
+                    "long": "--variables"
+                }
+            ], 
+            "cmd_name": "execute-script", 
+            "required_options": [
+                {
+                    "all": [
+                        "farm_id", 
+                        "script_id", 
+                        "mode", 
+                        "timeout"
+                    ]
+                }
+            ], 
+            "api_method_name": "ScriptExecute", 
+            "cmd_help": "{-f farm-id | -n name} -e script-id -a async -t timeout [-i farm-role-id -s server-id -r revision -v variables]"
+        }
+    }, 
+    {
+        "table": {
+            "upper_level": [
+                "TransactionID"
+            ], 
+            "dynamic": [
+                ".//Name"
+            ], 
+            "row_path": "ScriptRevisionSet/Item", 
+            "descr": [
+                "Revision", 
+                "Date"
+            ], 
+            "aliases": {}
+        }, 
+        "command": {
+            "cmd_options": [
+                {
+                    "dest": "script_id", 
+                    "default": null, 
+                    "short": "-s", 
+                    "help": "Script ID", 
+                    "long": "--script-id"
+                }
+            ], 
+            "cmd_name": "get-script-details", 
+            "required_options": [
+                {
+                    "all": [
+                        "script_id"
+                    ]
+                }
+            ], 
+            "api_method_name": "ScriptGetDetails", 
+            "cmd_help": "-s script-id"
+        }
+    }, 
+    {
+        "table": {
+            "upper_level": [
+                "TransactionID"
+            ], 
+            "dynamic": [
+                "ServerInfo/", 
+                "PlatformProperties/", 
+                "ScalrProperties/"
+            ], 
+            "row_path": ".", 
+            "descr": [], 
+            "aliases": {}
+        }, 
+        "command": {
+            "cmd_options": [
+                {
+                    "dest": "server_id", 
+                    "default": null, 
+                    "short": "-i", 
+                    "help": "Server ID", 
+                    "long": "--server-id"
+                }
+            ], 
+            "cmd_name": "get-server-extended-information", 
+            "required_options": [
+                {
+                    "all": [
+                        "server_id"
+                    ]
+                }
+            ], 
+            "api_method_name": "ServerGetExtendedInformation", 
+            "cmd_help": "-i server-id"
+        }
+    }, 
+    {
+        "table": {
+            "upper_level": [
+                "TransactionID"
+            ], 
+            "dynamic": [
+                "PlatformProperties/"
+            ], 
+            "row_path": "FarmRoleSet/*/ServerSet/Item", 
+            "descr": [
+                "ExternalIP", 
+                "InternalIP", 
+                "ServerID", 
+                "Name", 
+                "ID", 
+                "Status", 
+                "Uptime", 
+                "Index", 
+                "ScalarizrVersion"
+            ], 
+            "aliases": {}
+        }, 
+        "command": {
+            "cmd_options": [
+                {
+                    "dest": "farm_id", 
+                    "default": null, 
+                    "short": "-f", 
+                    "help": "Farm ID", 
+                    "long": "--farm-id"
+                }, 
+                {
+                    "dest": "farm_name", 
+                    "default": null, 
+                    "short": "-n", 
+                    "help": "The name of farm could be used INSTEAD of ID", 
+                    "long": "--farm-name"
+                }, 
+                {
+                    "dest": "farm_role_id", 
+                    "default": null, 
+                    "short": "-r", 
+                    "help": "Farm Role ID", 
+                    "long": "--farm-role-id"
+                }
+            ], 
+            "cmd_name": "list-servers", 
+            "required_options": [
+                {
+                    "all": [
+                        "farm_id"
+                    ]
+                }
+            ], 
+            "api_method_name": "FarmGetDetails", 
+            "cmd_help": "{-f farm-id | -n name} [-r farm-role-id]"
+        }
+    }, 
+    {
+        "table": {
+            "upper_level": [
+                "TransactionID"
+            ], 
+            "row_path": ".", 
+            "descr": [
+                "ServerID"
+            ], 
+            "aliases": {}
+        }, 
+        "command": {
+            "cmd_options": [
+                {
+                    "dest": "farm_role_id", 
+                    "default": null, 
+                    "short": "-i", 
+                    "help": "FarmRoleID on which scalr should launch new instance", 
+                    "long": "--farm-role-id"
+                }, 
+                {
+                    "dest": "increase_max_instances", 
+                    "action": "store_true", 
+                    "short": "-i", 
+                    "help": "Increase min instances for this role", 
+                    "long": "--increase-max-instances"
+                }
+            ], 
+            "cmd_name": "launch-server", 
+            "required_options": [
+                {
+                    "all": [
+                        "farm_role_id"
+                    ]
+                }
+            ], 
+            "api_method_name": "ServerLaunch", 
+            "cmd_help": "-i farm-role-id [--increase-max-instances]"
+        }
+    }, 
+    {
+        "table": {
+            "upper_level": [
+                "TransactionID"
+            ], 
+            "row_path": ".", 
+            "descr": [
+                "Result"
+            ], 
+            "aliases": {}
+        }, 
+        "command": {
+            "cmd_options": [
+                {
+                    "dest": "server_id", 
+                    "default": null, 
+                    "short": "-s", 
+                    "help": "Server ID", 
+                    "long": "--server-id"
+                }
+            ], 
+            "cmd_name": "reboot-server", 
+            "required_options": [
+                {
+                    "all": [
+                        "server_id"
+                    ]
+                }
+            ], 
+            "api_method_name": "ServerReboot", 
+            "cmd_help": "-s server-id"
+        }
+    }, 
+    {
+        "table": {
+            "upper_level": [
+                "TransactionID"
+            ], 
+            "row_path": ".", 
+            "descr": [
+                "Result"
+            ], 
+            "aliases": {}
+        }, 
+        "command": {
+            "cmd_options": [
+                {
+                    "dest": "server_id", 
+                    "default": null, 
+                    "short": "-i", 
+                    "help": "ServerID", 
+                    "long": "--server-id"
+                }, 
+                {
+                    "dest": "decrease", 
+                    "default": null, 
+                    "short": "-d", 
+                    "help": "Decrease MinInstances setting for role (Default: 0)", 
+                    "long": "--decrease-min-instances"
+                }
+            ], 
+            "cmd_name": "terminate-server", 
+            "required_options": [
+                {
+                    "all": [
+                        "server_id"
+                    ]
+                }
+            ], 
+            "api_method_name": "ServerTerminate", 
+            "cmd_help": "-i server-id [-d decrease-min-instances-setting]"
+        }
+    }, 
+    {
+        "table": {
+            "upper_level": [
+                "TransactionID"
+            ], 
+            "row_path": ".", 
+            "descr": [
+                "GraphURL"
+            ], 
+            "aliases": {}
+        }, 
+        "command": {
+            "cmd_options": [
+                {
+                    "dest": "obj_type", 
+                    "default": null, 
+                    "short": "-o", 
+                    "help": "Object type. Valid values are: role, server or farm", 
+                    "long": "--object-type"
+                }, 
+                {
+                    "dest": "obj_id", 
+                    "default": null, 
+                    "short": "-i", 
+                    "help": "In case if object type is instance ObjectID shoudl be server id, in case if object type is role ObjectID should be role id and in case if object type is farm ObjectID should be farm id", 
+                    "long": "--object-id"
+                }, 
+                {
+                    "dest": "name", 
+                    "default": null, 
+                    "short": "-n", 
+                    "help": "Watcher name could be CPU, NET, MEM or LA", 
+                    "long": "--watcher-name"
+                }, 
+                {
+                    "dest": "graph_type", 
+                    "default": null, 
+                    "short": "-g", 
+                    "help": "Graph type could be daily, weekly, monthly or yearly", 
+                    "long": "--graph-type"
+                }
+            ], 
+            "cmd_name": "get-statistics-graph-url", 
+            "required_options": [
+                {
+                    "all": [
+                        "obj_type", 
+                        "obj_id", 
+                        "name", 
+                        "graph_type"
+                    ]
+                }
+            ], 
+            "api_method_name": "StatisticsGetGraphURL", 
+            "cmd_help": "-o object-type -i object-id -n watcher-name -g graph-type"
+        }
+    }, 
+    {
+        "table": {
+            "upper_level": [
+                "TransactionID"
+            ], 
+            "row_path": "ApacheVhostSet/Item", 
+            "descr": [
+                "Name", 
+                "FarmID", 
+                "FarmRoleID", 
+                "IsSSLEnabled", 
+                "LastModifiedAt"
+            ], 
+            "aliases": {}
+        }, 
+        "command": {
+            "cmd_options": [
+                {
+                    "dest": "domain", 
+                    "default": null, 
+                    "short": "-d", 
+                    "help": "Domain (Application) name", 
+                    "long": "--domain-name"
+                }, 
+                {
+                    "dest": "farm_id", 
+                    "default": null, 
+                    "short": "-f", 
+                    "help": "Farm ID", 
+                    "long": "--farm-id"
+                }, 
+                {
+                    "dest": "farm_name", 
+                    "default": null, 
+                    "short": "-n", 
+                    "help": "The name of farm could be used INSTEAD of ID", 
+                    "long": "--farm-name"
+                }, 
+                {
+                    "dest": "farm_role_id", 
+                    "default": null, 
+                    "short": "-i", 
+                    "help": "Farm Role ID", 
+                    "long": "--farm-role-id"
+                }, 
+                {
+                    "dest": "document_root", 
+                    "default": null, 
+                    "short": "-r", 
+                    "help": "Document root for virtualhost", 
+                    "long": "--document-root-dir"
+                }, 
+                {
+                    "dest": "enable_ssl", 
+                    "default": null, 
+                    "short": "-s", 
+                    "help": "EnableSSL (1 - yes, 0 - no)", 
+                    "long": "--enable-ssl"
+                }, 
+                {
+                    "dest": "pk_path", 
+                    "default": null, 
+                    "short": "-k", 
+                    "help": "Path to file with Private key for SSL", 
+                    "long": "--pk-path"
+                }, 
+                {
+                    "dest": "cert_path", 
+                    "default": null, 
+                    "short": "-c", 
+                    "help": "Path to file with Certificate for SSL", 
+                    "long": "--cert-path"
+                }
+            ], 
+            "cmd_name": "create-apache-vhost", 
+            "required_options": [
+                {
+                    "all": [
+                        "domain", 
+                        "farm_id", 
+                        "farm_role_id", 
+                        "document_root", 
+                        "enable_ssl"
+                    ]
+                }
+            ], 
+            "api_method_name": "ApacheVhostCreate", 
+            "cmd_help": "-d domain-name {-f farm-id | -n name} -i farm-role-id -r document-root -s enable-ssl [-k key-path -c cert-path]"
+        }
+    }, 
+    {
+        "table": {
+            "upper_level": [
+                "TransactionID"
+            ], 
+            "descr": [
+                "Name", 
+                "FarmID", 
+                "FarmRoleID", 
+                "IsSSLEnabled", 
+                "LastModifiedAt"
+            ], 
+            "row_path": "ApacheVhostSet/Item", 
+            "aliases": {}
+        }, 
+        "command": {
+            "cmd_options": [], 
+            "cmd_name": "list-apache-virtual-hosts", 
+            "required_options": [], 
+            "api_method_name": "ApacheVhostsList", 
+            "cmd_help": ""
+        }
+    }
+]
