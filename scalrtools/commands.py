@@ -80,12 +80,12 @@ class Command(object):
 		conn = None
 		#print 'self.config.environment.api_version', self.config.environment.api_version
 		if self.config.environment:
-			conn = ScalrConnection(self.config.environment.url, 
-					self.config.environment.key_id, 
-					self.config.environment.key, 
-					env_id=self.config.environment.env_id,
-					api_version=self.config.environment.api_version, 
-					logger=self.config.logger)
+			conn = ScalrConnection(
+				url=self.config.environment.url,
+				auth=self.config.environment.auth,
+				env_id=self.config.environment.env_id,
+				api_version=self.config.environment.api_version,
+				logger=self.config.logger)
 		return conn
 
 

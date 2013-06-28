@@ -52,7 +52,7 @@ class ConfigSection(object):
 		path = os.path.join(base_path, cls.config_name)
 		
 		if os.path.exists(path):
-			config = ConfigParser()	
+			config = ConfigParser()
 			config.read(path)
 			setattr(obj, 'name', section)
 		
@@ -78,6 +78,8 @@ class Environment(ConfigSection):
 			url = 'scalr_url',
 			key_id = 'scalr_key_id',
 			key = 'scalr_api_key',
+			username = 'ldap_username',
+			password = 'ldap_password',
 			env_id = 'env_id',
 			api_version = 'version')
 	
@@ -127,16 +129,13 @@ class Configuration:
 	def set_logger(self, logger):
 		self.logger = logger
 
-	def set_environment(self, key, key_id, url, env_id=None):	
+	def set_environment(self, auth, url, env_id=None):
 		self.environment = Environment.from_ini(self.base_path)
-		if key:
-			self.environment.key = key
-		if key_id:
-			self.environment.key_id = key_id
+		self.environment.auth = auth
 		if url:
 			self.environment.url = url
 		if env_id:
 			self.environment.env_id = env_id
 		
-		if not self.environment.key or not self.environment.key_id or not self.environment.url:
+		if not self.environment.auth or not self.environment.url:
 			raise ScalrEnvError('Environment not set.')

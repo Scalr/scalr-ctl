@@ -14,6 +14,7 @@ from optparse import OptionParser
 import commands
 from config import Configuration, ScalrCfgError, ScalrEnvError
 from api.client import ScalrAPIError
+from api.auth import KeyAuth, LDAPAuth
 
 
 def split_options(args):
@@ -48,12 +49,14 @@ def main():
 	parser = OptionParser(usage=usage, add_help_option=False)
 	parser.add_option("--debug", dest="debug", action="store_true", help="Enable debug output")
 	parser.add_option("-c", "--config-path", dest="base_path", default=None, help="Path to configuration files")
-	parser.add_option("-i", "--key-id", dest="key_id", default=None, help="Scalr API key ID")
-	parser.add_option("-a", "--access-key", dest="key", default=None, help="Scalr API access key")
 	parser.add_option("-u", "--api-url", dest="api_url", default=None, help="Scalr API URL (IF you use open source Scalr installation)")
 	parser.add_option("-e", "--env-id", dest="env_id", default=None, help="Scalr Environment ID")
 	parser.add_option("-h", "--help", dest="help", action="store_true", help="Help")
-	
+	parser.add_option("-i", "--key-id", dest="key_id", default=None, help="Scalr API key ID")
+	parser.add_option("-a", "--access-key", dest="key", default=None, help="Scalr API access key")
+	parser.add_option("-n", "--username", dest="ldap_username", default=None, help="LDAP username")
+	parser.add_option("-p", "--password", dest="ldap_password", default=None, help="LDAP password")
+
 	args, cmd, subargs = split_options(sys.argv)
 
 	subcommands = sorted([command.name for command in get_commands() if not command.name.startswith('_')])
@@ -69,7 +72,20 @@ def main():
 
 	try:
 		c = Configuration(options.base_path)
-		c.set_environment(options.key, options.key_id, options.api_url, options.env_id)
+
+		auth = None
+
+		if options.key_id:
+			auth = KeyAuth(options.key_id, options.key)
+
+		if options.ldap_username:
+			assert auth is None, "You can't use LDAP and Key-based authentication together"
+			assert options.env_id is not None, "You must specify Environment ID for LDAP authentication"
+			auth = LDAPAuth(options.ldap_username, options.ldap_password)
+
+		print "AUTH", auth
+
+		c.set_environment(auth, options.api_url, options.env_id)
 		
 		if options.debug:
 			c.set_logger(logger)

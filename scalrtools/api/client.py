@@ -8,14 +8,12 @@ import binascii
 import hashlib
 import logging
 import hmac
-import sys
-
 
 try:
 	import timemodule as time
 except ImportError:
 	import time
-		
+
 from xml.dom.minidom import parseString
 from urllib import urlencode, splitnport
 from urllib2 import urlopen, Request, URLError, HTTPError
@@ -27,10 +25,9 @@ class ScalrConnection(object):
 	implements Scalr API
 	'''
 
-	def __init__(self, url, key_id, access_key, env_id=None, api_version=None, logger=None):
+	def __init__(self, url, auth, env_id=None, api_version=None, logger=None):
 		self.url = url
-		self.key_id  = key_id
-		self.access_key = access_key
+		self.auth = auth
 		self.env_id = env_id
 		self.api_version = api_version 
 		self._logger = logger or logging.getLogger(__name__)
@@ -45,7 +42,6 @@ class ScalrConnection(object):
 		request_body = {}
 		request_body["Action"] = command
 		request_body["Version"] = self.api_version
-		request_body["KeyID"] = self.key_id
 		request_body['AuthVersion'] = '3'
 		if self.env_id and self.env_id != 'None':
 			request_body['EnvID'] = self.env_id
@@ -58,11 +54,8 @@ class ScalrConnection(object):
 						request_body['%s[%s]'%(key,k)] = v
 				else:
 					request_body[key] = value
-					
-		signature, timestamp = sign_http_request_v3(request_body, self.key_id, self.access_key)	
-		
-		request_body["TimeStamp"] = timestamp	
-		request_body["Signature"] = signature	
+
+		self.auth.authorize(request_body)
 		
 		post_data = urlencode(request_body)
 
@@ -833,15 +826,6 @@ def xml_strip(el):
 	return el	
 
 
-def sign_http_request_v3(data, key_id, access_key, timestamp=None):
-	date = time.strftime("%Y-%m-%dT%H:%M:%S.000Z", timestamp or time.gmtime())
-	data['TimeStamp']=date
-	canonical_string = 	"%s:%s:%s" % (data['Action'], key_id, data['TimeStamp'])
-	digest = hmac.new(access_key, canonical_string, hashlib.sha256).digest()
-	sign = binascii.b2a_base64(digest).strip()
-	return sign, date		
-
-		
 def sign_http_request_v1(data, key, timestamp=None):
 	date = time.strftime("%Y-%m-%dT%H:%M:%S.000Z", timestamp or time.gmtime())
 	data['TimeStamp']=date
