@@ -50,6 +50,8 @@ def main():
 	parser.add_option("-c", "--config-path", dest="base_path", default=None, help="Path to configuration files")
 	parser.add_option("-i", "--key-id", dest="key_id", default=None, help="Scalr API key ID")
 	parser.add_option("-a", "--access-key", dest="key", default=None, help="Scalr API access key")
+	parser.add_option("-l", "--login", dest="ldap_login", default=None, help="Login for LDAP authentication")
+	parser.add_option("-p", "--password", dest="ldap_password", default=None, help="Password for LDAP authentication")
 	parser.add_option("-u", "--api-url", dest="api_url", default=None, help="Scalr API URL (IF you use open source Scalr installation)")
 	parser.add_option("-e", "--env-id", dest="env_id", default=None, help="Scalr Environment ID")
 	parser.add_option("-h", "--help", dest="help", action="store_true", help="Help")
@@ -69,8 +71,7 @@ def main():
 
 	try:
 		c = Configuration(options.base_path)
-		c.set_environment(options.key, options.key_id, options.api_url, options.env_id)
-		
+		c.set_environment(options.key, options.key_id, options.api_url, options.env_id, options.ldap_login, options.ldap_password)
 		if options.debug:
 			c.set_logger(logger)
 			

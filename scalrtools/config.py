@@ -70,7 +70,10 @@ class Environment(ConfigSection):
 	key_id=None
 	key=None
 	env_id = None
-	api_version = None	
+	api_version = None
+	auth_type = None
+	ldap_login = None
+	ldap_password = None
 	
 	config_name = 'config.ini'
 	
@@ -79,7 +82,11 @@ class Environment(ConfigSection):
 			key_id = 'scalr_key_id',
 			key = 'scalr_api_key',
 			env_id = 'env_id',
-			api_version = 'version')
+			api_version = 'version',
+			auth_type = 'auth_type',
+			ldap_login = 'ldap_login',
+			#ldap_password = 'ldap_password'
+	)
 	
 	def write(self, base_path, section='api'):
 		super(Environment, self).write(base_path, section)
@@ -105,9 +112,12 @@ class Environment(ConfigSection):
 		table.add_row(('key id', self.key_id))
 		table.add_row(('environment id', self.env_id))
 		table.add_row(('version', self.api_version))
+		table.add_row(('ldap_login', self.ldap_login))
+		#table.add_row(('ldap_password', self.ldap_password))
+		table.add_row(('auth_type', self.auth_type))
+
 		
 		res = str(table)
-		print 'b'
 		return res
 	
 
@@ -127,16 +137,31 @@ class Configuration:
 	def set_logger(self, logger):
 		self.logger = logger
 
-	def set_environment(self, key, key_id, url, env_id=None):	
+	def set_environment(self, key=None, key_id=None, url=None, env_id=None, ldap_login=None, ldap_password=None):
 		self.environment = Environment.from_ini(self.base_path)
-		if key:
-			self.environment.key = key
-		if key_id:
-			self.environment.key_id = key_id
 		if url:
 			self.environment.url = url
 		if env_id:
 			self.environment.env_id = env_id
-		
+
+		if ldap_login:
+			self.environment.ldap_login = ldap_login
+			if not self.environment.auth_type:
+				#XXX: Ugly
+				self.environment.auth_type = 'ldap'
+
+		if ldap_password:
+			self.environment.ldap_password = ldap_password
+
+		if key:
+			self.environment.key = key
+			if not self.environment.auth_type:
+				#XXX: Ugly
+				self.environment.auth_type = 'password'
+		if key_id:
+			self.environment.key_id = key_id
+
+
 		if not self.environment.key or not self.environment.key_id or not self.environment.url:
 			raise ScalrEnvError('Environment not set.')
+

@@ -77,17 +77,8 @@ class Command(object):
 
 	@property		
 	def connection(self):
-		conn = None
-		#print 'self.config.environment.api_version', self.config.environment.api_version
-		if self.config.environment:
-			conn = ScalrConnection(self.config.environment.url, 
-					self.config.environment.key_id, 
-					self.config.environment.key, 
-					env_id=self.config.environment.env_id,
-					api_version=self.config.environment.api_version, 
+		return ScalrConnection(self.config.environment,
 					logger=self.config.logger)
-		return conn
-
 
 
 class FarmRoleParametersList(Command):
@@ -917,12 +908,39 @@ class ConfigureEnv(Command):
 				key_id=self.options.key_id,
 				key=self.options.key,
 				env_id = self.options.env_id,
-				api_version = '2.3.0')
+				api_version = '2.3.0',
+				auth_type = 'password')
 		
 		e.write(self.config.base_path)
 		e = Environment.from_ini(self.config.base_path)
 		print e
 
+
+class ConfigureLDAPEnv(Command):
+	name = 'configure-ldap'
+	help = '-l login -u -api_url -e env_id'
+
+	def __init__(self, config, *args):
+		super(ConfigureLDAPEnv, self).__init__(config, *args)
+		self.require(self.options.login, self.options.api_url)
+
+	@classmethod
+	def inject_options(cls, parser):
+		parser.add_option("-l", "--login", dest="login", default=None, help="Login for LDAP authentication")
+		parser.add_option("-e", "--env-id", dest="env_id", default=None, help="Scalr Environment ID")
+		parser.add_option("-u", "--api-url", dest="api_url", default=DEFAULT_API_URL, help="Scalr API URL (IF you use open source Scalr installation)")
+
+	def run(self):
+		e = Environment(
+				url=self.options.api_url,
+				ldap_login=self.options.login,
+				env_id = self.options.env_id,
+				api_version = '2.3.0',
+				auth_type='ldap')
+
+		e.write(self.config.base_path)
+		e = Environment.from_ini(self.config.base_path)
+		print e
 
 class EnvironmentsList(Command):
 	name = 'list-environments'

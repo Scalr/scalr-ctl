@@ -15,7 +15,8 @@ try:
 	import timemodule as time
 except ImportError:
 	import time
-		
+
+import os
 from xml.dom.minidom import parseString
 from urllib import urlencode, splitnport
 from urllib2 import urlopen, Request, URLError, HTTPError
@@ -27,12 +28,15 @@ class ScalrConnection(object):
 	implements Scalr API
 	'''
 
-	def __init__(self, url, key_id, access_key, env_id=None, api_version=None, logger=None):
+	def __init__(self, environment, logger=None):
+		self.environment = environment
+		'''
 		self.url = url
 		self.key_id  = key_id
 		self.access_key = access_key
 		self.env_id = env_id
-		self.api_version = api_version 
+		self.api_version = api_version
+		'''
 		self._logger = logger or logging.getLogger(__name__)
 		self.last_transaction_id = None
 		
@@ -44,13 +48,12 @@ class ScalrConnection(object):
 		# Perform HTTP request
 		request_body = {}
 		request_body["Action"] = command
-		request_body["Version"] = self.api_version
-		request_body["KeyID"] = self.key_id
+		request_body["Version"] = self.environment.api_version
 		request_body['AuthVersion'] = '3'
-		if self.env_id and self.env_id != 'None':
-			request_body['EnvID'] = self.env_id
+		if self.environment.env_id and self.environment.env_id != 'None':
+			request_body['EnvID'] = self.environment.env_id
 		#request_body['SysDebug'] = '1'
-		
+
 		if {} != params :
 			for key, value in params.items():
 				if isinstance(value, dict):
@@ -58,20 +61,30 @@ class ScalrConnection(object):
 						request_body['%s[%s]'%(key,k)] = v
 				else:
 					request_body[key] = value
-					
-		signature, timestamp = sign_http_request_v3(request_body, self.key_id, self.access_key)	
-		
-		request_body["TimeStamp"] = timestamp	
-		request_body["Signature"] = signature	
-		
+
+		if self.environment.auth_type == 'password':
+			request_body["KeyID"] = self.environment.key_id
+			signature, timestamp = sign_http_request_v3(request_body, self.environment.key_id, self.environment.key)
+			request_body["TimeStamp"] = timestamp
+			request_body["Signature"] = signature
+
+		elif self.environment.auth_type == 'ldap':
+			request_body["Login"] = self.environment.ldap_login
+			request_body["AuthType"] = self.environment.auth_type
+
+			password =self.environment.ldap_password or os.environ.get('SCALR_API_LDAP_PASSWORD')
+			if not password:
+				password = raw_input('Password: ')
+			request_body["Password"] = password
+
 		post_data = urlencode(request_body)
 
-		self._logger.debug('POST URL: \n%s' % self.url)
+		self._logger.debug('POST URL: \n%s' % self.environment.url)
 		self._logger.debug('POST DATA: \n%s' % post_data)
 		
 		response = None
 		try:
-			req = Request(self.url, post_data, {})
+			req = Request(self.environment.url, post_data, {})
 			response = urlopen(req)
 		except URLError, e:
 			if isinstance(e, HTTPError):

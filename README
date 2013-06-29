@@ -1,5 +1,16 @@
 
-version 0.3.41
+version 0.3.43
+codename: Stygian Shoti
+
+[+] Added LDAP authentication support.
+
+Run 'scalr configure-ldap' to set your login and environment id.
+
+LDAP password can be either passed with -p option, set as environment variable SCALR_API_LDAP_PASSWORD or simply entered in command line on request.
+
+-------------
+
+version 0.3.42
 codename: Zippy Zapiekanka
 
 [+] New API method: FarmRoleParametersList
