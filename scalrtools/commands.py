@@ -82,7 +82,7 @@ class Command(object):
 		if self.config.environment:
 			conn = ScalrConnection(
 				url=self.config.environment.url,
-				auth=self.config.environment.auth,
+				auth=self.config.get_auth(),
 				env_id=self.config.environment.env_id,
 				api_version=self.config.environment.api_version,
 				logger=self.config.logger)
@@ -899,11 +899,11 @@ class ApacheVhostCreate(Command):
 	
 class ConfigureEnv(Command):
 	name = 'configure'
-	help = '-i key_id -a key -u api_url -e env_id'
+	help = '[-i key_id -a key] [-n ldap_username -p ldap_password] -u api_url -e env_id'
 		
 	def __init__(self, config, *args):
 		super(ConfigureEnv, self).__init__(config, *args)
-		self.require(self.options.key_id, self.options.key, self.options.api_url)
+		self.require(self.options.api_url)
 			
 	@classmethod
 	def inject_options(cls, parser):
@@ -911,12 +911,16 @@ class ConfigureEnv(Command):
 		parser.add_option("-a", "--access-key", dest="key", default=None, help="Scalr API access key")
 		parser.add_option("-e", "--env-id", dest="env_id", default=None, help="Scalr Environment ID")
 		parser.add_option("-u", "--api-url", dest="api_url", default=DEFAULT_API_URL, help="Scalr API URL (IF you use open source Scalr installation)")
+		parser.add_option("-n", "--username", dest="ldap_username", default=None, help="LDAP username")
+		parser.add_option("-p", "--password", dest="ldap_password", default=None, help="LDAP password")
 		
-	def run(self):		
+	def run(self):
 		e = Environment(url=self.options.api_url,
 				key_id=self.options.key_id,
 				key=self.options.key,
 				env_id = self.options.env_id,
+				ldap_username=self.options.ldap_username,
+				ldap_password=self.options.ldap_password,
 				api_version = '2.3.0')
 		
 		e.write(self.config.base_path)

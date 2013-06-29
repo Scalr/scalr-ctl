@@ -1,4 +1,9 @@
 #coding:utf-8
+import hashlib
+import hmac
+import time
+import binascii
+
 
 def sign_http_request_v3(data, key_id, access_key, timestamp=None):
 	date = time.strftime("%Y-%m-%dT%H:%M:%S.000Z", timestamp or time.gmtime())

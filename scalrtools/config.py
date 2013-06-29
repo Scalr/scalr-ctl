@@ -7,7 +7,8 @@ import os
 
 from ConfigParser import ConfigParser, NoSectionError, NoOptionError
 
-from prettytable import PrettyTable	
+from prettytable import PrettyTable
+from scalrtools.api.auth import KeyAuth, LDAPAuth
 
 
 class ScalrCfgError(BaseException):
@@ -69,6 +70,8 @@ class Environment(ConfigSection):
 	url=None
 	key_id=None
 	key=None
+	ldap_username=None
+	ldap_password=None
 	env_id = None
 	api_version = None	
 	
@@ -78,8 +81,8 @@ class Environment(ConfigSection):
 			url = 'scalr_url',
 			key_id = 'scalr_key_id',
 			key = 'scalr_api_key',
-			username = 'ldap_username',
-			password = 'ldap_password',
+			ldap_username = 'ldap_username',
+			ldap_password = 'ldap_password',
 			env_id = 'env_id',
 			api_version = 'version')
 	
@@ -105,6 +108,8 @@ class Environment(ConfigSection):
 		table.add_row(('url', self.url))
 		table.add_row(('access key', self.key[:visible_length]+'...' if len(self.key)>40 else self.key))
 		table.add_row(('key id', self.key_id))
+		table.add_row(('ldap username', self.ldap_username))
+		table.add_row(('ldap password', "****" if self.ldap_password is not None else "not-set"))
 		table.add_row(('environment id', self.env_id))
 		table.add_row(('version', self.api_version))
 		
@@ -113,7 +118,7 @@ class Environment(ConfigSection):
 		return res
 	
 
-class Configuration:
+class Configuration(object):
 	logger = None
 	base_path = None
 	
@@ -126,16 +131,40 @@ class Configuration:
 		self.base_path = base_path or os.path.expanduser("~/.scalr/")
 		self.logger = logger
 
+
+	def get_auth(self):
+		if self.environment.key_id is not None and self.environment.key_id != "None":
+			# Config loader returns a "None" string.
+			return KeyAuth(self.environment.key_id, self.environment.key)
+
+		if self.environment.ldap_username is not None:
+			return LDAPAuth(self.environment.ldap_username, self.environment.ldap_password)
+
+		self.raise_invalid_environment("auth")
+
 	def set_logger(self, logger):
 		self.logger = logger
 
-	def set_environment(self, auth, url, env_id=None):
+	def raise_invalid_environment(self, k):
+		raise ScalrEnvError('Environment not set, missing: {0}'.format(k))
+
+	def set_environment(self, **options):
+		# Options:
+		# url
+		# key_id
+		# key
+		# ldap_username
+		# ldap_password
+		# env_id
+
 		self.environment = Environment.from_ini(self.base_path)
-		self.environment.auth = auth
-		if url:
-			self.environment.url = url
-		if env_id:
-			self.environment.env_id = env_id
-		
-		if not self.environment.auth or not self.environment.url:
-			raise ScalrEnvError('Environment not set.')
+
+		for k, v in options.items():
+			if v is not None:
+				setattr(self.environment, k, v)
+
+		if not self.environment.url:
+			self.raise_invalid_environment("api_url")
+
+		if not self.environment.api_version:
+			self.raise_invalid_environment("api_version")

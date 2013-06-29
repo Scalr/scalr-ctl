@@ -59,8 +59,9 @@ class ScalrConnection(object):
 		
 		post_data = urlencode(request_body)
 
-		self._logger.debug('POST URL: \n%s' % self.url)
-		self._logger.debug('POST DATA: \n%s' % post_data)
+		self._logger.debug('AUTH TYPE: \n%s\n' % self.auth.__class__.__name__)
+		self._logger.debug('POST URL: \n%s\n' % self.url)
+		self._logger.debug('POST DATA: \n%s\n' % post_data)
 		
 		response = None
 		try:

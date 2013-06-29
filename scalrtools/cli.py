@@ -73,26 +73,23 @@ def main():
 	try:
 		c = Configuration(options.base_path)
 
-		auth = None
+		environment = {
+			"url": options.api_url,
+			"key_id": options.key_id,
+			"key": options.key,
+			"ldap_username": options.ldap_username,
+			"ldap_password": options.ldap_password,
+			"env_id": options.env_id
+		}
 
-		if options.key_id:
-			auth = KeyAuth(options.key_id, options.key)
-
-		if options.ldap_username:
-			assert auth is None, "You can't use LDAP and Key-based authentication together"
-			assert options.env_id is not None, "You must specify Environment ID for LDAP authentication"
-			auth = LDAPAuth(options.ldap_username, options.ldap_password)
-
-		print "AUTH", auth
-
-		c.set_environment(auth, options.api_url, options.env_id)
+		c.set_environment(**environment)
 		
 		if options.debug:
 			c.set_logger(logger)
 			
 	except ScalrEnvError, e:
 		if not cmd.startswith('configure') and cmd != 'help':
-			print "\nNo login information found."
+			print e
 			print "Please specify options -a -u and -s, or run '%s help configure' to find out how to set login information permanently.\n" % commands.progname
 			#print help
 			sys.exit(1)
