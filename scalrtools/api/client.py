@@ -17,6 +17,7 @@ except ImportError:
 	import time
 
 import os
+import getpass
 from xml.dom.minidom import parseString
 from urllib import urlencode, splitnport
 from urllib2 import urlopen, Request, URLError, HTTPError
@@ -62,7 +63,7 @@ class ScalrConnection(object):
 				else:
 					request_body[key] = value
 
-		if self.environment.auth_type == 'password':
+		if not self.environment.auth_type or self.environment.auth_type == 'password':
 			request_body["KeyID"] = self.environment.key_id
 			signature, timestamp = sign_http_request_v3(request_body, self.environment.key_id, self.environment.key)
 			request_body["TimeStamp"] = timestamp
@@ -74,7 +75,7 @@ class ScalrConnection(object):
 
 			password =self.environment.ldap_password or os.environ.get('SCALR_API_LDAP_PASSWORD')
 			if not password:
-				password = raw_input('Password: ')
+				password = getpass.getpass('Password: ')
 			request_body["Password"] = password
 
 		post_data = urlencode(request_body)

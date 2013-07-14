@@ -1,5 +1,5 @@
 
-version 0.3.43
+version 0.3.46
 codename: Stygian Shoti
 
 [+] Added LDAP authentication support.
@@ -10,7 +10,7 @@ LDAP password can be either passed with -p option, set as environment variable S
 
 -------------
 
-version 0.3.42
+version 0.3.44
 codename: Zippy Zapiekanka
 
 [+] New API method: FarmRoleParametersList
