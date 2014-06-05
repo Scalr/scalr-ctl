@@ -587,13 +587,11 @@ class ScalrConnection(object):
 					server.name = role.name
 					server.farm_role_id = role.farm_role_id
 					servers.append(server)
-				
 
 		if farm_role_id:
 			for server in list(servers):
 				if server.farm_role_id != farm_role_id:
 					servers.remove(server)
-
 
 		if columns:
 			for server in servers:
@@ -608,6 +606,17 @@ class ScalrConnection(object):
 							else:
 								del server.__titles__[variable]
 		return servers
+
+
+	def remove_farm_role(self, farm_id, farm_role_id):
+		"""
+		@return Server[]
+		"""
+		params = {}
+
+		params['FarmID'] = farm_id
+		params['FarmRoleID'] = farm_role_id
+		return self._request(command="FarmRemoveRole", params=params, response_reader=self._read_remove_farm_role_response)
 	
 		
 	def execute_script(self,farm_id,script_id,timeout,async,farm_role_id=None,server_id=None,config_variables=None,revision=None):
@@ -627,6 +636,18 @@ class ScalrConnection(object):
 		
 		return self._request(command="ScriptExecute", params=params, response_reader=self._read_execute_script_response)
 
+
+	def fire_custom_event(self,server_id, event_name, kv_params=None):
+		"""
+		@return Result
+		"""
+		params = {}
+		params['ServerID'] = server_id
+		params['EventName'] = event_name
+		if kv_params: params['Params'] = kv_params
+
+		return self._request(command="FireCustomEvent", params=params, response_reader=self._read_fire_custom_event_response)
+
 	
 	def list_environments(self):
 		"""
@@ -635,8 +656,142 @@ class ScalrConnection(object):
 		return self._request("EnvironmentsList", response_reader=self._read_list_environments_response)
 
 
+	def create_farm(self, name, descr=None):
+		"""
+		@return FarmID
+		"""
+		params = {'Name': name}
+		if descr:
+			params['Description'] = descr
+
+		return self._request(command="FarmCreate", params=params, response_reader=self._read_create_farm_response)
+
+
+	def remove_farm(self, farm_id):
+		"""
+		@return Result
+		"""
+		params = {'FarmID': farm_id}
+		return self._request(command="FarmRemove", params=params, response_reader=self._read_remove_farm_response)
+
+
+	def add_farm_role(self, farm_id, role_id, platform, location, alias, configuration=None):
+		"""
+		@return FarmRoleID
+		"""
+		params = {}
+		params['FarmID'] = farm_id
+		params['RoleID'] = role_id
+		params['Platform'] = platform
+		params['CloudLocation'] = location
+		if alias:
+			params['Alias'] = alias
+		if configuration:
+			params['Configuration'] = configuration
+
+		return self._request(command="FarmAddRole", params=params, response_reader=self._read_add_farm_fole_response)
+
+
+	def update_farm_role(self, farm_role_id, alias, configuration=None):
+		"""
+		@return Result
+		"""
+		params = {}
+		params['FarmRoleID'] = farm_role_id
+		if alias:
+			params['Alias'] = alias
+		if configuration:
+			params['Configuration'] = configuration
+
+		return self._request(command="FarmUpdateRole", params=params, response_reader=self._read_update_farm_fole_response)
+
+
+	def list_golbal_variables(self, role_id=None, farm_id=None, farm_role_id=None, server_id=None):
+		"""
+		@return dict
+		"""
+		params = {}
+		if role_id:
+			params['RoleID'] = role_id
+		if farm_id:
+			params['FarmID'] = farm_id
+		if farm_role_id:
+			params['FarmRoleID'] = farm_role_id
+		if server_id:
+			params['ServerID'] = server_id
+
+		return self._request("GlobalVariablesList", params=params, response_reader=self._read_list_golbal_variables_response)
+
+
+	def get_extended_server_information(self, server_id):
+		"""
+		@return GlobalVariable[]
+		"""
+		params = {'ServerID': server_id}
+
+		return self._request("ServerGetExtendedInformation", params=params, response_reader=self._read_get_extended_server_information_response)
+
+
+	def set_golbal_variable(self, param_name, param_value, role_id=None, farm_id=None, farm_role_id=None, server_id=None):
+		"""
+		@return dict
+		"""
+		params = {"ParamName": param_name, "ParamValue": param_value}
+		if role_id:
+			params['RoleID'] = role_id
+		if farm_id:
+			params['FarmID'] = farm_id
+		if farm_role_id:
+			params['FarmRoleID'] = farm_role_id
+		if server_id:
+			params['ServerID'] = server_id
+
+		return self._request("GlobalVariableSet", params=params, response_reader=self._read_set_golbal_variable_response)
+
+
+	def _read_get_extended_server_information_response(self, xml):
+		def from_xml(xml, parent_name=""):
+			d = {}
+			for element in xml.childNodes:
+				if element.nodeType == 3:
+					d[parent_name + '/' + element.parentNode.nodeName] = element.nodeValue
+				else:
+					d.update(from_xml(element, element.parentNode.nodeName))
+			return d
+		return from_xml(xml)
+
+
+	def _read_set_golbal_variable_response(self, xml):
+		return self._read_response(xml, node_name='GlobalVariableSetResponse', cls=types.Result, simple_response=True)
+
+
+	def _read_list_golbal_variables_response(self, xml):
+		return self._read_response(xml, node_name='VariableSet', cls=types.GlobalVariable)
+
+
+	def _read_update_farm_fole_response(self, xml):
+		return self._read_response(xml, node_name='FarmUpdateRoleResponse', cls=types.Result, simple_response=True)
+
+
+	def _read_add_farm_fole_response(self, xml):
+		return self._read_response(xml, node_name='FarmAddRoleResponse', cls=types.FarmRoleID, simple_response=True)
+
+
+	def _read_remove_farm_role_response(self, xml):
+		return self._read_response(xml, node_name='FarmRemoveRoleResponse', cls=types.Result, simple_response=True)
+
+
+	def _read_remove_farm_response(self, xml):
+		return self._read_response(xml, node_name='FarmRemoveResponse', cls=types.Result, simple_response=True)
+
+
+	def _read_create_farm_response(self, xml):
+		return self._read_response(xml, node_name='FarmID', cls=types.FarmID, simple_response=True)
+
+
 	def _read_list_farm_role_parameters(self, xml):
 		return self._read_response(xml, node_name='ParamSet', cls=types.FarmRoleParameter)
+
 
 	def _read_update_farm_role_parameter(self, xml):
 		return self._read_response(xml, node_name='FarmRoleUpdateParameterValueResponse', cls=types.Result, simple_response=True)
@@ -664,7 +819,8 @@ class ScalrConnection(object):
 	
 	def _dm_get_deployment_task_log_response(self, xml):
 		return self._read_response(xml, node_name='LogSet', cls=types.DMTaskLog, wrap_page=True)
-	
+
+
 	def _read_dm_get_deployment_task_status_response(self, xml):
 		return self._read_response(xml, node_name='DeploymentTaskStatus', cls=types.DeploymentTask, simple_response=True)	
 	
@@ -779,6 +935,10 @@ class ScalrConnection(object):
 	
 	def _read_execute_script_response(self, xml):
 		return self._read_response(xml, node_name='ExecuteScriptResponse', cls=types.Result, simple_response=True)	
+
+
+	def _read_fire_custom_event_response(self, xml):
+		return self._read_response(xml, node_name='FireCustomEventResponse', cls=types.EventID, simple_response=True)
 	
 	
 	def _read_list_environments_response(self, xml):

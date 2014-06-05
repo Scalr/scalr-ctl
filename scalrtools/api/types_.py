@@ -135,10 +135,13 @@ class FarmRole(ScalrObject):
 	__titles__['farm_role_id'] = 'ID'
 	__titles__['role_id'] = 'RoleID'
 	__titles__['name'] = 'Name'
+	__titles__['alias'] = 'Alias'
 	__titles__['platform'] = 'Platform'
 	__titles__['category'] = 'Category'
 	__titles__['cloud_location'] = 'CloudLocation'
-	
+
+
+
 	__aliases__ = dict(ID = 'FarmRoleID')
 	
 	farm_role_id = None
@@ -146,7 +149,8 @@ class FarmRole(ScalrObject):
 	name = None
 	platform = None
 	category = None
-	cloud_location = None	
+	cloud_location = None
+	alias = None
 	
 	
 class FarmRoleProperties(ScalrObject):
@@ -192,7 +196,7 @@ class Server(ScalrObject):
 	__titles__['scalarizr_version'] = 'ScalarizrVersion'
 	__titles__['platform_properties'] = 'PlatformProperties'
 	__titles__['index'] = 'Index'
-	
+
 	server_id = None
 	platform_properties = None
 	external_ip = None
@@ -343,9 +347,19 @@ class FarmRoleParameter(ScalrObject):
 
 
 class ServerID(ScalrObject):
-	__titles__ = {'server_id' : 'ServerID'}
+	__titles__ = {'server_id': 'ServerID'}
 	server_id = None
-	
+
+
+class FarmID(ScalrObject):
+	__titles__ = {'id': 'FarmID'}
+	id = None
+
+
+class FarmRoleID(ScalrObject):
+	__titles__ = {'farm_role_id': 'FarmRoleID'}
+	farm_role_id = None
+
 
 class BundleTaskID(ScalrObject):
 	__titles__ = {'bundle_task_id' : 'BundleTaskID'}
@@ -356,6 +370,11 @@ class GraphURL(ScalrObject):
 	__titles__ = {'graph_url' : 'GraphURL'}
 	graph_url = None
 	
+
+class EventID(ScalrObject):
+	__titles__ = {'event_id' : 'EventID'}
+	event_id = None
+
 	
 class BundleTask(ScalrObject):
 	__titles__ = OrderedDict()
@@ -570,7 +589,16 @@ class Environment(ScalrObject):
 	
 	id = None
 	name = None
-	
+
+
+class GlobalVariable(ScalrObject):
+	__titles__ = OrderedDict()
+	__titles__['name'] = 'Name'
+	__titles__['value'] = 'Value'
+
+	name = None
+	value = None
+
 
 def get_items_first_child(xml,tag): 
 	elements = xml.getElementsByTagName(tag)

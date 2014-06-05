@@ -1,3 +1,64 @@
+version 0.3.48 Ossified Ossetian pie
+
+[+] Added support for new API methods:
+
+FarmCreate
+
+Example: # scalr create-farm --name pecha-test
+
+
+FarmRemove
+
+Example: # scalr remove-farm --name pecha-test
+
+
+FarmAddRole
+
+Example: # scalr add-role-to-farm --farm-name pecha-test -r 16163 -p ec2 -l us-east-1 -a pecha-test5
+
+
+FarmRemoveRole
+
+Example: # scalr remove-farm-role --farm-name pecha-test -r 73172
+
+
+FarmUpdateRole
+
+Example: # scalr update-farm-role -r 73172 -c aws.availability_zone=us-east-1c,aws.instance_type=t1.micro,aws.security_groups.list=~/sglist.json
+
+
+GlobalVariablesList
+
+Example: # scalr list-golbal-variables -n pecha-test -i 73172
+
+
+GlobalVariableSet
+
+Example: #
+
+
+ServerGetExtendedInformation
+
+Example: # scalr get-server-extended-information -s bd96c424-01c2-4064-9772-a363b9466536
+
+
+[+] Extended support for updated methods:
+
+
+FarmGetDetails ("list-farm-roles" command now returns farmrole alias)
+
+
+-------------
+
+
+version 0.3.47 codename: Opulent Oscypek
+
+[+] Added FireCustomEvent command.
+
+Example: # scalr fire-custom-event -s 71ecf2b5-4358-4a38-a6e9-ca63fb4c2028 -n aptgetinstall -v package_name=nginx,package_name2=memcachedb
+
+-------------
+
 
 version 0.3.46
 codename: Stygian Shoti
@@ -9,6 +70,7 @@ Run 'scalr configure-ldap' to set your login and environment id.
 LDAP password can be either passed with -p option, set as environment variable SCALR_API_LDAP_PASSWORD or simply entered in command line on request.
 
 -------------
+
 
 version 0.3.44
 codename: Zippy Zapiekanka

@@ -6,7 +6,11 @@ Created on Feb 21th, 2011
 import os
 import sys
 import time
+import json
 import xmlrpclib
+import collections
+import prettytable
+
 from optparse import OptionParser, TitledHelpFormatter
 from pkg_resources import parse_version, working_set
 
@@ -726,7 +730,8 @@ class FarmTerminate(Command):
 					break
 			else: 
 				print 'Cannot stop farm. Please try again.'
-		
+
+
 class ScriptExecute(Command):
 	name = 'execute-script'
 	help = '{-f farm-id | -n name} -e script-id -a async -t timeout [-i farm-role-id -s server-id -r revision -v variables]'
@@ -748,7 +753,29 @@ class ScriptExecute(Command):
 		parser.add_option("-a", "--async", dest="mode", default=None, help="Excute script asynchronously (1) or synchronously (0)")
 		parser.add_option("-r", "--revision", dest="revision", default=None, help="Execute specified revision of script")
 		parser.add_option("-v", "--variables", dest="variables", default=None, help="Script variables.Example: key1=value1,key2=value2")
-	
+
+
+	def run(self):
+		args = (self.options.farm_id, self.options.script_id, self.options.timeout \
+				, self.options.mode, self.options.farm_role_id, self.options.server_id, parse_kv_options(self.options.variables), self.options.revision)
+		print self.pretty(self.connection.execute_script, *args)	
+
+
+class FireCustomEvent(Command):
+	name = 'fire-custom-event'
+	help = '-s server-id -n event-name [-v variables]'
+
+	def __init__(self, config, *args):
+		super(FireCustomEvent, self).__init__(config, *args)
+		self.require(self.options.server_id, self.options.event_name)
+
+	@classmethod
+	def inject_options(cls, parser):
+		id_help = "Fire custom Scalr Event on the node"
+		parser.add_option("-s", "--server-id", dest="server_id", default=None, help="The event will be fired from this server")
+		parser.add_option("-n", "--event-name", dest="event_name", default=None, help="Name of the event to fire")
+		parser.add_option("-v", "--variables", dest="variables", default=None, help="Event variables.Example: key1=value1,key2=value2")
+
 	def parse_variables(self, vars):
 		'''
 		k1=v1;k2=v2 -> dict(k1=v1,k2=v2)
@@ -760,11 +787,9 @@ class ScriptExecute(Command):
 				s[k] = v
 		return s
 
-	
 	def run(self):
-		args = (self.options.farm_id, self.options.script_id, self.options.timeout \
-				, self.options.mode, self.options.farm_role_id, self.options.server_id, self.parse_variables(self.options.variables), self.options.revision)
-		print self.pretty(self.connection.execute_script, *args)	
+		args = (self.options.server_id, self.options.event_name, self.parse_variables(self.options.variables))
+		print self.pretty(self.connection.fire_custom_event, *args)
 
 
 class ServerReboot(Command):
@@ -979,6 +1004,183 @@ class CheckUpdates(Command):
 				print 'No updates available.'
 
 
+class FarmCreate(Command):
+	name = 'create-farm'
+	help = '-n name [-d description]'
+
+	def __init__(self, config, *args):
+		super(FarmCreate, self).__init__(config, *args)
+		self.require(self.options.name)
+
+	@classmethod
+	def inject_options(cls, parser):
+		parser.add_option("-n", "--farm-name", dest="name", default=None, help="A name for the Farm to be created")
+		help_descr = "A description for the Farm to be created. Interactive mode required"
+		parser.add_option("-d", "--description", dest="descr", action="store_true", help=help_descr)
+
+	def run(self):
+		descr = raw_input("Farm description []:") if self.options.descr else ""
+		print self.pretty(self.connection.create_farm, self.options.name, descr)
+
+
+class FarmRemove(Command):
+	name = 'remove-farm'
+	help = '{-f farm-id | -n farm-name}'
+
+	def __init__(self, config, *args):
+		super(FarmRemove, self).__init__(config, *args)
+		self.require(self.options.farm_id or self.options.farm_name)
+
+	@classmethod
+	def inject_options(cls, parser):
+		parser.add_option("-f", "--farm-id", dest="farm_id", default=None, help="ID of the farm that you want to terminate")
+		parser.add_option("-n", "--farm-name", dest="farm_name", default=None, help="Farm name could be used INSTEAD of ID")
+
+	def run(self):
+		print self.pretty(self.connection.remove_farm, self.options.farm_id)
+
+
+class FarmRemoveRole(Command):
+	name = 'remove-farm-role'
+	help = '{-f farm-id | -n name} -r farm-role-id'
+
+	def __init__(self, config, *args):
+		super(FarmRemoveRole, self).__init__(config, *args)
+		self.require(self.options.farm_id, self.options.farm_role_id)
+
+	@classmethod
+	def inject_options(cls, parser):
+		parser.add_option("-f", "--farm-id", dest="farm_id", default=None, help="Farm ID")
+		parser.add_option("-n", "--farm-name", dest="farm_name", default=None, help="The name of farm could be used INSTEAD of ID")
+		parser.add_option("-r", "--farm-role-id", dest="farm_role_id", default=None, help="Farm Role ID")
+
+	def run(self):
+		args = (self.options.farm_id, self.options.farm_role_id)
+		print self.pretty(self.connection.remove_farm_role, *args)
+
+
+class FarmAddRole(Command):
+	name = 'add-role-to-farm'
+	help = '{-f farm-id | -n name} -r role_id -p platform -l cloud-location -a alias [-c configuration]'
+
+	def __init__(self, config, *args):
+		super(FarmAddRole, self).__init__(config, *args)
+		self.require(self.options.farm_id, self.options.role_id, self.options.platform, self.options.location, self.options.alias)
+
+	@classmethod
+	def inject_options(cls, parser):
+		parser.add_option("-f", "--farm-id", dest="farm_id", default=None, help="The ID of the Farm you'd like to add a Role to")
+		parser.add_option("-n", "--farm-name", dest="farm_name", default=None, help="The name of farm could be used INSTEAD of ID")
+		parser.add_option("-r", "--role-id", dest="role_id", default=None, help="The ID of the Role you'd like to add to the Farm")
+		parser.add_option("-p", "--platform", dest="platform", default="ec2", help="https://scalr-wiki.atlassian.net/wiki/display/docs/API+Constants")
+		parser.add_option("-l", "--location", dest="location", default=None, help="The identifier of the Cloud Location the Farm Role should be launched in")
+		parser.add_option("-a", "--alias", dest="alias", default=None, help="Farm Role Alias. Must be longer than 4 characters, and should match: [a-zA-Z0-9-_]")
+		parser.add_option("-c", "--configuration", dest="configuration", default=None, help="Configuration for the Farm Role. Example: key1=value1,key2=value2")
+
+	def run(self):
+		args = (self.options.farm_id, self.options.role_id, self.options.platform, self.options.location,
+										self.options.alias, prepare_farmrole_settings(parse_kv_options(self.options.configuration)))
+		print self.pretty(self.connection.add_farm_role, *args)
+
+
+class FarmUpdateRole(Command):
+	name = 'update-farm-role'
+	help = '-r farm-role-id [-a alias -c configuration]'
+
+	def __init__(self, config, *args):
+		super(FarmUpdateRole, self).__init__(config, *args)
+		self.require(self.options.farm_role_id)
+
+	def prepare_farmrole_settings(vars):
+		d = {}
+		for attribute, value in vars.items():
+			if attribute in ("chef.attributes", "openstack.networks", "aws.security_groups.list", "chef.runlist"):
+				if not os.path.exists(value):
+					raise ScalrError("Error: %s not found." % value)
+				try:
+					with open(value) as fp:
+						d[attribute] = json.load(fp)
+				except (TypeError, ValueError), e:
+					raise ScalrError("Cannot parse JSON in %s: %s" % (value, str(e)))
+			else:
+				d[attribute] = value
+		return d
+
+	@classmethod
+	def inject_options(cls, parser):
+		parser.add_option("-r", "--farm-role-id", dest="farm_role_id", default=None, help="Farm Role ID")
+		parser.add_option("-a", "--alias", dest="alias", default=None, help="Farm Role Alias. Must be longer than 4 characters, and should match: [a-zA-Z0-9-_]")
+		parser.add_option("-c", "--configuration", dest="configuration", default=None, help="Configuration for the Farm Role. Example: key1=value1,key2=value2")
+
+	def run(self):
+		args = (self.options.farm_role_id, self.options.alias, prepare_farmrole_settings(parse_kv_options(self.options.configuration)))
+		print self.pretty(self.connection.update_farm_role, *args)
+
+
+class GlobalVariablesList(Command):
+	name = 'list-golbal-variables'
+
+	@classmethod
+	def inject_options(cls, parser):
+		parser.add_option("-f", "--farm-id", dest="farm_id", default=None, help="The ID of the Farm you'd like to add a Role to")
+		parser.add_option("-n", "--farm-name", dest="farm_name", default=None, help="The name of farm could be used INSTEAD of ID")
+		parser.add_option("-i", "--farm-role-id", dest="farm_role_id", default=None, help="Farm Role ID")
+		parser.add_option("-r", "--role-id", dest="role_id", default=None, help="The ID of the Role you'd like to add to the Farm")
+		parser.add_option("-s", "--server-id", dest="server_id", default=None, help="Instance ID")
+
+
+	def run(self):
+		args = (self.options.role_id, self.options.farm_id, self.options.farm_role_id, self.options.server_id)
+		print self.pretty(self.connection.list_golbal_variables, *args)
+
+
+class ServerGetExtendedInformation(Command):
+	name = 'get-server-extended-information'
+
+	def __init__(self, config, *args):
+		super(ServerGetExtendedInformation, self).__init__(config, *args)
+		self.require(self.options.server_id)
+
+
+	@classmethod
+	def inject_options(cls, parser):
+		parser.add_option("-s", "--server-id", dest="server_id", default=None, help="Instance ID")
+
+
+	def run(self):
+		kv = self.connection.get_extended_server_information(self.options.server_id)
+		pt = prettytable.PrettyTable(field_names=["Name", "Value"])
+		for k,v in kv.items():
+			pt.add_row([k,v])
+		print pt
+
+
+class GlobalVariableSet(Command):
+	name = 'set-golbal-variable'
+
+
+	def __init__(self, config, *args):
+		super(GlobalVariableSet, self).__init__(config, *args)
+		self.require(self.options.param_name, self.options.param_value,
+					 self.options.farm_id or self.options.farm_role_id or self.options.role_id or self.options.server_id)
+
+
+	@classmethod
+	def inject_options(cls, parser):
+		parser.add_option("-k", "--param-name", dest="param_name", default=None, help="Global Variable Name.")
+		parser.add_option("-v", "--param-value", dest="param_value", default=None, help="Global Variable Value.")
+		parser.add_option("-f", "--farm-id", dest="farm_id", default=None, help="The ID of the Farm you'd like to add a Role to")
+		parser.add_option("-n", "--farm-name", dest="farm_name", default=None, help="The name of farm could be used INSTEAD of ID")
+		parser.add_option("-i", "--farm-role-id", dest="farm_role_id", default=None, help="Farm Role ID")
+		parser.add_option("-r", "--role-id", dest="role_id", default=None, help="The ID of the Role you'd like to add to the Farm")
+		parser.add_option("-s", "--server-id", dest="server_id", default=None, help="Instance ID")
+
+
+	def run(self):
+		args = [self.options.param_name, self.options.param_value]
+		args += [self.options.role_id, self.options.farm_id, self.options.farm_role_id, self.options.server_id]
+		print self.pretty(self.connection.set_golbal_variable, *args)
+
 def waits(n):
 	num = 0
 	sum = 0
@@ -986,3 +1188,43 @@ def waits(n):
 		yield num
 		num += 1
 		sum += num
+
+
+def parse_kv_options(vars):
+	'''
+	k1=v1;k2=v2 -> dict(k1=v1,k2=v2)
+	'''
+	s = {}
+	if vars:
+		for pair in vars.split(','):
+			k,v = pair.split('=')
+			s[k] = v
+	return s
+
+
+def prepare_farmrole_settings(data):
+	d = {}
+	for attribute, value in data.items():
+		if attribute in ("chef.attributes", "openstack.networks", "aws.security_groups.list", "chef.runlist"):
+			if not os.path.exists(value):
+				raise ScalrError("Error: %s not found." % value)
+			try:
+				with open(value) as fp:
+					d[attribute] = convert(json.load(fp))
+			except (TypeError, ValueError), e:
+				raise ScalrError("Cannot parse JSON in %s: %s" % (value, str(e)))
+		else:
+			d[attribute] = value
+	return d
+
+
+def convert(data):
+	#converts unicode to string
+	if isinstance(data, basestring):
+		return str(data)
+	elif isinstance(data, collections.Mapping):
+		return dict(map(convert, data.iteritems()))
+	elif isinstance(data, collections.Iterable):
+		return type(data)(map(convert, data))
+	else:
+		return data
