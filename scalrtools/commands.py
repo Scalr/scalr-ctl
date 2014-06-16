@@ -1118,7 +1118,7 @@ class FarmUpdateRole(Command):
 
 
 class GlobalVariablesList(Command):
-	name = 'list-golbal-variables'
+	name = 'list-global-variables'
 
 	@classmethod
 	def inject_options(cls, parser):

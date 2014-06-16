@@ -1,4 +1,4 @@
-version 0.3.48 Ossified Ossetian pie
+version 0.3.49 Ossified Ossetian pie
 
 [+] Added support for new API methods:
 
@@ -29,7 +29,7 @@ Example: # scalr update-farm-role -r 73172 -c aws.availability_zone=us-east-1c,a
 
 GlobalVariablesList
 
-Example: # scalr list-golbal-variables -n pecha-test -i 73172
+Example: # scalr list-global-variables -n pecha-test -i 73172
 
 
 GlobalVariableSet
