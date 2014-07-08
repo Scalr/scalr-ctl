@@ -70,7 +70,7 @@ class Environment(ConfigSection):
 	key_id=None
 	key=None
 	env_id = None
-	api_version = None
+	api_version = "2.3.0"
 	auth_type = None
 	ldap_login = None
 	ldap_password = None

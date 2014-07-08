@@ -43,8 +43,11 @@ class Command(object):
 			
 			if not self.options.farm_id:
 				raise ScalrError("Farm '%s' not found" % self.options.farm_name)
-			
-		if hasattr(self.options, 'farm_name') and not self.options.farm_name:
+
+		if hasattr(self.options, 'farm_name') and not self.options.farm_name and not self.options.farm_id:
+			pass  # When farm_id is not reqired
+
+		elif hasattr(self.options, 'farm_name') and not self.options.farm_name:
 			self.options.farm_name = self.connection.get_farm_name(self.options.farm_id)
 			
 	def run(self):

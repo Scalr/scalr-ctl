@@ -90,7 +90,7 @@ class ScalrConnection(object):
 		except URLError, e:
 			if isinstance(e, HTTPError):
 				resp_body = e.read() if e.fp is not None else ""
-				raise ScalrAPIError("Request failed. %s. URL: %s. Service message: %s" % (e, self.url, resp_body))				
+				raise ScalrAPIError("Request failed. %s. URL: %s. Service message: %s" % (e, self.environment.url, resp_body))
 			else:
 				host, port = splitnport(req.host, req.port or 443)
 				raise ScalrAPIError("Cannot connect to Scalr on %s:%s. %s" 

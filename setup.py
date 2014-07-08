@@ -21,8 +21,19 @@ cfg = dict(
 	license = "GPL",
 	platforms = "any",
 	packages = find_packages(),
+	include_package_data = True,
 	scripts=['bin/scalr'],
 	install_requires = ["prettytable"],
-	long_description=read('README')
-)
+	long_description=read('README'),
+	classifiers=[
+		'Programming Language :: Python',
+		'Programming Language :: Python :: 2',
+		'License :: OSI Approved :: GNU General Public License (GPL)',
+		'Operating System :: OS Independent',
+		'Development Status :: 4 - Beta',
+		'Environment :: Console',
+		'Intended Audience :: System Administrators',
+		'Topic :: Utilities'
+		]
+	)
 setup(**cfg)

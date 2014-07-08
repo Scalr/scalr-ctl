@@ -78,7 +78,7 @@ def main():
 	except ScalrEnvError, e:
 		if not cmd.startswith('configure') and cmd != 'help':
 			print "\nNo login information found."
-			print "Please specify options -a -u and -s, or run '%s help configure' to find out how to set login information permanently.\n" % commands.progname
+			print "Please specify options -i -a and -u, or run '%s help configure' to find out how to set login information permanently.\n" % commands.progname
 			#print help
 			sys.exit(1)
 		
