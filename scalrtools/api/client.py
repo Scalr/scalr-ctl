@@ -706,7 +706,7 @@ class ScalrConnection(object):
 		return self._request(command="FarmUpdateRole", params=params, response_reader=self._read_update_farm_fole_response)
 
 
-	def list_golbal_variables(self, role_id=None, farm_id=None, farm_role_id=None, server_id=None):
+	def list_global_variables(self, role_id=None, farm_id=None, farm_role_id=None, server_id=None):
 		"""
 		@return dict
 		"""
@@ -720,7 +720,7 @@ class ScalrConnection(object):
 		if server_id:
 			params['ServerID'] = server_id
 
-		return self._request("GlobalVariablesList", params=params, response_reader=self._read_list_golbal_variables_response)
+		return self._request("GlobalVariablesList", params=params, response_reader=self._read_list_global_variables_response)
 
 
 	def get_extended_server_information(self, server_id):
@@ -732,7 +732,7 @@ class ScalrConnection(object):
 		return self._request("ServerGetExtendedInformation", params=params, response_reader=self._read_get_extended_server_information_response)
 
 
-	def set_golbal_variable(self, param_name, param_value, role_id=None, farm_id=None, farm_role_id=None, server_id=None):
+	def set_global_variable(self, param_name, param_value, role_id=None, farm_id=None, farm_role_id=None, server_id=None):
 		"""
 		@return dict
 		"""
@@ -746,7 +746,7 @@ class ScalrConnection(object):
 		if server_id:
 			params['ServerID'] = server_id
 
-		return self._request("GlobalVariableSet", params=params, response_reader=self._read_set_golbal_variable_response)
+		return self._request("GlobalVariableSet", params=params, response_reader=self._read_set_global_variable_response)
 
 
 	def _read_get_extended_server_information_response(self, xml):
@@ -761,11 +761,11 @@ class ScalrConnection(object):
 		return from_xml(xml)
 
 
-	def _read_set_golbal_variable_response(self, xml):
+	def _read_set_global_variable_response(self, xml):
 		return self._read_response(xml, node_name='GlobalVariableSetResponse', cls=types.Result, simple_response=True)
 
 
-	def _read_list_golbal_variables_response(self, xml):
+	def _read_list_global_variables_response(self, xml):
 		return self._read_response(xml, node_name='VariableSet', cls=types.GlobalVariable)
 
 

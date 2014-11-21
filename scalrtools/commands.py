@@ -1134,7 +1134,7 @@ class GlobalVariablesList(Command):
 
 	def run(self):
 		args = (self.options.role_id, self.options.farm_id, self.options.farm_role_id, self.options.server_id)
-		print self.pretty(self.connection.list_golbal_variables, *args)
+		print self.pretty(self.connection.list_global_variables, *args)
 
 
 class ServerGetExtendedInformation(Command):
@@ -1159,7 +1159,7 @@ class ServerGetExtendedInformation(Command):
 
 
 class GlobalVariableSet(Command):
-	name = 'set-golbal-variable'
+	name = 'set-global-variable'
 
 
 	def __init__(self, config, *args):
@@ -1182,7 +1182,7 @@ class GlobalVariableSet(Command):
 	def run(self):
 		args = [self.options.param_name, self.options.param_value]
 		args += [self.options.role_id, self.options.farm_id, self.options.farm_role_id, self.options.server_id]
-		print self.pretty(self.connection.set_golbal_variable, *args)
+		print self.pretty(self.connection.set_global_variable, *args)
 
 def waits(n):
 	num = 0
