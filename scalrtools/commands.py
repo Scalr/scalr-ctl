@@ -1094,21 +1094,6 @@ class FarmUpdateRole(Command):
 		super(FarmUpdateRole, self).__init__(config, *args)
 		self.require(self.options.farm_role_id)
 
-	def prepare_farmrole_settings(vars):
-		d = {}
-		for attribute, value in vars.items():
-			if attribute in ("chef.attributes", "openstack.networks", "aws.security_groups.list", "chef.runlist"):
-				if not os.path.exists(value):
-					raise ScalrError("Error: %s not found." % value)
-				try:
-					with open(value) as fp:
-						d[attribute] = json.load(fp)
-				except (TypeError, ValueError), e:
-					raise ScalrError("Cannot parse JSON in %s: %s" % (value, str(e)))
-			else:
-				d[attribute] = value
-		return d
-
 	@classmethod
 	def inject_options(cls, parser):
 		parser.add_option("-r", "--farm-role-id", dest="farm_role_id", default=None, help="Farm Role ID")
@@ -1208,7 +1193,13 @@ def parse_kv_options(vars):
 def prepare_farmrole_settings(data):
 	d = {}
 	for attribute, value in data.items():
-		if attribute in ("chef.attributes", "openstack.networks", "aws.security_groups.list", "chef.runlist"):
+		if attribute in (
+			"chef.attributes",
+			"openstack.networks",
+			"aws.security_groups.list",
+			"cloudstack.security_groups.list",
+			"chef.runlist"
+		):
 			if not os.path.exists(value):
 				raise ScalrError("Error: %s not found." % value)
 			try:
