@@ -1072,13 +1072,16 @@ class FarmAddRole(Command):
 
 	@classmethod
 	def inject_options(cls, parser):
+		configuration_help = "Configuration for the Farm Role. Example: key1=value1,key2=value2. "
+		configuration_help += "JSON values should be passed through a file "
+		configuration_help += "(e.g. -c cloudstack.security_groups.list=/path/to/file/cs_sgroups.json"
 		parser.add_option("-f", "--farm-id", dest="farm_id", default=None, help="The ID of the Farm you'd like to add a Role to")
 		parser.add_option("-n", "--farm-name", dest="farm_name", default=None, help="The name of farm could be used INSTEAD of ID")
 		parser.add_option("-r", "--role-id", dest="role_id", default=None, help="The ID of the Role you'd like to add to the Farm")
 		parser.add_option("-p", "--platform", dest="platform", default="ec2", help="https://scalr-wiki.atlassian.net/wiki/display/docs/API+Constants")
 		parser.add_option("-l", "--location", dest="location", default=None, help="The identifier of the Cloud Location the Farm Role should be launched in")
 		parser.add_option("-a", "--alias", dest="alias", default=None, help="Farm Role Alias. Must be longer than 4 characters, and should match: [a-zA-Z0-9-_]")
-		parser.add_option("-c", "--configuration", dest="configuration", default=None, help="Configuration for the Farm Role. Example: key1=value1,key2=value2")
+		parser.add_option("-c", "--configuration", dest="configuration", default=None, help=configuration_help)
 
 	def run(self):
 		args = (self.options.farm_id, self.options.role_id, self.options.platform, self.options.location,
@@ -1096,9 +1099,12 @@ class FarmUpdateRole(Command):
 
 	@classmethod
 	def inject_options(cls, parser):
+		configuration_help = "Configuration for the Farm Role. Example: key1=value1,key2=value2. "
+		configuration_help += "JSON values should be passed through a file "
+		configuration_help += "(e.g. -c cloudstack.security_groups.list=/path/to/file/cs_sgroups.json"
 		parser.add_option("-r", "--farm-role-id", dest="farm_role_id", default=None, help="Farm Role ID")
 		parser.add_option("-a", "--alias", dest="alias", default=None, help="Farm Role Alias. Must be longer than 4 characters, and should match: [a-zA-Z0-9-_]")
-		parser.add_option("-c", "--configuration", dest="configuration", default=None, help="Configuration for the Farm Role. Example: key1=value1,key2=value2")
+		parser.add_option("-c", "--configuration", dest="configuration", default=None, help=configuration_help)
 
 	def run(self):
 		args = (self.options.farm_role_id, self.options.alias, prepare_farmrole_settings(parse_kv_options(self.options.configuration)))
