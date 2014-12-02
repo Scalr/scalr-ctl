@@ -21,6 +21,16 @@ from api.view import TableViewer
 progname = 'scalr'
 DEFAULT_API_URL = 'https://api.scalr.net'
 
+farmrole_json_keys = (
+	"chef.attributes",
+	"chef.runlist",
+	"openstack.networks",
+	"aws.vpc_subnet_id",
+	"aws.security_groups.list",
+	"cloudstack.security_groups.list",
+	"openstack.security_groups.list",
+)
+
 class ScalrError(BaseException):
 	pass
 
@@ -1072,9 +1082,11 @@ class FarmAddRole(Command):
 
 	@classmethod
 	def inject_options(cls, parser):
+		list_opts = ",".join(farmrole_json_keys)
 		configuration_help = "Configuration for the Farm Role. Example: key1=value1,key2=value2. "
-		configuration_help += "JSON values should be passed through a file "
-		configuration_help += "(e.g. -c cloudstack.security_groups.list=/path/to/file/cs_sgroups.json"
+		configuration_help += "Certain parameters should be passed through a file "
+		configuration_help += "(e.g. -c cloudstack.security_groups.list=/path/to/file/cs_sgroups.json) "
+		configuration_help += "Those parameters are: \n %s" % list_opts
 		parser.add_option("-f", "--farm-id", dest="farm_id", default=None, help="The ID of the Farm you'd like to add a Role to")
 		parser.add_option("-n", "--farm-name", dest="farm_name", default=None, help="The name of farm could be used INSTEAD of ID")
 		parser.add_option("-r", "--role-id", dest="role_id", default=None, help="The ID of the Role you'd like to add to the Farm")
@@ -1099,9 +1111,11 @@ class FarmUpdateRole(Command):
 
 	@classmethod
 	def inject_options(cls, parser):
+		list_opts = ",".join(farmrole_json_keys)
 		configuration_help = "Configuration for the Farm Role. Example: key1=value1,key2=value2. "
-		configuration_help += "JSON values should be passed through a file "
-		configuration_help += "(e.g. -c cloudstack.security_groups.list=/path/to/file/cs_sgroups.json"
+		configuration_help += "Certain parameters should be passed through a file "
+		configuration_help += "(e.g. -c cloudstack.security_groups.list=/path/to/file/cs_sgroups.json) "
+		configuration_help += "Those parameters are: \n %s" % list_opts
 		parser.add_option("-r", "--farm-role-id", dest="farm_role_id", default=None, help="Farm Role ID")
 		parser.add_option("-a", "--alias", dest="alias", default=None, help="Farm Role Alias. Must be longer than 4 characters, and should match: [a-zA-Z0-9-_]")
 		parser.add_option("-c", "--configuration", dest="configuration", default=None, help=configuration_help)
@@ -1199,13 +1213,7 @@ def parse_kv_options(vars):
 def prepare_farmrole_settings(data):
 	d = {}
 	for attribute, value in data.items():
-		if attribute in (
-			"chef.attributes",
-			"openstack.networks",
-			"aws.security_groups.list",
-			"cloudstack.security_groups.list",
-			"chef.runlist"
-		):
+		if attribute in farmrole_json_keys:
 			if not os.path.exists(value):
 				raise ScalrError("Error: %s not found." % value)
 			try:
