@@ -472,10 +472,20 @@ class Role(ScalrObject):
 	__titles__['name'] = 'Name'
 	__titles__['owner'] = 'Owner'
 	__titles__['architecture'] = 'Architecture'
+	__titles__['os_family'] = 'OsFamily'
+	__titles__['os_version'] = 'OsVersion'
+	__titles__['created_at'] = 'CreatedAt'
+	__titles__['created_by'] = 'CreatedBy'
+	__titles__['role_id'] = 'ID'
 	
 	name = None
 	owner = None
 	architecture = None
+	os_family = None
+	os_version = None
+	created_at = None
+	created_by = None
+	role_id = None
 	
 	
 class FarmStat(ScalrObject):

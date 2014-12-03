@@ -1,3 +1,16 @@
+version 0.3.58
+
+[+] Added new fields to 'list-roles' output:
+OsFamily 
+OsVersion 
+CreatedAt
+CreatedBy
+ID
+
+
+-------------
+
+
 version 0.3.57
 
 [+] Minor fixes 
