@@ -1086,7 +1086,7 @@ class FarmAddRole(Command):
 
 	@classmethod
 	def inject_options(cls, parser):
-		list_opts = ",".join(sorted(farmrole_json_keys+farmrole_fpath_keys))
+		list_opts = ", ".join(sorted(farmrole_json_keys+farmrole_fpath_keys))
 		configuration_help = "Configuration for the Farm Role. Example: key1=value1,key2=value2. "
 		configuration_help += "Certain parameters should be passed through a file "
 		configuration_help += "(e.g. -c cloudstack.security_groups.list=/path/to/file/cs_sgroups.json) "
@@ -1115,7 +1115,7 @@ class FarmUpdateRole(Command):
 
 	@classmethod
 	def inject_options(cls, parser):
-		list_opts = ",".join(farmrole_json_keys)
+		list_opts = ", ".join(sorted(farmrole_json_keys+farmrole_fpath_keys))
 		configuration_help = "Configuration for the Farm Role. Example: key1=value1,key2=value2. "
 		configuration_help += "Certain parameters should be passed through a file "
 		configuration_help += "(e.g. -c cloudstack.security_groups.list=/path/to/file/cs_sgroups.json) "
