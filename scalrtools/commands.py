@@ -21,7 +21,7 @@ from api.view import TableViewer
 progname = 'scalr'
 DEFAULT_API_URL = 'https://api.scalr.net'
 
-farmrole_json_keys = (
+farmrole_json_keys = [
 	"chef.attributes",
 	"chef.runlist",
 	"openstack.networks",
@@ -29,7 +29,11 @@ farmrole_json_keys = (
 	"aws.security_groups.list",
 	"cloudstack.security_groups.list",
 	"openstack.security_groups.list",
-)
+]
+
+farmrole_fpath_keys = [
+	"chef.ssh_private_key",
+	]
 
 class ScalrError(BaseException):
 	pass
@@ -1082,7 +1086,7 @@ class FarmAddRole(Command):
 
 	@classmethod
 	def inject_options(cls, parser):
-		list_opts = ",".join(farmrole_json_keys)
+		list_opts = ",".join(sorted(farmrole_json_keys+farmrole_fpath_keys))
 		configuration_help = "Configuration for the Farm Role. Example: key1=value1,key2=value2. "
 		configuration_help += "Certain parameters should be passed through a file "
 		configuration_help += "(e.g. -c cloudstack.security_groups.list=/path/to/file/cs_sgroups.json) "
@@ -1214,13 +1218,25 @@ def prepare_farmrole_settings(data):
 	d = {}
 	for attribute, value in data.items():
 		if attribute in farmrole_json_keys:
+			value = os.path.realpath(os.path.expanduser(value))
 			if not os.path.exists(value):
-				raise ScalrError("Error: %s not found." % value)
+				raise ScalrError("Error: JSON configuration file %s not found." % value)
 			try:
 				with open(value) as fp:
 					d[attribute] = convert(json.load(fp))
 			except (TypeError, ValueError), e:
 				raise ScalrError("Cannot parse JSON in %s: %s" % (value, str(e)))
+
+		elif attribute in farmrole_fpath_keys:
+			value = os.path.realpath(os.path.expanduser(value))
+			if not os.path.exists(value):
+				raise ScalrError("Error: %s not found." % value)
+			try:
+				with open(value) as fp:
+					d[attribute] = convert(fp.read())
+			except BaseException, e:
+				raise ScalrError("Cannot read from file %s: %s" % (value, str(e)))
+
 		else:
 			d[attribute] = value
 	return d

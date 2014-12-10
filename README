@@ -1,4 +1,15 @@
-version 0.3.58
+version 0.3.59
+
+[+] fixed update-farm-role and add-role-to-farm methods
+
+[+] update-farm-role and add-role-to-farm methods now support “chef.ssh_private_key” configuration parameter
+
+
+-------------
+
+
+version 0.3.59
+
 
 [+] Added new fields to 'list-roles' output:
 OsFamily 
