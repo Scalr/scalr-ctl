@@ -1223,7 +1223,7 @@ def prepare_farmrole_settings(data):
 				raise ScalrError("Error: JSON configuration file %s not found." % value)
 			try:
 				with open(value) as fp:
-					d[attribute] = convert(json.load(fp))
+					d[attribute] = json.dumps(json.load(fp),separators=(',',':'))
 			except (TypeError, ValueError), e:
 				raise ScalrError("Cannot parse JSON in %s: %s" % (value, str(e)))
 
