@@ -1,9 +1,0 @@
-<?xml version="1.0" ?>
-<DNSZoneRecordRemoveResponse>
-	<TransactionID>
-		d848ca61-86ad-4f16-a165-f3cc9a1d9cc3
-	</TransactionID>
-	<Result>
-		1
-	</Result>
-</DNSZoneRecordRemoveResponse>

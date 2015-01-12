@@ -1,9 +1,0 @@
-<?xml version="1.0" ?>
-<ServerTerminateResponse>
-	<TransactionID>
-		b8773d82-b75a-4290-b885-47cfd614f7fa
-	</TransactionID>
-	<Result>
-		1
-	</Result>
-</ServerTerminateResponse>

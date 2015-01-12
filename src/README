@@ -1,0 +1,20 @@
+$ scalr-tools_
+
+  Scalr-tools is a command-line interface to your Scalr account
+
+  Version 2.0 is intended to work with the new Scalr JSON API. 
+
+Usage:
+
+  $ pip install --editable .
+  $ scalr-tools --help
+
+
+To setup bash completion permanently put this into your bashrc instead:
+
+. /path/to/pecha/scalr-tools-complete.sh
+
+or run
+
+eval "$(_SCALR_TOOLS_COMPLETE=source scalr-tools)"
+

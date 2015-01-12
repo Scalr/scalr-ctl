@@ -1,9 +1,0 @@
-<?xml version="1.0" ?>
-<StatisticsGetGraphURLResponse>
-	<TransactionID>
-		3b810214-47a6-4b63-a5d8-c0fcbc624936
-	</TransactionID>
-	<GraphURL>
-		https://monitoring-graphs.scalr.net/1997/FARM_CPUSNMP.monthly.gif
-	</GraphURL>
-</StatisticsGetGraphURLResponse>
