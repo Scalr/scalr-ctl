@@ -47,7 +47,7 @@ class HelpBuilder(object):
         if "parameters" in d:
             for parameter in d['parameters']:
                 params.append(parameter)
-            return params
+        return params
 
     def get_params(self, path, method="get"):
         return self.get_body_type_params(path, method) + self.get_path_type_params(path)
