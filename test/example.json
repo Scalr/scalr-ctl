@@ -1,0 +1,1 @@
+{"name": "myapp", "orchestration": {"HostInit": ["script-1", "chef-solo-1", "script-2"]}, "location": ["eu-west-1", "eu-central-1"]}

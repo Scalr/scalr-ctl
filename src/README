@@ -8,13 +8,3 @@ Usage:
 
   $ pip install --editable .
   $ scalr-tools --help
-
-
-To setup bash completion permanently put this into your bashrc instead:
-
-. /path/to/pecha/scalr-tools-complete.sh
-
-or run
-
-eval "$(_SCALR_TOOLS_COMPLETE=source scalr-tools)"
-
