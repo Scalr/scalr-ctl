@@ -656,13 +656,17 @@ class ScalrConnection(object):
 		return self._request("EnvironmentsList", response_reader=self._read_list_environments_response)
 
 
-	def create_farm(self, name, descr=None):
+	def create_farm(self, name, descr=None, project_id=None, config=None):
 		"""
 		@return FarmID
 		"""
 		params = {'Name': name}
 		if descr:
 			params['Description'] = descr
+		if project_id:
+			params['ProjectID'] = project_id
+		if config:
+			params['Configuration'] = config
 
 		return self._request(command="FarmCreate", params=params, response_reader=self._read_create_farm_response)
 

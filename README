@@ -1,4 +1,6 @@
-version 0.3.60
+version 0.3.62
+
+[+] farm-create now takes optional parameters like ProjectID, vpc_region and vpc_id
 
 [+] fixed update-farm-role and add-role-to-farm methods
 

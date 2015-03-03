@@ -1034,10 +1034,15 @@ class FarmCreate(Command):
 		parser.add_option("-n", "--farm-name", dest="name", default=None, help="A name for the Farm to be created")
 		help_descr = "A description for the Farm to be created. Interactive mode required"
 		parser.add_option("-d", "--description", dest="descr", action="store_true", help=help_descr)
+		proj_id = "The ID of the Cost Analytics Project to assign this Farm to. Rquired, if Cost Analytics is in use"
+		parser.add_option("-i", "--project-id", dest="project_id", default=None, help=proj_id)
+		parser.add_option("-c", "--configuration", dest="config", default=None, help="Farm configuration. Example: vpc_region=r1,vpc_id=2")
 
 	def run(self):
-		descr = raw_input("Farm description []:") if self.options.descr else ""
-		print self.pretty(self.connection.create_farm, self.options.name, descr)
+		descr = None
+		if not self.options.descr:
+			descr = raw_input("Farm description []:")
+		print self.pretty(self.connection.create_farm, self.options.name, descr, self.options.project_id, parse_kv_options(self.options.config))
 
 
 class FarmRemove(Command):
