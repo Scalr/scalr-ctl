@@ -1036,7 +1036,7 @@ class FarmCreate(Command):
 		parser.add_option("-d", "--description", dest="descr", action="store_true", help=help_descr)
 		proj_id = "The ID of the Cost Analytics Project to assign this Farm to. Rquired, if Cost Analytics is in use"
 		parser.add_option("-i", "--project-id", dest="project_id", default=None, help=proj_id)
-		parser.add_option("-c", "--configuration", dest="config", default=None, help="Farm configuration. Example: vpc_region=r1,vpc_id=2")
+		parser.add_option("-c", "--configuration", dest="config", default=None, help="Farm configuration. Example: vpc_region=us-east-1,vpc_id=vpc-8371b8e6")
 
 	def run(self):
 		descr = None
