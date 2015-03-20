@@ -8,8 +8,7 @@ import binascii
 import hashlib
 import logging
 import hmac
-import sys
-
+import urlparse
 
 try:
 	import timemodule as time
@@ -92,7 +91,9 @@ class ScalrConnection(object):
 				resp_body = e.read() if e.fp is not None else ""
 				raise ScalrAPIError("Request failed. %s. URL: %s. Service message: %s" % (e, self.environment.url, resp_body))
 			else:
-				host, port = splitnport(req.host, req.port or 443)
+				host, port = splitnport(req.host, req.port)
+				if not port:
+					port = 80 if "http" == urlparse.urlparse(self.environment.url).scheme else 443
 				raise ScalrAPIError("Cannot connect to Scalr on %s:%s. %s" 
 						% (host, port, str(e)))
 		except BaseException,e:
