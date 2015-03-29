@@ -1,0 +1,982 @@
+info:
+  version: 1.0.0
+  description: "Manage Roles, Images, Farms, Farm Roles, and Servers"
+  title: Scalr User API
+paths:
+  "/{envId}/roles/{roleId}/images/":
+    post:
+      description: Associate a new Image with this Role
+      parameters:
+        - schema:
+            $ref: "#/definitions/Image"
+          required: true
+          description: "The JSON representation of an Image.  An `id` attribute is expected unless you are creating or patching the Image."
+          name: image
+          in: body
+      responses:
+        "201":
+          description: The Image was successfully associated with this Role
+          schema:
+            $ref: "#/definitions/ImageDetailEnvelope"
+        "400":
+          description: A client-side error was made
+          schema:
+            $ref: "#/definitions/ApiErrorEnvelope"
+        "401":
+          description: Request was not authenticated
+          schema:
+            $ref: "#/definitions/ApiErrorEnvelope"
+        "403":
+          description: Insufficient permissions
+          schema:
+            $ref: "#/definitions/ApiErrorEnvelope"
+        "500":
+          description: A server-side error occured
+          schema:
+            $ref: "#/definitions/ApiErrorEnvelope"
+    parameters:
+      - required: true
+        type: integer
+        description: The ID of the Environment scoping this request
+        in: path
+        name: envId
+      - required: true
+        type: integer
+        description: The ID of the Role being accessed
+        in: path
+        name: roleId
+    get:
+      description: List Images associated with this Role
+      responses:
+        "200":
+          description: A list of Images
+          schema:
+            $ref: "#/definitions/ImageListEnvelope"
+        "400":
+          description: A client-side error was made
+          schema:
+            $ref: "#/definitions/ApiErrorEnvelope"
+        "401":
+          description: Request was not authenticated
+          schema:
+            $ref: "#/definitions/ApiErrorEnvelope"
+        "403":
+          description: Insufficient permissions
+          schema:
+            $ref: "#/definitions/ApiErrorEnvelope"
+        "500":
+          description: A server-side error occured
+          schema:
+            $ref: "#/definitions/ApiErrorEnvelope"
+  "/{envId}/roles/{roleId}/images/{imageId}/":
+    get:
+      description: Redirects to the Image
+      responses:
+        "302":
+          description: Redirects to the Image.
+        "400":
+          description: A client-side error was made
+          schema:
+            $ref: "#/definitions/ApiErrorEnvelope"
+        "401":
+          description: Request was not authenticated
+          schema:
+            $ref: "#/definitions/ApiErrorEnvelope"
+        "403":
+          description: Insufficient permissions
+          schema:
+            $ref: "#/definitions/ApiErrorEnvelope"
+        "404":
+          description: "The Image is not associated with this Role, or this Role does not exist."
+        "500":
+          description: A server-side error occured
+          schema:
+            $ref: "#/definitions/ApiErrorEnvelope"
+    parameters:
+      - required: true
+        type: integer
+        description: The ID of the Environment scoping this request
+        in: path
+        name: envId
+      - required: true
+        type: integer
+        description: The ID of the Role being accessed
+        in: path
+        name: roleId
+      - required: true
+        type: integer
+        description: The ID of the Image being accessed
+        in: path
+        name: imageId
+    delete:
+      description: Dis-associate this Image from this Role
+      responses:
+        "200":
+          description: The Image was dis-associated from the Role
+        "400":
+          description: A client-side error was made
+          schema:
+            $ref: "#/definitions/ApiErrorEnvelope"
+        "401":
+          description: Request was not authenticated
+          schema:
+            $ref: "#/definitions/ApiErrorEnvelope"
+        "403":
+          description: Insufficient permissions
+          schema:
+            $ref: "#/definitions/ApiErrorEnvelope"
+        "404":
+          description: "The Image is not associated with this Role, or this Role does not exist."
+        "500":
+          description: A server-side error occured
+          schema:
+            $ref: "#/definitions/ApiErrorEnvelope"
+  "/{envId}/roles/{roleId}/global-variables/{globalVariableName}":
+    get:
+      description: "Retrieve a Global Variable's value in this Role's scope"
+      responses:
+        "200":
+          description: Global Variable retrieved
+          schema:
+            $ref: "#/definitions/GlobalVariableDetailEnvelope"
+        "400":
+          description: A client-side error was made
+          schema:
+            $ref: "#/definitions/ApiErrorEnvelope"
+        "401":
+          description: Request was not authenticated
+          schema:
+            $ref: "#/definitions/ApiErrorEnvelope"
+        "403":
+          description: Insufficient permissions
+          schema:
+            $ref: "#/definitions/ApiErrorEnvelope"
+        "500":
+          description: A server-side error occured
+          schema:
+            $ref: "#/definitions/ApiErrorEnvelope"
+    patch:
+      description: "Update a Global Variable's value in this Role's scope"
+      responses:
+        "202":
+          description: Global Variable updated
+          schema:
+            $ref: "#/definitions/GlobalVariableDetailEnvelope"
+        "400":
+          description: A client-side error was made
+          schema:
+            $ref: "#/definitions/ApiErrorEnvelope"
+        "401":
+          description: Request was not authenticated
+          schema:
+            $ref: "#/definitions/ApiErrorEnvelope"
+        "403":
+          description: Insufficient permissions
+          schema:
+            $ref: "#/definitions/ApiErrorEnvelope"
+        "500":
+          description: A server-side error occured
+          schema:
+            $ref: "#/definitions/ApiErrorEnvelope"
+    parameters:
+      - required: true
+        type: integer
+        description: The ID of the Environment scoping this request
+        in: path
+        name: envId
+      - required: true
+        type: integer
+        description: The ID of the Role being accessed
+        in: path
+        name: roleId
+      - required: true
+        type: string
+        description: The name of the Global Variable being accessed.
+        in: path
+        name: globalVariableName
+    delete:
+      description: "Delete a Global Variable from this Role's scope"
+      responses:
+        "200":
+          description: Global Variable deleted
+        "400":
+          description: A client-side error was made
+          schema:
+            $ref: "#/definitions/ApiErrorEnvelope"
+        "401":
+          description: Request was not authenticated
+          schema:
+            $ref: "#/definitions/ApiErrorEnvelope"
+        "403":
+          description: Insufficient permissions
+          schema:
+            $ref: "#/definitions/ApiErrorEnvelope"
+        "500":
+          description: A server-side error occured
+          schema:
+            $ref: "#/definitions/ApiErrorEnvelope"
+  "/{envId}/roles/{roleId}/images/{imageId}/actions/replace/":
+    post:
+      description: "Replace an Image in-place. This allows you to replace an Image without having to dis-associate it and then associate a new one, which may not be possible if a Farm Role is currently using this Image."
+      parameters:
+        - schema:
+            $ref: "#/definitions/Image"
+          required: true
+          description: "The JSON representation of an Image.  An `id` attribute is expected unless you are creating or patching the Image."
+          name: image
+          in: body
+      responses:
+        "200":
+          description: The replacement was successful.
+          schema:
+            $ref: "#/definitions/ImageDetailEnvelope"
+        "400":
+          description: A client-side error was made
+          schema:
+            $ref: "#/definitions/ApiErrorEnvelope"
+        "401":
+          description: Request was not authenticated
+          schema:
+            $ref: "#/definitions/ApiErrorEnvelope"
+        "403":
+          description: Insufficient permissions
+          schema:
+            $ref: "#/definitions/ApiErrorEnvelope"
+        "500":
+          description: A server-side error occured
+          schema:
+            $ref: "#/definitions/ApiErrorEnvelope"
+    parameters:
+      - required: true
+        type: integer
+        description: The ID of the Environment scoping this request
+        in: path
+        name: envId
+      - required: true
+        type: integer
+        description: The ID of the Role being accessed
+        in: path
+        name: roleId
+      - required: true
+        type: integer
+        description: The ID of the Image being accessed
+        in: path
+        name: imageId
+  "/{envId}/images/":
+    post:
+      description: Register a new Image in this Environment
+      parameters:
+        - schema:
+            $ref: "#/definitions/Image"
+          required: true
+          description: "The JSON representation of an Image.  An `id` attribute is expected unless you are creating or patching the Image."
+          name: image
+          in: body
+      responses:
+        "201":
+          description: Image registered
+          schema:
+            $ref: "#/definitions/ImageDetailEnvelope"
+        "400":
+          description: A client-side error was made
+          schema:
+            $ref: "#/definitions/ApiErrorEnvelope"
+        "401":
+          description: Request was not authenticated
+          schema:
+            $ref: "#/definitions/ApiErrorEnvelope"
+        "403":
+          description: Insufficient permissions
+          schema:
+            $ref: "#/definitions/ApiErrorEnvelope"
+        "500":
+          description: A server-side error occured
+          schema:
+            $ref: "#/definitions/ApiErrorEnvelope"
+    parameters:
+      - required: true
+        type: integer
+        description: The ID of the Environment scoping this request
+        in: path
+        name: envId
+    get:
+      description: List Images available in this Environment
+      responses:
+        "200":
+          description: A list of Images
+          schema:
+            $ref: "#/definitions/ImageListEnvelope"
+        "400":
+          description: A client-side error was made
+          schema:
+            $ref: "#/definitions/ApiErrorEnvelope"
+        "401":
+          description: Request was not authenticated
+          schema:
+            $ref: "#/definitions/ApiErrorEnvelope"
+        "403":
+          description: Insufficient permissions
+          schema:
+            $ref: "#/definitions/ApiErrorEnvelope"
+        "500":
+          description: A server-side error occured
+          schema:
+            $ref: "#/definitions/ApiErrorEnvelope"
+  "/{envId}/images/{imageId}/":
+    patch:
+      description: "Change image attributes. Only the name be can changed!"
+      parameters:
+        - required: true
+          in: body
+          description: The updated definition
+          name: image
+          schema:
+            $ref: "#/definitions/Image"
+      responses:
+        "200":
+          description: Image updated
+          schema:
+            $ref: "#/definitions/ImageDetailEnvelope"
+        "400":
+          description: A client-side error was made
+          schema:
+            $ref: "#/definitions/ApiErrorEnvelope"
+        "401":
+          description: Request was not authenticated
+          schema:
+            $ref: "#/definitions/ApiErrorEnvelope"
+        "403":
+          description: Insufficient permissions
+          schema:
+            $ref: "#/definitions/ApiErrorEnvelope"
+        "500":
+          description: A server-side error occured
+          schema:
+            $ref: "#/definitions/ApiErrorEnvelope"
+    parameters:
+      - required: true
+        type: integer
+        description: The ID of the Environment scoping this request
+        in: path
+        name: envId
+      - required: true
+        type: integer
+        description: The ID of the Image being accessed
+        in: path
+        name: imageId
+    delete:
+      description: De-register an Image from this Environment
+      parameters:
+        - description: Attempt to delete this Image in your Cloud
+          required: false
+          type: boolean
+          name: cloudDelete
+          in: query
+      responses:
+        "200":
+          description: Image de-registered
+        "202":
+          description: Image scheduled for de-registration and deletion
+        "400":
+          description: A client-side error was made
+          schema:
+            $ref: "#/definitions/ApiErrorEnvelope"
+        "401":
+          description: Request was not authenticated
+          schema:
+            $ref: "#/definitions/ApiErrorEnvelope"
+        "403":
+          description: Insufficient permissions
+          schema:
+            $ref: "#/definitions/ApiErrorEnvelope"
+        "500":
+          description: A server-side error occured
+          schema:
+            $ref: "#/definitions/ApiErrorEnvelope"
+  "/{envId}/images/{imageId}/actions/copy/":
+    post:
+      description: Copy an image from one EC2 region to another
+      parameters:
+        - description: The EC2 region to copy this Image to
+          required: true
+          in: body
+          name: copyTo
+          schema:
+            $ref: "#/definitions/CloudLocation"
+      responses:
+        "202":
+          description: The Image copy was scheduled.
+          schema:
+            $ref: "#/definitions/ImageDetailEnvelope"
+        "400":
+          description: A client-side error was made
+          schema:
+            $ref: "#/definitions/ApiErrorEnvelope"
+        "401":
+          description: Request was not authenticated
+          schema:
+            $ref: "#/definitions/ApiErrorEnvelope"
+        "403":
+          description: Insufficient permissions
+          schema:
+            $ref: "#/definitions/ApiErrorEnvelope"
+        "500":
+          description: A server-side error occured
+          schema:
+            $ref: "#/definitions/ApiErrorEnvelope"
+    parameters:
+      - required: true
+        type: integer
+        description: The ID of the Environment scoping this request
+        in: path
+        name: envId
+      - required: true
+        type: integer
+        description: The ID of the Image being accessed
+        in: path
+        name: imageId
+  "/{envId}/roles/":
+    post:
+      description: Create a new Role in this Environment
+      parameters:
+        - schema:
+            $ref: "#/definitions/Role"
+          required: true
+          description: "The JSON representation of a Role.  An `id` attribute is expected unless you are creating or patching the Role."
+          name: role
+          in: body
+      responses:
+        "201":
+          description: Role created
+          schema:
+            $ref: "#/definitions/RoleDetailEnvelope"
+        "400":
+          description: A client-side error was made
+          schema:
+            $ref: "#/definitions/ApiErrorEnvelope"
+        "401":
+          description: Request was not authenticated
+          schema:
+            $ref: "#/definitions/ApiErrorEnvelope"
+        "403":
+          description: Insufficient permissions
+          schema:
+            $ref: "#/definitions/ApiErrorEnvelope"
+        "500":
+          description: A server-side error occured
+          schema:
+            $ref: "#/definitions/ApiErrorEnvelope"
+    parameters:
+      - required: true
+        type: integer
+        description: The ID of the Environment scoping this request
+        in: path
+        name: envId
+    get:
+      description: List Roles available in this Environment
+      responses:
+        "200":
+          description: A list of Roles
+          schema:
+            $ref: "#/definitions/RoleListEnvelope"
+        "400":
+          description: A client-side error was made
+          schema:
+            $ref: "#/definitions/ApiErrorEnvelope"
+        "401":
+          description: Request was not authenticated
+          schema:
+            $ref: "#/definitions/ApiErrorEnvelope"
+        "403":
+          description: Insufficient permissions
+          schema:
+            $ref: "#/definitions/ApiErrorEnvelope"
+        "500":
+          description: A server-side error occured
+          schema:
+            $ref: "#/definitions/ApiErrorEnvelope"
+  "/{envId}/roles/{roleId}/":
+    get:
+      description: Retrieve a Role.
+      responses:
+        "200":
+          description: JSON representation of the Role
+          schema:
+            $ref: "#/definitions/RoleDetailEnvelope"
+        "400":
+          description: A client-side error was made
+          schema:
+            $ref: "#/definitions/ApiErrorEnvelope"
+        "401":
+          description: Request was not authenticated
+          schema:
+            $ref: "#/definitions/ApiErrorEnvelope"
+        "403":
+          description: Insufficient permissions
+          schema:
+            $ref: "#/definitions/ApiErrorEnvelope"
+        "500":
+          description: A server-side error occured
+          schema:
+            $ref: "#/definitions/ApiErrorEnvelope"
+    patch:
+      description: Change Role attributes.
+      parameters:
+        - schema:
+            $ref: "#/definitions/Role"
+          required: true
+          description: "The JSON representation of a Role.  An `id` attribute is expected unless you are creating or patching the Role."
+          name: role
+          in: body
+      responses:
+        "200":
+          description: Role updated
+          schema:
+            $ref: "#/definitions/RoleDetailEnvelope"
+        "400":
+          description: A client-side error was made
+          schema:
+            $ref: "#/definitions/ApiErrorEnvelope"
+        "401":
+          description: Request was not authenticated
+          schema:
+            $ref: "#/definitions/ApiErrorEnvelope"
+        "403":
+          description: Insufficient permissions
+          schema:
+            $ref: "#/definitions/ApiErrorEnvelope"
+        "500":
+          description: A server-side error occured
+          schema:
+            $ref: "#/definitions/ApiErrorEnvelope"
+    parameters:
+      - required: true
+        type: integer
+        description: The ID of the Environment scoping this request
+        in: path
+        name: envId
+      - required: true
+        type: integer
+        description: The ID of the Role being accessed
+        in: path
+        name: roleId
+    delete:
+      description: Delete this Role from this Environment.
+      responses:
+        "200":
+          description: Role deleted
+        "400":
+          description: A client-side error was made
+          schema:
+            $ref: "#/definitions/ApiErrorEnvelope"
+        "401":
+          description: Request was not authenticated
+          schema:
+            $ref: "#/definitions/ApiErrorEnvelope"
+        "403":
+          description: Insufficient permissions
+          schema:
+            $ref: "#/definitions/ApiErrorEnvelope"
+        "500":
+          description: A server-side error occured
+          schema:
+            $ref: "#/definitions/ApiErrorEnvelope"
+  "/{envId}/roles/{roleId}/global-variables/":
+    post:
+      description: Declare a new Global Variable for this Role
+      parameters:
+        - schema:
+            $ref: "#/definitions/GlobalVariable"
+          required: true
+          description: The JSON representation of a Global Variable.
+          name: globalVariable
+          in: body
+      responses:
+        "201":
+          description: Global Variable Created
+          schema:
+            $ref: "#/definitions/GlobalVariableDetailEnvelope"
+        "400":
+          description: A client-side error was made
+          schema:
+            $ref: "#/definitions/ApiErrorEnvelope"
+        "401":
+          description: Request was not authenticated
+          schema:
+            $ref: "#/definitions/ApiErrorEnvelope"
+        "403":
+          description: Insufficient permissions
+          schema:
+            $ref: "#/definitions/ApiErrorEnvelope"
+        "500":
+          description: A server-side error occured
+          schema:
+            $ref: "#/definitions/ApiErrorEnvelope"
+    parameters:
+      - required: true
+        type: integer
+        description: The ID of the Environment scoping this request
+        in: path
+        name: envId
+      - required: true
+        type: integer
+        description: The ID of the Role being accessed
+        in: path
+        name: roleId
+    get:
+      description: List Global Variables associated for this Role
+      responses:
+        "200":
+          description: A list of Global Variables
+          schema:
+            $ref: "#/definitions/GlobalVariableListEnvelope"
+        "400":
+          description: A client-side error was made
+          schema:
+            $ref: "#/definitions/ApiErrorEnvelope"
+        "401":
+          description: Request was not authenticated
+          schema:
+            $ref: "#/definitions/ApiErrorEnvelope"
+        "403":
+          description: Insufficient permissions
+          schema:
+            $ref: "#/definitions/ApiErrorEnvelope"
+        "500":
+          description: A server-side error occured
+          schema:
+            $ref: "#/definitions/ApiErrorEnvelope"
+  /os/:
+    get:
+      description: Retrieve a list of Operating Systems available in this Scalr Installation.
+      responses:
+        "200":
+          description: a List of OSes
+          schema:
+            $ref: "#/definitions/OsListEnvelope"
+        "400":
+          description: A client-side error was made
+          schema:
+            $ref: "#/definitions/ApiErrorEnvelope"
+        "401":
+          description: Request was not authenticated
+          schema:
+            $ref: "#/definitions/ApiErrorEnvelope"
+        "403":
+          description: Insufficient permissions
+          schema:
+            $ref: "#/definitions/ApiErrorEnvelope"
+        "500":
+          description: A server-side error occured
+          schema:
+            $ref: "#/definitions/ApiErrorEnvelope"
+produces:
+  - application/json
+basePath: /api/user/v1
+definitions:
+  GlobalVariableDetailEnvelope:
+    properties:
+      errors:
+        items:
+          $ref: "#/definitions/ApiMessage"
+        readOnly: true
+        type: array
+      data:
+        $ref: "#/definitions/GlobalVariable"
+      warnings:
+        items:
+          $ref: "#/definitions/ApiMessage"
+        readOnly: true
+        type: array
+  ImageDetailEnvelope:
+    properties:
+      errors:
+        items:
+          $ref: "#/definitions/ApiMessage"
+        readOnly: true
+        type: array
+      data:
+        $ref: "#/definitions/Image"
+      warnings:
+        items:
+          $ref: "#/definitions/ApiMessage"
+        readOnly: true
+        type: array
+  ApiMessage:
+    properties:
+      message:
+        type: string
+        description: A human-readable representation of the message
+      code:
+        type: string
+        description: A machine-readable representation of the message
+  RoleListEnvelope:
+    properties:
+      pagination:
+        readOnly: true
+        $ref: "#/definitions/ApiPagination"
+      errors:
+        items:
+          $ref: "#/definitions/ApiMessage"
+        readOnly: true
+        type: array
+      data:
+        items:
+          $ref: "#/definitions/Role"
+        readOnly: true
+        type: array
+      warnings:
+        items:
+          $ref: "#/definitions/ApiMessage"
+        readOnly: true
+        type: array
+  Image:
+    required:
+      - cloudLocation
+    properties:
+      cloudLocation:
+        $ref: "#/definitions/CloudLocation"
+      name:
+        type: string
+      scope:
+        readOnly: true
+        $ref: "#/definitions/Scope"
+      cloudId:
+        type: string
+      os:
+        $ref: "#/definitions/Os"
+      id:
+        readOnly: true
+        type: string
+      architecture:
+        readOnly: true
+        $ref: "#/definitions/Architecture"
+  OsListEnvelope:
+    properties:
+      pagination:
+        readOnly: true
+        $ref: "#/definitions/ApiPagination"
+      errors:
+        items:
+          $ref: "#/definitions/ApiMessage"
+        readOnly: true
+        type: array
+      data:
+        items:
+          $ref: "#/definitions/Os"
+        readOnly: true
+        type: array
+      warnings:
+        items:
+          $ref: "#/definitions/ApiMessage"
+        readOnly: true
+        type: array
+  GlobalVariableListEnvelope:
+    properties:
+      pagination:
+        readOnly: true
+        $ref: "#/definitions/ApiPagination"
+      errors:
+        items:
+          $ref: "#/definitions/ApiMessage"
+        readOnly: true
+        type: array
+      data:
+        items:
+          $ref: "#/definitions/GlobalVariable"
+        readOnly: true
+        type: array
+      warnings:
+        items:
+          $ref: "#/definitions/ApiMessage"
+        readOnly: true
+        type: array
+  RoleDetailEnvelope:
+    properties:
+      errors:
+        items:
+          $ref: "#/definitions/ApiMessage"
+        readOnly: true
+        type: array
+      data:
+        $ref: "#/definitions/Role"
+      warnings:
+        items:
+          $ref: "#/definitions/ApiMessage"
+        readOnly: true
+        type: array
+  CloudLocation:
+    properties:
+      cloud:
+        enum:
+          - ec2
+          - rackspace
+          - eucalyptus
+          - gce
+          - openstack
+          - ecs
+          - ocs
+          - nebula
+          - contrail
+          - rackspacengus
+          - rackspacenguk
+          - cloudstack
+          - idcf
+        type: string
+      zone:
+        type: string
+  RoleCategory:
+    required:
+      - name
+    properties:
+      scope:
+        readOnly: true
+        $ref: "#/definitions/Scope"
+      name:
+        type: string
+  Architecture:
+    properties:
+      architecture:
+        enum:
+          - i386
+          - x86_64
+        type: string
+  GlobalVariable:
+    required:
+      - name
+    properties:
+      declared:
+        type: boolean
+        description: Whether this variable is declared in the current scope.
+      requiredIn:
+        description: "The scope where this variable is required. This is read-only if `declared` is false."
+        $ref: "#/definitions/Scope"
+      name:
+        type: string
+      effectiveValue:
+        readOnly: true
+        type: string
+        description: The value computed by Scalr for this variable once inheritance has been taken into account.
+      definedValue:
+        type: string
+        description: "The value declared in the current scope for this variable.  null allows inheritance. Any other value overrides inheritance.  This is ignored if `declared` is false."
+      outputFormat:
+        type: string
+        description: "The formatting to apply when formatting this variable. This is read-only if `declared` is false."
+      validationPattern:
+        type: string
+        description: "A validation pattern to apply in inner scopes. This is read-only if `declared` is false."
+      locked:
+        type: boolean
+        description: "Whether this variable is locked in inner scopes. This is read-only if `declared` is false."
+      hidden:
+        type: boolean
+        description: "Whether this variable is hidden in inner scopes. This is read-only if `declared` is false."
+  Scope:
+    properties:
+      name:
+        enum:
+          - scalr
+          - account
+          - environment
+          - farm
+          - farmRole
+          - server
+        type: string
+  ImageListEnvelope:
+    properties:
+      pagination:
+        readOnly: true
+        $ref: "#/definitions/ApiPagination"
+      errors:
+        items:
+          $ref: "#/definitions/ApiMessage"
+        readOnly: true
+        type: array
+      data:
+        items:
+          $ref: "#/definitions/Image"
+        readOnly: true
+        type: array
+      warnings:
+        items:
+          $ref: "#/definitions/ApiMessage"
+        readOnly: true
+        type: array
+  Os:
+    properties:
+      generation:
+        enum:
+          - 5
+          - 6
+          - 7
+          - 10.04
+          - 12.04
+          - 14.04
+          - 2003
+          - 2008
+          - 2012
+          - 2012.09
+          - 2013.03
+          - 2014.03
+          - 2014.09
+        type: string
+      version:
+        type: string
+      id:
+        type: string
+        description: An ID uniquely identifying this OS in Scalr.
+      family:
+        enum:
+          - debian
+          - ubuntu
+          - rhel
+          - centos
+          - amazon
+          - windows
+        type: string
+      name:
+        type: string
+        description: A human-readable name for this OS.
+  ApiErrorEnvelope:
+    properties:
+      errors:
+        items:
+          schema:
+            $ref: "#/definitions/ApiMessage"
+        readOnly: true
+        type: array
+  Role:
+    required:
+      - name
+      - category
+    properties:
+      category:
+        $ref: "#/definitions/RoleCategory"
+      description:
+        type: string
+      scope:
+        readOnly: true
+        $ref: "#/definitions/Scope"
+      os:
+        $ref: "#/definitions/Os"
+      id:
+        readOnly: true
+        type: integer
+      name:
+        type: string
+  ApiPagination:
+    properties:
+      next:
+        readOnly: true
+        type: string
+      prev:
+        readOnly: true
+        type: string
+      last:
+        readOnly: true
+        type: string
+      first:
+        readOnly: true
+        type: string
+swagger: "2.0"
