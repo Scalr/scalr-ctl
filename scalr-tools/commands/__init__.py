@@ -37,7 +37,7 @@ class SubCommand(object):
         print
 
         if settings.raw_view:
-            test_folder = os.path.abspath(os.path.join(os.path.dirname(__file__), '../..', 'test'))
+            test_folder = os.path.abspath(os.path.join(os.path.dirname(__file__), '../..', 'tests'))
             text = open(os.path.join(test_folder, "example.json")).read()
             click.echo(build_tree(text))
         else:
