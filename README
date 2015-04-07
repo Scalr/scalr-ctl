@@ -7,4 +7,6 @@ $ scalr-tools_
 Usage:
 
   $ pip install --editable .
+  $ . scalr-tools-complete.sh 
   $ scalr-tools --help
+  $ scalr-tools <tab> <tab>
