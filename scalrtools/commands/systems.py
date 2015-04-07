@@ -1,6 +1,6 @@
 __author__ = 'shaitanich'
 
-import commands
+from scalrtools import commands
 
 
 name = "os"
@@ -16,8 +16,15 @@ def callback(*args, **kwargs):
     pass
 
 
-class OS(commands.SubCommand):
-    name = "retrieve"
+class OSList(commands.SubCommand):
+    name = "list"
     route = "/os/"
+    method = "get"
+    enabled = True
+
+
+class OSRetrieve(commands.SubCommand):
+    name = "retrieve"
+    route = "/os/{osId}"
     method = "get"
     enabled = True

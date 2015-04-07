@@ -1,6 +1,6 @@
 __author__ = 'shaitanich'
 
-import commands
+from scalrtools import commands
 
 
 name = "role"
@@ -20,10 +20,24 @@ class Role(commands.SubCommand):
     pass
 
 
+class ChangeRoleAttrs(Role):
+    name = "change-attributes"
+    route = "/{envId}/roles/{roleId}/"
+    method = "patch"
+    enabled = True
+
+
 class CreateRole(Role):
     name = "create"
     route = "/{envId}/roles/"
     method = "post"
+    enabled = True
+
+
+class DeleteRole(Role):
+    name = "delete"
+    route = "/{envId}/roles/{roleId}/"
+    method = "delete"
     enabled = True
 
 
@@ -41,15 +55,4 @@ class RetrieveRole(Role):
     enabled = True
 
 
-class ChangeRoleAttrs(Role):
-    name = "change-attributes"
-    route = "/{envId}/roles/{roleId}/"
-    method = "patch"
-    enabled = True
 
-
-class DeleteRole(Role):
-    name = "delete"
-    route = "/{envId}/images/{imageId}/actions/copy/"
-    method = "delete"
-    enabled = True

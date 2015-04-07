@@ -1,6 +1,6 @@
 __author__ = 'shaitanich'
 
-import commands
+from scalrtools import commands
 
 
 name = "role-image"
@@ -35,7 +35,7 @@ class ListImages(RoleImage):
 
 
 class ImageDetails(RoleImage):
-    name = "details"
+    name = "retrieve"
     route = "/{envId}/roles/{roleId}/images/{imageId}/"
     method = "get"
     enabled = True

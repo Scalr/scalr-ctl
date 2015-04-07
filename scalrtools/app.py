@@ -65,17 +65,15 @@ def list_module_filenames():
 
 
 class MyCLI(click.Group):
-    _modules = None
 
+    _modules = None
 
     def __init__(self, name=None, commands=None, **attrs):
         click.Group.__init__(self, name, commands, **attrs)
         self._modules = {}
         self._init()
 
-        current_dir = os.path.dirname(os.path.realpath(__file__))
-        data = yaml.load(open(os.path.join(current_dir, "swagger.yaml"), "r"))
-        self.hb = HelpBuilder(data)
+        self.hb = HelpBuilder(settings.spec)
 
 
     def _list_module_objects(self):
@@ -96,8 +94,13 @@ class MyCLI(click.Group):
         params = self.hb.get_params(subcommand.route, subcommand.method)
         options = []
         for param in params:
-            option = click.Option(("--%s" % param['name'],), required=param['required'], help=param["description"])
+            option = click.Option(("--%s" % param['name'], param['name']), required=param['required'], help=param["description"])
             options.append(option)
+
+        if subcommand.method.upper() == 'GET':
+            option = click.Option(("--maxresults", "maxResults"), type=int, required=False, help="Show only first N results. Example: --maxresults=2")
+            options.append(option)
+
         return options
 
 
@@ -106,7 +109,7 @@ class MyCLI(click.Group):
             try:
                 if sys.version_info[0] == 2:
                     name = name.encode('ascii', 'replace')
-                mod = __import__('commands.' + name[:-3], None, None, ['enabled'])
+                mod = __import__('scalrtools.commands.' + name[:-3], None, None, ['enabled'])
                 if hasattr(mod, "name"):
                     self._modules[mod.name] = mod
             except ImportError:
@@ -120,12 +123,21 @@ class MyCLI(click.Group):
 
 
     def get_command(self, ctx, name):
+        if name not in self._modules:
+            raise click.ClickException("No such command: %s" % name)
+
         group = click.Group(name, callback=self._modules[name].callback)
 
         for subcommand in self._list_subcommands(name):
             if subcommand.route in self.hb.list_paths() \
                     and subcommand.method in self.hb.list_http_methods(subcommand.route):
                 options = self._list_options(subcommand)
+
+                for option in options:
+                    if option.name == "envId" and settings.envId:
+                        # settings module can contain envId
+                        option.required = False
+
                 help = self.hb.get_method_description(subcommand.route, subcommand.method)
                 cmd = click.Command(subcommand.name, params=options, callback=subcommand.run, help=help)
                 group.add_command(cmd)
@@ -135,15 +147,16 @@ class MyCLI(click.Group):
 @click.command(cls=MyCLI)
 @click.version_option()
 @click.pass_context
-@click.option('--debug/--no-debug', default=False)
-@click.option('--raw', is_flag=True, default=False)
-def cli(ctx, debug, raw, *args, **kvargs):
+@click.option('--debug/--no-debug', default=False, help="Print debug messages")
+@click.option('--raw', 'transformation', is_flag=True, flag_value='raw', default=False, help="Print raw response")
+@click.option('--table', 'transformation', is_flag=True, flag_value='table', default=False, help="Print response as a colored table")
+@click.option('--tree', 'transformation', is_flag=True, flag_value='tree', default=True, help="Print response as a colored tree")
+def cli(ctx, debug, transformation, *args, **kvargs):
     """Scalr-tools is a command-line interface to your Scalr account"""
     if debug:
         settings.debug_mode = debug
         click.echo("Debug mode: %s" % settings.debug_mode)
-    if raw:
-        settings.raw_view = raw
+    settings.view = transformation
 
     #print('in outer')
     #print(args)
