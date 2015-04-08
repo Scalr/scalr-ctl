@@ -2,9 +2,17 @@
 
   Version 2.0 is intended to work with the new Scalr JSON API. 
 
-Usage:
-
+Install:
+  $ git clone https://github.com/Scalr/pecha.git
+  $ git checkout develop
+  $ cd pecha/
   $ pip install --editable .
   $ . scalr-tools-complete.sh 
+  
+Configure:
+  TBD
+  
+Use:
+  
   $ scalr-tools --help
   $ scalr-tools <tab> <tab>
