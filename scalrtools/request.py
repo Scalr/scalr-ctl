@@ -6,6 +6,7 @@ import binascii
 import urlparse
 import urllib
 import urllib2
+import json
 
 import click
 
@@ -16,7 +17,7 @@ def request(method, request_uri, query_data=None):
     method = method.upper()
     scheme = settings.API_SCHEME
     api_host = settings.API_HOST
-    debug = settings.API_DEBUG
+    debug = 0 #settings.API_DEBUG
     query_string = urllib.urlencode(query_data) if query_data else ''
     time_iso8601 = time.strftime("%Y-%m-%dT%H:%M:%S.000Z", time.gmtime())
 
@@ -35,8 +36,8 @@ def request(method, request_uri, query_data=None):
     url = urlparse.urlunsplit((scheme, api_host, request_uri, query_string, ''))
 
     if settings.debug_mode:
-        print "%s URL: %s" % (method, url)
-        print "Headers: ", headers
+        click.echo("%s URL: %s" % (method, url))
+        click.echo("Headers: %s " % json.dumps(headers, indent=2))
 
     try:
         req = urllib2.Request(url, headers=headers)

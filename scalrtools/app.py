@@ -12,7 +12,7 @@ import settings
 
 
 cmd_folder = os.path.abspath(os.path.join(os.path.dirname(__file__), 'commands'))
-
+config_path = os.path.expanduser(os.environ.get("SCALR_APICLIENT_CONFPATH", "~/.scalr/config.yaml"))
 
 class HelpBuilder(object):
     document = None
@@ -118,12 +118,19 @@ class MyCLI(click.Group):
 
     def list_commands(self, ctx):
         rv = [module.name for module in self._list_module_objects()]
+        rv.append("configure")
         rv.sort()
         return rv
 
 
     def get_command(self, ctx, name):
-        if name not in self._modules:
+
+        if name == "configure":
+            configure_help = "Set configuration options in interactive mode"
+            configure_cmd = click.Command("configure", callback=configure, help=configure_help)
+            return configure_cmd
+
+        elif name not in self._modules:
             raise click.ClickException("No such command: %s" % name)
 
         group = click.Group(name, callback=self._modules[name].callback)
@@ -141,22 +148,75 @@ class MyCLI(click.Group):
                 help = self.hb.get_method_description(subcommand.route, subcommand.method)
                 cmd = click.Command(subcommand.name, params=options, callback=subcommand.run, help=help)
                 group.add_command(cmd)
+
         return group
+
+
+def configure():
+    data = {}
+
+    if os.path.exists(config_path):
+        old_data = yaml.load(open(config_path, "r"))
+        data.update(old_data)
+
+
+    for obj in dir(settings):
+        if not obj.startswith("__") and type(getattr(settings, obj)) in (int, str):
+            data[obj] = str(click.prompt(obj, default=getattr(settings, obj)))
+
+    """
+    key_id = str(click.prompt('Please enter API KEY ID:'))
+    secret_key = str(click.prompt('Please enter API SECRET KEY:'))
+    env_id = str(click.prompt('Please enter EnvironmentID:'))
+    new_data = dict(API_KEY_ID=key_id,API_SECRET_KEY=secret_key, envId=env_id)
+    data.update(new_data)
+    """
+
+    configdir = os.path.dirname(config_path)
+    if not os.path.exists(configdir):
+        os.makedirs(configdir)
+
+    raw = yaml.dump(data, default_flow_style=False, default_style='')
+    with open(config_path, 'w') as fp:
+        fp.write(raw)
+
+    click.echo()
+    click.echo("New config saved:")
+    click.echo()
+    click.echo(open(config_path, "r").read())
 
 
 @click.command(cls=MyCLI)
 @click.version_option()
 @click.pass_context
+@click.option('--key_id', help="API key ID")
+@click.option('--secret_key', help="API secret key")
 @click.option('--debug/--no-debug', default=False, help="Print debug messages")
 @click.option('--raw', 'transformation', is_flag=True, flag_value='raw', default=False, help="Print raw response")
 @click.option('--table', 'transformation', is_flag=True, flag_value='table', default=False, help="Print response as a colored table")
 @click.option('--tree', 'transformation', is_flag=True, flag_value='tree', default=True, help="Print response as a colored tree")
-def cli(ctx, debug, transformation, *args, **kvargs):
+def cli(ctx, key_id, secret_key, debug, transformation, *args, **kvargs):
     """Scalr-tools is a command-line interface to your Scalr account"""
+
     if debug:
         settings.debug_mode = debug
         click.echo("Debug mode: %s" % settings.debug_mode)
+        click.echo("Key ID: %s" % key_id)
+
+    if os.path.exists(config_path):
+        config_data = yaml.load(open(config_path, "r"))
+        for key, value in config_data.items():
+            if hasattr(settings, key):
+                setattr(settings, key, value)
+
+    if key_id:
+        settings.API_KEY_ID = str(key_id)
+    if secret_key:
+        settings.API_SECRET_KEY = str(secret_key)
+
+
     settings.view = transformation
+
 
     #print('in outer')
     #print(args)

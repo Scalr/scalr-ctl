@@ -59,7 +59,7 @@ class SubCommand(object):
             text = json.dumps(data)
 
             if settings.debug_mode:
-                print response["meta"]
+                click.echo(response["meta"])
 
             if settings.view == "tree":
                 click.echo(build_tree(text))

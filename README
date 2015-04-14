@@ -4,8 +4,8 @@
 
 Install:
   $ git clone https://github.com/Scalr/pecha.git
-  $ git checkout develop
   $ cd pecha/
+  $ git checkout develop
   $ pip install --editable .
   $ . scalr-tools-complete.sh 
   
