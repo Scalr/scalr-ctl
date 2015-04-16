@@ -22,9 +22,9 @@ def request(method, request_uri, query_data=None):
     time_iso8601 = time.strftime("%Y-%m-%dT%H:%M:%S.000Z", time.gmtime())
 
     try:
-        assert settings.API_KEY_ID
-        assert settings.API_SECRET_KEY
-        
+        assert settings.API_KEY_ID, "No Key ID"
+        assert settings.API_SECRET_KEY, "No Secret key"
+
         string_to_sign = "%s\n%s\n%s\n%s\n" % (method.upper(), time_iso8601, request_uri, query_string)
         digest = hmac.new(settings.API_SECRET_KEY, string_to_sign, hashlib.sha256).digest()
         signature = binascii.b2a_base64(digest).strip()
