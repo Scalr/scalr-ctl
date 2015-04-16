@@ -21,13 +21,13 @@ def request(method, request_uri, query_data=None):
     query_string = urllib.urlencode(query_data) if query_data else ''
     time_iso8601 = time.strftime("%Y-%m-%dT%H:%M:%S.000Z", time.gmtime())
 
-    string_to_sign = "%s\n%s\n%s\n%s\n" % (method.upper(), time_iso8601, request_uri, query_string)
-    digest = hmac.new(settings.API_SECRET_KEY, string_to_sign, hashlib.sha256).digest()
-    signature = binascii.b2a_base64(digest).strip()
-
     try:
         assert settings.API_KEY_ID
         assert settings.API_SECRET_KEY
+        
+        string_to_sign = "%s\n%s\n%s\n%s\n" % (method.upper(), time_iso8601, request_uri, query_string)
+        digest = hmac.new(settings.API_SECRET_KEY, string_to_sign, hashlib.sha256).digest()
+        signature = binascii.b2a_base64(digest).strip()
 
         headers = dict()
         headers['Content-Type'] = 'application/json; charset=utf-8'
