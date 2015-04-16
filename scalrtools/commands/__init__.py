@@ -35,8 +35,6 @@ class SubCommand(object):
         uri = self._request_template
         query_data = {}
 
-        print "settings.envId:", settings.envId
-
         if settings.envId and '{envId}' in uri and ('envId' not in kwargs or not kwargs['envId']):
             kwargs['envId'] = settings.envId  # XXX
 
