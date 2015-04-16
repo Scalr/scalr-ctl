@@ -40,6 +40,9 @@ def request(method, request_uri, query_data=None):
         click.echo("Headers: %s " % json.dumps(headers, indent=2))
 
     try:
+        assert settings.API_KEY_ID
+        assert settings.API_SECRET_KEY
+
         req = urllib2.Request(url, headers=headers)
         req.get_method = lambda: method
         response = urllib2.urlopen(req)

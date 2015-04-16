@@ -14,6 +14,13 @@ import settings
 cmd_folder = os.path.abspath(os.path.join(os.path.dirname(__file__), 'commands'))
 config_path = os.path.expanduser(os.environ.get("SCALR_APICLIENT_CONFPATH", "~/.scalr/config.yaml"))
 
+if os.path.exists(config_path):
+    config_data = yaml.load(open(config_path, "r"))
+    for key, value in config_data.items():
+        if hasattr(settings, key):
+            setattr(settings, key, value)
+
+
 class HelpBuilder(object):
     document = None
 
@@ -98,8 +105,10 @@ class MyCLI(click.Group):
             options.append(option)
 
         if subcommand.method.upper() == 'GET':
-            option = click.Option(("--maxresults", "maxResults"), type=int, required=False, help="Show only first N results. Example: --maxresults=2")
-            options.append(option)
+            maxrez = click.Option(("--maxresults", "maxResults"), type=int, required=False, help="Maximum number of records. Example: --maxresults=2")
+            options.append(maxrez)
+            pagenum = click.Option(("--pagenumber", "pageNum"), type=int, required=False, help="Current page number. Example: --pagenumber=3")
+            options.append(pagenum)
 
         return options
 
@@ -164,14 +173,6 @@ def configure():
         if not obj.startswith("__") and type(getattr(settings, obj)) in (int, str):
             data[obj] = str(click.prompt(obj, default=getattr(settings, obj)))
 
-    """
-    key_id = str(click.prompt('Please enter API KEY ID:'))
-    secret_key = str(click.prompt('Please enter API SECRET KEY:'))
-    env_id = str(click.prompt('Please enter EnvironmentID:'))
-    new_data = dict(API_KEY_ID=key_id,API_SECRET_KEY=secret_key, envId=env_id)
-    data.update(new_data)
-    """
-
     configdir = os.path.dirname(config_path)
     if not os.path.exists(configdir):
         os.makedirs(configdir)
@@ -202,12 +203,6 @@ def cli(ctx, key_id, secret_key, debug, transformation, *args, **kvargs):
         settings.debug_mode = debug
         click.echo("Debug mode: %s" % settings.debug_mode)
         click.echo("Key ID: %s" % key_id)
-
-    if os.path.exists(config_path):
-        config_data = yaml.load(open(config_path, "r"))
-        for key, value in config_data.items():
-            if hasattr(settings, key):
-                setattr(settings, key, value)
 
     if key_id:
         settings.API_KEY_ID = str(key_id)
