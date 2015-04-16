@@ -170,8 +170,10 @@ def configure():
 
 
     for obj in dir(settings):
-        if not obj.startswith("__") and type(getattr(settings, obj)) in (int, str):
-            data[obj] = str(click.prompt(obj, default=getattr(settings, obj)))
+        if not obj.startswith("__"):
+            default_value = getattr(settings, obj)
+            if not default_value or type(default_value) in (int, str):
+                data[obj] = str(click.prompt(obj, default=getattr(settings, obj)))
 
     configdir = os.path.dirname(config_path)
     if not os.path.exists(configdir):
