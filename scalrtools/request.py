@@ -13,8 +13,10 @@ import requests
 
 from scalrtools import settings
 
-
-requests.packages.urllib3.disable_warnings()
+try:
+    requests.packages.urllib3.disable_warnings()
+except:
+    pass
 
 def request(method, request_uri, payload=None, data=None):
     scheme = settings.API_SCHEME
