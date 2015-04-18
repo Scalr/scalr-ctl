@@ -14,7 +14,8 @@ setup(
     install_requires=[
         'Click',
         'prettytable',
-        'pyyaml'
+        'pyyaml',
+        'requests'
     ],
     entry_points='''
         [console_scripts]

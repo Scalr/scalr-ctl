@@ -23,17 +23,26 @@ class SubCommand(object):
     def _request_template(self):
         return "%s%s" % (self._basepath_uri, self.route)
 
-    def pre(self):
-        pass
+    def pre(self, *args, **kwargs):
+        return args, kwargs
 
 
-    def post(self):
-        pass
+    def post(self, response):
+        return response
+
+    def modify_options(self, options):
+        #print "In SubCommand modifier"
+        for option in options:
+            if option.name == "envId" and settings.envId:
+                option.required = False
+        return options
 
 
     def run(self, *args, **kwargs):
+        args, kwargs = self.pre(*args, **kwargs)
         uri = self._request_template
-        query_data = {}
+        payload = {}
+        data = None
 
         if settings.envId and '{envId}' in uri and ('envId' not in kwargs or not kwargs['envId']):
             kwargs['envId'] = settings.envId  # XXX
@@ -45,21 +54,29 @@ class SubCommand(object):
                 t = "{%s}" % key
                 # filtering in-body and empty params
                 if value and t not in self._request_template:
-                    query_data[key] = value
+                    if self.method.upper() in ("GET", "DELETE"):
+                        payload[key] = value
+                    elif self.method.upper() in ("POST", "PATCH"):
+                        data = value  #XXX
 
-        raw_response = request.request(self.method, uri, query_data)
+        raw_response = request.request(self.method, uri, payload, data)
+        response = self.post(raw_response)
 
         if settings.view == "raw":
             click.echo(raw_response)
 
         if raw_response:
 
-            response = json.loads(raw_response)
-            data = response["data"]
+            response_json = json.loads(response)
+
+            if "errors" in response_json and response_json["errors"]:
+                raise click.ClickException(response_json["errors"][0]['message'])
+
+            data = response_json["data"]
             text = json.dumps(data)
 
             if settings.debug_mode:
-                click.echo(response["meta"])
+                click.echo(response_json["meta"])
 
             if settings.view == "tree":
                 click.echo(build_tree(text))

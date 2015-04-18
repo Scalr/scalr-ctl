@@ -149,10 +149,7 @@ class MyCLI(click.Group):
                     and subcommand.method in self.hb.list_http_methods(subcommand.route):
                 options = self._list_options(subcommand)
 
-                for option in options:
-                    if option.name == "envId" and settings.envId:
-                        # settings module can contain envId
-                        option.required = False
+                options = subcommand.modify_options(options)
 
                 help = self.hb.get_method_description(subcommand.route, subcommand.method)
                 cmd = click.Command(subcommand.name, params=options, callback=subcommand.run, help=help)
@@ -203,8 +200,8 @@ def cli(ctx, key_id, secret_key, debug, transformation, *args, **kvargs):
 
     if debug:
         settings.debug_mode = debug
-        click.echo("Debug mode: %s" % settings.debug_mode)
-        click.echo("Key ID: %s" % key_id)
+        #click.echo("Debug mode: %s" % settings.debug_mode)
+        #click.echo("Key ID: %s" % settings.API_KEY_ID)
 
     if key_id:
         settings.API_KEY_ID = str(key_id)
