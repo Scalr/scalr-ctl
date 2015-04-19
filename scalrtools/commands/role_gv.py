@@ -1,4 +1,5 @@
 __author__ = 'shaitanich'
+__doc__ = 'Manage global variables for roles'
 
 from scalrtools import commands
 

@@ -1,4 +1,6 @@
 __author__ = 'shaitanich'
+__doc__ = 'Supported operating systems'
+
 
 from scalrtools import commands
 

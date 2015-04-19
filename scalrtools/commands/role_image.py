@@ -1,4 +1,6 @@
 __author__ = 'shaitanich'
+__doc__ = 'Manage images in roles'
+
 
 from scalrtools import commands
 

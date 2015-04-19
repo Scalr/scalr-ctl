@@ -1,4 +1,6 @@
 __author__ = 'shaitanich'
+__doc__ = 'Role management'
+
 
 from scalrtools import commands
 

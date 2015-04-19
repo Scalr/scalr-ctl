@@ -14,6 +14,8 @@ class SubCommand(object):
     route = None
     method = None
     enabled = False
+    mutable_body_parts = None # object definitions in YAML spec are not always correct
+    prompt_for = None # Some values like GCE imageId cannot be passed through command line
 
     @property
     def _basepath_uri(self):
@@ -23,22 +25,55 @@ class SubCommand(object):
     def _request_template(self):
         return "%s%s" % (self._basepath_uri, self.route)
 
-    def pre(self, *args, **kwargs):
-        return args, kwargs
-
-
-    def post(self, response):
-        return response
-
     def modify_options(self, options):
+        """
+        this is the place where command line options can be fixed
+        after they are loaded from yaml spec
+        """
         #print "In SubCommand modifier"
         for option in options:
+            if self.prompt_for and option.name in self.prompt_for:
+                option.prompt = option.name
+
             if option.name == "envId" and settings.envId:
                 option.required = False
         return options
 
 
+    def pre(self, *args, **kwargs):
+        """
+        before request is made
+        """
+        if self.method.upper() in ("PATCH", "POST"):
+            #prompting for body and then validating it
+            for param in self._post_params():
+                name = param["name"]
+                raw = click.termui.prompt("%s %s" % (name, "JSON"))
+
+                try:
+                    user_object = json.loads(raw)
+                except (Exception, BaseException), e:
+                    if settings.debug_mode:
+                        raise
+                    raise click.ClickException(str(e))
+
+                valid_object = self._filter_json_object(user_object)
+                valid_object_str = json.dumps(valid_object)
+                kwargs[name] = valid_object_str
+        return args, kwargs
+
+
+    def post(self, response):
+        """
+        after request is made
+        """
+        return response
+
+
     def run(self, *args, **kwargs):
+        """
+        callback for click subcommand
+        """
         args, kwargs = self.pre(*args, **kwargs)
         uri = self._request_template
         payload = {}
@@ -88,3 +123,46 @@ class SubCommand(object):
                     ("1002", "Test_Farm_2", "Second farm"),
                 ]
                 click.echo(build_table(fields, rows, "Page: 1 of 1", "Total: 1"))
+
+
+    def _list_mutable_body_parts(self):
+        """
+        finds object in yaml spec and determines it's mutable fields
+        to filter user JSON
+        """
+        mutable = []
+        spec = settings.spec
+        for param in spec["paths"][self.route][self.method]["parameters"]:
+            name = param["name"] # image
+            reference_path = param["schema"]['$ref'] # #/definitions/Image
+            parts = reference_path.split("/")
+            object =  spec[parts[1]][parts[2]]
+            object_properties = object["properties"]
+            for property, descr in object_properties.items():
+                if 'readOnly' not in descr or not descr['readOnly']:
+                    mutable.append(property)
+        return  mutable
+
+    def _filter_json_object(self, obj):
+        """
+        removes immutable parts from JSON object before sending it in POST or PATCH
+        """
+        #XXX: make it recursive
+        result = {}
+        mutable_parts = self.mutable_body_parts or self._list_mutable_body_parts()
+        for name, value in obj.items():
+            if name in mutable_parts:
+                result[name] = obj[name]
+        return result
+
+    def _post_params(self):
+        """
+        Determines list of body params
+        e.g. 'image' JSON object for 'change-attributes' command
+        """
+        params = []
+        m = settings.spec["paths"][self.route][self.method]
+        if "parameters" in m:
+            for parameter in m['parameters']:
+                params.append(parameter)
+        return params

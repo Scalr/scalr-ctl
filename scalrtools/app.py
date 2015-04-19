@@ -63,7 +63,11 @@ class HelpBuilder(object):
 
 
     def get_params(self, path, method="get"):
-        return self.get_body_type_params(path, method) + self.get_path_type_params(path)
+        result = self.get_path_type_params(path)
+        if method.upper() in ("GET", "DELETE"):
+            body_params = self.get_body_type_params(path, method)
+            result += body_params
+        return result
 
 
 def list_module_filenames():
@@ -142,7 +146,7 @@ class MyCLI(click.Group):
         elif name not in self._modules:
             raise click.ClickException("No such command: %s" % name)
 
-        group = click.Group(name, callback=self._modules[name].callback)
+        group = click.Group(name, callback=self._modules[name].callback, help=self._modules[name].__doc__)
 
         for subcommand in self._list_subcommands(name):
             if subcommand.route in self.hb.list_paths() \
@@ -169,7 +173,9 @@ def configure():
     for obj in dir(settings):
         if not obj.startswith("__"):
             default_value = getattr(settings, obj)
-            if not default_value or type(default_value) in (int, str):
+            if isinstance(default_value, bool):
+                data[obj] = click.confirm(obj, default=getattr(settings, obj))
+            elif not default_value or type(default_value) in (int, str):
                 data[obj] = str(click.prompt(obj, default=getattr(settings, obj)))
 
     configdir = os.path.dirname(config_path)

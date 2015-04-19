@@ -1,4 +1,5 @@
 __author__ = 'shaitanich'
+__doc__ = 'Current Role categories'
 
 from scalrtools import commands
 

@@ -1,7 +1,10 @@
 __author__ = 'shaitanich'
+__doc__ = 'Image management'
 
-from scalrtools import commands
+from scalrtools import commands, settings
 import click
+import json
+
 
 name = "image"
 enabled = True
@@ -25,18 +28,13 @@ class ChangeImageAttrs(Image):
     route = "/{envId}/images/{imageId}/"
     method = "patch"
     enabled = True
+    mutable_body_parts = ["name"]
+    prompt_for = ["imageId"]
+
 
     def modify_options(self, options):
         options = super(ChangeImageAttrs, self).modify_options(options)
-        #print "In ChangeImageAttrs modifier"
-        for option in options:
-            if option.name == "image":
-                options.remove(option)
         return options
-
-    def pre(self, *args, **kwargs):
-        kwargs["image"] = click.termui.prompt("Image object JSON")
-        return args, kwargs
 
 
 class CopyImage(Image):
@@ -91,6 +89,7 @@ class RetrieveImage(Image):
     route = "/{envId}/images/{imageId}/"
     method = "get"
     enabled = True
+    prompt_for = ["imageId"]
 
 
 
