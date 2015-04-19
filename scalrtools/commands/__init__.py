@@ -17,9 +17,12 @@ class SubCommand(object):
     route = None
     method = None
     enabled = False
-    mutable_body_parts = None # object definitions in YAML spec are not always correct
-    prompt_for = None # Some values like GCE imageId cannot be passed through command line
-    module = sys.modules[__name__] #XXX: inheretance problem quickfix
+
+    object_reference = None # optional, e.g. '#/definitions/GlobalVariable'
+    mutable_body_parts = None # optional, object definitions in YAML spec are not always correct
+
+    prompt_for = None #optional, Some values like GCE imageId cannot be passed through command line
+    module = sys.modules[__name__] #XXX: temporary, inheretance problem quickfix
 
     @property
     def _basepath_uri(self):
@@ -158,16 +161,23 @@ class SubCommand(object):
         """
         mutable = []
         spec = settings.spec
-        for param in spec["paths"][self.route][self.method]["parameters"]:
-            name = param["name"] # image
-            reference_path = param["schema"]['$ref'] # #/definitions/Image
-            parts = reference_path.split("/")
-            object =  spec[parts[1]][parts[2]]
-            object_properties = object["properties"]
-            for property, descr in object_properties.items():
-                if 'readOnly' not in descr or not descr['readOnly']:
+
+        if not self.object_reference:
+            for param in spec["paths"][self.route][self.method]["parameters"]:
+                name = param["name"] # image
+                reference_path = param["schema"]['$ref'] # #/definitions/Image
+        else:
+            #XXX: Temporary code, see GlobalVariableDetailEnvelope or "role-global-variables update"
+            reference_path = self.object_reference
+
+        parts = reference_path.split("/")
+        object =  spec[parts[1]][parts[2]]
+
+        object_properties = object["properties"]
+        for property, descr in object_properties.items():
+            if 'readOnly' not in descr or not descr['readOnly']:
                     mutable.append(property)
-        return  mutable
+        return mutable
 
     def _filter_json_object(self, obj):
         """
