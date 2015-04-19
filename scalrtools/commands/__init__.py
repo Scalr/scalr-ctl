@@ -1,10 +1,13 @@
 __author__ = 'shaitanich'
 
+import sys
 import json
 import click
+import inspect
 from scalrtools import settings
 from scalrtools import request
 from scalrtools.view import build_table, build_tree
+
 
 enabled = False
 
@@ -16,6 +19,7 @@ class SubCommand(object):
     enabled = False
     mutable_body_parts = None # object definitions in YAML spec are not always correct
     prompt_for = None # Some values like GCE imageId cannot be passed through command line
+    module = sys.modules[__name__] #XXX: inheretance problem quickfix
 
     @property
     def _basepath_uri(self):
@@ -37,6 +41,7 @@ class SubCommand(object):
 
             if option.name == "envId" and settings.envId:
                 option.required = False
+
         return options
 
 
@@ -44,11 +49,31 @@ class SubCommand(object):
         """
         before request is made
         """
+        edit = kwargs.pop("edit", False)
+
         if self.method.upper() in ("PATCH", "POST"):
             #prompting for body and then validating it
             for param in self._post_params():
                 name = param["name"]
-                raw = click.termui.prompt("%s %s" % (name, "JSON"))
+
+                if edit:
+                    text = ''
+                    try:
+                        #XXX: rewrite, think of globals() or such
+                        for name, obj in inspect.getmembers(self.module):
+                            if inspect.isclass(obj):
+                                if obj.route == self.route and obj.method.upper() == "GET":
+                                    rawtext = obj().run(*args, **kwargs)
+                                    json_text = json.loads(rawtext)
+                                    filtered = self._filter_json_object(json_text['data'])
+                                    text = json.dumps(filtered)
+                                    print "TEXT:", text
+                    except (Exception, BaseException), e:
+                        pass
+                    raw = click.edit(text)
+
+                else:
+                    raw = click.termui.prompt("%s %s" % (name, "JSON"))
 
                 try:
                     user_object = json.loads(raw)
@@ -123,6 +148,8 @@ class SubCommand(object):
                     ("1002", "Test_Farm_2", "Second farm"),
                 ]
                 click.echo(build_table(fields, rows, "Page: 1 of 1", "Total: 1"))
+
+        return response
 
 
     def _list_mutable_body_parts(self):

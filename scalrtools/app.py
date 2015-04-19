@@ -114,6 +114,11 @@ class MyCLI(click.Group):
             pagenum = click.Option(("--pagenumber", "pageNum"), type=int, required=False, help="Current page number. Example: --pagenumber=3")
             options.append(pagenum)
 
+        if subcommand.method.upper() in ('PATCH','POST'):
+            edit_help = "Open default text editor to change JSON data before sending API request"
+            edit = click.Option(("--edit", "edit"), is_flag=True, default=False, help=edit_help)
+            options.append(edit)
+
         return options
 
 

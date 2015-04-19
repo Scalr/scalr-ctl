@@ -31,8 +31,10 @@ def request(method, request_uri, payload=None, data=None):
 
         string_to_sign = "%s\n%s\n%s\n%s\n%s" % (method.upper(), time_iso8601, request_uri, query_string, body)
         #string_to_sign = "%s\n%s\n%s\n%s\n%s" % ("GET", time_iso8601, request_uri, query_string, "")
-        print "stringToSign:"
-        print string_to_sign
+        if settings.debug_mode:
+            #DELETE: needed to debug "requests" module on OSX (works fine on linux)
+            print "stringToSign:"
+            print string_to_sign
         digest = hmac.new(settings.API_SECRET_KEY, string_to_sign, hashlib.sha256).digest()
         signature = binascii.b2a_base64(digest).strip()
 
