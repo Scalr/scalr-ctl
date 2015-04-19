@@ -1,6 +1,8 @@
 __author__ = 'shaitanich'
 __doc__ = 'Manage global variables for roles'
 
+
+import sys
 from scalrtools import commands
 
 
@@ -51,3 +53,5 @@ class UpdateRoleGlobalVariable(GV):
     name = "update"
     method = "patch"
     enabled = True
+    prompt_for = ["roleId", "globalVariableName"]
+    module = sys.modules[__name__]
