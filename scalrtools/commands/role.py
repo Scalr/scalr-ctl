@@ -2,6 +2,7 @@ __author__ = 'shaitanich'
 __doc__ = 'Role management'
 
 
+import sys
 from scalrtools import commands
 
 
@@ -27,6 +28,8 @@ class ChangeRoleAttrs(Role):
     route = "/{envId}/roles/{roleId}/"
     method = "patch"
     enabled = True
+    prompt_for = ["roleId"]
+    module = sys.modules[__name__]
 
 
 class CreateRole(Role):

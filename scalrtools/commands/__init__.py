@@ -67,7 +67,6 @@ class SubCommand(object):
                                     json_text = json.loads(rawtext)
                                     filtered = self._filter_json_object(json_text['data'])
                                     text = json.dumps(filtered)
-                                    print "TEXT:", text
                     except (Exception, BaseException), e:
                         pass
                     raw = click.edit(text)
