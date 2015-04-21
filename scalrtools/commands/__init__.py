@@ -61,17 +61,18 @@ class SubCommand(object):
 
                 if edit:
                     text = ''
-                    try:
-                        #XXX: rewrite, think of globals() or such
-                        for name, obj in inspect.getmembers(self.module):
-                            if inspect.isclass(obj):
-                                if obj.route == self.route and obj.method.upper() == "GET":
-                                    rawtext = obj().run(*args, **kwargs)
-                                    json_text = json.loads(rawtext)
-                                    filtered = self._filter_json_object(json_text['data'])
-                                    text = json.dumps(filtered)
-                    except (Exception, BaseException), e:
-                        pass
+                    if self.method.upper() == "PATCH":
+                        try:
+                            #XXX: rewrite, think of globals() or such
+                            for name, obj in inspect.getmembers(self.module):
+                                if inspect.isclass(obj):
+                                    if obj.route == self.route and obj.method.upper() == "GET":
+                                        rawtext = obj().run(*args, **kwargs)
+                                        json_text = json.loads(rawtext)
+                                        filtered = self._filter_json_object(json_text['data'])
+                                        text = json.dumps(filtered)
+                        except (Exception, BaseException), e:
+                            pass
                     raw = click.edit(text)
 
                 else:
