@@ -4,6 +4,7 @@ import sys
 import json
 import click
 import inspect
+from collections import defaultdict
 from scalrtools import settings
 from scalrtools import request
 from scalrtools.view import build_table, build_tree
@@ -12,17 +13,29 @@ from scalrtools.view import build_table, build_tree
 enabled = False
 
 
+class SubCommandMeta(type):
+
+    def __new__(mcs, name, parents, dct):
+        route = dct.get("route")
+        c = super(SubCommandMeta, mcs).__new__(mcs, name, parents, dct)
+        if name!="SubCommand" and route:
+            SubCommand._siblings[route].append(c)
+        return c
+
 class SubCommand(object):
+    __metaclass__ = SubCommandMeta
+    _siblings = defaultdict(list)
     name = None
     route = None
     method = None
     enabled = False
 
+    mutable_body_parts = None # temporary, object definitions in YAML spec are not always correct
     object_reference = None # optional, e.g. '#/definitions/GlobalVariable'
-    mutable_body_parts = None # optional, object definitions in YAML spec are not always correct
-
     prompt_for = None #optional, Some values like GCE imageId cannot be passed through command line
-    module = sys.modules[__name__] #XXX: temporary, inheretance problem quickfix
+
+    def get_siblings(self):
+        return SubCommand._siblings.get(self.route)
 
     @property
     def _basepath_uri(self):
@@ -52,31 +65,28 @@ class SubCommand(object):
         """
         before request is made
         """
-        edit = kwargs.pop("edit", False)
+        stdin = kwargs.pop("stdin", False)
 
         if self.method.upper() in ("PATCH", "POST"):
             #prompting for body and then validating it
             for param in self._post_params():
                 name = param["name"]
 
-                if edit:
+                if stdin:
+                    raw = click.termui.prompt("%s %s" % (name, "JSON"))
+                else:
                     text = ''
                     if self.method.upper() == "PATCH":
                         try:
-                            #XXX: rewrite, think of globals() or such
-                            for name, obj in inspect.getmembers(self.module):
-                                if inspect.isclass(obj):
-                                    if obj.route == self.route and obj.method.upper() == "GET":
-                                        rawtext = obj().run(*args, **kwargs)
-                                        json_text = json.loads(rawtext)
-                                        filtered = self._filter_json_object(json_text['data'])
-                                        text = json.dumps(filtered)
+                            for cls in self.get_siblings():
+                                if cls.method.upper() == "GET":
+                                    rawtext = cls().run(*args, **kwargs)
+                                    json_text = json.loads(rawtext)
+                                    filtered = self._filter_json_object(json_text['data'])
+                                    text = json.dumps(filtered)
                         except (Exception, BaseException), e:
                             pass
                     raw = click.edit(text)
-
-                else:
-                    raw = click.termui.prompt("%s %s" % (name, "JSON"))
 
                 try:
                     user_object = json.loads(raw)

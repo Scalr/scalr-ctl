@@ -55,4 +55,3 @@ class UpdateRoleGlobalVariable(GV):
     enabled = True
     object_reference = "#/definitions/GlobalVariable"
     prompt_for = ["roleId", "globalVariableName"]
-    module = sys.modules[__name__]

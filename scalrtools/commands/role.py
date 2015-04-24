@@ -29,7 +29,6 @@ class ChangeRoleAttrs(Role):
     method = "patch"
     enabled = True
     prompt_for = ["roleId"]
-    module = sys.modules[__name__]
 
 
 class CreateRole(Role):

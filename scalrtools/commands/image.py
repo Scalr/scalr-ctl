@@ -32,17 +32,12 @@ class ChangeImageAttrs(Image):
     enabled = True
     mutable_body_parts = ["name"]
     prompt_for = ["imageId"]
-    module = sys.modules[__name__]
 
 
     def modify_options(self, options):
         options = super(ChangeImageAttrs, self).modify_options(options)
         return options
 
-    def get_class(self):
-        for name, obj in inspect.getmembers(sys.modules[__name__]):
-            if inspect.isclass(obj):
-                print name
 
 class CopyImage(Image):
     name = "copy"

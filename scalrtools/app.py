@@ -69,6 +69,24 @@ class HelpBuilder(object):
             result += body_params
         return result
 
+    def returns_envelope(self, path):
+        responces = self.document["paths"][path]["get"]['responses']
+        if 200 in responces:
+            ok200 = responces[200]
+            if 'schema' in ok200:
+                schema = ok200['schema']
+                if '$ref' in schema:
+                    reference = schema['$ref']
+                    object_key = reference.split("/")[-1]
+                    object_descr = self.document["definitions"][object_key]
+                    object_properties = object_descr["properties"]
+                    data_structure = object_properties["data"]
+                    if "type" in data_structure:
+                        responce_type = data_structure["type"]
+                        if "array" == responce_type:
+                            return True
+        return False
+
 
 def list_module_filenames():
     files = os.listdir(cmd_folder)
@@ -108,16 +126,16 @@ class MyCLI(click.Group):
             option = click.Option(("--%s" % param['name'], param['name']), required=param['required'], help=param["description"])
             options.append(option)
 
-        if subcommand.method.upper() == 'GET':
+        if subcommand.method.upper() == 'GET' and self.hb.returns_envelope(subcommand.route):
             maxrez = click.Option(("--maxresults", "maxResults"), type=int, required=False, help="Maximum number of records. Example: --maxresults=2")
             options.append(maxrez)
             pagenum = click.Option(("--pagenumber", "pageNum"), type=int, required=False, help="Current page number. Example: --pagenumber=3")
             options.append(pagenum)
 
         if subcommand.method.upper() in ('PATCH','POST'):
-            edit_help = "Open default text editor to change JSON data before sending API request"
-            edit = click.Option(("--edit", "edit"), is_flag=True, default=False, help=edit_help)
-            options.append(edit)
+            stdin_help = "Ask for input instead of opening default text editor"
+            stdin = click.Option(("--stdin", "stdin"), is_flag=True, default=False, help=stdin_help)
+            options.append(stdin)
 
         return options
 
@@ -181,7 +199,7 @@ def configure():
             if isinstance(default_value, bool):
                 data[obj] = click.confirm(obj, default=getattr(settings, obj))
             elif not default_value or type(default_value) in (int, str):
-                data[obj] = str(click.prompt(obj, default=getattr(settings, obj)))
+                data[obj] = str(click.prompt(obj, default=getattr(settings, obj))).strip()
 
     configdir = os.path.dirname(config_path)
     if not os.path.exists(configdir):
