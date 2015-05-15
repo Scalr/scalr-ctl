@@ -9,6 +9,7 @@ import click
 
 import commands
 import settings
+import spec
 
 
 cmd_folder = os.path.abspath(os.path.join(os.path.dirname(__file__), 'commands'))
@@ -69,7 +70,7 @@ class HelpBuilder(object):
             result += body_params
         return result
 
-    def returns_envelope(self, path):
+    def returns_iterable(self, path):
         responces = self.document["paths"][path]["get"]['responses']
         if 200 in responces:
             ok200 = responces[200]
@@ -126,11 +127,20 @@ class MyCLI(click.Group):
             option = click.Option(("--%s" % param['name'], param['name']), required=param['required'], help=param["description"])
             options.append(option)
 
-        if subcommand.method.upper() == 'GET' and self.hb.returns_envelope(subcommand.route):
+        if subcommand.method.upper() == 'GET' and self.hb.returns_iterable(subcommand.route):
             maxrez = click.Option(("--maxresults", "maxResults"), type=int, required=False, help="Maximum number of records. Example: --maxresults=2")
             options.append(maxrez)
+
             pagenum = click.Option(("--pagenumber", "pageNum"), type=int, required=False, help="Current page number. Example: --pagenumber=3")
             options.append(pagenum)
+
+            filthelp = "Apply filters. Example: type=ebs,size=8. "
+            spc = spec.Spec(settings.spec, subcommand.route, subcommand.method)
+            if spc.filters:
+                filters = sorted(spc.filters)
+                filthelp += "Available filters: %s." % ", ".join(filters)
+            filters = click.Option(("--filters", "filters"), required=False, help=filthelp)
+            options.append(filters)
 
         if subcommand.method.upper() in ('PATCH','POST'):
             stdin_help = "Ask for input instead of opening default text editor"
@@ -178,8 +188,8 @@ class MyCLI(click.Group):
 
                 options = subcommand.modify_options(options)
 
-                help = self.hb.get_method_description(subcommand.route, subcommand.method)
-                cmd = click.Command(subcommand.name, params=options, callback=subcommand.run, help=help)
+                spc = spec.Spec(settings.spec, subcommand.route, subcommand.method)
+                cmd = click.Command(subcommand.name, params=options, callback=subcommand.run, help=spc.description)
                 group.add_command(cmd)
 
         return group

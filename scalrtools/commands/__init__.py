@@ -65,6 +65,15 @@ class SubCommand(object):
         """
         before request is made
         """
+        raw_filters = kwargs.pop("filters", None)
+
+        if raw_filters:
+            for pair in raw_filters.split(","):
+                kv = pair.split("=")
+                if 2==len(kv):
+                    kwargs[kv[0]]=kv[1]
+
+
         stdin = kwargs.pop("stdin", False)
 
         if self.method.upper() in ("PATCH", "POST"):

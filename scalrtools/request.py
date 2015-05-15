@@ -39,6 +39,14 @@ except:
     pass
 
 def request(method, request_uri, payload=None, data=None):
+    """
+    #XXX:temporary!
+    if not payload:
+        payload = {}
+    payload["id"] = "0059d6b9-6def-4b5b-3a36-256ed5c80001"
+    print "payload:", payload
+    """
+
     scheme = settings.API_SCHEME
     api_host = settings.API_HOST
     time_iso8601 = time.strftime("%Y-%m-%dT%H:%M:%S.000Z", time.gmtime())
@@ -69,7 +77,7 @@ def request(method, request_uri, payload=None, data=None):
         url = urlparse.urlunsplit((scheme, api_host, request_uri, '', ''))
 
         if settings.debug_mode:
-            click.echo("%s URL: %s" % (method.upper(), url))
+            #click.echo("%s URL: %s" % (method.upper(), url))
             click.echo("Headers: %s " % json.dumps(headers, indent=2))
 
         #session = requests.sessions.Session()

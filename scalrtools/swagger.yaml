@@ -535,6 +535,10 @@ definitions:
         enum: *id001
         readOnly: true
         type: string
+      description:
+        description: A description that explains what this Global Variable is used
+          for.
+        type: string
       hidden:
         description: Whether this variable is hidden in inner scopes. This is read-only
           if `declaredIn` is not the current scope.
