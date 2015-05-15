@@ -139,8 +139,8 @@ class MyCLI(click.Group):
             if spc.filters:
                 filters = sorted(spc.filters)
                 filthelp += "Available filters: %s." % ", ".join(filters)
-            filters = click.Option(("--filters", "filters"), required=False, help=filthelp)
-            options.append(filters)
+                filters = click.Option(("--filters", "filters"), required=False, help=filthelp)
+                options.append(filters)
 
         if subcommand.method.upper() in ('PATCH','POST'):
             stdin_help = "Ask for input instead of opening default text editor"
