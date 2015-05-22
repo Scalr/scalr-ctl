@@ -160,6 +160,7 @@ class FarmRoleProperties(ScalrObject):
 	__titles__['scaling_properties'] = 'ScalingProperties'
 	__titles__['platform_properties'] = 'PlatformProperties'
 	__titles__['mysql_properties'] = 'MySQLProperties'
+	__titles__['alias'] = 'Alias'
 	
 	name = None
 	farm_role_id = None	
@@ -167,6 +168,7 @@ class FarmRoleProperties(ScalrObject):
 	mysql_properties = None
 	scaling_properties = None
 	servers = None
+	alias = None
 			
 	@classmethod
 	def fromxml (cls, xml):	
@@ -196,6 +198,7 @@ class Server(ScalrObject):
 	__titles__['scalarizr_version'] = 'ScalarizrVersion'
 	__titles__['platform_properties'] = 'PlatformProperties'
 	__titles__['index'] = 'Index'
+	__titles__['alias'] = 'Alias'
 
 	server_id = None
 	platform_properties = None
@@ -208,6 +211,8 @@ class Server(ScalrObject):
 	name = None
 	farm_role_id = None
 	index = None
+
+	alias = None
 	
 	__aliases__ = dict(ScalarizrVersion = 'Agent', ID = 'FarmRoleID')
 

@@ -1,3 +1,11 @@
+version 0.3.66
+
+[+] 'list-servers' command now returns role alias. Example: # scalr list-servers -n stridercd --columns=ExternalIP,Name,Alias
+
+
+-------------
+
+
 version 0.3.64
 
 [+] some log messages fixed

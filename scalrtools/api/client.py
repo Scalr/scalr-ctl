@@ -581,11 +581,14 @@ class ScalrConnection(object):
 		
 		params['FarmID'] = farm_id
 		roles = self._request(command="FarmGetDetails", params=params, response_reader=self._read_get_farm_role_properties_response)
+
 		servers = []
 		for role in roles:
+
 			if role.servers:
 				for server in role.servers:
 					server.name = role.name
+					server.alias = role.alias
 					server.farm_role_id = role.farm_role_id
 					servers.append(server)
 
