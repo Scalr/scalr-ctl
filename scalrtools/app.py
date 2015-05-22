@@ -123,24 +123,34 @@ class MyCLI(click.Group):
     def _list_options(self, subcommand):
         params = self.hb.get_params(subcommand.route, subcommand.method)
         options = []
+
+        debug = click.Option(('--debug/--no-debug', 'debug'), default=False, help="Print debug messages")
+        options.append(debug)
+
         for param in params:
             option = click.Option(("--%s" % param['name'], param['name']), required=param['required'], help=param["description"])
             options.append(option)
 
-        if subcommand.method.upper() == 'GET' and self.hb.returns_iterable(subcommand.route):
-            maxrez = click.Option(("--maxresults", "maxResults"), type=int, required=False, help="Maximum number of records. Example: --maxresults=2")
-            options.append(maxrez)
+        if subcommand.method.upper() == 'GET':
+            raw = click.Option(('--raw', 'transformation'), is_flag=True, flag_value='raw', default=False, help="Print raw response")
+            table = click.Option(('--table', 'transformation'), is_flag=True, flag_value='table', default=False, help="Print response as a colored table")
+            tree = click.Option(('--tree', 'transformation'), is_flag=True, flag_value='tree', default=True, help="Print response as a colored tree")
+            options += [raw, table, tree]
 
-            pagenum = click.Option(("--pagenumber", "pageNum"), type=int, required=False, help="Current page number. Example: --pagenumber=3")
-            options.append(pagenum)
+            if self.hb.returns_iterable(subcommand.route):
+                maxrez = click.Option(("--maxresults", "maxResults"), type=int, required=False, help="Maximum number of records. Example: --maxresults=2")
+                options.append(maxrez)
 
-            filthelp = "Apply filters. Example: type=ebs,size=8. "
-            spc = spec.Spec(settings.spec, subcommand.route, subcommand.method)
-            if spc.filters:
-                filters = sorted(spc.filters)
-                filthelp += "Available filters: %s." % ", ".join(filters)
-                filters = click.Option(("--filters", "filters"), required=False, help=filthelp)
-                options.append(filters)
+                pagenum = click.Option(("--pagenumber", "pageNum"), type=int, required=False, help="Current page number. Example: --pagenumber=3")
+                options.append(pagenum)
+
+                filthelp = "Apply filters. Example: type=ebs,size=8. "
+                spc = spec.Spec(settings.spec, subcommand.route, subcommand.method)
+                if spc.filters:
+                    filters = sorted(spc.filters)
+                    filthelp += "Available filters: %s." % ", ".join(filters)
+                    filters = click.Option(("--filters", "filters"), required=False, help=filthelp)
+                    options.append(filters)
 
         if subcommand.method.upper() in ('PATCH','POST'):
             stdin_help = "Ask for input instead of opening default text editor"
@@ -230,32 +240,12 @@ def configure():
 @click.pass_context
 @click.option('--key_id', help="API key ID")
 @click.option('--secret_key', help="API secret key")
-@click.option('--debug/--no-debug', default=False, help="Print debug messages")
-@click.option('--raw', 'transformation', is_flag=True, flag_value='raw', default=False, help="Print raw response")
-@click.option('--table', 'transformation', is_flag=True, flag_value='table', default=False, help="Print response as a colored table")
-@click.option('--tree', 'transformation', is_flag=True, flag_value='tree', default=True, help="Print response as a colored tree")
-def cli(ctx, key_id, secret_key, debug, transformation, *args, **kvargs):
+def cli(ctx, key_id, secret_key, *args, **kvargs):
     """Scalr-tools is a command-line interface to your Scalr account"""
-
-    if debug:
-        settings.debug_mode = debug
-        #click.echo("Debug mode: %s" % settings.debug_mode)
-        #click.echo("Key ID: %s" % settings.API_KEY_ID)
-
     if key_id:
         settings.API_KEY_ID = str(key_id)
     if secret_key:
         settings.API_SECRET_KEY = str(secret_key)
-
-
-    settings.view = transformation
-
-
-    #print('in outer')
-    #print(args)
-    #print(kvargs)
-
-    pass
 
 
 if __name__ == '__main__':

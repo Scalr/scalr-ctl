@@ -1,12 +1,12 @@
 __author__ = 'shaitanich'
 
-import sys
+import re
 import json
 import click
-import inspect
 from collections import defaultdict
 from scalrtools import settings
 from scalrtools import request
+from scalrtools import spec
 from scalrtools.view import build_table, build_tree
 
 
@@ -65,6 +65,9 @@ class SubCommand(object):
         """
         before request is made
         """
+        settings.debug_mode = kwargs.pop("debug", False)
+        settings.view = kwargs.pop("transformation", "tree")
+
         raw_filters = kwargs.pop("filters", None)
 
         if raw_filters:
@@ -164,12 +167,29 @@ class SubCommand(object):
                 click.echo(build_tree(text))
 
             elif settings.view == "table":
-                fields = ["Farm_ID", "Name", "Descriprion"]
-                rows = [
-                    ("1001", "Test_Farm", "First farm"),
-                    ("1002", "Test_Farm_2", "Second farm"),
-                ]
-                click.echo(build_table(fields, rows, "Page: 1 of 1", "Total: 1"))
+                spc = spec.Spec(settings.spec, self.route, self.method)
+                columns = spc.get_column_names()
+                rows = []
+
+                for d in data:
+                    row = [d[name] for name in columns if name in d]
+                    rows.append(row)
+
+
+                pagination = response_json.get("pagination", None)
+                if pagination:
+                    url_last = pagination.get('last', None)
+                    number = re.search("pageNum=(\d*)", url_last)
+                    pagenum_last = number.group(1) if number else 1
+
+                    url_next = pagination.get('next', None)
+                    num = re.search("pageNum=(\d*)", url_next)
+                    pagenum_next = num.group(1) if num else 1
+                    current_pagenum = int(pagenum_next) - 1
+
+
+
+                click.echo(build_table(columns, rows, "Page: %s of %s" % (current_pagenum, pagenum_last))) #XXX
 
         return response
 

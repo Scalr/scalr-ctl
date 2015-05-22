@@ -1,6 +1,5 @@
 __author__ = 'shaitanich'
 
-from scalrtools import settings
 
 class Spec(object):
 
@@ -85,6 +84,15 @@ class Spec(object):
                     return
                 result = result[path]
             return result
+
+    def get_column_names(self):
+        fields = []
+        response_ref = self._result_descr["properties"]["data"]["items"]["$ref"]
+        response_descr = self.lookup(response_ref)
+        for k,v in response_descr["properties"].items():
+            if "$ref" not in v:
+                fields.append(k)
+        return sorted(fields)
 
     def __repr__(self):
         return 'Spec("%s", "%s")' % (self.route, self.method)
