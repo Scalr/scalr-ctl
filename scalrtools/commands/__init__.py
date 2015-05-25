@@ -185,7 +185,11 @@ class SubCommand(object):
                         for item in block:
                             if name.lower() == item.lower():
                                 row.append(block[item])
-                    rows.append(row)
+                                break
+                        else:
+                            raise click.ClickException("Cannot apply filter. No such column: %s" % name)
+                    if row:
+                        rows.append(row)
 
                 pagination = response_json.get("pagination", None)
                 if pagination:
