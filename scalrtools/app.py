@@ -27,6 +27,7 @@ class HelpBuilder(object):
 
 
     def __init__(self, document):
+        #XXX: move methods to spec module
         self.document = document
 
 
@@ -151,6 +152,12 @@ class MyCLI(click.Group):
                     filthelp += "Available filters: %s." % ", ".join(filters)
                     filters = click.Option(("--filters", "filters"), required=False, help=filthelp)
                     options.append(filters)
+
+                columnshelp = "Filter columns in table view [--table required]. Example: NAME,SIZE,SCOPE. "
+                available_columns = spc.get_column_names()
+                columnshelp +=  "Available columns: %s." % ", ".join(available_columns)
+                columns = click.Option(("--columns", "columns"), required=False, help=columnshelp)
+                options.append(columns)
 
         if subcommand.method.upper() in ('PATCH','POST'):
             stdin_help = "Ask for input instead of opening default text editor"

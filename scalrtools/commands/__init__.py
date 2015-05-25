@@ -29,10 +29,14 @@ class SubCommand(object):
     route = None
     method = None
     enabled = False
+    _table_columns = None
 
     mutable_body_parts = None # temporary, object definitions in YAML spec are not always correct
     object_reference = None # optional, e.g. '#/definitions/GlobalVariable'
     prompt_for = None #optional, Some values like GCE imageId cannot be passed through command line
+
+    def __init__(self):
+        self._table_columns = []
 
     def get_siblings(self):
         return SubCommand._siblings.get(self.route)
@@ -65,6 +69,10 @@ class SubCommand(object):
         """
         before request is made
         """
+        raw_columns = kwargs.pop("columns", False)
+        if raw_columns:
+            self._table_columns = raw_columns.split(",")
+
         settings.debug_mode = kwargs.pop("debug", False)
         settings.view = kwargs.pop("transformation", "tree")
 
@@ -168,13 +176,16 @@ class SubCommand(object):
 
             elif settings.view == "table":
                 spc = spec.Spec(settings.spec, self.route, self.method)
-                columns = spc.get_column_names()
+                columns = self._table_columns or spc.get_column_names()
+
                 rows = []
-
-                for d in data:
-                    row = [d[name] for name in columns if name in d]
+                for block in data:
+                    row = []
+                    for name in columns:
+                        for item in block:
+                            if name.lower() == item.lower():
+                                row.append(block[item])
                     rows.append(row)
-
 
                 pagination = response_json.get("pagination", None)
                 if pagination:
