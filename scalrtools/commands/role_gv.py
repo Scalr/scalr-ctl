@@ -20,7 +20,7 @@ def callback(*args, **kwargs):
 
 
 class GV(commands.SubCommand):
-    route = "/{envId}/roles/{roleId}/global-variables/{globalVariableName}"
+    route = "/{envId}/roles/{roleId}/global-variables/{globalVariableName}/"
 
 
 class DeleteRoleGlobalVariable(GV):

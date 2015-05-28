@@ -251,6 +251,7 @@ def configure():
 
     update()
 
+
 def update():
     if settings.spec_url:
         click.echo("Trying to get new API Spec from %s" % settings.spec_url)
