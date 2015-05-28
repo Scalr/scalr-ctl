@@ -14,10 +14,14 @@ view = "tree"
 
 debug_mode = False
 
+colored_output = True
+
 API_SCHEME = 'https'
 
 API_HOST = 'my.scalr.net'
 
 SIGNATURE_VERSION = 'V1-HMAC-SHA256'
 
-spec = yaml.load(open(os.path.join(os.path.dirname(os.path.realpath(__file__)), "swagger.yaml"), "r"))
+spec_url = "http://repo.scalr.net/swagger.yaml"
+
+spec = yaml.load(open(os.path.join(os.path.expanduser(os.environ.get("SCALR_APICLIENT_CONFDIR", "~/.scalr")), "swagger.yaml"), "r"))

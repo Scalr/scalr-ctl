@@ -75,6 +75,7 @@ class SubCommand(object):
 
         settings.debug_mode = kwargs.pop("debug", False)
         settings.view = kwargs.pop("transformation", "tree")
+        settings.colored_output = not kwargs.pop("nocolor", False)
 
         raw_filters = kwargs.pop("filters", None)
 

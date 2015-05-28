@@ -6,6 +6,7 @@ import inspect
 
 import yaml
 import click
+import requests
 
 import commands
 import settings
@@ -13,7 +14,8 @@ import spec
 
 
 cmd_folder = os.path.abspath(os.path.join(os.path.dirname(__file__), 'commands'))
-config_path = os.path.expanduser(os.environ.get("SCALR_APICLIENT_CONFPATH", "~/.scalr/config.yaml"))
+config_folder = os.path.expanduser(os.environ.get("SCALR_APICLIENT_CONFDIR", "~/.scalr"))
+config_path = os.path.join(config_folder, "config.yaml")
 
 if os.path.exists(config_path):
     config_data = yaml.load(open(config_path, "r"))
@@ -136,7 +138,8 @@ class MyCLI(click.Group):
             raw = click.Option(('--raw', 'transformation'), is_flag=True, flag_value='raw', default=False, help="Print raw response")
             table = click.Option(('--table', 'transformation'), is_flag=True, flag_value='table', default=False, help="Print response as a colored table")
             tree = click.Option(('--tree', 'transformation'), is_flag=True, flag_value='tree', default=True, help="Print response as a colored tree")
-            options += [raw, table, tree]
+            nocolor = click.Option(('--nocolor', 'nocolor'), is_flag=True, default=False, help="Use colors")
+            options += [raw, table, tree, nocolor]
 
             if self.hb.returns_iterable(subcommand.route):
                 maxrez = click.Option(("--maxresults", "maxResults"), type=int, required=False, help="Maximum number of records. Example: --maxresults=2")
@@ -181,7 +184,7 @@ class MyCLI(click.Group):
 
     def list_commands(self, ctx):
         rv = [module.name for module in self._list_module_objects()]
-        rv.append("configure")
+        rv += ["configure", "update"]
         rv.sort()
         return rv
 
@@ -192,6 +195,11 @@ class MyCLI(click.Group):
             configure_help = "Set configuration options in interactive mode"
             configure_cmd = click.Command("configure", callback=configure, help=configure_help)
             return configure_cmd
+
+        elif name == "update":
+            update_help = "Fetch new API specification if available."
+            update_cmd = click.Command("update", callback=update, help=update_help)
+            return update_cmd
 
         elif name not in self._modules:
             raise click.ClickException("No such command: %s" % name)
@@ -241,6 +249,26 @@ def configure():
     click.echo()
     click.echo(open(config_path, "r").read())
 
+    update()
+
+def update():
+    if settings.spec_url:
+        click.echo("Trying to get new API Spec from %s" % settings.spec_url)
+        r = requests.get(settings.spec_url)
+        dst = os.path.join(config_folder, "swagger.yaml")
+        old = None
+        if os.path.exists(dst):
+            with open(dst, "r") as fp:
+                old = fp.read()
+        if r.text == old:
+            click.echo("API Spec is already up-to-date.")
+        elif r.text:
+            with open(dst, "w") as fp:
+                fp.write(r.text)
+                click.echo("API Spec successfully updated.")
+
+
+
 
 @click.command(cls=MyCLI)
 @click.version_option()
@@ -249,6 +277,7 @@ def configure():
 @click.option('--secret_key', help="API secret key")
 def cli(ctx, key_id, secret_key, *args, **kvargs):
     """Scalr-tools is a command-line interface to your Scalr account"""
+
     if key_id:
         settings.API_KEY_ID = str(key_id)
     if secret_key:

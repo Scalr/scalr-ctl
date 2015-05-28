@@ -3,6 +3,7 @@ __author__ = 'shaitanich'
 import json
 import yaml
 import prettytable
+import settings
 
 
 def build_table(field_names, rows, pre=None, post=None):
@@ -11,7 +12,8 @@ def build_table(field_names, rows, pre=None, post=None):
     table.right_padding_width = 4
     table.left_padding_width = 1
     table.set_style(prettytable.PLAIN_COLUMNS)
-    table.field_names = ['\x1b[1m%s\x1b[0m' % field.upper().replace("_", " ") for field in field_names]
+    template = '\x1b[1m%s\x1b[0m' if settings.colored_output else "%s"
+    table.field_names = [template % field.upper().replace("_", " ") for field in field_names]
 
     for row in rows:
         table.add_row(row)
@@ -31,6 +33,10 @@ def build_tree(data):
         data = json.loads(data)
 
     yaml_text = yaml.safe_dump(data, encoding='utf-8', allow_unicode=True, default_flow_style=False)
+
+    if not settings.colored_output:
+        return yaml_text
+
     pairs = []
     in_key = False
 
