@@ -27,6 +27,6 @@ class OSList(commands.SubCommand):
 
 class OSRetrieve(commands.SubCommand):
     name = "retrieve"
-    route = "/os/{osId}"
+    route = "/os/{osId}/"
     method = "get"
     enabled = True
