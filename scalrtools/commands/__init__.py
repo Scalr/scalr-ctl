@@ -194,14 +194,17 @@ class SubCommand(object):
 
                 pagination = response_json.get("pagination", None)
                 if pagination:
+                    pagenum_last, current_pagenum = 1, 1
                     url_last = pagination.get('last', None)
-                    number = re.search("pageNum=(\d*)", url_last)
-                    pagenum_last = number.group(1) if number else 1
+                    if url_last:
+                        number = re.search("pageNum=(\d*)", url_last)
+                        pagenum_last = number.group(1) if number else 1
 
                     url_next = pagination.get('next', None)
-                    num = re.search("pageNum=(\d*)", url_next)
-                    pagenum_next = num.group(1) if num else 1
-                    current_pagenum = int(pagenum_next) - 1
+                    if url_next:
+                        num = re.search("pageNum=(\d*)", url_next)
+                        pagenum_next = num.group(1) if num else 1
+                        current_pagenum = int(pagenum_next) - 1
 
 
 

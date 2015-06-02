@@ -2,7 +2,6 @@ __author__ = 'shaitanich'
 __doc__ = 'Role management'
 
 
-import sys
 from scalrtools import commands
 
 
@@ -12,7 +11,7 @@ enabled = True
 
 def callback(*args, **kwargs):
     """
-    print('in image module')
+    print('in role module')
     print(args)
     print(kwargs)
     """
