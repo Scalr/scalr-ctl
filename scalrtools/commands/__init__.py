@@ -1,9 +1,12 @@
 __author__ = 'shaitanich'
 
+import click
+
 import re
 import json
-import click
+import traceback
 from collections import defaultdict
+
 from scalrtools import settings
 from scalrtools import request
 from scalrtools import spec
@@ -22,6 +25,7 @@ class SubCommandMeta(type):
             SubCommand._siblings[route].append(c)
         return c
 
+
 class SubCommand(object):
     __metaclass__ = SubCommandMeta
     _siblings = defaultdict(list)
@@ -38,12 +42,16 @@ class SubCommand(object):
     def __init__(self):
         self._table_columns = []
 
+    @property
+    def spc(self):
+        return spec.Spec(spec.rawspec, self.route, self.method)
+
     def get_siblings(self):
         return SubCommand._siblings.get(self.route)
 
     @property
     def _basepath_uri(self):
-        return settings.spec["basePath"]
+        return spec.rawspec["basePath"]
 
     @property
     def _request_template(self):
@@ -94,7 +102,7 @@ class SubCommand(object):
                 name = param["name"]
 
                 if stdin:
-                    raw = click.termui.prompt("%s %s" % (name, "JSON"))
+                    raw = click.termui.prompt("Input %s in JSON format" % name)
                 else:
                     text = ''
                     if self.method.upper() == "PATCH":
@@ -103,10 +111,13 @@ class SubCommand(object):
                                 if cls.method.upper() == "GET":
                                     rawtext = cls().run(*args, **kwargs)
                                     json_text = json.loads(rawtext)
-                                    filtered = self._filter_json_object(json_text['data'])
+                                    filtered = self._filter_json_object(json_text['data'], filter_createonly=True)
                                     text = json.dumps(filtered)
                         except (Exception, BaseException), e:
-                            pass
+                            if settings.debug_mode:
+                                click.echo(traceback.format_exc())
+                            else:
+                                click.echo(e)
                     raw = click.edit(text)
 
                 try:
@@ -176,8 +187,9 @@ class SubCommand(object):
                 click.echo(build_tree(text))
 
             elif settings.view == "table":
-                spc = spec.Spec(settings.spec, self.route, self.method)
-                columns = self._table_columns or spc.get_column_names()
+                columns = self._table_columns or self.spc.get_column_names()
+                print columns
+                print data
 
                 rows = []
                 for block in data:
@@ -217,20 +229,25 @@ class SubCommand(object):
         """
         finds object in yaml spec and determines it's mutable fields
         to filter user JSON
+        XXX: Move to Spec (?) after TODO#3
         """
         mutable = []
-        spec = settings.spec
+
+        ### spcobj = spec.Spec(settings.spec, self.route, self.method)
+        ### print "descr:", spcobj._result_descr
 
         if not self.object_reference:
-            for param in spec["paths"][self.route][self.method]["parameters"]:
+            for param in spec.rawspec["paths"][self.route][self.method]["parameters"]:
                 name = param["name"] # image
                 reference_path = param["schema"]['$ref'] # #/definitions/Image
+
         else:
             #XXX: Temporary code, see GlobalVariableDetailEnvelope or "role-global-variables update"
             reference_path = self.object_reference
+        #print "reference_path", reference_path
 
         parts = reference_path.split("/")
-        object =  spec[parts[1]][parts[2]]
+        object =  spec.rawspec[parts[1]][parts[2]]
 
         object_properties = object["properties"]
         for property, descr in object_properties.items():
@@ -238,7 +255,24 @@ class SubCommand(object):
                     mutable.append(property)
         return mutable
 
-    def _filter_json_object(self, obj):
+    def _list_createonly_properties(self):
+        """
+        Some properties (mostly IDs) cannot be marked as read-only because they are
+        passed in PUT-methods (but still must be filtered in UPDATE-methods)
+        """
+        result = []
+        properties = self.spc._result_descr['properties']
+        data = properties['data']
+        if 'items' in data:
+            path = data['items']['$ref']
+        else:
+            path = data['$ref']
+        obj = self.spc.lookup(path)
+        if 'x-createOnly' in obj:
+            result = obj['x-createOnly']
+        return result
+
+    def _filter_json_object(self, obj, filter_createonly=False):
         """
         removes immutable parts from JSON object before sending it in POST or PATCH
         """
@@ -246,7 +280,9 @@ class SubCommand(object):
         result = {}
         mutable_parts = self.mutable_body_parts or self._list_mutable_body_parts()
         for name, value in obj.items():
-            if name in mutable_parts:
+            if filter_createonly and name in self._list_createonly_properties():
+                continue
+            elif name in mutable_parts:
                 result[name] = obj[name]
         return result
 
@@ -256,7 +292,7 @@ class SubCommand(object):
         e.g. 'image' JSON object for 'change-attributes' command
         """
         params = []
-        m = settings.spec["paths"][self.route][self.method]
+        m = spec.rawspec["paths"][self.route][self.method]
         if "parameters" in m:
             for parameter in m['parameters']:
                 params.append(parameter)

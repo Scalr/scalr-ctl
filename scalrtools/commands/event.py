@@ -1,11 +1,11 @@
 __author__ = 'shaitanich'
-__doc__ = 'Event management'
+__doc__ = 'Manage events available in the Scalr Account'
 
 
 from scalrtools import commands
 
 
-name = "event"
+name = "account-level-event"
 enabled = True
 
 

@@ -1,5 +1,7 @@
 __author__ = 'shaitanich'
 
+import os
+import json
 
 class Spec(object):
 
@@ -87,7 +89,9 @@ class Spec(object):
 
     def get_column_names(self):
         fields = []
-        response_ref = self._result_descr["properties"]["data"]["items"]["$ref"]
+        data = self._result_descr["properties"]["data"]
+        # response_ref = data["items"]["$ref"] if "items" in data else data["$ref"] # [ST-54]
+        response_ref = data["items"]["$ref"]
         response_descr = self.lookup(response_ref)
         for k,v in response_descr["properties"].items():
             if "$ref" not in v:
@@ -96,3 +100,5 @@ class Spec(object):
 
     def __repr__(self):
         return 'Spec("%s", "%s")' % (self.route, self.method)
+
+rawspec = json.load(open(os.path.join(os.path.expanduser(os.environ.get("SCALRCLI_HOME", "~/.scalr")), "swagger.json"), "r"))

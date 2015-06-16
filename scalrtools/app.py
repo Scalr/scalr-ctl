@@ -2,6 +2,7 @@ __author__ = 'shaitanich'
 
 import os
 import sys
+import json
 import inspect
 
 import yaml
@@ -12,13 +13,13 @@ import commands
 import settings
 import spec
 
+DEFAULT_PROFILE = "default"
+CMD_FOLDER = os.path.abspath(os.path.join(os.path.dirname(__file__), 'commands'))
+CONFIG_FOLDER = os.path.expanduser(os.environ.get("SCALRCLI_HOME", "~/.scalr"))
+CONFIG_PATH = os.path.join(CONFIG_FOLDER, "%s.yaml" % os.environ.get("SCALRCLI_PROFILE", DEFAULT_PROFILE))
 
-cmd_folder = os.path.abspath(os.path.join(os.path.dirname(__file__), 'commands'))
-config_folder = os.path.expanduser(os.environ.get("SCALR_APICLIENT_CONFDIR", "~/.scalr"))
-config_path = os.path.join(config_folder, "config.yaml")
-
-if os.path.exists(config_path):
-    config_data = yaml.load(open(config_path, "r"))
+if os.path.exists(CONFIG_PATH):
+    config_data = yaml.load(open(CONFIG_PATH, "r"))
     for key, value in config_data.items():
         if hasattr(settings, key):
             setattr(settings, key, value)
@@ -93,7 +94,7 @@ class HelpBuilder(object):
 
 
 def list_module_filenames():
-    files = os.listdir(cmd_folder)
+    files = os.listdir(CMD_FOLDER)
     return [fname for fname in files if fname.endswith('.py') and not fname.startswith("_")]
 
 
@@ -106,7 +107,7 @@ class MyCLI(click.Group):
         self._modules = {}
         self._init()
 
-        self.hb = HelpBuilder(settings.spec)
+        self.hb = HelpBuilder(spec.rawspec)
 
 
     def _list_module_objects(self):
@@ -136,10 +137,13 @@ class MyCLI(click.Group):
 
         if subcommand.method.upper() == 'GET':
             raw = click.Option(('--raw', 'transformation'), is_flag=True, flag_value='raw', default=False, help="Print raw response")
-            table = click.Option(('--table', 'transformation'), is_flag=True, flag_value='table', default=False, help="Print response as a colored table")
             tree = click.Option(('--tree', 'transformation'), is_flag=True, flag_value='tree', default=True, help="Print response as a colored tree")
             nocolor = click.Option(('--nocolor', 'nocolor'), is_flag=True, default=False, help="Use colors")
-            options += [raw, table, tree, nocolor]
+            options += [raw, tree, nocolor]
+            if subcommand.name != "retrieve": # [ST-54]
+                table = click.Option(('--table', 'transformation'), is_flag=True, flag_value='table', default=False, help="Print response as a colored table")
+                options.append(table)
+
 
             if self.hb.returns_iterable(subcommand.route):
                 maxrez = click.Option(("--maxresults", "maxResults"), type=int, required=False, help="Maximum number of records. Example: --maxresults=2")
@@ -149,7 +153,7 @@ class MyCLI(click.Group):
                 options.append(pagenum)
 
                 filthelp = "Apply filters. Example: type=ebs,size=8. "
-                spc = spec.Spec(settings.spec, subcommand.route, subcommand.method)
+                spc = spec.Spec(spec.rawspec, subcommand.route, subcommand.method)
                 if spc.filters:
                     filters = sorted(spc.filters)
                     filthelp += "Available filters: %s." % ", ".join(filters)
@@ -184,7 +188,7 @@ class MyCLI(click.Group):
 
     def list_commands(self, ctx):
         rv = [module.name for module in self._list_module_objects()]
-        rv += ["configure", "update"]
+        rv += ["configure", "update", "use"]
         rv.sort()
         return rv
 
@@ -193,13 +197,20 @@ class MyCLI(click.Group):
 
         if name == "configure":
             configure_help = "Set configuration options in interactive mode"
-            configure_cmd = click.Command("configure", callback=configure, help=configure_help)
+            profile_argument = click.Argument(("profile",), required=False) # [ST-30]
+            configure_cmd = click.Command("configure", callback=configure, help=configure_help, params=[profile_argument,])
             return configure_cmd
 
         elif name == "update":
             update_help = "Fetch new API specification if available."
             update_cmd = click.Command("update", callback=update, help=update_help)
             return update_cmd
+
+        elif name == "use":
+            use_help = "Set default profile."
+            profile_argument = click.Argument(("profile",), required=False) # [ST-30]
+            configure_cmd = click.Command("use", callback=use, help=use_help, params=[profile_argument,])
+            return configure_cmd
 
         elif name not in self._modules:
             raise click.ClickException("No such command: %s" % name)
@@ -213,20 +224,39 @@ class MyCLI(click.Group):
 
                 options = subcommand.modify_options(options)
 
-                spc = spec.Spec(settings.spec, subcommand.route, subcommand.method)
+                spc = spec.Spec(spec.rawspec, subcommand.route, subcommand.method)
                 cmd = click.Command(subcommand.name, params=options, callback=subcommand.run, help=spc.description)
                 group.add_command(cmd)
 
         return group
 
 
-def configure():
+def use(profile=None):
+    if not profile:
+        click.echo("Current profile: %s" % os.environ.get("SCALRCLI_PROFILE", DEFAULT_PROFILE))
+        click.echo("Profile configuration: %s" % CONFIG_PATH)
+        return
+
+    path = os.path.join(CONFIG_FOLDER, "%s.yaml" % profile)
+    if os.path.exists(path):
+        os.environ["SCALRCLI_PROFILE"] = path
+    else:
+        list_profiles = sorted([fname.split(".")[0] for fname in os.listdir(CONFIG_FOLDER) \
+                if fname.endswith(".yaml") and fname != "swagger.yaml"])
+        errmsg = "Cannot switch profile: %s not found. Available profiles: [%s]. " % (path, ", ".join(list_profiles))
+        errmsg += "Use 'configure' command to create new profiles."
+        raise click.ClickException(errmsg)
+
+
+def configure(profile=None):
+    confpath = os.path.join(CONFIG_FOLDER, "%s.yaml" % profile) if profile else CONFIG_PATH
     data = {}
 
-    if os.path.exists(config_path):
-        old_data = yaml.load(open(config_path, "r"))
+    if os.path.exists(confpath):
+        old_data = yaml.load(open(confpath, "r"))
         data.update(old_data)
 
+    print "Configuring %s:" % confpath
 
     for obj in dir(settings):
         if not obj.startswith("__"):
@@ -236,18 +266,17 @@ def configure():
             elif not default_value or type(default_value) in (int, str):
                 data[obj] = str(click.prompt(obj, default=getattr(settings, obj))).strip()
 
-    configdir = os.path.dirname(config_path)
-    if not os.path.exists(configdir):
-        os.makedirs(configdir)
+    if not os.path.exists(CONFIG_FOLDER):
+        os.makedirs(CONFIG_FOLDER)
 
     raw = yaml.dump(data, default_flow_style=False, default_style='')
-    with open(config_path, 'w') as fp:
+    with open(confpath, 'w') as fp:
         fp.write(raw)
 
     click.echo()
     click.echo("New config saved:")
     click.echo()
-    click.echo(open(config_path, "r").read())
+    click.echo(open(confpath, "r").read())
 
     update()
 
@@ -256,7 +285,7 @@ def update():
     if settings.spec_url:
         click.echo("Trying to get new API Spec from %s" % settings.spec_url)
         r = requests.get(settings.spec_url)
-        dst = os.path.join(config_folder, "swagger.yaml")
+        dst = os.path.join(CONFIG_FOLDER, "swagger.yaml")
         old = None
         if os.path.exists(dst):
             with open(dst, "r") as fp:
@@ -264,11 +293,14 @@ def update():
         if r.text == old:
             click.echo("API Spec is already up-to-date.")
         elif r.text:
+
             with open(dst, "w") as fp:
                 fp.write(r.text)
-                click.echo("API Spec successfully updated.")
 
-
+            struct = yaml.load(r.text)
+            json_path = os.path.join(CONFIG_FOLDER, "swagger.json")
+            json.dump(struct, open(json_path, "w"))
+            click.echo("API Spec successfully updated.")
 
 
 @click.command(cls=MyCLI)
@@ -278,11 +310,14 @@ def update():
 @click.option('--secret_key', help="API secret key")
 def cli(ctx, key_id, secret_key, *args, **kvargs):
     """Scalr-tools is a command-line interface to your Scalr account"""
-
     if key_id:
         settings.API_KEY_ID = str(key_id)
     if secret_key:
         settings.API_SECRET_KEY = str(secret_key)
+    elif settings.API_KEY_ID and settings.API_KEY_ID.strip() and not settings.API_SECRET_KEY: # [ST-21]
+        if ctx.invoked_subcommand not in ("configure", "update"):
+            raw = click.prompt(text="API SECRET KEY", hide_input=True)
+            settings.API_SECRET_KEY = str(raw)
 
 
 if __name__ == '__main__':

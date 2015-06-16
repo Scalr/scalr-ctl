@@ -38,7 +38,7 @@ class ListRoleGlobalVariables(GV):
 
 class NewRoleGV(GV):
     route = "/{envId}/roles/{roleId}/global-variables/"
-    name = "new"
+    name = "create"
     method = "post"
     enabled = True
 
@@ -53,5 +53,5 @@ class UpdateRoleGlobalVariable(GV):
     name = "update"
     method = "patch"
     enabled = True
-    object_reference = "#/definitions/GlobalVariable"
+    #object_reference = "#/definitions/GlobalVariable"
     prompt_for = ["roleId", "globalVariableName"]
