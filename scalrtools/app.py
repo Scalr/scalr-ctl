@@ -13,16 +13,98 @@ import commands
 import settings
 import spec
 
+
 DEFAULT_PROFILE = "default"
 CMD_FOLDER = os.path.abspath(os.path.join(os.path.dirname(__file__), 'commands'))
 CONFIG_FOLDER = os.path.expanduser(os.environ.get("SCALRCLI_HOME", "~/.scalr"))
 CONFIG_PATH = os.path.join(CONFIG_FOLDER, "%s.yaml" % os.environ.get("SCALRCLI_PROFILE", DEFAULT_PROFILE))
+SWAGGER_FILE = "user.yaml"
+SWAGGER_PATH = os.path.join(CONFIG_FOLDER, SWAGGER_FILE)
+SWAGGER_JSONSPEC_FILE = SWAGGER_FILE.split(".")[0] + ".json"
+SWAGGER_JSONSPEC_PATH = os.path.join(CONFIG_FOLDER, SWAGGER_JSONSPEC_FILE)
+
+def use(profile=None):
+    if not profile:
+        click.echo("Current profile: %s" % os.environ.get("SCALRCLI_PROFILE", DEFAULT_PROFILE))
+        click.echo("Profile configuration: %s" % CONFIG_PATH)
+        return
+
+    path = os.path.join(CONFIG_FOLDER, "%s.yaml" % profile)
+    if os.path.exists(path):
+        os.environ["SCALRCLI_PROFILE"] = path
+    else:
+        list_profiles = sorted([fname.split(".")[0] for fname in os.listdir(CONFIG_FOLDER) \
+                if fname.endswith(".yaml") and fname != SWAGGER_FILE])
+        errmsg = "Cannot switch profile: %s not found. Available profiles: [%s]. " % (path, ", ".join(list_profiles))
+        errmsg += "Use 'configure' command to create new profiles."
+        raise click.ClickException(errmsg)
+
+
+def configure(profile=None):
+    confpath = os.path.join(CONFIG_FOLDER, "%s.yaml" % profile) if profile else CONFIG_PATH
+    data = {}
+
+    if os.path.exists(confpath):
+        old_data = yaml.load(open(confpath, "r"))
+        data.update(old_data)
+
+    print "Configuring %s:" % confpath
+
+    for obj in dir(settings):
+        if not obj.startswith("__"):
+            default_value = getattr(settings, obj)
+            if isinstance(default_value, bool):
+                data[obj] = click.confirm(obj, default=getattr(settings, obj))
+            elif not default_value or type(default_value) in (int, str):
+                data[obj] = str(click.prompt(obj, default=getattr(settings, obj))).strip()
+
+    if not os.path.exists(CONFIG_FOLDER):
+        os.makedirs(CONFIG_FOLDER)
+
+    raw = yaml.dump(data, default_flow_style=False, default_style='')
+    with open(confpath, 'w') as fp:
+        fp.write(raw)
+
+    click.echo()
+    click.echo("New config saved:")
+    click.echo()
+    click.echo(open(confpath, "r").read())
+
+    update()
+
+
+def update():
+    if settings.spec_url:
+        click.echo("Trying to get new API Spec from %s" % settings.spec_url)
+        r = requests.get(settings.spec_url)
+        dst = os.path.join(CONFIG_FOLDER, SWAGGER_FILE)
+        old = None
+
+        if os.path.exists(dst):
+            with open(dst, "r") as fp:
+                old = fp.read()
+
+        if r.text == old:
+            click.echo("API Spec is already up-to-date.")
+        elif r.text:
+            with open(dst, "w") as fp:
+                fp.write(r.text)
+            click.echo("API Spec successfully updated.")
+
+        if r.text:
+            struct = yaml.load(r.text)
+            json.dump(struct, open(SWAGGER_JSONSPEC_PATH, "w"))
+
 
 if os.path.exists(CONFIG_PATH):
     config_data = yaml.load(open(CONFIG_PATH, "r"))
     for key, value in config_data.items():
         if hasattr(settings, key):
             setattr(settings, key, value)
+
+
+if not os.path.exists(SWAGGER_PATH) or not os.path.exists(SWAGGER_JSONSPEC_PATH):
+    update() # [ST-53]
 
 
 class HelpBuilder(object):
@@ -107,7 +189,7 @@ class MyCLI(click.Group):
         self._modules = {}
         self._init()
 
-        self.hb = HelpBuilder(spec.rawspec)
+        self.hb = HelpBuilder(spec.get_raw_spec())
 
 
     def _list_module_objects(self):
@@ -153,7 +235,7 @@ class MyCLI(click.Group):
                 options.append(pagenum)
 
                 filthelp = "Apply filters. Example: type=ebs,size=8. "
-                spc = spec.Spec(spec.rawspec, subcommand.route, subcommand.method)
+                spc = spec.Spec(spec.get_raw_spec(), subcommand.route, subcommand.method)
                 if spc.filters:
                     filters = sorted(spc.filters)
                     filthelp += "Available filters: %s." % ", ".join(filters)
@@ -224,83 +306,11 @@ class MyCLI(click.Group):
 
                 options = subcommand.modify_options(options)
 
-                spc = spec.Spec(spec.rawspec, subcommand.route, subcommand.method)
+                spc = spec.Spec(spec.get_raw_spec(), subcommand.route, subcommand.method)
                 cmd = click.Command(subcommand.name, params=options, callback=subcommand.run, help=spc.description)
                 group.add_command(cmd)
 
         return group
-
-
-def use(profile=None):
-    if not profile:
-        click.echo("Current profile: %s" % os.environ.get("SCALRCLI_PROFILE", DEFAULT_PROFILE))
-        click.echo("Profile configuration: %s" % CONFIG_PATH)
-        return
-
-    path = os.path.join(CONFIG_FOLDER, "%s.yaml" % profile)
-    if os.path.exists(path):
-        os.environ["SCALRCLI_PROFILE"] = path
-    else:
-        list_profiles = sorted([fname.split(".")[0] for fname in os.listdir(CONFIG_FOLDER) \
-                if fname.endswith(".yaml") and fname != "swagger.yaml"])
-        errmsg = "Cannot switch profile: %s not found. Available profiles: [%s]. " % (path, ", ".join(list_profiles))
-        errmsg += "Use 'configure' command to create new profiles."
-        raise click.ClickException(errmsg)
-
-
-def configure(profile=None):
-    confpath = os.path.join(CONFIG_FOLDER, "%s.yaml" % profile) if profile else CONFIG_PATH
-    data = {}
-
-    if os.path.exists(confpath):
-        old_data = yaml.load(open(confpath, "r"))
-        data.update(old_data)
-
-    print "Configuring %s:" % confpath
-
-    for obj in dir(settings):
-        if not obj.startswith("__"):
-            default_value = getattr(settings, obj)
-            if isinstance(default_value, bool):
-                data[obj] = click.confirm(obj, default=getattr(settings, obj))
-            elif not default_value or type(default_value) in (int, str):
-                data[obj] = str(click.prompt(obj, default=getattr(settings, obj))).strip()
-
-    if not os.path.exists(CONFIG_FOLDER):
-        os.makedirs(CONFIG_FOLDER)
-
-    raw = yaml.dump(data, default_flow_style=False, default_style='')
-    with open(confpath, 'w') as fp:
-        fp.write(raw)
-
-    click.echo()
-    click.echo("New config saved:")
-    click.echo()
-    click.echo(open(confpath, "r").read())
-
-    update()
-
-
-def update():
-    if settings.spec_url:
-        click.echo("Trying to get new API Spec from %s" % settings.spec_url)
-        r = requests.get(settings.spec_url)
-        dst = os.path.join(CONFIG_FOLDER, "swagger.yaml")
-        old = None
-        if os.path.exists(dst):
-            with open(dst, "r") as fp:
-                old = fp.read()
-        if r.text == old:
-            click.echo("API Spec is already up-to-date.")
-        elif r.text:
-
-            with open(dst, "w") as fp:
-                fp.write(r.text)
-
-            struct = yaml.load(r.text)
-            json_path = os.path.join(CONFIG_FOLDER, "swagger.json")
-            json.dump(struct, open(json_path, "w"))
-            click.echo("API Spec successfully updated.")
 
 
 @click.command(cls=MyCLI)
@@ -315,7 +325,7 @@ def cli(ctx, key_id, secret_key, *args, **kvargs):
     if secret_key:
         settings.API_SECRET_KEY = str(secret_key)
     elif settings.API_KEY_ID and settings.API_KEY_ID.strip() and not settings.API_SECRET_KEY: # [ST-21]
-        if ctx.invoked_subcommand not in ("configure", "update"):
+        if ctx.invoked_subcommand not in ("configure", "update", "use"):
             raw = click.prompt(text="API SECRET KEY", hide_input=True)
             settings.API_SECRET_KEY = str(raw)
 

@@ -44,14 +44,14 @@ class SubCommand(object):
 
     @property
     def spc(self):
-        return spec.Spec(spec.rawspec, self.route, self.method)
+        return spec.Spec(spec.get_raw_spec(), self.route, self.method)
 
     def get_siblings(self):
         return SubCommand._siblings.get(self.route)
 
     @property
     def _basepath_uri(self):
-        return spec.rawspec["basePath"]
+        return spec.get_raw_spec()["basePath"]
 
     @property
     def _request_template(self):
@@ -237,7 +237,7 @@ class SubCommand(object):
         ### print "descr:", spcobj._result_descr
 
         if not self.object_reference:
-            for param in spec.rawspec["paths"][self.route][self.method]["parameters"]:
+            for param in spec.get_raw_spec()["paths"][self.route][self.method]["parameters"]:
                 name = param["name"] # image
                 reference_path = param["schema"]['$ref'] # #/definitions/Image
 
@@ -247,7 +247,7 @@ class SubCommand(object):
         #print "reference_path", reference_path
 
         parts = reference_path.split("/")
-        object =  spec.rawspec[parts[1]][parts[2]]
+        object =  spec.get_raw_spec()[parts[1]][parts[2]]
 
         object_properties = object["properties"]
         for property, descr in object_properties.items():
@@ -292,7 +292,7 @@ class SubCommand(object):
         e.g. 'image' JSON object for 'change-attributes' command
         """
         params = []
-        m = spec.rawspec["paths"][self.route][self.method]
+        m = spec.get_raw_spec()["paths"][self.route][self.method]
         if "parameters" in m:
             for parameter in m['parameters']:
                 params.append(parameter)

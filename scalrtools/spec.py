@@ -101,4 +101,7 @@ class Spec(object):
     def __repr__(self):
         return 'Spec("%s", "%s")' % (self.route, self.method)
 
-rawspec = json.load(open(os.path.join(os.path.expanduser(os.environ.get("SCALRCLI_HOME", "~/.scalr")), "swagger.json"), "r"))
+def get_raw_spec():
+    path = os.path.join(os.path.expanduser(os.environ.get("SCALRCLI_HOME", "~/.scalr")), "user.json")
+    if os.path.exists(path):
+        return json.load(open(path, "r"))

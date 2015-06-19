@@ -20,4 +20,3 @@ SIGNATURE_VERSION = 'V1-HMAC-SHA256'
 
 spec_url = "http://repo.scalr.net/swagger.yaml"
 
-
