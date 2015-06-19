@@ -24,12 +24,20 @@ SWAGGER_JSONSPEC_FILE = SWAGGER_FILE.split(".")[0] + ".json"
 SWAGGER_JSONSPEC_PATH = os.path.join(CONFIG_FOLDER, SWAGGER_JSONSPEC_FILE)
 
 def use(profile=None):
+    """
+    Show or set current configuration profile
+    :param profile: Profile name
+    """
+    list_profiles = sorted([fname.split(".")[0] for fname in os.listdir(CONFIG_FOLDER) \
+                if fname.endswith(".yaml") and fname != SWAGGER_FILE])
+
     if not profile:
         if os.path.exists(CONFIG_PATH):
             click.echo("Current profile: %s" % os.environ.get("SCALRCLI_PROFILE", DEFAULT_PROFILE))
             click.echo("Profile configuration: %s" % CONFIG_PATH)
         else:
-            msg = "No profiles found in %s . " % CONFIG_FOLDER
+            msg = "Current profile is not set. \n"
+            msg += "Available profiles: %s \n" % list_profiles
             msg += "Use 'configure' command to create new profiles."
             click.echo(msg)
         return
@@ -38,14 +46,18 @@ def use(profile=None):
     if os.path.exists(path):
         os.environ["SCALRCLI_PROFILE"] = path
     else:
-        list_profiles = sorted([fname.split(".")[0] for fname in os.listdir(CONFIG_FOLDER) \
-                if fname.endswith(".yaml") and fname != SWAGGER_FILE])
         errmsg = "Cannot switch profile: %s not found. Available profiles: [%s]. " % (path, ", ".join(list_profiles))
         errmsg += "Use 'configure' command to create new profiles."
         raise click.ClickException(errmsg)
 
 
 def configure(profile=None):
+    """
+    Configure command-line client.
+    Creates new profile in configuration directory
+    and downloads spec file.
+    :param profile: Profile name
+    """
     confpath = os.path.join(CONFIG_FOLDER, "%s.yaml" % profile) if profile else CONFIG_PATH
     data = {}
 
@@ -79,6 +91,10 @@ def configure(profile=None):
 
 
 def update():
+    """
+    Downloads yaml spec and converts it to JSON
+    Both files are stored in configuration directory.
+    """
     if settings.spec_url:
         click.echo("Trying to get new API Spec from %s" % settings.spec_url)
         r = requests.get(settings.spec_url)
