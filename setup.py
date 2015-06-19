@@ -4,11 +4,8 @@ from setuptools import setup
 setup(
     name='scalr-tools',
     version='2.0',
-    py_modules=[
-        'scalrtools.app',
-        'scalrtools.view',
-        'scalrtools.settings',
-        'scalrtools.request',
+    packages = [
+        "scalrtools",
     ],
     include_package_data=True,
     install_requires=[
