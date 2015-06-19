@@ -103,13 +103,13 @@ def update():
 
         if os.path.exists(dst):
             with open(dst, "r") as fp:
-                old = fp.read()
+                old = fp.read().decode('utf8')
 
         if r.text == old:
             click.echo("API Spec is already up-to-date.")
         elif r.text:
             with open(dst, "w") as fp:
-                fp.write(r.text)
+                fp.write(r.text.encode('utf8'))
             click.echo("API Spec successfully updated.")
 
         if r.text:
