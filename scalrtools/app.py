@@ -105,15 +105,17 @@ def update():
             with open(dst, "r") as fp:
                 old = fp.read().decode('utf8')
 
-        if r.text == old:
+        text = r.text.decode('utf8')
+
+        if text == old:
             click.echo("API Spec is already up-to-date.")
-        elif r.text:
+        elif text:
             with open(dst, "w") as fp:
-                fp.write(r.text.encode('utf8'))
+                fp.write(text.encode('utf8'))
             click.echo("API Spec successfully updated.")
 
         if r.text:
-            struct = yaml.load(r.text)
+            struct = yaml.load(text)
             json.dump(struct, open(SWAGGER_JSONSPEC_PATH, "w"))
 
 
