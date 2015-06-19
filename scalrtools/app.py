@@ -25,9 +25,14 @@ SWAGGER_JSONSPEC_PATH = os.path.join(CONFIG_FOLDER, SWAGGER_JSONSPEC_FILE)
 
 def use(profile=None):
     if not profile:
-        click.echo("Current profile: %s" % os.environ.get("SCALRCLI_PROFILE", DEFAULT_PROFILE))
-        click.echo("Profile configuration: %s" % CONFIG_PATH)
-        return
+        if os.path.exists(CONFIG_PATH):
+            click.echo("Current profile: %s" % os.environ.get("SCALRCLI_PROFILE", DEFAULT_PROFILE))
+            click.echo("Profile configuration: %s" % CONFIG_PATH)
+            return
+        else:
+            errmsg = "No profiles found in %s . " % CONFIG_FOLDER
+            errmsg += "Use 'configure' command to create new profiles."
+            raise click.ClickException(errmsg)
 
     path = os.path.join(CONFIG_FOLDER, "%s.yaml" % profile)
     if os.path.exists(path):
