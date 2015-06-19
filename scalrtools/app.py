@@ -28,11 +28,11 @@ def use(profile=None):
         if os.path.exists(CONFIG_PATH):
             click.echo("Current profile: %s" % os.environ.get("SCALRCLI_PROFILE", DEFAULT_PROFILE))
             click.echo("Profile configuration: %s" % CONFIG_PATH)
-            return
         else:
-            errmsg = "No profiles found in %s . " % CONFIG_FOLDER
-            errmsg += "Use 'configure' command to create new profiles."
-            raise click.ClickException(errmsg)
+            msg = "No profiles found in %s . " % CONFIG_FOLDER
+            msg += "Use 'configure' command to create new profiles."
+            click.echo(msg)
+        return
 
     path = os.path.join(CONFIG_FOLDER, "%s.yaml" % profile)
     if os.path.exists(path):
