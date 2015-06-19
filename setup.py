@@ -6,6 +6,7 @@ setup(
     version='2.0',
     packages = [
         "scalrtools",
+        "scalrtools.commands",
     ],
     include_package_data=True,
     install_requires=[
