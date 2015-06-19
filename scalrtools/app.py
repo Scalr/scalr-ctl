@@ -96,17 +96,6 @@ def update():
             json.dump(struct, open(SWAGGER_JSONSPEC_PATH, "w"))
 
 
-if os.path.exists(CONFIG_PATH):
-    config_data = yaml.load(open(CONFIG_PATH, "r"))
-    for key, value in config_data.items():
-        if hasattr(settings, key):
-            setattr(settings, key, value)
-
-
-if not os.path.exists(SWAGGER_PATH) or not os.path.exists(SWAGGER_JSONSPEC_PATH):
-    update() # [ST-53]
-
-
 class HelpBuilder(object):
     document = None
 
@@ -311,6 +300,19 @@ class MyCLI(click.Group):
                 group.add_command(cmd)
 
         return group
+
+
+if not os.path.exists(CONFIG_FOLDER):
+    os.makedirs(CONFIG_FOLDER)
+
+if os.path.exists(CONFIG_PATH):
+    config_data = yaml.load(open(CONFIG_PATH, "r"))
+    for key, value in config_data.items():
+        if hasattr(settings, key):
+            setattr(settings, key, value)
+
+if not os.path.exists(SWAGGER_PATH) or not os.path.exists(SWAGGER_JSONSPEC_PATH):
+    update() # [ST-53]
 
 
 @click.command(cls=MyCLI)
