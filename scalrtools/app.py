@@ -110,12 +110,13 @@ def update():
         elif r.text:
             with open(dst, "w") as fp:
                 fp.write(r.text)
+            click.echo("API Spec successfully updated.")
 
         if r.text:
             struct = yaml.load(r.text)
             json.dump(struct, open(SWAGGER_JSONSPEC_PATH, "w"))
 
-    click.echo("API Spec successfully updated.")
+
 
 
 class HelpBuilder(object):
