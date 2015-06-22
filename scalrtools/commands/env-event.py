@@ -1,4 +1,4 @@
-__author__ = 'shaitanich'
+__author__ = 'Dmitriy Korsakov'
 __doc__ =  'Manage events available in the Scalr Environment'
 
 

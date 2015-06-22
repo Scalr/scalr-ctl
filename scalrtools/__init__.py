@@ -1,1 +1,1 @@
-__author__ = 'shaitanich'
+__author__ = 'Dmitriy Korsakov'

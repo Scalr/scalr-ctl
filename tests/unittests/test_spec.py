@@ -1,4 +1,4 @@
-__author__ = 'shaitanich'
+__author__ = 'Dmitriy Korsakov'
 
 from scalrtools import settings, spec
 

@@ -1,4 +1,4 @@
-__author__ = 'shaitanich'
+__author__ = 'Dmitriy Korsakov'
 __doc__ = 'Current Role categories'
 
 from scalrtools import commands
