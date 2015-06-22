@@ -3,6 +3,8 @@ __author__ = 'shaitanich'
 import os
 import json
 
+import settings
+
 class Spec(object):
 
     document = None
@@ -105,3 +107,6 @@ def get_raw_spec():
     path = os.path.join(os.path.expanduser(os.environ.get("SCALRCLI_HOME", "~/.scalr")), "user.json")
     if os.path.exists(path):
         return json.load(open(path, "r"))
+
+def get_spec_url(api_level="user"):
+    return "https://{0}/api/{1}.{2}.yml".format(settings.API_HOST, api_level, settings.API_VERSION)

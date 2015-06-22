@@ -95,9 +95,10 @@ def update():
     Downloads yaml spec and converts it to JSON
     Both files are stored in configuration directory.
     """
-    if settings.spec_url:
-        click.echo("Trying to get new API Spec from %s" % settings.spec_url)
-        r = requests.get(settings.spec_url)
+    url = spec.get_spec_url()
+    if url:
+        click.echo("Trying to get new API Spec from %s" % url)
+        r = requests.get(url)
         dst = os.path.join(CONFIG_FOLDER, SWAGGER_FILE)
         old = None
 

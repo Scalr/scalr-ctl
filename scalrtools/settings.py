@@ -4,6 +4,8 @@ API_KEY_ID = None
 
 API_SECRET_KEY = None
 
+API_VERSION = "v1beta0"
+
 envId = None
 
 view = "tree"
@@ -17,5 +19,3 @@ API_SCHEME = 'https'
 API_HOST = 'my.scalr.net'
 
 SIGNATURE_VERSION = 'V1-HMAC-SHA256'
-
-spec_url = "https://my.scalr.com/api/user.v1beta0.yml"
