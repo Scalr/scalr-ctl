@@ -19,4 +19,3 @@ API_HOST = 'my.scalr.net'
 SIGNATURE_VERSION = 'V1-HMAC-SHA256'
 
 spec_url = "https://my.scalr.com/api/user.v1beta0.yml"
-
