@@ -1,0 +1,4 @@
+Click
+prettytable
+pyyaml
+requests
