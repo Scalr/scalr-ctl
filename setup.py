@@ -34,7 +34,7 @@ if __name__ == '__main__':
             [console_scripts]
             scalr-tools=scalrtools.app:cli
         ''',
-        cmdclass=dict(install=_install)
+        #cmdclass=dict(install=_install)
     )
 
 
