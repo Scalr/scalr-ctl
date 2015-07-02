@@ -1,32 +1,32 @@
 __author__ = 'Dmitriy Korsakov'
-__doc__ = 'Supported operating systems'
+__doc__ = 'View projects'
 
 
 from scalrtools import commands
 
 
-name = "os"
+name = "project"
 enabled = True
 
 
 def callback(*args, **kwargs):
     """
-    print('in os module')
+    print('in project module')
     print(args)
     print(kwargs)
     """
     pass
 
 
-class OSList(commands.SubCommand):
+class ProjectList(commands.SubCommand):
     name = "list"
-    route = "/os/"
+    route = "/{envId}/projects/"
     method = "get"
     enabled = True
 
 
-class OSRetrieve(commands.SubCommand):
+class ProjectRetrieve(commands.SubCommand):
     name = "retrieve"
-    route = "/os/{osId}/"
+    route = "/{envId}/projects/{projectId}/"
     method = "get"
     enabled = True
