@@ -10,7 +10,7 @@ Install:
   $ . scalr-tools-complete.sh 
   
 Configure:
-  TBD
+  $ scalr-tools configure
   
 Use:
   
