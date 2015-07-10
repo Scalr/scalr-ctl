@@ -25,6 +25,13 @@ class ProjectList(commands.SubCommand):
     enabled = True
 
 
+class CreateProject(commands.SubCommand):
+    name = "create"
+    route = "/{envId}/projects/"
+    method = "post"
+    enabled = True
+
+
 class ProjectRetrieve(commands.SubCommand):
     name = "retrieve"
     route = "/{envId}/projects/{projectId}/"
