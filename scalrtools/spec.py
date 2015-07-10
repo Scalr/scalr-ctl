@@ -109,4 +109,4 @@ def get_raw_spec():
         return json.load(open(path, "r"))
 
 def get_spec_url(api_level="user"):
-    return "https://{0}/api/{1}.{2}.yml".format(settings.API_HOST, api_level, settings.API_VERSION)
+    return "{0}://{1}/api/{2}.{3}.yml".format(settings.API_SCHEME, settings.API_HOST, api_level, settings.API_VERSION)
