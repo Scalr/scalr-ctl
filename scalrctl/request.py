@@ -11,7 +11,7 @@ import yaml
 import click
 import requests
 
-from scalrtools import settings
+from scalrctl import settings
 
 
 """

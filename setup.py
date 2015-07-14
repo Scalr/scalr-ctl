@@ -17,11 +17,11 @@ class _install(install):
 if __name__ == '__main__':
 
     setup(
-        name='scalr-tools',
+        name='scalr-ctl',
         version='1.0',
         packages = [
-            "scalrtools",
-            "scalrtools.commands",
+            "scalrctl",
+            "scalrctl.commands",
         ],
         include_package_data=True,
         install_requires=[
@@ -32,7 +32,7 @@ if __name__ == '__main__':
         ],
         entry_points='''
             [console_scripts]
-            scalr-tools=scalrtools.app:cli
+            scalr-ctl=scalrctl.app:cli
         ''',
         #cmdclass=dict(install=_install)
     )

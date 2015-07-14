@@ -1,7 +1,7 @@
 __author__ = 'Dmitriy Korsakov'
 __doc__ = 'Image management'
 
-from scalrtools import commands, settings
+from scalrctl import commands, settings
 import click
 import json
 import sys

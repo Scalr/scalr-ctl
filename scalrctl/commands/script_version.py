@@ -2,7 +2,7 @@ __author__ = 'Dmitriy Korsakov'
 __doc__ = 'Script Version management'
 
 
-from scalrtools import commands
+from scalrctl import commands
 
 
 name = "script-version"

@@ -1,1 +1,1 @@
-eval "$(_SCALR_TOOLS_COMPLETE=source scalr-tools)"
+eval "$(_SCALR_CTL_COMPLETE=source scalr-ctl)"

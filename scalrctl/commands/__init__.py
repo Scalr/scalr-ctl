@@ -7,10 +7,10 @@ import json
 import traceback
 from collections import defaultdict
 
-from scalrtools import settings
-from scalrtools import request
-from scalrtools import spec
-from scalrtools.view import build_table, build_tree
+from scalrctl import settings
+from scalrctl import request
+from scalrctl import spec
+from scalrctl.view import build_table, build_tree
 
 
 enabled = False

@@ -2,7 +2,7 @@ __author__ = 'Dmitriy Korsakov'
 __doc__ = 'Orchestration Rule management'
 
 
-from scalrtools import commands
+from scalrctl import commands
 
 
 name = "role-orchestration-rule"

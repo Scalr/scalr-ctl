@@ -1,0 +1,108 @@
+/events/:
+- post
+- get
+/events/{eventId}/:
+- patch
+- get
+- delete
+/os/:
+- get
+/os/{osId}/:
+- get
+/{envId}/events/:
+- post
+- get
+/{envId}/events/{eventId}/:
+- patch
+- get
+- delete
+/{envId}/farm-roles/:
+- post
+- get
+/{envId}/farm-roles/{farmRoleId}/:
+- patch
+- get
+- delete
+/{envId}/farm-roles/{farmRoleId}/instance/:
+- patch
+- get
+/{envId}/farm-roles/{farmRoleId}/placement/:
+- patch
+- get
+/{envId}/farm-roles/{farmRoleId}/scaling/:
+- patch
+- get
+/{envId}/farms/:
+- post
+- get
+/{envId}/farms/{farmId}/:
+- patch
+- get
+- delete
+/{envId}/farms/{farmId}/global-variables/:
+- post
+- get
+/{envId}/farms/{farmId}/global-variables/{globalVariableName}/:
+- patch
+- get
+- delete
+/{envId}/images/:
+- post
+- get
+/{envId}/images/{imageId}/:
+- patch
+- get
+- delete
+/{envId}/images/{imageId}/actions/copy/:
+- post
+/{envId}/projects/:
+- get
+/{envId}/projects/{projectId}/:
+- get
+/{envId}/role-categories/:
+- get
+/{envId}/role-categories/{roleCategoryId}/:
+- get
+/{envId}/roles/:
+- post
+- get
+/{envId}/roles/{roleId}/:
+- patch
+- get
+- delete
+/{envId}/roles/{roleId}/global-variables/:
+- post
+- get
+/{envId}/roles/{roleId}/global-variables/{globalVariableName}/:
+- patch
+- get
+- delete
+/{envId}/roles/{roleId}/images/:
+- post
+- get
+/{envId}/roles/{roleId}/images/{imageId}/:
+- get
+- delete
+/{envId}/roles/{roleId}/images/{imageId}/actions/replace/:
+- post
+/{envId}/roles/{roleId}/orchestration-rules/:
+- post
+- get
+/{envId}/roles/{roleId}/orchestration-rules/{orchestrationRuleId}/:
+- patch
+- get
+- delete
+/{envId}/scripts/:
+- post
+- get
+/{envId}/scripts/{scriptId}/:
+- patch
+- get
+- delete
+/{envId}/scripts/{scriptId}/script-versions/:
+- post
+- get
+- delete
+/{envId}/scripts/{scriptId}/script-versions/{scriptVersionNumber}/:
+- patch
+- get

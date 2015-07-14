@@ -2,7 +2,7 @@ __author__ = 'Dmitriy Korsakov'
 __doc__ = 'View projects'
 
 
-from scalrtools import commands
+from scalrctl import commands
 
 
 name = "project"

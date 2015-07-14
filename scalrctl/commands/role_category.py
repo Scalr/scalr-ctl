@@ -1,7 +1,7 @@
 __author__ = 'Dmitriy Korsakov'
 __doc__ = 'Current Role categories'
 
-from scalrtools import commands
+from scalrctl import commands
 
 
 name = "role-category"

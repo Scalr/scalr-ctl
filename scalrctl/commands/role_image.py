@@ -2,7 +2,7 @@ __author__ = 'Dmitriy Korsakov'
 __doc__ = 'Manage images in roles'
 
 
-from scalrtools import commands
+from scalrctl import commands
 
 
 name = "role-image"

@@ -3,7 +3,7 @@ __doc__ = 'Manage global variables for roles'
 
 
 import sys
-from scalrtools import commands
+from scalrctl import commands
 
 
 name = "role-global-variables"

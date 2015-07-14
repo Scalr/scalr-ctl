@@ -2,7 +2,7 @@ __author__ = 'Dmitriy Korsakov'
 __doc__ = 'Manage events available in the Scalr Account'
 
 
-from scalrtools import commands
+from scalrctl import commands
 
 
 name = "account-level-event"

@@ -276,7 +276,7 @@ class MyCLI(click.Group):
             try:
                 if sys.version_info[0] == 2:
                     name = name.encode('ascii', 'replace')
-                mod = __import__('scalrtools.commands.' + name[:-3], None, None, ['enabled'])
+                mod = __import__('scalrctl.commands.' + name[:-3], None, None, ['enabled'])
                 if hasattr(mod, "name"):
                     self._modules[mod.name] = mod
             except ImportError:
@@ -347,7 +347,7 @@ if not os.path.exists(SWAGGER_PATH) or not os.path.exists(SWAGGER_JSONSPEC_PATH)
 @click.option('--key_id', help="API key ID")
 @click.option('--secret_key', help="API secret key")
 def cli(ctx, key_id, secret_key, *args, **kvargs):
-    """Scalr-tools is a command-line interface to your Scalr account"""
+    """Scalr-ctl is a command-line interface to your Scalr account"""
     if key_id:
         settings.API_KEY_ID = str(key_id)
     if secret_key:

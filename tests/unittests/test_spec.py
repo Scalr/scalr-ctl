@@ -1,6 +1,6 @@
 __author__ = 'Dmitriy Korsakov'
 
-from scalrtools import settings, spec
+from scalrctl import settings, spec
 
 
 specs_dict = {}
