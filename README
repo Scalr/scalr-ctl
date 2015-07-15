@@ -16,9 +16,12 @@ Configure:
 Use:
 
   $ scalr-ctl --help
+
   $ scalr-ctl <tab> <tab>
 
 
 Update:
+
   $ pip install --upgrade scalr-ctl
+
   $ scalr-ctl update
