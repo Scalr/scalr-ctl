@@ -114,7 +114,7 @@ def configure(profile=None):
         old_data = yaml.load(open(confpath, "r"))
         data.update(old_data)
 
-    print "Configuring %s:" % confpath
+    click.echo("Configuring %s:" % confpath)
 
     for obj in dir(settings):
         if not obj.startswith("__"):

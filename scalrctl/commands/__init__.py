@@ -188,8 +188,6 @@ class SubCommand(object):
 
             elif settings.view == "table":
                 columns = self._table_columns or self.spc.get_column_names()
-                print columns
-                print data
 
                 rows = []
                 for block in data:
