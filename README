@@ -1,18 +1,17 @@
   scalr-ctl is a command-line interface to your Scalr account
 
-  Version 2.0 is intended to work with the new Scalr JSON API. 
+  Version 1.0 is intended to work with the new Scalr JSON API.
 
 Install:
-  $ git clone https://github.com/Scalr/pecha.git
-  $ cd pecha/
-  $ git checkout develop
-  $ pip install --editable .
-  $ . scalr-ctl-complete.sh 
+  $ pip install scalr-ctl
   
 Configure:
   $ scalr-ctl configure
   
 Use:
-  
   $ scalr-ctl --help
   $ scalr-ctl <tab> <tab>
+
+Update:
+  $ pip install --upgrade scalr-ctl
+  $ scalr-ctl update
