@@ -223,8 +223,8 @@ class HelpBuilder(object):
 
     def returns_iterable(self, path):
         responces = self.document["paths"][path]["get"]['responses']
-        if 200 in responces:
-            ok200 = responces[200]
+        if '200' in responces:
+            ok200 = responces['200']
             if 'schema' in ok200:
                 schema = ok200['schema']
                 if '$ref' in schema:
