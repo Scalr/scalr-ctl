@@ -80,7 +80,9 @@ def setup_bash_complete():
         click.echo("Backing up [%s] to [%s]." % (startup_path, backup_path))
         shutil.copy(startup_path, backup_path)
 
-        source_line = "source '%s'" % AUTOCOMPLETE_PATH
+        #source_line = "source '%s'" % AUTOCOMPLETE_PATH #XXX: for some reason this seized to work
+        source_line = 'eval "$(%s)"' % AUTOCOMPLETE_CONTENT
+
         startupfile_content = open(startup_path, "r").read()
         if AUTOCOMPLETE_PATH not in startupfile_content:
             comment = "# The next line enables bash completion for %s." % PROGNAME
