@@ -29,8 +29,8 @@ class Spec(object):
     @property
     def _result_descr(self):
         responces = self._data['responses']
-        if 200 in responces:
-            ok200 = responces[200]
+        if '200' in responces:
+            ok200 = responces['200']
             if 'schema' in ok200:
                 schema = ok200['schema']
                 if '$ref' in schema:
