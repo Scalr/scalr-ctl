@@ -58,8 +58,4 @@ if __name__ == '__main__':
             [console_scripts]
             scalr-ctl=scalrctl.app:cli
         ''',
-        #cmdclass=dict(install=_install)
     )
-
-
-# pip install PyYAML --global-option='--without-libyaml'
