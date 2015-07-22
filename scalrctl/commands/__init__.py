@@ -250,10 +250,8 @@ class SubCommand(object):
         if reference_path:
             parts = reference_path.split("/")
             object =  spec.get_raw_spec()[parts[1]][parts[2]]
-            print object
             object_properties = object["properties"]
             for property, descr in object_properties.items():
-                print property, descr
                 if 'readOnly' not in descr or not descr['readOnly']:
                         mutable.append(property)
         return mutable
