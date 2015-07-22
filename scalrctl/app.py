@@ -31,60 +31,30 @@ AUTOCOMPLETE_CONTENT = "_%s_COMPLETE=source %s" % (PROGNAME.upper().replace("-",
 AUTOCOMPLETE_PATH = os.path.join(os.path.expanduser(CONFIG_FOLDER), AUTOCOMPLETE_FNAME)
 
 
-def use(profile=None):
-    """
-    Show or set current configuration profile
-    :param profile: Profile name
-    """
-    list_profiles = sorted([fname.split(".")[0] for fname in os.listdir(CONFIG_FOLDER) \
-                if fname.endswith(".yaml") and fname != SWAGGER_FILE])
-
-    if not profile:
-        if os.path.exists(CONFIG_PATH):
-            click.echo("Current profile: %s" % os.environ.get("SCALRCLI_PROFILE", DEFAULT_PROFILE))
-            click.echo("Profile configuration: %s" % CONFIG_PATH)
-        else:
-            msg = "Current profile is not set. \n"
-            msg += "Available profiles: %s \n" % list_profiles
-            msg += "Use 'configure' command to create new profiles."
-            click.echo(msg)
-        return
-
-    path = os.path.join(CONFIG_FOLDER, "%s.yaml" % profile)
-    if os.path.exists(path):
-        os.environ["SCALRCLI_PROFILE"] = path
-    else:
-        errmsg = "Cannot switch profile: %s not found. Available profiles: [%s]. " % (path, ", ".join(list_profiles))
-        errmsg += "Use 'configure' command to create new profiles."
-        raise click.ClickException(errmsg)
-
-
 def setup_bash_complete():
     if "nt" == os.name: # Click currently only supports completion for Bash.
         return
 
-    import click
+    bashrc_path = os.path.expanduser("~/.bashrc")
+    bashprofile_path = os.path.expanduser("~/.bash_profile")
+    startup_path = bashprofile_path if os.path.exists(bashprofile_path) else bashrc_path
+    startup_path = click.prompt("Enter path to an rc file to update, or leave blank to use", default=startup_path, err=True)
+    startupfile_content = open(startup_path, "r").read()
 
-    confirmed = click.confirm("Modify profile to update your $PATH and enable bash completion?", default=True, err=True)
+    if AUTOCOMPLETE_PATH not in startupfile_content:
+        confirmed = click.confirm("Modify profile to update your $PATH and enable bash completion?", default=True, err=True)
 
-    if confirmed:
-        with open(AUTOCOMPLETE_PATH, "w") as fp:
-            fp.write(AUTOCOMPLETE_CONTENT)
+        if confirmed:
+            with open(AUTOCOMPLETE_PATH, "w") as fp:
+                fp.write(AUTOCOMPLETE_CONTENT)
 
-        bashrc_path = os.path.expanduser("~/.bashrc")
-        bashprofile_path = os.path.expanduser("~/.bash_profile")
-        startup_path = bashprofile_path if os.path.exists(bashprofile_path) else bashrc_path
-        startup_path = click.prompt("Enter path to an rc file to update, or leave blank to use", default=startup_path, err=True)
+            backup_path = startup_path + ".backup"
+            click.echo("Backing up [%s] to [%s]." % (startup_path, backup_path))
+            shutil.copy(startup_path, backup_path)
 
-        backup_path = startup_path + ".backup"
-        click.echo("Backing up [%s] to [%s]." % (startup_path, backup_path))
-        shutil.copy(startup_path, backup_path)
+            #source_line = "source '%s'" % AUTOCOMPLETE_PATH #XXX: for some reason this seized to work
+            source_line = 'eval "$(%s)"' % AUTOCOMPLETE_CONTENT
 
-        #source_line = "source '%s'" % AUTOCOMPLETE_PATH #XXX: for some reason this seized to work
-        source_line = 'eval "$(%s)"' % AUTOCOMPLETE_CONTENT
-
-        startupfile_content = open(startup_path, "r").read()
-        if AUTOCOMPLETE_PATH not in startupfile_content:
             comment = "# The next line enables bash completion for %s." % PROGNAME
             newline = "" if startupfile_content.endswith("\n") else "\n"
             add = "%s%s\n%s" % (newline, comment, source_line)
@@ -97,7 +67,7 @@ def setup_bash_complete():
             with open(startup_path, "a") as afp:
                 afp.write(add)
 
-        click.echo("Start a new shell for the changes to take effect.")
+            click.echo("Start a new shell for the changes to take effect.")
 
 
 def configure(profile=None):
@@ -335,7 +305,7 @@ class MyCLI(click.Group):
 
     def list_commands(self, ctx):
         rv = [module.name for module in self._list_module_objects()]
-        rv += ["configure", "update", "use"]
+        rv += ["configure", "update"]
         rv.sort()
         return rv
 
@@ -352,12 +322,6 @@ class MyCLI(click.Group):
             update_help = "Fetch new API specification if available."
             update_cmd = click.Command("update", callback=update, help=update_help)
             return update_cmd
-
-        elif name == "use":
-            use_help = "Set default profile."
-            profile_argument = click.Argument(("profile",), required=False) # [ST-30]
-            configure_cmd = click.Command("use", callback=use, help=use_help, params=[profile_argument,])
-            return configure_cmd
 
         elif name not in self._modules:
             raise click.ClickException("No such command: %s" % name)
@@ -378,14 +342,17 @@ class MyCLI(click.Group):
         return group
 
 
+def apply_settings(data):
+    for key, value in data.items():
+        if hasattr(settings, key):
+            setattr(settings, key, value)
+
+
 if not os.path.exists(CONFIG_FOLDER):
     os.makedirs(CONFIG_FOLDER)
 
 if os.path.exists(CONFIG_PATH):
-    config_data = yaml.load(open(CONFIG_PATH, "r"))
-    for key, value in config_data.items():
-        if hasattr(settings, key):
-            setattr(settings, key, value)
+    apply_settings(yaml.load(open(CONFIG_PATH, "r")))
 
 if not os.path.exists(SWAGGER_PATH) or not os.path.exists(SWAGGER_JSONSPEC_PATH):
     update() # [ST-53]
@@ -403,7 +370,7 @@ def cli(ctx, key_id, secret_key, *args, **kvargs):
     if secret_key:
         settings.API_SECRET_KEY = str(secret_key)
     elif settings.API_KEY_ID and settings.API_KEY_ID.strip() and not settings.API_SECRET_KEY: # [ST-21]
-        if ctx.invoked_subcommand not in ("configure", "update", "use"):
+        if ctx.invoked_subcommand not in ("configure", "update"):
             raw = click.prompt(text="API SECRET KEY", hide_input=True)
             settings.API_SECRET_KEY = str(raw)
 

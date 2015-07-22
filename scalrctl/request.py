@@ -61,9 +61,11 @@ def request(method, request_uri, payload=None, data=None):
         string_to_sign = "%s\n%s\n%s\n%s\n%s" % (method.upper(), time_iso8601, request_uri, query_string, body)
         #string_to_sign = "%s\n%s\n%s\n%s\n%s" % ("GET", time_iso8601, request_uri, query_string, "")
         if settings.debug_mode:
-            #DELETE: needed to debug "requests" module on OSX (works fine on linux)
-            print "stringToSign:"
-            print string_to_sign
+            click.echo("API HOST: %s" % api_host)
+            click.echo()
+            click.echo("stringToSign:")
+            click.echo(string_to_sign)
+
         digest = hmac.new(settings.API_SECRET_KEY, string_to_sign, hashlib.sha256).digest()
         signature = binascii.b2a_base64(digest).strip()
 
@@ -80,6 +82,7 @@ def request(method, request_uri, payload=None, data=None):
         if settings.debug_mode:
             #click.echo("%s URL: %s" % (method.upper(), url))
             click.echo("Headers: %s " % json.dumps(headers, indent=2))
+            click.echo()
 
         #session = requests.sessions.Session()
         #session.headers.pop('Connection')

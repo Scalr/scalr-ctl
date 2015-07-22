@@ -246,7 +246,7 @@ class SubCommand(object):
             #XXX: Temporary code, see GlobalVariableDetailEnvelope or "role-global-variables update"
             reference_path = self.object_reference
         #print "reference_path", reference_path
-
+        
         if reference_path:
             parts = reference_path.split("/")
             object =  spec.get_raw_spec()[parts[1]][parts[2]]
