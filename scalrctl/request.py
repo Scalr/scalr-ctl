@@ -51,6 +51,7 @@ def request(method, request_uri, payload=None, data=None):
     api_host = settings.API_HOST
     time_iso8601 = time.strftime("%Y-%m-%dT%H:%M:%S.000Z", time.gmtime())
     try:
+        r = None
         query_string = urllib.urlencode(sorted(payload.items())) if payload else ''
         body = json.dumps(yaml.safe_load(data)) if data else '' #XXX
 
@@ -85,7 +86,6 @@ def request(method, request_uri, payload=None, data=None):
         r = requests.request(method.lower(), url, data=body, params=payload, headers=headers)
         #session.close()
         result = r.text
-
 
     except (Exception, BaseException), e:
         if settings.debug_mode:

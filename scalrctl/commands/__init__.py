@@ -188,7 +188,6 @@ class SubCommand(object):
 
             elif settings.view == "table":
                 columns = self._table_columns or self.spc.get_column_names()
-
                 rows = []
                 for block in data:
                     row = []
@@ -230,6 +229,7 @@ class SubCommand(object):
         XXX: Move to Spec (?) after TODO#3
         """
         mutable = []
+        reference_path = None
 
         ### spcobj = spec.Spec(settings.spec, self.route, self.method)
         ### print "descr:", spcobj._result_descr
@@ -237,20 +237,25 @@ class SubCommand(object):
         if not self.object_reference:
             for param in spec.get_raw_spec()["paths"][self.route][self.method]["parameters"]:
                 name = param["name"] # image
-                reference_path = param["schema"]['$ref'] # #/definitions/Image
-
+                if "schema" in param:
+                    reference_path = param["schema"]['$ref'] # #/definitions/Image
+                elif 'readOnly' not in param:
+                    # e.g. POST /{envId}/farms/{farmId}/actions/terminate/
+                    mutable.append(name)
         else:
             #XXX: Temporary code, see GlobalVariableDetailEnvelope or "role-global-variables update"
             reference_path = self.object_reference
         #print "reference_path", reference_path
 
-        parts = reference_path.split("/")
-        object =  spec.get_raw_spec()[parts[1]][parts[2]]
-
-        object_properties = object["properties"]
-        for property, descr in object_properties.items():
-            if 'readOnly' not in descr or not descr['readOnly']:
-                    mutable.append(property)
+        if reference_path:
+            parts = reference_path.split("/")
+            object =  spec.get_raw_spec()[parts[1]][parts[2]]
+            print object
+            object_properties = object["properties"]
+            for property, descr in object_properties.items():
+                print property, descr
+                if 'readOnly' not in descr or not descr['readOnly']:
+                        mutable.append(property)
         return mutable
 
     def _list_createonly_properties(self):
