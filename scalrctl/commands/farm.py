@@ -69,4 +69,3 @@ class TerminateFarm(Farm):
     route = "/{envId}/farms/{farmId}/actions/terminate/"
     method = "post"
     enabled = True
-

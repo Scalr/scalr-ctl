@@ -34,6 +34,8 @@ def build_tree(data):
 
     yaml_text = yaml.safe_dump(data, encoding='utf-8', allow_unicode=True, default_flow_style=False)
 
+    yaml_text = yaml_text.decode('unicode_escape').encode('ascii','ignore') # [ST-63]
+
     if not settings.colored_output:
         return yaml_text
 
