@@ -22,24 +22,24 @@ class FarmRole(commands.SubCommand):
     pass
 
 
+class RetrieveFarmRole(FarmRole):
+    name = "retrieve"
+    route = "/{envId}/farm-roles/{farmRoleId}/"
+    method = "get"
+    enabled = True
+
+
 class ListFarmRoles(FarmRole):
     name = "list"
-    route = "/{envId}/farm-roles/"
+    route = "/{envId}/farms/{farmId}/farm-roles/"
     method = "get"
     enabled = True
 
 
 class CreateFarmRole(FarmRole):
     name = "create"
-    route = "/{envId}/farm-roles/{farmId}/"
+    route = "/{envId}/farms/{farmId}/farm-roles/"
     method = "post"
-    enabled = True
-
-
-class RetrieveFarmRole(FarmRole):
-    name = "retrieve"
-    route = "/{envId}/farm-roles/{farmRoleId}/"
-    method = "get"
     enabled = True
 
 
@@ -55,7 +55,6 @@ class DeleteFarmRole(FarmRole):
     route = "/{envId}/farm-roles/{farmRoleId}/"
     method = "delete"
     enabled = True
-
 
 
 class RetrievePlacementConfiguration(FarmRole):
