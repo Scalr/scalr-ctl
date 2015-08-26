@@ -1,0 +1,11 @@
+image: gcr.io/scalr-labs/drone-build
+env:
+  - DOCKER_HOST=tcp://172.17.42.1:2375
+script:
+  - pip install -r requirements.txt
+  - pip install pytest
+  - py.test tests
+notify:
+  email:
+    recipients:
+      - marat@scalr.com
