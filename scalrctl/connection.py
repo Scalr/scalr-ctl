@@ -14,10 +14,10 @@ import requests
 from scalrctl import spec
 
 CONFIG_FOLDER = os.path.expanduser(os.environ.get("SCALRCLI_HOME", "~/.scalr"))
-SWAGGER_FILE = "user.yaml"
-SWAGGER_PATH = os.path.join(CONFIG_FOLDER, SWAGGER_FILE)
-SWAGGER_JSONSPEC_FILE = SWAGGER_FILE.split(".")[0] + ".json"
-SWAGGER_JSONSPEC_PATH = os.path.join(CONFIG_FOLDER, SWAGGER_JSONSPEC_FILE)
+SWAGGER_USER_FILE = "user.yaml"
+SWAGGER_USER_PATH = os.path.join(CONFIG_FOLDER, SWAGGER_USER_FILE)
+SWAGGER_USER_JSONSPEC_FILE = SWAGGER_USER_FILE.split(".")[0] + ".json"
+SWAGGER_USER_JSONSPEC_PATH = os.path.join(CONFIG_FOLDER, SWAGGER_USER_JSONSPEC_FILE)
 
 
 class BaseConnection(object):
@@ -78,12 +78,12 @@ class Connection(BaseConnection):
         if self._spec:
             return
 
-        if os.path.exists(SWAGGER_JSONSPEC_PATH):
-            struct = json.load(open(SWAGGER_JSONSPEC_PATH))
+        if os.path.exists(SWAGGER_USER_JSONSPEC_PATH):
+            struct = json.load(open(SWAGGER_USER_JSONSPEC_PATH))
         else:
             r = requests.get(self._get_spec_url())
             struct = yaml.load(r.text)
-            json.dump(struct, open(SWAGGER_JSONSPEC_PATH, "w"))
+            json.dump(struct, open(SWAGGER_USER_JSONSPEC_PATH, "w"))
 
         return struct
 

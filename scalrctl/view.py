@@ -12,7 +12,7 @@ def build_table(field_names, rows, pre=None, post=None):
     table.right_padding_width = 4
     table.left_padding_width = 1
     table.set_style(prettytable.PLAIN_COLUMNS)
-    
+
     template = '\x1b[1m%s\x1b[0m' if settings.colored_output else "%s"
     table.field_names = [template % field.upper().replace("_", " ") for field in field_names]
 

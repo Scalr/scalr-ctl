@@ -14,17 +14,22 @@ import commands
 import settings
 import spec
 
-
+NOUPDATE_TRIGGER = ".noupdate"
 PROGNAME = "scalr-ctl"
 DEFAULT_PROFILE = "default"
 CMD_FOLDER = os.path.abspath(os.path.join(os.path.dirname(__file__), 'commands'))
 CONFIG_FOLDER = os.path.expanduser(os.environ.get("SCALRCLI_HOME", "~/.scalr"))
 CONFIG_PATH = os.path.join(CONFIG_FOLDER, "%s.yaml" % os.environ.get("SCALRCLI_PROFILE", DEFAULT_PROFILE))
 
-SWAGGER_FILE = "user.yaml"
-SWAGGER_PATH = os.path.join(CONFIG_FOLDER, SWAGGER_FILE)
-SWAGGER_JSONSPEC_FILE = SWAGGER_FILE.split(".")[0] + ".json"
-SWAGGER_JSONSPEC_PATH = os.path.join(CONFIG_FOLDER, SWAGGER_JSONSPEC_FILE)
+SWAGGER_USER_FILE = "user.yaml"
+SWAGGER_USER_PATH = os.path.join(CONFIG_FOLDER, SWAGGER_USER_FILE)
+SWAGGER_USER_JSONSPEC_FILE = SWAGGER_USER_FILE.split(".")[0] + ".json"
+SWAGGER_USER_JSONSPEC_PATH = os.path.join(CONFIG_FOLDER, SWAGGER_USER_JSONSPEC_FILE)
+
+SWAGGER_ACCOUNT_FILE = "account.yaml"
+SWAGGER_ACCOUNT_PATH = os.path.join(CONFIG_FOLDER, SWAGGER_USER_FILE)
+SWAGGER_ACCOUNT_JSONSPEC_FILE = SWAGGER_USER_FILE.split(".")[0] + ".json"
+SWAGGER_ACCOUNT_JSONSPEC_PATH = os.path.join(CONFIG_FOLDER, SWAGGER_USER_JSONSPEC_FILE)
 
 AUTOCOMPLETE_FNAME = "path.bash.inc"
 AUTOCOMPLETE_CONTENT = "_%s_COMPLETE=source %s" % (PROGNAME.upper().replace("-", "_"), PROGNAME)
@@ -115,11 +120,15 @@ def update():
     Downloads yaml spec and converts it to JSON
     Both files are stored in configuration directory.
     """
+    text = None
     url = spec.get_spec_url()
-    if url:
+    dst = os.path.join(CONFIG_FOLDER, SWAGGER_USER_FILE)
+    trigger_file = os.path.join(CONFIG_FOLDER, NOUPDATE_TRIGGER)
+
+    if url and not os.path.exists(trigger_file):
         click.echo("Trying to get new API Spec from %s" % url)
         r = requests.get(url)
-        dst = os.path.join(CONFIG_FOLDER, SWAGGER_FILE)
+
         old = None
 
         if os.path.exists(dst):
@@ -129,17 +138,15 @@ def update():
         text = r.text
 
         if text == old:
-            click.echo("API Spec is already up-to-date.")
+            click.echo("API UserSpec is already up-to-date.")
         elif text:
             with open(dst, "w") as fp:
                 fp.write(text)
-            click.echo("API Spec successfully updated.")
+            click.echo("API UserSpec successfully updated.")
 
-        if r.text:
-            struct = yaml.load(text)
-            json.dump(struct, open(SWAGGER_JSONSPEC_PATH, "w"))
-
-
+    if text or os.path.exists(dst):
+        struct = yaml.load(text or open(dst).read())
+        json.dump(struct, open(SWAGGER_USER_JSONSPEC_PATH, "w"))
 
 
 class HelpBuilder(object):
@@ -228,7 +235,9 @@ class MyCLI(click.Group):
 
 
     def _list_module_objects(self):
-        return [module for module in self._modules.values() if module.enabled]
+        objects = [module for module in self._modules.values() if module.enabled]
+        #print "MODULE OBJECTS: %s" % objects
+        return objects
 
 
     def _list_subcommands(self, command_name):
@@ -238,6 +247,7 @@ class MyCLI(click.Group):
                 subcommand = obj()
                 if isinstance(subcommand, commands.SubCommand):
                     objects.append(subcommand)
+        #print "SUBCOMMANDS: %s", objects
         return objects
 
 
@@ -301,18 +311,24 @@ class MyCLI(click.Group):
                     self._modules[mod.name] = mod
             except ImportError:
                 raise  # pass
+        #print self._modules
 
 
     def list_commands(self, ctx):
         rv = [module.name for module in self._list_module_objects()]
-        rv += ["configure", "update"]
+        rv += ["configure", "update", "account"]
         rv.sort()
         return rv
 
 
     def get_command(self, ctx, name):
 
-        if name == "configure":
+        if name == "account":
+            account_help = "All AccountAPI commands"  # TODO: HelpStr
+            account_group = click.Group("account", callback=configure, help=account_help)
+            return account_group
+
+        elif name == "configure":
             configure_help = "Set configuration options in interactive mode"
             profile_argument = click.Argument(("profile",), required=False) # [ST-30]
             configure_cmd = click.Command("configure", callback=configure, help=configure_help, params=[profile_argument,])
@@ -341,6 +357,9 @@ class MyCLI(click.Group):
 
         return group
 
+def account():
+    # debug code
+    pass
 
 def apply_settings(data):
     for key, value in data.items():
@@ -354,7 +373,7 @@ if not os.path.exists(CONFIG_FOLDER):
 if os.path.exists(CONFIG_PATH):
     apply_settings(yaml.load(open(CONFIG_PATH, "r")))
 
-if not os.path.exists(SWAGGER_PATH) or not os.path.exists(SWAGGER_JSONSPEC_PATH):
+if not os.path.exists(SWAGGER_USER_PATH) or not os.path.exists(SWAGGER_USER_JSONSPEC_PATH):
     update() # [ST-53]
 
 

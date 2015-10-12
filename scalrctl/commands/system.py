@@ -20,13 +20,15 @@ def callback(*args, **kwargs):
 
 class OSList(commands.SubCommand):
     name = "list"
-    route = "/os/"
+    route = "/{envId}/os/"
     method = "get"
     enabled = True
 
 
 class OSRetrieve(commands.SubCommand):
     name = "retrieve"
-    route = "/os/{osId}/"
+    route = "/{envId}/os/{osId}/"
     method = "get"
     enabled = True
+
+
