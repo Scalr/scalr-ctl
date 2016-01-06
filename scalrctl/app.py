@@ -14,22 +14,23 @@ import commands
 import settings
 import spec
 
-NOUPDATE_TRIGGER = ".noupdate"
 PROGNAME = "scalr-ctl"
 DEFAULT_PROFILE = "default"
 CMD_FOLDER = os.path.abspath(os.path.join(os.path.dirname(__file__), 'commands'))
 CONFIG_FOLDER = os.path.expanduser(os.environ.get("SCALRCLI_HOME", "~/.scalr"))
 CONFIG_PATH = os.path.join(CONFIG_FOLDER, "%s.yaml" % os.environ.get("SCALRCLI_PROFILE", DEFAULT_PROFILE))
 
+SWAGGER_USER_NOUPDATE_TRIGGER = ".noupdate.user"
 SWAGGER_USER_FILE = "user.yaml"
 SWAGGER_USER_PATH = os.path.join(CONFIG_FOLDER, SWAGGER_USER_FILE)
 SWAGGER_USER_JSONSPEC_FILE = SWAGGER_USER_FILE.split(".")[0] + ".json"
 SWAGGER_USER_JSONSPEC_PATH = os.path.join(CONFIG_FOLDER, SWAGGER_USER_JSONSPEC_FILE)
 
+SWAGGER_ACCOUNT_NOUPDATE_TRIGGER = ".noupdate.account"
 SWAGGER_ACCOUNT_FILE = "account.yaml"
-SWAGGER_ACCOUNT_PATH = os.path.join(CONFIG_FOLDER, SWAGGER_USER_FILE)
-SWAGGER_ACCOUNT_JSONSPEC_FILE = SWAGGER_USER_FILE.split(".")[0] + ".json"
-SWAGGER_ACCOUNT_JSONSPEC_PATH = os.path.join(CONFIG_FOLDER, SWAGGER_USER_JSONSPEC_FILE)
+SWAGGER_ACCOUNT_PATH = os.path.join(CONFIG_FOLDER, SWAGGER_ACCOUNT_FILE)
+SWAGGER_ACCOUNT_JSONSPEC_FILE = SWAGGER_ACCOUNT_FILE.split(".")[0] + ".json"
+SWAGGER_ACCOUNT_JSONSPEC_PATH = os.path.join(CONFIG_FOLDER, SWAGGER_ACCOUNT_JSONSPEC_FILE)
 
 AUTOCOMPLETE_FNAME = "path.bash.inc"
 AUTOCOMPLETE_CONTENT = "_%s_COMPLETE=source %s" % (PROGNAME.upper().replace("-", "_"), PROGNAME)
@@ -44,6 +45,9 @@ def setup_bash_complete():
     bashprofile_path = os.path.expanduser("~/.bash_profile")
     startup_path = bashprofile_path if os.path.exists(bashprofile_path) else bashrc_path
     startup_path = click.prompt("Enter path to an rc file to update, or leave blank to use", default=startup_path, err=True)
+    if not os.path.exists(startup_path):
+        click.echo("%s not found." % startup_path)
+        return
     startupfile_content = open(startup_path, "r").read()
 
     if AUTOCOMPLETE_PATH not in startupfile_content:
@@ -111,6 +115,9 @@ def configure(profile=None):
     click.echo()
     click.echo(open(confpath, "r").read())
 
+    for setting, value in data.items():
+        setattr(settings, setting, value)
+
     update()
     setup_bash_complete()
 
@@ -121,32 +128,63 @@ def update():
     Both files are stored in configuration directory.
     """
     text = None
-    url = spec.get_spec_url()
-    dst = os.path.join(CONFIG_FOLDER, SWAGGER_USER_FILE)
-    trigger_file = os.path.join(CONFIG_FOLDER, NOUPDATE_TRIGGER)
+    user_trigger_file = os.path.join(CONFIG_FOLDER, SWAGGER_USER_NOUPDATE_TRIGGER)
 
-    if url and not os.path.exists(trigger_file):
-        click.echo("Trying to get new API Spec from %s" % url)
-        r = requests.get(url)
+    user_url = spec.get_spec_url(api_level="user")
+    user_dst = os.path.join(CONFIG_FOLDER, SWAGGER_USER_FILE)
+
+    if user_url and not os.path.exists(user_trigger_file):
+        click.echo("Trying to get new UserAPI Spec from %s" % user_url)
+        r = requests.get(user_url)
 
         old = None
 
-        if os.path.exists(dst):
-            with open(dst, "r") as fp:
+        if os.path.exists(user_dst):
+            with open(user_dst, "r") as fp:
                 old = fp.read()
 
         text = r.text
 
         if text == old:
-            click.echo("API UserSpec is already up-to-date.")
+            click.echo("UserAPI Spec is already up-to-date.")
         elif text:
-            with open(dst, "w") as fp:
+            with open(user_dst, "w") as fp:
                 fp.write(text)
-            click.echo("API UserSpec successfully updated.")
+            click.echo("UserAPI UserSpec successfully updated.")
 
-    if text or os.path.exists(dst):
-        struct = yaml.load(text or open(dst).read())
+    if text or os.path.exists(user_dst):
+        struct = yaml.load(text or open(user_dst).read())
         json.dump(struct, open(SWAGGER_USER_JSONSPEC_PATH, "w"))
+
+
+    # Fetch AccountAPI spec and convert to JSON
+    text = None
+    account_trigger_file = os.path.join(CONFIG_FOLDER, SWAGGER_ACCOUNT_NOUPDATE_TRIGGER)
+    account_url = spec.get_spec_url(api_level="account")
+    account_dst = os.path.join(CONFIG_FOLDER, SWAGGER_ACCOUNT_FILE)
+
+    if account_url and not os.path.exists(account_trigger_file):
+        click.echo("Trying to get new AccountAPI Spec from %s" % account_url)
+        r = requests.get(account_url)
+
+        old = None
+
+        if os.path.exists(account_dst):
+            with open(account_dst, "r") as fp:
+                old = fp.read()
+
+        text = r.text
+
+        if text == old:
+            click.echo("AccountAPI Spec is already up-to-date.")
+        elif text:
+            with open(account_dst, "w") as fp:
+                fp.write(text)
+            click.echo("AccountAPI Spec successfully updated.")
+
+    if text or os.path.exists(account_dst):
+        struct = yaml.load(text or open(account_dst).read())
+        json.dump(struct, open(SWAGGER_ACCOUNT_JSONSPEC_PATH, "w"))
 
 
 class HelpBuilder(object):
@@ -219,7 +257,14 @@ class HelpBuilder(object):
 
 def list_module_filenames():
     files = os.listdir(CMD_FOLDER)
-    return [fname for fname in files if fname.endswith('.py') and not fname.startswith("_")]
+    """
+    account_files = os.listdir(os.path.join(CMD_FOLDER, "account"))
+    print account_files
+    files += account_files
+    """
+    l = [fname for fname in files if fname.endswith('.py') and not fname.startswith("_")]
+    return l
+
 
 
 class MyCLI(click.Group):
@@ -326,6 +371,10 @@ class MyCLI(click.Group):
         if name == "account":
             account_help = "All AccountAPI commands"  # TODO: HelpStr
             account_group = click.Group("account", callback=configure, help=account_help)
+
+            metaspec = spec.MetaSpec.lookup()
+            print metaspec
+
             return account_group
 
         elif name == "configure":
