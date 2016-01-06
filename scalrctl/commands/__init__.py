@@ -34,6 +34,7 @@ class SubCommand(object):
     method = None
     enabled = False
     _table_columns = None
+    api_level = "user"
 
     mutable_body_parts = None # temporary, object definitions in YAML spec are not always correct
     object_reference = None # optional, e.g. '#/definitions/GlobalVariable'
@@ -44,14 +45,14 @@ class SubCommand(object):
 
     @property
     def spc(self):
-        return spec.Spec(spec.get_raw_spec(), self.route, self.method)
+        return spec.Spec(spec.get_raw_spec(self.api_level), self.route, self.method)
 
     def get_siblings(self):
         return SubCommand._siblings.get(self.route)
 
     @property
     def _basepath_uri(self):
-        return spec.get_raw_spec()["basePath"]
+        return spec.get_raw_spec(self.api_level)["basePath"]
 
     @property
     def _request_template(self):
@@ -235,11 +236,8 @@ class SubCommand(object):
         mutable = []
         reference_path = None
 
-        ### spcobj = spec.Spec(settings.spec, self.route, self.method)
-        ### print "descr:", spcobj._result_descr
-
         if not self.object_reference:
-            for param in spec.get_raw_spec()["paths"][self.route][self.method]["parameters"]:
+            for param in spec.get_raw_spec(self.api_level)["paths"][self.route][self.method]["parameters"]:
                 name = param["name"] # image
                 if "schema" in param:
                     reference_path = param["schema"]['$ref'] # #/definitions/Image
@@ -249,11 +247,10 @@ class SubCommand(object):
         else:
             #XXX: Temporary code, see GlobalVariableDetailEnvelope or "role-global-variables update"
             reference_path = self.object_reference
-        #print "reference_path", reference_path
         
         if reference_path:
             parts = reference_path.split("/")
-            object =  spec.get_raw_spec()[parts[1]][parts[2]]
+            object =  spec.get_raw_spec(self.api_level)[parts[1]][parts[2]]
             object_properties = object["properties"]
             for property, descr in object_properties.items():
                 if 'readOnly' not in descr or not descr['readOnly']:
@@ -297,7 +294,7 @@ class SubCommand(object):
         e.g. 'image' JSON object for 'change-attributes' command
         """
         params = []
-        m = spec.get_raw_spec()["paths"][self.route][self.method]
+        m = spec.get_raw_spec(self.api_level)["paths"][self.route][self.method]
         if "parameters" in m:
             for parameter in m['parameters']:
                 params.append(parameter)

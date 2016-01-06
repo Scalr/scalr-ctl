@@ -190,15 +190,12 @@ def update():
 class HelpBuilder(object):
     document = None
 
-
     def __init__(self, document):
         #XXX: move methods to spec module
         self.document = document
 
-
     def list_paths(self):
         return self.document["paths"].keys()
-
 
     def list_http_methods(self, path):
         l = self.document["paths"][path].keys()
@@ -206,10 +203,8 @@ class HelpBuilder(object):
             l.remove("parameters")
         return l
 
-
     def get_method_description(self, path, method="get"):
         return self.document["paths"][path][method]['description']
-
 
     def get_body_type_params(self, path, method="get"):
         params = []
@@ -219,15 +214,14 @@ class HelpBuilder(object):
                 params.append(parameter)
         return params
 
-
     def get_path_type_params(self, path):
         params = []
+        paths = self.document["paths"].keys()
         d = self.document["paths"][path]
         if "parameters" in d:
             for parameter in d['parameters']:
                 params.append(parameter)
         return params
-
 
     def get_params(self, path, method="get"):
         result = self.get_path_type_params(path)
@@ -257,11 +251,6 @@ class HelpBuilder(object):
 
 def list_module_filenames():
     files = os.listdir(CMD_FOLDER)
-    """
-    account_files = os.listdir(os.path.join(CMD_FOLDER, "account"))
-    print account_files
-    files += account_files
-    """
     l = [fname for fname in files if fname.endswith('.py') and not fname.startswith("_")]
     return l
 
@@ -275,13 +264,16 @@ class MyCLI(click.Group):
         click.Group.__init__(self, name, commands, **attrs)
         self._modules = {}
         self._init()
+        self.metaspec = spec.MetaSpec.lookup()
 
-        self.hb = HelpBuilder(spec.get_raw_spec())
+
+    def get_help_builder(self, api_level="user"):
+        spec_dict = self.metaspec._get_spec_dict(api_level=api_level)
+        return HelpBuilder(spec_dict)
 
 
     def _list_module_objects(self):
         objects = [module for module in self._modules.values() if module.enabled]
-        #print "MODULE OBJECTS: %s" % objects
         return objects
 
 
@@ -292,12 +284,12 @@ class MyCLI(click.Group):
                 subcommand = obj()
                 if isinstance(subcommand, commands.SubCommand):
                     objects.append(subcommand)
-        #print "SUBCOMMANDS: %s", objects
         return objects
 
 
-    def _list_options(self, subcommand):
-        params = self.hb.get_params(subcommand.route, subcommand.method)
+    def _list_options(self, route, method, subcommand_name, api_level="user"):  #XXX: subcommand_name
+        help_builder = self.get_help_builder(api_level=api_level)
+        params = help_builder.get_params(route, method)
         options = []
 
         debug = click.Option(('--debug/--no-debug', 'debug'), default=False, help="Print debug messages")
@@ -307,17 +299,16 @@ class MyCLI(click.Group):
             option = click.Option(("--%s" % param['name'], param['name']), required=param['required'], help=param["description"])
             options.append(option)
 
-        if subcommand.method.upper() == 'GET':
+        if method.upper() == 'GET':
             raw = click.Option(('--raw', 'transformation'), is_flag=True, flag_value='raw', default=False, help="Print raw response")
             tree = click.Option(('--tree', 'transformation'), is_flag=True, flag_value='tree', default=True, help="Print response as a colored tree")
             nocolor = click.Option(('--nocolor', 'nocolor'), is_flag=True, default=False, help="Use colors")
             options += [raw, tree, nocolor]
-            if subcommand.name != "retrieve": # [ST-54]
+            if subcommand_name != "retrieve": # [ST-54]
                 table = click.Option(('--table', 'transformation'), is_flag=True, flag_value='table', default=False, help="Print response as a colored table")
                 options.append(table)
 
-
-            if self.hb.returns_iterable(subcommand.route):
+            if help_builder.returns_iterable(route):
                 maxrez = click.Option(("--maxresults", "maxResults"), type=int, required=False, help="Maximum number of records. Example: --maxresults=2")
                 options.append(maxrez)
 
@@ -325,7 +316,7 @@ class MyCLI(click.Group):
                 options.append(pagenum)
 
                 filthelp = "Apply filters. Example: type=ebs,size=8. "
-                spc = spec.Spec(spec.get_raw_spec(), subcommand.route, subcommand.method)
+                spc = spec.Spec(spec.get_raw_spec(api_level=api_level), route, method)
                 if spc.filters:
                     filters = sorted(spc.filters)
                     filthelp += "Available filters: %s." % ", ".join(filters)
@@ -338,7 +329,7 @@ class MyCLI(click.Group):
                 columns = click.Option(("--columns", "columns"), required=False, help=columnshelp)
                 options.append(columns)
 
-        if subcommand.method.upper() in ('PATCH','POST'):
+        if method.upper() in ('PATCH','POST'):
             stdin_help = "Ask for input instead of opening default text editor"
             stdin = click.Option(("--stdin", "stdin"), is_flag=True, default=False, help=stdin_help)
             options.append(stdin)
@@ -356,7 +347,6 @@ class MyCLI(click.Group):
                     self._modules[mod.name] = mod
             except ImportError:
                 raise  # pass
-        #print self._modules
 
 
     def list_commands(self, ctx):
@@ -370,11 +360,32 @@ class MyCLI(click.Group):
 
         if name == "account":
             account_help = "All AccountAPI commands"  # TODO: HelpStr
-            account_group = click.Group("account", callback=configure, help=account_help)
+            account_group = click.Group("account", callback=lambda: None, help=account_help)
 
-            metaspec = spec.MetaSpec.lookup()
-            print metaspec
+            #print self.metaspec._list_subcmd_aliases(command_name="os", api_level="account")
+            #print self.metaspec._list_cmd_aliases(api_level="account")
 
+            for command_name in self.metaspec._list_cmd_aliases(api_level="account"):
+                command_descr = self.metaspec._get_cmd_descr(command_name=command_name, api_level="account")
+                grp = click.Group(command_name, callback=lambda: None, help=command_descr)
+
+                for subcommand_name in self.metaspec._list_subcmd_aliases(command_name=command_name, api_level="account"):
+
+                    route = self.metaspec.get_route(command_name, subcommand_name, api_level="account")
+                    method = self.metaspec.get_http_method(command_name, subcommand_name, api_level="account")
+                    subcommand = commands.SubCommand()
+                    subcommand.name = subcommand_name
+                    subcommand.route = route
+                    subcommand.method = method
+                    subcommand.api_level = "account"
+                    options = self._list_options(route, method, subcommand_name, api_level="account")
+                    options = subcommand.modify_options(options)
+                    acc_spec = spec.Spec(spec.get_raw_spec(api_level="account"), route, method)
+                    subcommand_descr = acc_spec.description
+                    cmd = click.Command(subcommand_name, params=options, callback=subcommand.run, help=subcommand_descr)
+                    grp.add_command(cmd)
+
+                account_group.add_command(grp)
             return account_group
 
         elif name == "configure":
@@ -393,14 +404,17 @@ class MyCLI(click.Group):
 
         group = click.Group(name, callback=self._modules[name].callback, help=self._modules[name].__doc__)
 
-        for subcommand in self._list_subcommands(name):
-            if subcommand.route in self.hb.list_paths() \
-                    and subcommand.method in self.hb.list_http_methods(subcommand.route):
-                options = self._list_options(subcommand)
+        hb = self.get_help_builder(api_level="user")
+        subcommands = self._list_subcommands(name)  #TODO: BROKEN CODE! see scalr-ctl os list
+        routes = hb.list_paths()
+        for subcommand in subcommands:
+            if subcommand.route in routes \
+                    and subcommand.method in hb.list_http_methods(subcommand.route):
+                options = self._list_options(route=subcommand.route, method=subcommand.method, subcommand_name=subcommand.name, api_level="user")
 
                 options = subcommand.modify_options(options)
 
-                spc = spec.Spec(spec.get_raw_spec(), subcommand.route, subcommand.method)
+                spc = spec.Spec(spec.get_raw_spec(api_level="user"), subcommand.route, subcommand.method)
                 cmd = click.Command(subcommand.name, params=options, callback=subcommand.run, help=spc.description)
                 group.add_command(cmd)
 

@@ -5,18 +5,174 @@ import json
 
 import settings
 
+
+class MetaSpec(object):
+
+    specs = None
+
+    data = {
+        "account": {
+            "os": {
+                    "descr" : "Supported operating systems",
+                    "subcommands": {
+                        "list": ("/os/", "get"),
+                        "retrieve": ("/os/{osId}/", "get"),
+                        },
+            },
+
+            "event": {
+                    "descr" : "Manage events available in the Scalr Account",
+                    "subcommands": {
+                        "list": ("/events/", "get"),
+                        "retrieve": ("/events/{eventId}/", "get"),
+                        "create": ("/events/", "post"),
+                        "delete": ("/events/{eventId}/", "delete"),
+                        },
+                    },
+
+            "image": {
+                    "descr" : "Image management",
+                    "subcommands": {
+                        "change-attributes": ("/images/{imageId}/", "patch"),
+                        "copy": ("/images/{imageId}/actions/copy/", "post"),
+                        "register": ("/images/", "post"),
+                        "retrieve": ("/images/{imageId}/", "get"),
+                        "list": ("/images/", "get"),
+                        "delete": ("/images/{imageId}/", "delete"),
+                        },
+                    },
+
+            "role-orchestration-rule": {
+                    "descr" : "Orchestration Rule management",
+                    "subcommands": {
+                        "list": ("/roles/{roleId}/orchestration-rules/", "get"),
+                        "retrieve": ("/roles/{roleId}/orchestration-rules/{orchestrationRuleId}/", "get"),
+                        "create": ("/roles/{roleId}/orchestration-rules/", "post"),
+                        "delete": ("/roles/{roleId}/orchestration-rules/{orchestrationRuleId}/", "delete"),
+                        },
+                    },
+
+            "role-global-variables": {
+                    "descr" : "Manage global variables for roles",
+                    "subcommands": {
+                        "list": ("/roles/{roleId}/global-variables/", "get"),
+                        "retrieve": ("/roles/{roleId}/global-variables/{globalVariableName}/", "get"),
+                        "update": ("/roles/{roleId}/global-variables/{globalVariableName}/", "patch"),
+                        "create": ("/roles/{roleId}/global-variables/", "post"),
+                        "delete": ("/roles/{roleId}/global-variables/{globalVariableName}/", "delete"),
+                        },
+                    },
+
+            "role-image": {
+                    "descr" : "Manage images in roles",
+                    "subcommands": {
+                        "list": ("/roles/{roleId}/images/", "get"),
+                        "retrieve": ("/roles/{roleId}/images/{imageId}/", "get"),
+                        "update": ("/roles/{roleId}/images/", "post"),
+                        "delete": ("/roles/{roleId}/images/{imageId}/", "delete"),
+                        "replace": ("/roles/{roleId}/images/{imageId}/actions/replace/", "post"),
+                        },
+                    },
+
+            "role": {
+                    "descr" : "Role management",
+                    "subcommands": {
+                        "change-attributes": ("/roles/{roleId}/", "patch"),
+                        "list": ("/roles/", "get"),
+                        "retrieve": ("/roles/{roleId}/", "get"),
+                        "create": ("/roles/", "post"),
+                        "delete": ("/roles/{roleId}/", "delete"),
+                        },
+                    },
+
+        }
+    }
+
+
+    def __init__(self, *specs):
+        self.specs = specs
+
+    def __repr__(self):
+        return str([spec_dict["basePath"] for spec_dict in self.specs])
+
+
+    @classmethod
+    def lookup(cls, base_path=None, api_levels=None):
+        if not base_path:
+            base_path = os.path.expanduser(os.environ.get("SCALRCLI_HOME", "~/.scalr"))
+
+        if not api_levels:
+            api_levels = ["user", "account", "admin"]
+
+        data = []
+
+        for api_level in api_levels:
+            path = os.path.join(base_path, "%s.json" % api_level)
+            if os.path.exists(path):
+                spec_dict = json.load(open(path, "r"))
+                data.append(spec_dict)
+
+        return cls(*data)
+
+    def get_route(self, command_name, subcommand_name, api_level="user"):
+        return self.data[api_level][command_name]["subcommands"][subcommand_name][0]
+
+    def get_http_method(self, command_name, subcommand_name, api_level="user"):
+        return self.data[api_level][command_name]["subcommands"][subcommand_name][1]
+
+    def list_http_methods(self, route):
+        methods = []
+        return methods
+
+    def get_command_name(self, route, method):
+        name = []
+        return name
+
+    def get_command_object(self, command_name, subcommand_name, api_level="user"):
+        obj = None
+        return obj
+
+    def list_options(self, command_name, subcommand_name, api_level="user"):
+        pass
+
+
+    def _get_spec_dict(self, api_level="user"):
+        for spec in self.specs:
+            if api_level in spec["basePath"]:
+                return spec
+
+    def _list_cmd_aliases(self, api_level="user"):
+        """return route aliases"""
+        level_data = self.data[api_level]
+        return [alias for alias in level_data if alias]
+
+    def _get_cmd_descr(self, command_name, api_level="user"):
+        "returns help for command e.g. OS help"
+        level_data = self.data[api_level]
+        cmd_data = level_data[command_name]
+        return cmd_data["descr"]
+
+    def _get_subcmd_descr(self, command_name, subcommand_name, api_level="user"):
+        "returns help for command e.g. OS help"
+        level_data = self.data[api_level]
+        cmd_data = level_data[command_name]
+        return cmd_data["descr"]
+
+    def _list_subcmd_aliases(self, command_name, api_level="user"):
+        """returns aliases for subcommands (route+http_method)"""
+        return self.data[api_level][command_name]["subcommands"].keys()
+
+
 class Spec(object):
 
     document = None
     method = None
     route = None
 
-
     def __init__(self, document, route, method):
         self.document = document
         self.route = route
         self.method = method
-
 
     @property
     def _route_data(self):
@@ -28,9 +184,9 @@ class Spec(object):
 
     @property
     def _result_descr(self):
-        responces = self._data['responses']
-        if '200' in responces:
-            ok200 = responces['200']
+        responses = self._data['responses']
+        if '200' in responses:
+            ok200 = responses['200']
             if 'schema' in ok200:
                 schema = ok200['schema']
                 if '$ref' in schema:
@@ -103,10 +259,12 @@ class Spec(object):
     def __repr__(self):
         return 'Spec("%s", "%s")' % (self.route, self.method)
 
-def get_raw_spec():
-    path = os.path.join(os.path.expanduser(os.environ.get("SCALRCLI_HOME", "~/.scalr")), "user.json")
+def get_raw_spec(api_level="user"):
+    api_level = api_level or "user"  #XXX: Ugly,  SubCommand class needs to be changed first
+    path = os.path.join(os.path.expanduser(os.environ.get("SCALRCLI_HOME", "~/.scalr")), "%s.json" % api_level)
     if os.path.exists(path):
         return json.load(open(path, "r"))
 
 def get_spec_url(api_level="user"):
+    api_level = api_level or "user"  #XXX: Ugly,  SubCommand class needs to be changed first
     return "{0}://{1}/api/{2}.{3}.yml".format(settings.API_SCHEME, settings.API_HOST, api_level, settings.API_VERSION)

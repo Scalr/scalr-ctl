@@ -18,39 +18,39 @@ def callback(*args, **kwargs):
     pass
 
 
-class Event(commands.SubCommand):
+class AccountEvent(commands.SubCommand):
     pass
 
 
-class ListEvents(Event):
+class AccountListEvents(AccountEvent):
     name = "list"
     route = "/events/"
     method = "get"
     enabled = True
 
 
-class RetrieveEvent(Event):
+class AccountRetrieveEvent(AccountEvent):
     name = "retrieve"
     route = "/events/{eventId}/"
     method = "get"
     enabled = True
 
 
-class CreateEvent(Event):
+class AccountCreateEvent(AccountEvent):
     name = "create"
     route = "/events/"
     method = "post"
     enabled = True
 
 
-class ChangeEventAttrs(Event):
+class AccountChangeEventAttrs(AccountEvent):
     name = "change-attributes"
     route = "/events/{eventId}/"
     method = "patch"
     enabled = True
 
 
-class DeleteEvent(Event):
+class AccountDeleteEvent(AccountEvent):
     name = "delete"
     route = "/events/{eventId}/"
     method = "delete"

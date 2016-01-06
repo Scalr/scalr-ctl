@@ -11,7 +11,6 @@ import json
 import yaml
 
 import requests
-from scalrctl import spec
 
 CONFIG_FOLDER = os.path.expanduser(os.environ.get("SCALRCLI_HOME", "~/.scalr"))
 SWAGGER_USER_FILE = "user.yaml"
@@ -96,7 +95,6 @@ class Connection(BaseConnection):
         for route in self._spec["paths"]:
             for method in self._spec["paths"][route].keys():
                 if method != "parameters":
-                    #print '("%s", "%s") : ("%s", "%s")' % (method, route, self._get_route_alias(route), method)
                     l.append((str(route), str(method)))
         return l
 
