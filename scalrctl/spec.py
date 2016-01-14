@@ -6,12 +6,6 @@ import json
 import settings
 
 
-"""
- 	GET|POST|DELETE
-/environments/{envId}/teams/ 	GET|POST
-/environments/{envId}/teams/{teamId}/ 	DELETE
-"""
-
 class MetaSpec(object):
 
     specs = None
@@ -26,6 +20,7 @@ class MetaSpec(object):
                         "update": ("/environments/{envId}/", "patch"),
                         "delete": ("/environments/{envId}/", "delete"),
                         },
+            },
             "cloud": {
                     "descr" : "Manage cloud providers",
                     "subcommands": {
