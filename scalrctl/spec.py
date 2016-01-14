@@ -6,11 +6,35 @@ import json
 import settings
 
 
+"""
+ 	GET|POST|DELETE
+/environments/{envId}/teams/ 	GET|POST
+/environments/{envId}/teams/{teamId}/ 	DELETE
+"""
+
 class MetaSpec(object):
 
     specs = None
     data = {
         "account": {
+            "environment": {
+                    "descr" : "Manage environments",
+                    "subcommands": {
+                        "list": ("/environments/", "get"),
+                        "create": ("/environments/", "post"),
+                        "retrieve": ("/environments/{envId}/", "get"),
+                        "update": ("/environments/{envId}/", "patch"),
+                        "delete": ("/environments/{envId}/", "delete"),
+                        },
+            "cloud": {
+                    "descr" : "Manage cloud providers",
+                    "subcommands": {
+                        "list": ("/environments/{envId}/clouds/", "get"),
+                        "retrieve": ("/environments/{envId}/clouds/{cloud}/", "get"),
+                        "update": ("/environments/{envId}/clouds/{cloud}/", "post"),
+                        "delete": ("/environments/{envId}/clouds/{cloud}/", "delete"),
+                        },
+            },
             "os": {
                     "descr" : "Supported operating systems",
                     "subcommands": {
