@@ -9,7 +9,6 @@ import settings
 class MetaSpec(object):
 
     specs = None
-
     data = {
         "account": {
             "os": {
@@ -17,6 +16,16 @@ class MetaSpec(object):
                     "subcommands": {
                         "list": ("/os/", "get"),
                         "retrieve": ("/os/{osId}/", "get"),
+                        },
+            },
+            "cloud-credentials": {
+                    "descr" : "Manage Cloud Credentials for Account scope",
+                    "subcommands": {
+                        "list": ("/cloud-credentials/", "get"),
+                        "retrieve": ("/cloud-credentials/{cloudCredentialsId}/", "get"),
+                        "create": ("/cloud-credentials/", "post"),
+                        "update": ("/cloud-credentials/{cloudCredentialsId}/", "patch"),
+                        "delete": ("/cloud-credentials/{cloudCredentialsId}/", "delete"),
                         },
             },
 
