@@ -30,6 +30,14 @@ class MetaSpec(object):
                         "delete": ("/environments/{envId}/clouds/{cloud}/", "delete"),
                         },
             },
+            "team": {
+                    "descr" : "Manage teams",
+                    "subcommands": {
+                        "list": ("/environments/{envId}/teams/", "get"),
+                        "create": ("/environments/{envId}/teams/", "post"),
+                        "delete": ("/environments/{envId}/teams/{teamId}/", "delete"),
+                        },
+            },
             "os": {
                     "descr" : "Supported operating systems",
                     "subcommands": {
