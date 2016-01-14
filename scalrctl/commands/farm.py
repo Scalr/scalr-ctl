@@ -69,3 +69,10 @@ class TerminateFarm(Farm):
     route = "/{envId}/farms/{farmId}/actions/terminate/"
     method = "post"
     enabled = True
+
+
+class CloneFarm(Farm):
+    name = "clone"
+    route = "/{envId}/farms/{farmId}/actions/clone/"
+    method = "post"
+    enabled = True
