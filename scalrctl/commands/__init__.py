@@ -118,7 +118,7 @@ class SubCommand(object):
                                     json_text = json.loads(rawtext)
                                     filtered = self._filter_json_object(json_text['data'], filter_createonly=True)
                                     text = json.dumps(filtered)
-                        except (Exception, BaseException), e:
+                        except (Exception, BaseException) as e:
                             if settings.debug_mode:
                                 click.echo(traceback.format_exc())
                             else:
@@ -127,7 +127,7 @@ class SubCommand(object):
 
                 try:
                     user_object = json.loads(raw)
-                except (Exception, BaseException), e:
+                except (Exception, BaseException) as e:
                     if settings.debug_mode:
                         raise
                     raise click.ClickException(str(e))

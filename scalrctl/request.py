@@ -2,7 +2,6 @@ import time
 import hmac
 import hashlib
 import binascii
-import urlparse
 import urllib
 import json
 import yaml
@@ -11,6 +10,8 @@ import click
 import requests
 
 from scalrctl import settings
+
+from six.moves.urllib.parse import urlparse, urlencode
 
 
 """
@@ -43,7 +44,7 @@ def request(method, request_uri, payload=None, data=None):
     time_iso8601 = time.strftime("%Y-%m-%dT%H:%M:%S.000Z", time.gmtime())
     try:
         r = None
-        query_string = urllib.urlencode(sorted(payload.items())) if payload else ''
+        query_string = urlencode(sorted(payload.items())) if payload else ''
         body = json.dumps(yaml.safe_load(data)) if data else '' #XXX
 
         assert settings.API_KEY_ID, "No Key ID"
@@ -77,7 +78,7 @@ def request(method, request_uri, payload=None, data=None):
         r = requests.request(method.lower(), url, data=body, params=payload, headers=headers)
         result = r.text
 
-    except (Exception, BaseException), e:
+    except (Exception, BaseException) as e:
         if settings.debug_mode:
             raise
         raise click.ClickException(str(e))

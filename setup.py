@@ -52,7 +52,8 @@ if __name__ == '__main__':
             'Click',
             'prettytable',
             'pyyaml',
-            'requests'
+            'requests',
+            "six"
         ],
         entry_points='''
             [console_scripts]

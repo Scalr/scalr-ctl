@@ -10,9 +10,9 @@ import yaml
 import click
 import requests
 
-import commands
-import settings
-import spec
+from scalrctl import commands
+from scalrctl import settings
+from scalrctl import spec
 
 PROGNAME = "scalr-ctl"
 DEFAULT_PROFILE = "default"
@@ -195,10 +195,10 @@ class HelpBuilder(object):
         self.document = document
 
     def list_paths(self):
-        return self.document["paths"].keys()
+        return list(self.document["paths"])
 
     def list_http_methods(self, path):
-        l = self.document["paths"][path].keys()
+        l = list(self.document["paths"][path])
         if "parameters" in l:
             l.remove("parameters")
         return l
@@ -216,7 +216,7 @@ class HelpBuilder(object):
 
     def get_path_type_params(self, path):
         params = []
-        paths = self.document["paths"].keys()
+        paths = list(self.document["paths"])
         d = self.document["paths"][path]
         if "parameters" in d:
             for parameter in d['parameters']:

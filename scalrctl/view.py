@@ -3,7 +3,8 @@ __author__ = 'Dmitriy Korsakov'
 import json
 import yaml
 import prettytable
-import settings
+
+from scalrctl import settings
 
 
 def build_table(field_names, rows, pre=None, post=None):

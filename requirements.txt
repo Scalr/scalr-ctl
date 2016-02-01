@@ -2,3 +2,4 @@ Click
 prettytable
 pyyaml
 requests
+six

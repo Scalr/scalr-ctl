@@ -3,7 +3,7 @@ __author__ = 'Dmitriy Korsakov'
 import os
 import json
 
-import settings
+from scalrctl import settings
 
 
 class MetaSpec(object):
