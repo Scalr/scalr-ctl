@@ -11,7 +11,7 @@ import requests
 
 from scalrctl import settings
 
-from six.moves.urllib.parse import urlparse, urlencode
+from six.moves.urllib.parse import urlparse, urlencode, urlunsplit
 
 
 """
@@ -58,18 +58,18 @@ def request(method, request_uri, payload=None, data=None):
             click.echo("stringToSign:")
             click.echo(string_to_sign)
 
-        digest = hmac.new(settings.API_SECRET_KEY, string_to_sign, hashlib.sha256).digest()
+        digest = hmac.new(settings.API_SECRET_KEY.encode(encoding='UTF-8'), string_to_sign.encode(encoding='UTF-8'), hashlib.sha256).digest()
         signature = binascii.b2a_base64(digest).strip()
 
         headers = dict()
         headers['Content-Type'] = 'application/json; charset=utf-8'
         headers['X-Scalr-Key-Id'] = settings.API_KEY_ID
         headers['X-Scalr-Date'] = time_iso8601
-        headers['X-Scalr-Signature'] = "%s %s" % (settings.SIGNATURE_VERSION, signature)
-        #if hasattr(settings, "API_DEBUG") and settings.API_DEBUG:
-        headers['X-Scalr-Debug'] = 1
+        headers['X-Scalr-Signature'] = "%s %s" % (settings.SIGNATURE_VERSION, signature.decode(encoding='UTF-8'))
+        # if hasattr(settings, "API_DEBUG") and settings.API_DEBUG:
+        #    headers['X-Scalr-Debug'] = 1
 
-        url = urlparse.urlunsplit((scheme, api_host, request_uri, '', ''))
+        url = urlunsplit((scheme, api_host, request_uri, '', ''))
 
         if settings.debug_mode:
             click.echo("Headers: %s " % json.dumps(headers, indent=2))
