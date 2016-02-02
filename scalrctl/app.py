@@ -17,7 +17,7 @@ from scalrctl import spec
 PROGNAME = "scalr-ctl"
 DEFAULT_PROFILE = "default"
 CMD_FOLDER = os.path.abspath(os.path.join(os.path.dirname(__file__), 'commands'))
-CONFIG_FOLDER = os.path.expanduser(os.environ.get("SCALRCLI_HOME", "~/.scalr"))
+CONFIG_FOLDER = os.path.expanduser(os.environ.get("SCALRCLI_HOME", os.path.join(os.path.expanduser("~"), ".scalr")))
 CONFIG_PATH = os.path.join(CONFIG_FOLDER, "%s.yaml" % os.environ.get("SCALRCLI_PROFILE", DEFAULT_PROFILE))
 
 SWAGGER_USER_NOUPDATE_TRIGGER = ".noupdate.user"
@@ -216,7 +216,6 @@ class HelpBuilder(object):
 
     def get_path_type_params(self, path):
         params = []
-        paths = list(self.document["paths"])
         d = self.document["paths"][path]
         if "parameters" in d:
             for parameter in d['parameters']:
