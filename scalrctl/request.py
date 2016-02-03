@@ -2,7 +2,6 @@ import time
 import hmac
 import hashlib
 import binascii
-import urlparse
 import urllib
 import json
 import yaml
@@ -11,6 +10,8 @@ import click
 import requests
 
 from scalrctl import settings
+
+from six.moves.urllib.parse import urlparse, urlencode, urlunsplit
 
 
 """
@@ -43,7 +44,7 @@ def request(method, request_uri, payload=None, data=None):
     time_iso8601 = time.strftime("%Y-%m-%dT%H:%M:%S.000Z", time.gmtime())
     try:
         r = None
-        query_string = urllib.urlencode(sorted(payload.items())) if payload else ''
+        query_string = urlencode(sorted(payload.items())) if payload else ''
         body = json.dumps(yaml.safe_load(data)) if data else '' #XXX
 
         assert settings.API_KEY_ID, "No Key ID"
@@ -57,18 +58,18 @@ def request(method, request_uri, payload=None, data=None):
             click.echo("stringToSign:")
             click.echo(string_to_sign)
 
-        digest = hmac.new(settings.API_SECRET_KEY, string_to_sign, hashlib.sha256).digest()
+        digest = hmac.new(settings.API_SECRET_KEY.encode(encoding='UTF-8'), string_to_sign.encode(encoding='UTF-8'), hashlib.sha256).digest()
         signature = binascii.b2a_base64(digest).strip()
 
         headers = dict()
         headers['Content-Type'] = 'application/json; charset=utf-8'
         headers['X-Scalr-Key-Id'] = settings.API_KEY_ID
         headers['X-Scalr-Date'] = time_iso8601
-        headers['X-Scalr-Signature'] = "%s %s" % (settings.SIGNATURE_VERSION, signature)
-        #if hasattr(settings, "API_DEBUG") and settings.API_DEBUG:
-        headers['X-Scalr-Debug'] = 1
+        headers['X-Scalr-Signature'] = "%s %s" % (settings.SIGNATURE_VERSION, signature.decode(encoding='UTF-8'))
+        # if hasattr(settings, "API_DEBUG") and settings.API_DEBUG:
+        #    headers['X-Scalr-Debug'] = 1
 
-        url = urlparse.urlunsplit((scheme, api_host, request_uri, '', ''))
+        url = urlunsplit((scheme, api_host, request_uri, '', ''))
 
         if settings.debug_mode:
             click.echo("Headers: %s " % json.dumps(headers, indent=2))
@@ -77,7 +78,7 @@ def request(method, request_uri, payload=None, data=None):
         r = requests.request(method.lower(), url, data=body, params=payload, headers=headers)
         result = r.text
 
-    except (Exception, BaseException), e:
+    except (Exception, BaseException) as e:
         if settings.debug_mode:
             raise
         raise click.ClickException(str(e))
