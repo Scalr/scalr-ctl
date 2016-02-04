@@ -19,53 +19,52 @@ def callback(*args, **kwargs):
 
 
 class Farm(commands.SubCommand):
-    pass
+    enabled = True
 
 
 class ListFarms(Farm):
     name = "list"
     route = "/{envId}/farms/"
     method = "get"
-    enabled = True
 
 
 class CreateFarm(Farm):
     name = "create"
     route = "/{envId}/farms/"
     method = "post"
-    enabled = True
 
 
 class RetrieveFarm(Farm):
     name = "retrieve"
     route = "/{envId}/farms/{farmId}/"
     method = "get"
-    enabled = True
 
 
 class ChangeFarmAttrs(Farm):
     name = "change-attributes"
     route = "/{envId}/farms/{farmId}/"
     method = "patch"
-    enabled = True
 
 
 class DeleteFarm(Farm):
     name = "delete"
     route = "/{envId}/farms/{farmId}/"
     method = "delete"
-    enabled = True
 
 
 class LaunchFarm(Farm):
     name = "launch"
     route = "/{envId}/farms/{farmId}/actions/launch/"
     method = "post"
-    enabled = True
 
 
 class TerminateFarm(Farm):
     name = "terminate"
     route = "/{envId}/farms/{farmId}/actions/terminate/"
     method = "post"
-    enabled = True
+
+
+class CloneFarm(Farm):
+    name = "clone"
+    route = "/{envId}/farms/{farmId}/actions/clone/"
+    method = "post"
