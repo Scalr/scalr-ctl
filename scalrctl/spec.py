@@ -3,20 +3,56 @@ __author__ = 'Dmitriy Korsakov'
 import os
 import json
 
-import settings
+from scalrctl import settings
 
 
 class MetaSpec(object):
 
     specs = None
-
     data = {
         "account": {
+            "environment": {
+                    "descr" : "Manage environments",
+                    "subcommands": {
+                        "list": ("/environments/", "get"),
+                        "create": ("/environments/", "post"),
+                        "retrieve": ("/environments/{envId}/", "get"),
+                        "update": ("/environments/{envId}/", "patch"),
+                        "delete": ("/environments/{envId}/", "delete"),
+                        },
+            },
+            "cloud": {
+                    "descr" : "Manage cloud providers",
+                    "subcommands": {
+                        "list": ("/environments/{envId}/clouds/", "get"),
+                        "retrieve": ("/environments/{envId}/clouds/{cloud}/", "get"),
+                        "update": ("/environments/{envId}/clouds/{cloud}/", "post"),
+                        "delete": ("/environments/{envId}/clouds/{cloud}/", "delete"),
+                        },
+            },
+            "team": {
+                    "descr" : "Manage teams",
+                    "subcommands": {
+                        "list": ("/environments/{envId}/teams/", "get"),
+                        "create": ("/environments/{envId}/teams/", "post"),
+                        "delete": ("/environments/{envId}/teams/{teamId}/", "delete"),
+                        },
+            },
             "os": {
                     "descr" : "Supported operating systems",
                     "subcommands": {
                         "list": ("/os/", "get"),
                         "retrieve": ("/os/{osId}/", "get"),
+                        },
+            },
+            "cloud-credentials": {
+                    "descr" : "Manage Cloud Credentials for Account scope",
+                    "subcommands": {
+                        "list": ("/cloud-credentials/", "get"),
+                        "retrieve": ("/cloud-credentials/{cloudCredentialsId}/", "get"),
+                        "create": ("/cloud-credentials/", "post"),
+                        "update": ("/cloud-credentials/{cloudCredentialsId}/", "patch"),
+                        "delete": ("/cloud-credentials/{cloudCredentialsId}/", "delete"),
                         },
             },
 

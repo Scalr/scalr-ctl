@@ -8,4 +8,4 @@ script:
 notify:
   email:
     recipients:
-      - marat@scalr.com
+      - blame
