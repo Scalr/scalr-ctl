@@ -2,10 +2,8 @@ __author__ = 'Dmitriy Korsakov'
 
 import json
 import yaml
-import platform
 import prettytable
-
-from scalrctl import settings
+import settings
 
 
 def build_table(field_names, rows, pre=None, post=None):
@@ -37,9 +35,10 @@ def build_tree(data):
 
     yaml_text = yaml.safe_dump(data, encoding='utf-8', allow_unicode=True, default_flow_style=False)
 
-    yaml_text = yaml_text.decode('unicode_escape').encode('ascii','ignore')  # [ST-63]
+    # yaml_text = yaml_text.decode('unicode_escape').encode('ascii','ignore')  # [ST-63]
+    yaml_text = yaml_text.decode("ascii", "ignore").encode("ascii")  # [ST-63]
 
-    if not settings.colored_output or platform.system() == "Windows":  # TODO: [ST-94]
+    if not settings.colored_output:
         return yaml_text
 
     pairs = []
@@ -60,7 +59,7 @@ def build_tree(data):
     result = yaml_text[:last_pos]
 
     for start, end in pairs:
-        result += yaml_text[last_pos:start] + b"\x1b[31;1m" + yaml_text[start:end] + b"\x1b[0m"
+        result += yaml_text[last_pos:start] + "\x1b[31;1m" + yaml_text[start:end] + "\x1b[0m"
         last_pos = end
 
     result += yaml_text[last_pos:]

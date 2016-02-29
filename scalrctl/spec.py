@@ -98,7 +98,16 @@ class MetaSpec(object):
                         "delete": ("/roles/{roleId}/global-variables/{globalVariableName}/", "delete"),
                         },
                     },
-
+            "role-category": {
+                    "descr" : "Manage current Role categories",
+                    "subcommands": {
+                        "list": ("/role-categories/", "get"),
+                        "retrieve": ("/role-categories/{roleCategoryId}/", "get"),
+                        "update": ("/role-categories/{roleCategoryId}/", "patch"),
+                        "create": ("/role-categories/", "post"),
+                        "delete": ("/role-categories/{roleCategoryId}/", "delete"),
+                        },
+                    },
             "role-image": {
                     "descr" : "Manage images in roles",
                     "subcommands": {
