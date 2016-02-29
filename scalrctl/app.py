@@ -303,9 +303,13 @@ class MyCLI(click.Group):
             tree = click.Option(('--tree', 'transformation'), is_flag=True, flag_value='tree', default=True, help="Print response as a colored tree")
             nocolor = click.Option(('--nocolor', 'nocolor'), is_flag=True, default=False, help="Use colors")
             options += [raw, tree, nocolor]
+
             if subcommand_name != "retrieve": # [ST-54]
                 table = click.Option(('--table', 'transformation'), is_flag=True, flag_value='table', default=False, help="Print response as a colored table")
                 options.append(table)
+            else:
+                export = click.Option(('--export', 'export'), required=False, type=click.Path(), help="Export Scalr Object to JSON file")  # [ST-88]
+                options.append(export)
 
             if help_builder.returns_iterable(route):
                 maxrez = click.Option(("--maxresults", "maxResults"), type=int, required=False, help="Maximum number of records. Example: --maxresults=2")
@@ -332,6 +336,11 @@ class MyCLI(click.Group):
             stdin_help = "Ask for input instead of opening default text editor"
             stdin = click.Option(("--stdin", "stdin"), is_flag=True, default=False, help=stdin_help)
             options.append(stdin)
+
+            import_help = "Import object from file"
+            from_file = click.Option(("--import", "from_file"), required=False, type=click.Path(), help=import_help)
+            options.append(from_file)
+
 
         return options
 

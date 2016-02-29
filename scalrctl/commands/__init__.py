@@ -2,8 +2,10 @@ __author__ = 'Dmitriy Korsakov'
 
 import click
 
+import os
 import re
 import json
+import datetime
 import traceback
 from collections import defaultdict
 
@@ -11,6 +13,8 @@ from scalrctl import settings
 from scalrctl import request
 from scalrctl import spec
 from scalrctl.view import build_table, build_tree
+
+import yaml
 
 
 enabled = False
@@ -96,6 +100,7 @@ class SubCommand(object):
 
 
         stdin = kwargs.pop("stdin", False)
+        from_file = kwargs.pop("from_file", False)  # [ST-88]
 
         if self.method.upper() in ("PATCH", "POST"):
             #prompting for body and then validating it
@@ -104,6 +109,16 @@ class SubCommand(object):
 
                 if stdin:
                     raw = click.termui.prompt("Input %s in JSON format" % name)
+                elif from_file:  # [ST-88]
+                    path = os.path.expanduser(from_file)
+
+                    if not os.path.exists(path):
+                        raise click.ClickException("Cannot import Scalr object: file not found")
+
+                    t = yaml.load(open(path, "r"))
+                    assert t["data"], "Incorrect data structure"
+                    raw = json.dumps(t["data"])  # XXX assert meta information first! # XXX excessive transformation
+
                 else:
                     text = ''
                     if self.method.upper() == "PATCH":
@@ -149,6 +164,8 @@ class SubCommand(object):
         """
         callback for click subcommand
         """
+        export_path = kwargs.pop("export", None)  # [ST-88]
+
         args, kwargs = self.pre(*args, **kwargs)
         uri = self._request_template
         payload = {}
@@ -182,6 +199,26 @@ class SubCommand(object):
             if "errors" in response_json and response_json["errors"]:
                 raise click.ClickException(response_json["errors"][0]['message'])
 
+            if export_path:  # [ST-88]
+                d = {
+                        "API_VERSION": settings.API_VERSION,
+                        "envId": settings.envId,
+                        "date": datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"),
+                        "envId": settings.envId,
+                        "API_HOST": settings.API_HOST,
+                        "METHOD": self.method,
+                        "URI": uri
+                        }
+                o = response_json.copy()
+                o["meta"]["scalrctl"] = d
+                #dump = json.dumps(o)
+                dump = yaml.safe_dump(o, encoding='utf-8', allow_unicode=True, default_flow_style=False)
+                try:
+                    with open(os.path.expanduser(export_path), "w") as fp:
+                        fp.write(dump)
+                except IOError as err:
+                    raise click.ClickException(str(err))
+
             data = response_json["data"]
             text = json.dumps(data)
 
@@ -190,6 +227,8 @@ class SubCommand(object):
 
             if settings.view == "tree":
                 click.echo(build_tree(text))
+
+
 
             elif settings.view == "table":
                 columns = self._table_columns or self.spc.get_column_names()

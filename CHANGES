@@ -1,0 +1,12 @@
+scalr-ctl Changelog
+===============
+
+
+Version 1.0.15
+-----------
+Added experimental import/export feature.
+Example:
+
+scalr-ctl scaling-metric retrieve --metricName DailyActiveUsers --envId 1 --export ~/Downloads/DailyActiveUsers.yaml
+
+scalr-ctl scaling-metric create --envId 2 --import ~/Downloads/DailyActiveUsers.yaml
