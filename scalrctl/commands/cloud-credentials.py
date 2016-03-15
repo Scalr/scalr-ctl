@@ -1,5 +1,5 @@
 __author__ = 'Dmitriy Korsakov'
-__doc__ = 'Manage events available in the Scalr Environment'
+__doc__ = 'Manage cloud credentials available in the Scalr Environment'
 
 
 from scalrctl import commands

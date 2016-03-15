@@ -279,10 +279,18 @@ class SubCommand(object):
             for param in spec.get_raw_spec(self.api_level)["paths"][self.route][self.method]["parameters"]:
                 name = param["name"] # image
                 if "schema" in param:
-                    reference_path = param["schema"]['$ref'] # #/definitions/Image
+                    if '$ref' in param["schema"]:
+                        reference_path = param["schema"]['$ref']  # e.g. #/definitions/Image
+                    elif "properties" in param["schema"]:  # ST-98, got object instead of $ref
+                        #reference_path = param["schema"]
+                        for property, descr in param["schema"]["properties"].items():
+                            if 'readOnly' not in descr or not descr['readOnly']:
+                                mutable.append(property)
+
                 elif 'readOnly' not in param:
                     # e.g. POST /{envId}/farms/{farmId}/actions/terminate/
                     mutable.append(name)
+
         else:
             #XXX: Temporary code, see GlobalVariableDetailEnvelope or "role-global-variables update"
             reference_path = self.object_reference
