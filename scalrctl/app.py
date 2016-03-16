@@ -50,7 +50,7 @@ def setup_bash_complete():
         return
     startupfile_content = open(startup_path, "r").read()
 
-    if AUTOCOMPLETE_PATH not in startupfile_content:
+    if AUTOCOMPLETE_CONTENT not in startupfile_content:
         confirmed = click.confirm("Modify profile to update your $PATH and enable bash completion?", default=True, err=True)
 
         if confirmed:
