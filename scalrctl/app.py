@@ -3,8 +3,10 @@ __author__ = 'Dmitriy Korsakov'
 import os
 import sys
 import json
+import time
 import shutil
 import inspect
+import threading
 
 import yaml
 import click
@@ -127,64 +129,100 @@ def update():
     Downloads yaml spec and converts it to JSON
     Both files are stored in configuration directory.
     """
+    successfull = False
     text = None
     user_trigger_file = os.path.join(CONFIG_FOLDER, SWAGGER_USER_NOUPDATE_TRIGGER)
 
     user_url = spec.get_spec_url(api_level="user")
     user_dst = os.path.join(CONFIG_FOLDER, SWAGGER_USER_FILE)
 
-    if user_url and not os.path.exists(user_trigger_file):
-        click.echo("Trying to get new UserAPI Spec from %s" % user_url)
-        r = requests.get(user_url)
+    def spinning_cursor():
+        while True:
+            for cursor in '|/-\\':
+                yield cursor
 
-        old = None
+    def draw_spinner(event):
+        spinner = spinning_cursor()
+        while not event.isSet():
+            sys.stdout.write(spinner.next())
+            sys.stdout.flush()
+            time.sleep(0.1)
+            sys.stdout.write('\b')
+        sys.stdout.write(' ')
+        sys.stdout.flush()
 
-        if os.path.exists(user_dst):
-            with open(user_dst, "r") as fp:
-                old = fp.read()
+    click.echo("Updating API specifications... ", nl=False)
 
-        text = r.text
+    e = threading.Event()
+    t = threading.Thread(target=draw_spinner, args=(e,))
+    t.start()
 
-        if text == old:
-            click.echo("UserAPI Spec is already up-to-date.")
-        elif text:
-            with open(user_dst, "w") as fp:
-                fp.write(text)
-            click.echo("UserAPI UserSpec successfully updated.")
+    try:
+        if user_url and not os.path.exists(user_trigger_file):
+            # click.echo("Trying to get new UserAPI Spec from %s" % user_url)
+            r = requests.get(user_url)
 
-    if text or os.path.exists(user_dst):
-        struct = yaml.load(text or open(user_dst).read())
-        json.dump(struct, open(SWAGGER_USER_JSONSPEC_PATH, "w"))
+            old = None
+
+            if os.path.exists(user_dst):
+                with open(user_dst, "r") as fp:
+                    old = fp.read()
+
+            text = r.text
+
+            if text == old:
+                # click.echo("UserAPI Spec is already up-to-date.")
+                successfull = True
+            elif text:
+                with open(user_dst, "w") as fp:
+                    fp.write(text)
+                # click.echo("UserAPI UserSpec successfully updated.")
+                successfull = True
+
+        if text or os.path.exists(user_dst):
+            struct = yaml.load(text or open(user_dst).read())
+            json.dump(struct, open(SWAGGER_USER_JSONSPEC_PATH, "w"))
 
 
-    # Fetch AccountAPI spec and convert to JSON
-    text = None
-    account_trigger_file = os.path.join(CONFIG_FOLDER, SWAGGER_ACCOUNT_NOUPDATE_TRIGGER)
-    account_url = spec.get_spec_url(api_level="account")
-    account_dst = os.path.join(CONFIG_FOLDER, SWAGGER_ACCOUNT_FILE)
+        # Fetch AccountAPI spec and convert to JSON
+        text = None
+        account_trigger_file = os.path.join(CONFIG_FOLDER, SWAGGER_ACCOUNT_NOUPDATE_TRIGGER)
+        account_url = spec.get_spec_url(api_level="account")
+        account_dst = os.path.join(CONFIG_FOLDER, SWAGGER_ACCOUNT_FILE)
 
-    if account_url and not os.path.exists(account_trigger_file):
-        click.echo("Trying to get new AccountAPI Spec from %s" % account_url)
-        r = requests.get(account_url)
+        if account_url and not os.path.exists(account_trigger_file):
+            # click.echo("Trying to get new AccountAPI Spec from %s" % account_url)
+            r = requests.get(account_url)
 
-        old = None
+            old = None
 
-        if os.path.exists(account_dst):
-            with open(account_dst, "r") as fp:
-                old = fp.read()
+            if os.path.exists(account_dst):
+                with open(account_dst, "r") as fp:
+                    old = fp.read()
 
-        text = r.text
+            text = r.text
 
-        if text == old:
-            click.echo("AccountAPI Spec is already up-to-date.")
-        elif text:
-            with open(account_dst, "w") as fp:
-                fp.write(text)
-            click.echo("AccountAPI Spec successfully updated.")
+            if text == old:
+                # click.echo("AccountAPI Spec is already up-to-date.")
+                successfull = True
+            elif text:
+                with open(account_dst, "w") as fp:
+                    fp.write(text)
+                # click.echo("AccountAPI Spec successfully updated.")
+                successfull = True
 
-    if text or os.path.exists(account_dst):
-        struct = yaml.load(text or open(account_dst).read())
-        json.dump(struct, open(SWAGGER_ACCOUNT_JSONSPEC_PATH, "w"))
+        if text or os.path.exists(account_dst):
+            struct = yaml.load(text or open(account_dst).read())
+            json.dump(struct, open(SWAGGER_ACCOUNT_JSONSPEC_PATH, "w"))
+
+    finally:
+        e.set()
+        time.sleep(0.1)  # XXX: ST-101
+        if successfull:
+            click.echo("Done")
+        else:
+            click.echo("Failed")
+
 
 
 class HelpBuilder(object):
