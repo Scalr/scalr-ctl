@@ -217,7 +217,7 @@ def update():
 
     finally:
         e.set()
-        time.sleep(0.1)  # XXX: ST-101
+        t.join()
         if successfull:
             click.echo("Done")
         else:
