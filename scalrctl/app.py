@@ -428,7 +428,7 @@ class MyCLI(click.Group):
                     options = subcommand.modify_options(options)
                     acc_spec = spec.Spec(spec.get_raw_spec(api_level="account"), route, method)
                     subcommand_descr = acc_spec.description
-                    cmd = click.Command(subcommand_name, params=options, callback=subcommand.run, help=subcommand_descr)
+                    cmd = click.Command(subcommand_name, params=options, callback=subcommand.run, short_help=subcommand_descr)
                     grp.add_command(cmd)
 
                 account_group.add_command(grp)
@@ -461,7 +461,7 @@ class MyCLI(click.Group):
                 options = subcommand.modify_options(options)
 
                 spc = spec.Spec(spec.get_raw_spec(api_level="user"), subcommand.route, subcommand.method)
-                cmd = click.Command(subcommand.name, params=options, callback=subcommand.run, help=spc.description)
+                cmd = click.Command(subcommand.name, params=options, callback=subcommand.run, short_help=spc.description)
                 group.add_command(cmd)
 
         return group
