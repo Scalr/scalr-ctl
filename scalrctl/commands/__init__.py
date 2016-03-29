@@ -194,7 +194,12 @@ class SubCommand(object):
 
         if raw_response:
 
-            response_json = json.loads(response)
+            try:
+                response_json = json.loads(response)
+            except ValueError, e:
+                if settings.debug_mode:
+                    raise
+                raise click.ClickException(str(e))
 
             if "errors" in response_json and response_json["errors"]:
                 raise click.ClickException(response_json["errors"][0]['message'])

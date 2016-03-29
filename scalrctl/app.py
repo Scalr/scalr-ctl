@@ -2,227 +2,20 @@ __author__ = 'Dmitriy Korsakov'
 
 import os
 import sys
-import json
-import time
-import shutil
 import inspect
-import threading
 
 import yaml
 import click
-import requests
 
 from scalrctl import commands
 from scalrctl import settings
 from scalrctl import spec
+from scalrctl import defaults
 
-PROGNAME = "scalr-ctl"
-DEFAULT_PROFILE = "default"
+from scalrctl.commands.internal import configure, update
+
+
 CMD_FOLDER = os.path.abspath(os.path.join(os.path.dirname(__file__), 'commands'))
-CONFIG_FOLDER = os.path.expanduser(os.environ.get("SCALRCLI_HOME", os.path.join(os.path.expanduser("~"), ".scalr")))
-CONFIG_PATH = os.path.join(CONFIG_FOLDER, "%s.yaml" % os.environ.get("SCALRCLI_PROFILE", DEFAULT_PROFILE))
-
-SWAGGER_USER_NOUPDATE_TRIGGER = ".noupdate.user"
-SWAGGER_USER_FILE = "user.yaml"
-SWAGGER_USER_PATH = os.path.join(CONFIG_FOLDER, SWAGGER_USER_FILE)
-SWAGGER_USER_JSONSPEC_FILE = SWAGGER_USER_FILE.split(".")[0] + ".json"
-SWAGGER_USER_JSONSPEC_PATH = os.path.join(CONFIG_FOLDER, SWAGGER_USER_JSONSPEC_FILE)
-
-SWAGGER_ACCOUNT_NOUPDATE_TRIGGER = ".noupdate.account"
-SWAGGER_ACCOUNT_FILE = "account.yaml"
-SWAGGER_ACCOUNT_PATH = os.path.join(CONFIG_FOLDER, SWAGGER_ACCOUNT_FILE)
-SWAGGER_ACCOUNT_JSONSPEC_FILE = SWAGGER_ACCOUNT_FILE.split(".")[0] + ".json"
-SWAGGER_ACCOUNT_JSONSPEC_PATH = os.path.join(CONFIG_FOLDER, SWAGGER_ACCOUNT_JSONSPEC_FILE)
-
-AUTOCOMPLETE_FNAME = "path.bash.inc"
-AUTOCOMPLETE_CONTENT = "_%s_COMPLETE=source %s" % (PROGNAME.upper().replace("-", "_"), PROGNAME)
-AUTOCOMPLETE_PATH = os.path.join(os.path.expanduser(CONFIG_FOLDER), AUTOCOMPLETE_FNAME)
-
-
-def setup_bash_complete():
-    if "nt" == os.name: # Click currently only supports completion for Bash.
-        return
-
-    bashrc_path = os.path.expanduser("~/.bashrc")
-    bashprofile_path = os.path.expanduser("~/.bash_profile")
-    startup_path = bashprofile_path if os.path.exists(bashprofile_path) else bashrc_path
-    startup_path = click.prompt("Enter path to an rc file to update, or leave blank to use", default=startup_path, err=True)
-    if not os.path.exists(startup_path):
-        click.echo("%s not found." % startup_path)
-        return
-    startupfile_content = open(startup_path, "r").read()
-
-    if AUTOCOMPLETE_CONTENT not in startupfile_content:
-        confirmed = click.confirm("Modify profile to update your $PATH and enable bash completion?", default=True, err=True)
-
-        if confirmed:
-            with open(AUTOCOMPLETE_PATH, "w") as fp:
-                fp.write(AUTOCOMPLETE_CONTENT)
-
-            backup_path = startup_path + ".backup"
-            click.echo("Backing up [%s] to [%s]." % (startup_path, backup_path))
-            shutil.copy(startup_path, backup_path)
-
-            #source_line = "source '%s'" % AUTOCOMPLETE_PATH #XXX: for some reason this seized to work
-            source_line = 'eval "$(%s)"' % AUTOCOMPLETE_CONTENT
-
-            comment = "# The next line enables bash completion for %s." % PROGNAME
-            newline = "" if startupfile_content.endswith("\n") else "\n"
-            add = "%s%s\n%s" % (newline, comment, source_line)
-
-            # Handling pip install --user and PATH
-            local_binpath = os.path.join(os.path.expanduser("~/.local/bin/"), PROGNAME)
-            if os.path.exists(local_binpath):
-                add += "\nasias %s=%s" % (PROGNAME, local_binpath)
-
-            with open(startup_path, "a") as afp:
-                afp.write(add)
-
-            click.echo("Start a new shell for the changes to take effect.")
-
-
-def configure(profile=None):
-    """
-    Configure command-line client.
-    Creates new profile in configuration directory
-    and downloads spec file.
-    :param profile: Profile name
-    """
-    confpath = os.path.join(CONFIG_FOLDER, "%s.yaml" % profile) if profile else CONFIG_PATH
-    data = {}
-
-    if os.path.exists(confpath):
-        old_data = yaml.load(open(confpath, "r"))
-        data.update(old_data)
-
-    click.echo("Configuring %s:" % confpath)
-
-    for obj in dir(settings):
-        if not obj.startswith("__"):
-            default_value = getattr(settings, obj)
-            if isinstance(default_value, bool):
-                data[obj] = click.confirm(obj, default=getattr(settings, obj))
-            elif not default_value or type(default_value) in (int, str):
-                data[obj] = str(click.prompt(obj, default=getattr(settings, obj))).strip()
-
-    if not os.path.exists(CONFIG_FOLDER):
-        os.makedirs(CONFIG_FOLDER)
-
-    raw = yaml.dump(data, default_flow_style=False, default_style='')
-    with open(confpath, 'w') as fp:
-        fp.write(raw)
-
-    click.echo()
-    click.echo("New config saved:")
-    click.echo()
-    click.echo(open(confpath, "r").read())
-
-    for setting, value in data.items():
-        setattr(settings, setting, value)
-
-    update()
-    setup_bash_complete()
-
-
-def update():
-    """
-    Downloads yaml spec and converts it to JSON
-    Both files are stored in configuration directory.
-    """
-    successfull = False
-    text = None
-    user_trigger_file = os.path.join(CONFIG_FOLDER, SWAGGER_USER_NOUPDATE_TRIGGER)
-
-    user_url = spec.get_spec_url(api_level="user")
-    user_dst = os.path.join(CONFIG_FOLDER, SWAGGER_USER_FILE)
-
-    def spinning_cursor():
-        while True:
-            for cursor in '|/-\\':
-                yield cursor
-
-    def draw_spinner(event):
-        spinner = spinning_cursor()
-        while not event.isSet():
-            sys.stdout.write(spinner.next())
-            sys.stdout.flush()
-            time.sleep(0.1)
-            sys.stdout.write('\b')
-        sys.stdout.write(' ')
-        sys.stdout.flush()
-
-    click.echo("Updating API specifications... ", nl=False)
-
-    e = threading.Event()
-    t = threading.Thread(target=draw_spinner, args=(e,))
-    t.start()
-
-    try:
-        if user_url and not os.path.exists(user_trigger_file):
-            # click.echo("Trying to get new UserAPI Spec from %s" % user_url)
-            r = requests.get(user_url)
-
-            old = None
-
-            if os.path.exists(user_dst):
-                with open(user_dst, "r") as fp:
-                    old = fp.read()
-
-            text = r.text
-
-            if text == old:
-                # click.echo("UserAPI Spec is already up-to-date.")
-                successfull = True
-            elif text:
-                with open(user_dst, "w") as fp:
-                    fp.write(text)
-                # click.echo("UserAPI UserSpec successfully updated.")
-                successfull = True
-
-        if text or os.path.exists(user_dst):
-            struct = yaml.load(text or open(user_dst).read())
-            json.dump(struct, open(SWAGGER_USER_JSONSPEC_PATH, "w"))
-
-
-        # Fetch AccountAPI spec and convert to JSON
-        text = None
-        account_trigger_file = os.path.join(CONFIG_FOLDER, SWAGGER_ACCOUNT_NOUPDATE_TRIGGER)
-        account_url = spec.get_spec_url(api_level="account")
-        account_dst = os.path.join(CONFIG_FOLDER, SWAGGER_ACCOUNT_FILE)
-
-        if account_url and not os.path.exists(account_trigger_file):
-            # click.echo("Trying to get new AccountAPI Spec from %s" % account_url)
-            r = requests.get(account_url)
-
-            old = None
-
-            if os.path.exists(account_dst):
-                with open(account_dst, "r") as fp:
-                    old = fp.read()
-
-            text = r.text
-
-            if text == old:
-                # click.echo("AccountAPI Spec is already up-to-date.")
-                successfull = True
-            elif text:
-                with open(account_dst, "w") as fp:
-                    fp.write(text)
-                # click.echo("AccountAPI Spec successfully updated.")
-                successfull = True
-
-        if text or os.path.exists(account_dst):
-            struct = yaml.load(text or open(account_dst).read())
-            json.dump(struct, open(SWAGGER_ACCOUNT_JSONSPEC_PATH, "w"))
-
-    finally:
-        e.set()
-        t.join()
-        if successfull:
-            click.echo("Done")
-        else:
-            click.echo("Failed")
-
 
 
 class HelpBuilder(object):
@@ -240,9 +33,6 @@ class HelpBuilder(object):
         if "parameters" in l:
             l.remove("parameters")
         return l
-
-    def get_method_description(self, path, method="get"):
-        return self.document["paths"][path][method]['description']
 
     def get_body_type_params(self, path, method="get"):
         params = []
@@ -284,12 +74,6 @@ class HelpBuilder(object):
                         if "array" == responce_type:
                             return True
         return False
-
-
-def list_module_filenames():
-    files = os.listdir(CMD_FOLDER)
-    l = [fname for fname in files if fname.endswith('.py') and not fname.startswith("_")]
-    return l
 
 
 
@@ -384,7 +168,10 @@ class MyCLI(click.Group):
 
 
     def _init(self):
-        for name in list_module_filenames():
+        files = os.listdir(CMD_FOLDER)
+        list_module_filenames = [fname for fname in files if fname.endswith('.py') and not fname.startswith("_")]
+
+        for name in list_module_filenames:
             try:
                 if sys.version_info[0] == 2:
                     name = name.encode('ascii', 'replace')
@@ -407,9 +194,6 @@ class MyCLI(click.Group):
         if name == "account":
             account_help = "All AccountAPI commands"  # TODO: HelpStr
             account_group = click.Group("account", callback=lambda: None, help=account_help)
-
-            #print self.metaspec._list_subcmd_aliases(command_name="os", api_level="account")
-            #print self.metaspec._list_cmd_aliases(api_level="account")
 
             for command_name in self.metaspec._list_cmd_aliases(api_level="account"):
                 command_descr = self.metaspec._get_cmd_descr(command_name=command_name, api_level="account")
@@ -436,8 +220,8 @@ class MyCLI(click.Group):
 
         elif name == "configure":
             configure_help = "Set configuration options in interactive mode"
-            profile_argument = click.Argument(("profile",), required=False) # [ST-30]
-            configure_cmd = click.Command("configure", callback=configure, help=configure_help, params=[profile_argument,])
+            profile_argument = click.Argument(("profile",), required=False)  # [ST-30]
+            configure_cmd = click.Command("configure", callback=configure.configure, help=configure_help, params=[profile_argument,])
             return configure_cmd
 
         elif name == "update":
@@ -451,7 +235,7 @@ class MyCLI(click.Group):
         group = click.Group(name, callback=self._modules[name].callback, help=self._modules[name].__doc__)
 
         hb = self.get_help_builder(api_level="user")
-        subcommands = self._list_subcommands(name)  #TODO: BROKEN CODE! see scalr-ctl os list
+        subcommands = self._list_subcommands(name)
         routes = hb.list_paths()
         for subcommand in subcommands:
             if subcommand.route in routes \
@@ -476,14 +260,14 @@ def apply_settings(data):
             setattr(settings, key, value)
 
 
-if not os.path.exists(CONFIG_FOLDER):
-    os.makedirs(CONFIG_FOLDER)
+if not os.path.exists(defaults.CONFIG_FOLDER):
+    os.makedirs(defaults.CONFIG_FOLDER)
 
-if os.path.exists(CONFIG_PATH):
-    apply_settings(yaml.load(open(CONFIG_PATH, "r")))
+if os.path.exists(defaults.CONFIG_PATH):
+    apply_settings(yaml.load(open(defaults.CONFIG_PATH, "r")))
 
-if not os.path.exists(SWAGGER_USER_PATH) or not os.path.exists(SWAGGER_USER_JSONSPEC_PATH):
-    update() # [ST-53]
+if update.is_update_required():
+    update.update()  # [ST-53]
 
 
 @click.command(cls=MyCLI)
