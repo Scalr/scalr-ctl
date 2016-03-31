@@ -226,7 +226,7 @@ class MyCLI(click.Group):
 
         elif name == "update":
             update_help = "Fetch new API specification if available."
-            update_cmd = click.Command("update", callback=update, help=update_help)
+            update_cmd = click.Command("update", callback=update.update, help=update_help)
             return update_cmd
 
         elif name not in self._modules:
