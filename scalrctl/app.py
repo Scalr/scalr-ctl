@@ -281,7 +281,7 @@ def cli(ctx, key_id, secret_key, *args, **kvargs):
         settings.API_KEY_ID = str(key_id)
     if secret_key:
         settings.API_SECRET_KEY = str(secret_key)
-    elif settings.API_KEY_ID and settings.API_KEY_ID.strip() and not settings.API_SECRET_KEY: # [ST-21]
+    elif settings.API_KEY_ID and settings.API_KEY_ID.strip() and not settings.API_SECRET_KEY:  # [ST-21]
         if ctx.invoked_subcommand not in ("configure", "update"):
             raw = click.prompt(text="API SECRET KEY", hide_input=True)
             settings.API_SECRET_KEY = str(raw)

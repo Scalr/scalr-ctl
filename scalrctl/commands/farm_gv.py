@@ -1,17 +1,17 @@
 __author__ = 'Dmitriy Korsakov'
-__doc__ = 'Manage global variables for farm roles'
+__doc__ = 'Manage global variables for farms'
 
 
 from scalrctl import commands
 
 
-name = "farm-role-global-variables"
+name = "farm-global-variables"
 enabled = True
 
 
 def callback(*args, **kwargs):
     """
-    print('in farm-role-global-variables module')
+    print('in farm-global-variables module')
     print(args)
     print(kwargs)
     """
@@ -19,36 +19,37 @@ def callback(*args, **kwargs):
 
 
 class GV(commands.SubCommand):
-    route = "/{envId}/farm-roles/{farmRoleId}/global-variables/{globalVariableName}/"
+    route = "/{envId}/farms/{farmId}/global-variables/{globalVariableName}/"
 
 
-class DeleteFarmRoleGlobalVariable(GV):
+class DeleteFarmGlobalVariable(GV):
     name = "delete"
     method = "delete"
     enabled = True
 
 
-class ListFarmRoleGlobalVariables(GV):
-    route = "/{envId}/farm-roles/{farmRoleId}/global-variables/"
+class ListFarmGlobalVariables(GV):
+
+    route = "/{envId}/farms/{farmId}/global-variables/"
     name = "list"
     method = "get"
     enabled = True
 
 
-class NewFarmRoleGV(GV):
-    route = "/{envId}/farm-roles/{farmRoleId}/global-variables/"
+class NewFarmGV(GV):
+    route = "/{envId}/farms/{farmId}/global-variables/"
     name = "create"
     method = "post"
     enabled = True
 
 
-class RetrieveFarmRoleGlobalVariable(GV):
+class RetrieveFarmGlobalVariable(GV):
     name = "retrieve"
     method = "get"
     enabled = True
 
 
-class UpdateFarmRoleGlobalVariable(GV):
+class UpdateFarmGlobalVariable(GV):
     name = "update"
     method = "patch"
     enabled = True
