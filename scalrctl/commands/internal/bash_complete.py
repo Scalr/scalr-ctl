@@ -39,10 +39,10 @@ def setup_bash_complete():
             shutil.copy(startup_path, backup_path)
 
             newline = "" if startupfile_content.endswith("\n") else "\n"
-            comment = "# The next two lines enable bash completion for %s.\n" % PROGNAME
+            comment = "# The next lines enable bash completion for %s.\n" % PROGNAME
             local_bindir = os.path.expanduser(os.path.join(site.USER_BASE, "bin"))
             local_binpath = os.path.join(local_bindir, PROGNAME)
-            source_line = 'eval "$(%s)"' % AUTOCOMPLETE_CONTENT
+            source_line = 'eval "$(%s)"\n' % AUTOCOMPLETE_CONTENT
 
             if os.path.exists(local_binpath):
                 msg = "Do you want to add %s to your $PATH?" % local_bindir
