@@ -38,10 +38,20 @@ def setup_bash_complete():
 
             newline = "" if startupfile_content.endswith("\n") else "\n"
             comment = "# The next line enables bash completion for %s.\n" % PROGNAME
-            local_binpath = os.path.join(os.path.expanduser("~/.local/bin/"), PROGNAME)
-            alias = "alias %s=%s\n" % (PROGNAME, local_binpath)  # Handling pip install --user and PATH
+            local_bindir = os.path.expanduser("~/.local/bin/")
+            local_binpath = os.path.join(local_bindir, PROGNAME)
+            # alias = "alias %s=%s\n" % (PROGNAME, local_binpath)  # Handling pip install --user and PATH
+
+            if os.path.exists(local_binpath):
+                msg = "Do you want to add %s to your $PATH?" % local_bindir
+                export_confirmed = click.confirm(msg, default=True, err=True)
+                if export_confirmed:
+                    export_line = "export PATH=$PATH:%s\n" % local_binpath  # [ST-112]
+            else:
+                export_line = ''
+
             source_line = 'eval "$(%s)"' % AUTOCOMPLETE_CONTENT
-            add = "%s%s%s%s" % (newline, comment, alias if os.path.exists(local_binpath) else '', source_line)
+            add = "%s%s%s%s" % (newline, comment, export_line, source_line if export_line else '')
 
             with open(startup_path, "a") as afp:
                 afp.write(add)
