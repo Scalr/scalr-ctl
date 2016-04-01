@@ -1,6 +1,7 @@
 __author__ = 'Dmitriy Korsakov'
 
 import os
+import site
 import shutil
 
 import click
@@ -39,7 +40,7 @@ def setup_bash_complete():
 
             newline = "" if startupfile_content.endswith("\n") else "\n"
             comment = "# The next two lines enable bash completion for %s.\n" % PROGNAME
-            local_bindir = os.path.expanduser("~/.local/bin/")
+            local_bindir = os.path.expanduser(os.path.join(site.USER_BASE, "bin"))
             local_binpath = os.path.join(local_bindir, PROGNAME)
             source_line = 'eval "$(%s)"' % AUTOCOMPLETE_CONTENT
 
