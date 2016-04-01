@@ -13,7 +13,8 @@ except ImportError:
 class _install(install):
     def run(self):
         install.run(self)
-        post_install()
+        post_install()  # Does not work with pip
+
 
 def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
@@ -46,6 +47,7 @@ if __name__ == '__main__':
         packages = [
             "scalrctl",
             "scalrctl.commands",
+            "scalrctl.commands.internal"
         ],
         include_package_data=True,
         install_requires=[
