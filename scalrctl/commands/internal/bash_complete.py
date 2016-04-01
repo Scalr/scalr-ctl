@@ -46,7 +46,7 @@ def setup_bash_complete():
                 msg = "Do you want to add %s to your $PATH?" % local_bindir
                 export_confirmed = click.confirm(msg, default=True, err=True)
                 if export_confirmed:
-                    export_line = "export PATH=$PATH:%s\n" % local_binpath  # [ST-112]
+                    export_line = "export PATH=$PATH:%s\n" % local_bindir  # [ST-112]
             else:
                 export_line = ''
 
