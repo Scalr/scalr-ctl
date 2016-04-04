@@ -51,7 +51,7 @@ if __name__ == '__main__':
         ],
         include_package_data=True,
         install_requires=[
-            'Click==6.3',
+            'Click>=6.3',
             'prettytable',
             'pyyaml',
             'requests',

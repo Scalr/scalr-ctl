@@ -76,13 +76,12 @@ class HelpBuilder(object):
         return False
 
 
-
 class MyCLI(click.Group):
 
     _modules = None
 
     def __init__(self, name=None, commands=None, **attrs):
-        click.Group.__init__(self, name, commands, **attrs)
+        super(MyCLI, self).__init__(name, commands, **attrs)
         self._modules = {}
         self._init()
         self.metaspec = spec.MetaSpec.lookup()
@@ -104,7 +103,16 @@ class MyCLI(click.Group):
             if inspect.isclass(obj) and hasattr(obj, 'enabled') and getattr(obj, 'enabled'):
                 subcommand = obj()
                 if isinstance(subcommand, commands.SubCommand):
-                    objects.append(subcommand)
+                    if subcommand.name == "retrieve":  # [ST-102]
+                        subcommand.name = "get"
+                        objects.append(subcommand)
+                    elif subcommand.name == "change-attributes":
+                        subcommand.name = "update"
+                        objects.append(subcommand)
+                    else:
+                        objects.append(subcommand)
+
+
         return objects
 
 
@@ -212,7 +220,17 @@ class MyCLI(click.Group):
                     options = subcommand.modify_options(options)
                     acc_spec = spec.Spec(spec.get_raw_spec(api_level="account"), route, method)
                     subcommand_descr = acc_spec.description
-                    cmd = click.Command(subcommand_name, params=options, callback=subcommand.run, short_help=subcommand_descr)
+                    cmd = click.Command(subcommand.name, params=options, callback=subcommand.run, short_help=subcommand_descr)
+
+                    if subcommand_name == "retrieve":  # [ST-102]
+                        new_cmd = click.Command("get", params=options, callback=subcommand.run, short_help=subcommand_descr)
+                        grp.add_command(new_cmd)
+                        cmd.hidden = True
+                    elif subcommand_name == "change-attributes":  # [ST-104]
+                        new_cmd = click.Command("update", params=options, callback=subcommand.run, short_help=subcommand_descr)
+                        grp.add_command(new_cmd)
+                        cmd.hidden = True
+
                     grp.add_command(cmd)
 
                 account_group.add_command(grp)
