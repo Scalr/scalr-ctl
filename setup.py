@@ -46,12 +46,12 @@ if __name__ == '__main__':
             ],
         packages = [
             "scalrctl",
+            "scalrctl.click",
             "scalrctl.commands",
             "scalrctl.commands.internal"
         ],
         include_package_data=True,
         install_requires=[
-            'Click==6.3',
             'prettytable',
             'pyyaml',
             'requests',

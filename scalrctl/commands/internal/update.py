@@ -7,9 +7,9 @@ import json
 import threading
 
 import yaml
-import click
 import requests
 
+from scalrctl import click
 from scalrctl import spec
 from scalrctl import defaults
 

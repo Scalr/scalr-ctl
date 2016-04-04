@@ -1,11 +1,13 @@
 __author__ = 'Dmitriy Korsakov'
 
 import os
+import site
 import shutil
 
-import click
-
+from scalrctl import click
 from scalrctl import defaults
+
+
 PROGNAME = "scalr-ctl"
 AUTOCOMPLETE_FNAME = "path.bash.inc"
 AUTOCOMPLETE_CONTENT = "_%s_COMPLETE=source %s" % (PROGNAME.upper().replace("-", "_"), PROGNAME)
@@ -23,6 +25,7 @@ def setup_bash_complete():
     if not os.path.exists(startup_path):
         click.echo("%s not found." % startup_path)
         return
+
     startupfile_content = open(startup_path, "r").read()
 
     if AUTOCOMPLETE_PATH not in startupfile_content:
@@ -37,23 +40,25 @@ def setup_bash_complete():
             shutil.copy(startup_path, backup_path)
 
             newline = "" if startupfile_content.endswith("\n") else "\n"
-            comment = "# The next line enables bash completion for %s.\n" % PROGNAME
-            local_bindir = os.path.expanduser("~/.local/bin/")
+            comment = "# The next lines enable bash completion for %s.\n" % PROGNAME
+            local_bindir = os.path.expanduser(os.path.join(site.USER_BASE, "bin"))
             local_binpath = os.path.join(local_bindir, PROGNAME)
-            # alias = "alias %s=%s\n" % (PROGNAME, local_binpath)  # Handling pip install --user and PATH
+            source_line = 'eval "$(%s)"\n' % AUTOCOMPLETE_CONTENT
 
             if os.path.exists(local_binpath):
                 msg = "Do you want to add %s to your $PATH?" % local_bindir
                 export_confirmed = click.confirm(msg, default=True, err=True)
                 if export_confirmed:
                     export_line = "export PATH=$PATH:%s\n" % local_bindir  # [ST-112]
+                else:
+                    source_line = ''
             else:
                 export_line = ''
 
-            source_line = 'eval "$(%s)"' % AUTOCOMPLETE_CONTENT
-            add = "%s%s%s%s" % (newline, comment, export_line, source_line if export_line else '')
+            add = "%s%s%s%s" % (newline, comment, export_line, source_line)
 
-            with open(startup_path, "a") as afp:
-                afp.write(add)
+            if export_line or source_line:
+                with open(startup_path, "a") as afp:
+                    afp.write(add)
 
             click.echo("Start a new shell for the changes to take effect.")

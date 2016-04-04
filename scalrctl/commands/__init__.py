@@ -1,7 +1,5 @@
 __author__ = 'Dmitriy Korsakov'
 
-import click
-
 import os
 import re
 import json
@@ -9,6 +7,7 @@ import datetime
 import traceback
 from collections import defaultdict
 
+from scalrctl import click
 from scalrctl import settings
 from scalrctl import request
 from scalrctl import spec
