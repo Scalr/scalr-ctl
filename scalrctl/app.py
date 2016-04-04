@@ -103,16 +103,7 @@ class MyCLI(click.Group):
             if inspect.isclass(obj) and hasattr(obj, 'enabled') and getattr(obj, 'enabled'):
                 subcommand = obj()
                 if isinstance(subcommand, commands.SubCommand):
-                    if subcommand.name == "retrieve":  # [ST-102]
-                        subcommand.name = "get"
-                        objects.append(subcommand)
-                    elif subcommand.name == "change-attributes":
-                        subcommand.name = "update"
-                        objects.append(subcommand)
-                    else:
-                        objects.append(subcommand)
-
-
+                    objects.append(subcommand)
         return objects
 
 
@@ -264,8 +255,17 @@ class MyCLI(click.Group):
 
                 spc = spec.Spec(spec.get_raw_spec(api_level="user"), subcommand.route, subcommand.method)
                 cmd = click.Command(subcommand.name, params=options, callback=subcommand.run, short_help=spc.description)
-                group.add_command(cmd)
 
+                if subcommand.name == "retrieve":  # [ST-102]
+                    new_cmd = click.Command("get", params=options, callback=subcommand.run, short_help=spc.description)
+                    group.add_command(new_cmd)
+                    cmd.hidden = True
+                elif subcommand.name == "change-attributes":  # [ST-104]
+                    new_cmd = click.Command("update", params=options, callback=subcommand.run, short_help=spc.description)
+                    group.add_command(new_cmd)
+                    cmd.hidden = True
+
+                group.add_command(cmd)
         return group
 
 def account():
