@@ -5,8 +5,8 @@ import sys
 import inspect
 
 import yaml
-import click
 
+from scalrctl import click
 from scalrctl import commands
 from scalrctl import settings
 from scalrctl import spec
@@ -125,7 +125,7 @@ class MyCLI(click.Group):
             nocolor = click.Option(('--nocolor', 'nocolor'), is_flag=True, default=False, help="Use colors")
             options += [raw, tree, nocolor]
 
-            if subcommand_name != "retrieve": # [ST-54]
+            if subcommand_name not in ("get", "retrieve"):  # [ST-54] [ST-102]
                 table = click.Option(('--table', 'transformation'), is_flag=True, flag_value='table', default=False, help="Print response as a colored table")
                 options.append(table)
             else:

@@ -1,12 +1,8 @@
 __author__ = 'Dmitriy Korsakov'
 __doc__ = 'Image management'
 
-from scalrctl import commands, settings
-import click
-import json
-import sys
-import inspect
-
+from scalrctl import commands
+from scalrctl import click
 
 name = "image"
 enabled = True

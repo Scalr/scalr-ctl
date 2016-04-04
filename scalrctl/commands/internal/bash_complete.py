@@ -4,9 +4,10 @@ import os
 import site
 import shutil
 
-import click
-
+from scalrctl import click
 from scalrctl import defaults
+
+
 PROGNAME = "scalr-ctl"
 AUTOCOMPLETE_FNAME = "path.bash.inc"
 AUTOCOMPLETE_CONTENT = "_%s_COMPLETE=source %s" % (PROGNAME.upper().replace("-", "_"), PROGNAME)

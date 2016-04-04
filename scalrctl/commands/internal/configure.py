@@ -3,8 +3,8 @@ __author__ = 'Dmitriy Korsakov'
 import os
 
 import yaml
-import click
 
+from scalrctl import click
 from scalrctl import defaults
 from scalrctl import settings
 from scalrctl.commands.internal import bash_complete, update

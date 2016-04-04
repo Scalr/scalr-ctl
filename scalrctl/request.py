@@ -6,9 +6,9 @@ import urllib
 import json
 import yaml
 
-import click
 import requests
 
+from scalrctl import click
 from scalrctl import settings
 
 from six.moves.urllib.parse import urlparse, urlencode, urlunsplit
