@@ -29,7 +29,7 @@ class ListScriptVersions(ScriptVersion):
     enabled = True
 
 
-class RetrieveScript(ScriptVersion):
+class RetrieveScriptVersion(ScriptVersion):
     name = "retrieve"
     route = "/{envId}/scripts/{scriptId}/script-versions/{scriptVersionNumber}/"
     method = "get"
@@ -43,14 +43,14 @@ class CreateScriptVersion(ScriptVersion):
     enabled = True
 
 
-class ChangeScriptAttrs(ScriptVersion):
+class ChangeScriptVersionAttrs(ScriptVersion):
     name = "change-attributes"
     route = "/{envId}/scripts/{scriptId}/script-versions/{scriptVersionNumber}/"
     method = "patch"
     enabled = True
 
 
-class DeleteScript(ScriptVersion):
+class DeleteScriptVersion(ScriptVersion):
     name = "delete"
     route = "/{envId}/scripts/{scriptId}/script-versions/{scriptVersionNumber}/"
     method = "delete"
