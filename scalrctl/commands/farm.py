@@ -5,7 +5,7 @@ __doc__ = 'Farm management'
 from scalrctl import commands
 
 
-name = "farm"
+NAME = "farm"
 enabled = True
 
 

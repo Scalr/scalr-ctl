@@ -4,7 +4,7 @@ __doc__ = 'Manage farmrole scaling'
 from scalrctl import commands
 
 
-name = "farm-role-scaling"
+NAME = "farm-role-scaling"
 enabled = True
 
 

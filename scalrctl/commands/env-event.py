@@ -5,7 +5,7 @@ __doc__ =  'Manage events available in the Scalr Environment'
 from scalrctl import commands
 
 
-name = "event"
+NAME = "event"
 enabled = True
 
 

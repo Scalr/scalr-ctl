@@ -107,7 +107,8 @@ class MyCLI(click.Group):
         return objects
 
 
-    def _list_options(self, route, method, subcommand_name, api_level="user"):  #XXX: subcommand_name
+    def _list_options(self, route, method, command_name, subcommand_name, api_level="user"):
+        # XXX: subcommand_name, command_name
         help_builder = self.get_help_builder(api_level=api_level)
         params = help_builder.get_params(route, method)
         options = []
@@ -119,7 +120,7 @@ class MyCLI(click.Group):
             option = click.Option(("--%s" % param['name'], param['name']), required=param['required'], help=param["description"])
             options.append(option)
 
-        if method.upper() == 'GET':
+        if method.upper() == 'GET' and command_name != "export":  # [ST-88]
             raw = click.Option(('--raw', 'transformation'), is_flag=True, flag_value='raw', default=False, help="Print raw response")
             tree = click.Option(('--tree', 'transformation'), is_flag=True, flag_value='tree', default=True, help="Print response as a colored tree")
             nocolor = click.Option(('--nocolor', 'nocolor'), is_flag=True, default=False, help="Use colors")
@@ -175,14 +176,14 @@ class MyCLI(click.Group):
                 if sys.version_info[0] == 2:
                     name = name.encode('ascii', 'replace')
                 mod = __import__('scalrctl.commands.' + name[:-3], None, None, ['enabled'])
-                if hasattr(mod, "name"):
-                    self._modules[mod.name] = mod
+                if hasattr(mod, "NAME"):
+                    self._modules[mod.NAME] = mod
             except ImportError:
                 raise  # pass
 
 
     def list_commands(self, ctx):
-        rv = [module.name for module in self._list_module_objects()]
+        rv = [module.NAME for module in self._list_module_objects()]
         rv += ["configure", "update", "account"]
         rv.sort()
         return rv
@@ -207,7 +208,7 @@ class MyCLI(click.Group):
                     subcommand.route = route
                     subcommand.method = method
                     subcommand.api_level = "account"
-                    options = self._list_options(route, method, subcommand_name, api_level="account")
+                    options = self._list_options(route, method, command_name, subcommand_name, api_level="account")
                     options = subcommand.modify_options(options)
                     acc_spec = spec.Spec(spec.get_raw_spec(api_level="account"), route, method)
                     subcommand_descr = acc_spec.description
@@ -249,7 +250,12 @@ class MyCLI(click.Group):
         for subcommand in subcommands:
             if subcommand.route in routes \
                     and subcommand.method in hb.list_http_methods(subcommand.route):
-                options = self._list_options(route=subcommand.route, method=subcommand.method, subcommand_name=subcommand.name, api_level="user")
+                options = self._list_options(
+                    route=subcommand.route,
+                    method=subcommand.method,
+                    command_name = name,
+                    subcommand_name=subcommand.name,
+                    api_level="user")
 
                 options = subcommand.modify_options(options)
 

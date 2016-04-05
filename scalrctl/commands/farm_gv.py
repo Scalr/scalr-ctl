@@ -5,7 +5,7 @@ __doc__ = 'Manage global variables for farms'
 from scalrctl import commands
 
 
-name = "farm-global-variables"
+NAME = "farm-global-variables"
 enabled = True
 
 

@@ -5,7 +5,7 @@ __doc__ = 'Cost Centrer management'
 from scalrctl import commands
 
 
-name = "cost-center"
+NAME = "cost-center"
 enabled = True
 
 

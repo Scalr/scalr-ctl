@@ -5,7 +5,7 @@ __doc__ = 'Supported operating systems'
 from scalrctl import commands
 
 
-name = "os"
+NAME = "os"
 enabled = True
 
 

@@ -4,7 +4,7 @@ __doc__ = 'Current Role categories'
 from scalrctl import commands
 
 
-name = "role-category"
+NAME = "role-category"
 enabled = True
 
 

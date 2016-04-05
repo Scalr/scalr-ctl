@@ -4,7 +4,7 @@ __doc__ = 'Manage scaling metrics'
 from scalrctl import commands
 
 
-name = "scaling-metric"
+NAME = "scaling-metric"
 enabled = True
 
 

@@ -5,7 +5,7 @@ __doc__ = 'Orchestration Rule management'
 from scalrctl import commands
 
 
-name = "role-orchestration-rule"
+NAME = "role-orchestration-rule"
 enabled = True
 
 

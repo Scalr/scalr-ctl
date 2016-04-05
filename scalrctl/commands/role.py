@@ -5,7 +5,7 @@ __doc__ = 'Role management'
 from scalrctl import commands
 
 
-name = "role"
+NAME = "role"
 enabled = True
 
 

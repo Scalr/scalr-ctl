@@ -5,7 +5,7 @@ __doc__ = 'Script management'
 from scalrctl import commands
 
 
-name = "script"
+NAME = "script"
 enabled = True
 
 

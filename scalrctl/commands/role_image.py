@@ -5,7 +5,7 @@ __doc__ = 'Manage images in roles'
 from scalrctl import commands
 
 
-name = "role-image"
+NAME = "role-image"
 enabled = True
 
 

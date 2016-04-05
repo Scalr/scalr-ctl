@@ -5,7 +5,7 @@ __doc__ = 'View projects'
 from scalrctl import commands
 
 
-name = "project"
+NAME = "project"
 enabled = True
 
 

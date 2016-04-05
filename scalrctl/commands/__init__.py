@@ -15,7 +15,7 @@ from scalrctl.view import build_table, build_tree
 
 import yaml
 
-
+NAME = ""
 enabled = False
 
 
@@ -164,6 +164,7 @@ class SubCommand(object):
         callback for click subcommand
         """
         export_path = kwargs.pop("export", None)  # [ST-88]
+        hide_output = kwargs.pop("hide_output", False)  # [ST-88]
 
         args, kwargs = self.pre(*args, **kwargs)
         uri = self._request_template
@@ -188,7 +189,7 @@ class SubCommand(object):
         raw_response = request.request(self.method, uri, payload, data)
         response = self.post(raw_response)
 
-        if settings.view == "raw":
+        if settings.view == "raw" and not hide_output:
             click.echo(raw_response)
 
         if raw_response:
@@ -208,14 +209,14 @@ class SubCommand(object):
                         "API_VERSION": settings.API_VERSION,
                         "envId": settings.envId,
                         "date": datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"),
-                        "envId": settings.envId,
                         "API_HOST": settings.API_HOST,
                         "METHOD": self.method,
-                        "URI": uri
+                        "URI": uri,
+                        "command": NAME,
+                        "action": self.name,
                         }
                 o = response_json.copy()
                 o["meta"]["scalrctl"] = d
-                #dump = json.dumps(o)
                 dump = yaml.safe_dump(o, encoding='utf-8', allow_unicode=True, default_flow_style=False)
                 try:
                     with open(os.path.expanduser(export_path), "w") as fp:
@@ -226,13 +227,11 @@ class SubCommand(object):
             data = response_json["data"]
             text = json.dumps(data)
 
-            if settings.debug_mode:
+            if settings.debug_mode and not hide_output:
                 click.echo(response_json["meta"])
 
-            if settings.view == "tree":
+            if settings.view == "tree" and not hide_output:
                 click.echo(build_tree(text))
-
-
 
             elif settings.view == "table":
                 columns = self._table_columns or self.spc.get_column_names()
@@ -263,9 +262,8 @@ class SubCommand(object):
                         pagenum_next = num.group(1) if num else 1
                         current_pagenum = int(pagenum_next) - 1
 
-
-
-                click.echo(build_table(columns, rows, "Page: %s of %s" % (current_pagenum, pagenum_last))) #XXX
+                if not hide_output:
+                    click.echo(build_table(columns, rows, "Page: %s of %s" % (current_pagenum, pagenum_last))) #XXX
 
         return response
 

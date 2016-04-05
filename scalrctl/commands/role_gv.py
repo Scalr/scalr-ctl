@@ -2,11 +2,10 @@ __author__ = 'Dmitriy Korsakov'
 __doc__ = 'Manage global variables for roles'
 
 
-import sys
 from scalrctl import commands
 
 
-name = "role-global-variables"
+NAME = "role-global-variables"
 enabled = True
 
 

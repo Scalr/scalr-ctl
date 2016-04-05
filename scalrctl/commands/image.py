@@ -4,7 +4,7 @@ __doc__ = 'Image management'
 from scalrctl import commands
 from scalrctl import click
 
-name = "image"
+NAME = "image"
 enabled = True
 
 

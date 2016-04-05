@@ -5,7 +5,7 @@ __doc__ = 'Manage global variables for farm roles'
 from scalrctl import commands
 
 
-name = "farm-role-global-variables"
+NAME = "farm-role-global-variables"
 enabled = True
 
 

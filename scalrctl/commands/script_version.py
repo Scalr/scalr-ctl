@@ -5,7 +5,7 @@ __doc__ = 'Script Version management'
 from scalrctl import commands
 
 
-name = "script-version"
+NAME = "script-version"
 enabled = True
 
 

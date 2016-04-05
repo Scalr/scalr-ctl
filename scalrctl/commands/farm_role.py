@@ -5,7 +5,7 @@ __doc__ = 'FarmRole management'
 from scalrctl import commands
 
 
-name = "farm-role"
+NAME = "farm-role"
 enabled = True
 
 

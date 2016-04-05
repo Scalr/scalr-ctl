@@ -5,7 +5,7 @@ __doc__ = 'Manage cloud credentials available in the Scalr Environment'
 from scalrctl import commands
 
 
-name = "cloud-credentials"
+NAME = "cloud-credentials"
 enabled = True
 
 
