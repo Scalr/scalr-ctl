@@ -9,137 +9,14 @@ from scalrctl import settings
 class MetaSpec(object):
 
     specs = None
-    data = {
-        "account": {
-            "environment": {
-                    "descr" : "Manage environments",
-                    "subcommands": {
-                        "list": ("/environments/", "get"),
-                        "create": ("/environments/", "post"),
-                        "retrieve": ("/environments/{envId}/", "get"),
-                        "update": ("/environments/{envId}/", "patch"),
-                        "delete": ("/environments/{envId}/", "delete"),
-                        },
-            },
-            "cloud": {
-                    "descr" : "Manage cloud providers",
-                    "subcommands": {
-                        "list": ("/environments/{envId}/clouds/", "get"),
-                        "retrieve": ("/environments/{envId}/clouds/{cloud}/", "get"),
-                        "update": ("/environments/{envId}/clouds/{cloud}/", "post"),
-                        "delete": ("/environments/{envId}/clouds/{cloud}/", "delete"),
-                        },
-            },
-            "team": {
-                    "descr" : "Manage teams",
-                    "subcommands": {
-                        "list": ("/environments/{envId}/teams/", "get"),
-                        "create": ("/environments/{envId}/teams/", "post"),
-                        "delete": ("/environments/{envId}/teams/{teamId}/", "delete"),
-                        },
-            },
-            "os": {
-                    "descr" : "Supported operating systems",
-                    "subcommands": {
-                        "list": ("/os/", "get"),
-                        "retrieve": ("/os/{osId}/", "get"),
-                        },
-            },
-            "cloud-credentials": {
-                    "descr" : "Manage Cloud Credentials for Account scope",
-                    "subcommands": {
-                        "list": ("/cloud-credentials/", "get"),
-                        "retrieve": ("/cloud-credentials/{cloudCredentialsId}/", "get"),
-                        "create": ("/cloud-credentials/", "post"),
-                        "update": ("/cloud-credentials/{cloudCredentialsId}/", "patch"),
-                        "delete": ("/cloud-credentials/{cloudCredentialsId}/", "delete"),
-                        },
-            },
-
-            "event": {
-                    "descr" : "Manage events available in the Scalr Account",
-                    "subcommands": {
-                        "list": ("/events/", "get"),
-                        "retrieve": ("/events/{eventId}/", "get"),
-                        "create": ("/events/", "post"),
-                        "delete": ("/events/{eventId}/", "delete"),
-                        },
-                    },
-
-            "image": {
-                    "descr" : "Image management",
-                    "subcommands": {
-                        "change-attributes": ("/images/{imageId}/", "patch"),
-                        "copy": ("/images/{imageId}/actions/copy/", "post"),
-                        "register": ("/images/", "post"),
-                        "retrieve": ("/images/{imageId}/", "get"),
-                        "list": ("/images/", "get"),
-                        "delete": ("/images/{imageId}/", "delete"),
-                        },
-                    },
-
-            "role-orchestration-rule": {
-                    "descr" : "Orchestration Rule management",
-                    "subcommands": {
-                        "list": ("/roles/{roleId}/orchestration-rules/", "get"),
-                        "retrieve": ("/roles/{roleId}/orchestration-rules/{orchestrationRuleId}/", "get"),
-                        "create": ("/roles/{roleId}/orchestration-rules/", "post"),
-                        "delete": ("/roles/{roleId}/orchestration-rules/{orchestrationRuleId}/", "delete"),
-                        },
-                    },
-
-            "role-global-variables": {
-                    "descr" : "Manage global variables for roles",
-                    "subcommands": {
-                        "list": ("/roles/{roleId}/global-variables/", "get"),
-                        "retrieve": ("/roles/{roleId}/global-variables/{globalVariableName}/", "get"),
-                        "update": ("/roles/{roleId}/global-variables/{globalVariableName}/", "patch"),
-                        "create": ("/roles/{roleId}/global-variables/", "post"),
-                        "delete": ("/roles/{roleId}/global-variables/{globalVariableName}/", "delete"),
-                        },
-                    },
-            "role-category": {
-                    "descr" : "Manage current Role categories",
-                    "subcommands": {
-                        "list": ("/role-categories/", "get"),
-                        "retrieve": ("/role-categories/{roleCategoryId}/", "get"),
-                        "update": ("/role-categories/{roleCategoryId}/", "patch"),
-                        "create": ("/role-categories/", "post"),
-                        "delete": ("/role-categories/{roleCategoryId}/", "delete"),
-                        },
-                    },
-            "role-image": {
-                    "descr" : "Manage images in roles",
-                    "subcommands": {
-                        "list": ("/roles/{roleId}/images/", "get"),
-                        "retrieve": ("/roles/{roleId}/images/{imageId}/", "get"),
-                        "update": ("/roles/{roleId}/images/", "post"),
-                        "delete": ("/roles/{roleId}/images/{imageId}/", "delete"),
-                        "replace": ("/roles/{roleId}/images/{imageId}/actions/replace/", "post"),
-                        },
-                    },
-
-            "role": {
-                    "descr" : "Role management",
-                    "subcommands": {
-                        "change-attributes": ("/roles/{roleId}/", "patch"),
-                        "list": ("/roles/", "get"),
-                        "retrieve": ("/roles/{roleId}/", "get"),
-                        "create": ("/roles/", "post"),
-                        "delete": ("/roles/{roleId}/", "delete"),
-                        },
-                    },
-
-        }
-    }
-
 
     def __init__(self, *specs):
+        with open(os.path.join(os.path.dirname(__file__), 'scheme/scheme.json')) as fp:
+            self.data = json.load(fp)
         self.specs = specs
 
     def __repr__(self):
         return str([spec_dict["basePath"] for spec_dict in self.specs])
-
 
     @classmethod
     def lookup(cls, base_path=None, api_levels=None):
@@ -160,10 +37,10 @@ class MetaSpec(object):
         return cls(*data)
 
     def get_route(self, command_name, subcommand_name, api_level="user"):
-        return self.data[api_level][command_name]["subcommands"][subcommand_name][0]
+        return self.data[api_level][command_name]["subcommands"][subcommand_name]['route']
 
     def get_http_method(self, command_name, subcommand_name, api_level="user"):
-        return self.data[api_level][command_name]["subcommands"][subcommand_name][1]
+        return self.data[api_level][command_name]["subcommands"][subcommand_name]['http-method']
 
     def list_http_methods(self, route):
         methods = []

@@ -1,0 +1,887 @@
+{
+    "account": {
+        "image": {
+            "subcommands": {
+                "retrieve": {
+                    "http-method": "get", 
+                    "route": "/images/{imageId}/"
+                }, 
+                "register": {
+                    "http-method": "post", 
+                    "route": "/images/"
+                }, 
+                "list": {
+                    "http-method": "get", 
+                    "route": "/images/"
+                }, 
+                "change-attributes": {
+                    "http-method": "patch", 
+                    "route": "/images/{imageId}/"
+                }, 
+                "copy": {
+                    "http-method": "post", 
+                    "route": "/images/{imageId}/actions/copy/"
+                }, 
+                "delete": {
+                    "http-method": "delete", 
+                    "route": "/images/{imageId}/"
+                }
+            }, 
+            "descr": "Image management"
+        }, 
+        "role-global-variables": {
+            "subcommands": {
+                "retrieve": {
+                    "http-method": "get", 
+                    "route": "/roles/{roleId}/global-variables/{globalVariableName}/"
+                }, 
+                "create": {
+                    "http-method": "post", 
+                    "route": "/roles/{roleId}/global-variables/"
+                }, 
+                "list": {
+                    "http-method": "get", 
+                    "route": "/roles/{roleId}/global-variables/"
+                }, 
+                "update": {
+                    "http-method": "patch", 
+                    "route": "/roles/{roleId}/global-variables/{globalVariableName}/"
+                }, 
+                "delete": {
+                    "http-method": "delete", 
+                    "route": "/roles/{roleId}/global-variables/{globalVariableName}/"
+                }
+            }, 
+            "descr": "Manage global variables for roles"
+        }, 
+        "role-image": {
+            "subcommands": {
+                "retrieve": {
+                    "http-method": "get", 
+                    "route": "/roles/{roleId}/images/{imageId}/"
+                }, 
+                "replace": {
+                    "http-method": "post", 
+                    "route": "/roles/{roleId}/images/{imageId}/actions/replace/"
+                }, 
+                "list": {
+                    "http-method": "get", 
+                    "route": "/roles/{roleId}/images/"
+                }, 
+                "update": {
+                    "http-method": "post", 
+                    "route": "/roles/{roleId}/images/"
+                }, 
+                "delete": {
+                    "http-method": "delete", 
+                    "route": "/roles/{roleId}/images/{imageId}/"
+                }
+            }, 
+            "descr": "Manage images in roles"
+        }, 
+        "environment": {
+            "subcommands": {
+                "retrieve": {
+                    "http-method": "get", 
+                    "route": "/environments/{envId}/"
+                }, 
+                "create": {
+                    "http-method": "post", 
+                    "route": "/environments/"
+                }, 
+                "list": {
+                    "http-method": "get", 
+                    "route": "/environments/"
+                }, 
+                "update": {
+                    "http-method": "patch", 
+                    "route": "/environments/{envId}/"
+                }, 
+                "delete": {
+                    "http-method": "delete", 
+                    "route": "/environments/{envId}/"
+                }
+            }, 
+            "descr": "Manage environments"
+        }, 
+        "role": {
+            "subcommands": {
+                "retrieve": {
+                    "http-method": "get", 
+                    "route": "/roles/{roleId}/"
+                }, 
+                "create": {
+                    "http-method": "post", 
+                    "route": "/roles/"
+                }, 
+                "delete": {
+                    "http-method": "delete", 
+                    "route": "/roles/{roleId}/"
+                }, 
+                "list": {
+                    "http-method": "get", 
+                    "route": "/roles/"
+                }, 
+                "change-attributes": {
+                    "http-method": "patch", 
+                    "route": "/roles/{roleId}/"
+                }
+            }, 
+            "descr": "Role management"
+        }, 
+        "cloud-credentials": {
+            "subcommands": {
+                "retrieve": {
+                    "http-method": "get", 
+                    "route": "/cloud-credentials/{cloudCredentialsId}/"
+                }, 
+                "create": {
+                    "http-method": "post", 
+                    "route": "/cloud-credentials/"
+                }, 
+                "list": {
+                    "http-method": "get", 
+                    "route": "/cloud-credentials/"
+                }, 
+                "update": {
+                    "http-method": "patch", 
+                    "route": "/cloud-credentials/{cloudCredentialsId}/"
+                }, 
+                "delete": {
+                    "http-method": "delete", 
+                    "route": "/cloud-credentials/{cloudCredentialsId}/"
+                }
+            }, 
+            "descr": "Manage Cloud Credentials for Account scope"
+        }, 
+        "role-orchestration-rule": {
+            "subcommands": {
+                "retrieve": {
+                    "http-method": "get", 
+                    "route": "/roles/{roleId}/orchestration-rules/{orchestrationRuleId}/"
+                }, 
+                "create": {
+                    "http-method": "post", 
+                    "route": "/roles/{roleId}/orchestration-rules/"
+                }, 
+                "list": {
+                    "http-method": "get", 
+                    "route": "/roles/{roleId}/orchestration-rules/"
+                }, 
+                "delete": {
+                    "http-method": "delete", 
+                    "route": "/roles/{roleId}/orchestration-rules/{orchestrationRuleId}/"
+                }
+            }, 
+            "descr": "Orchestration Rule management"
+        }, 
+        "role-category": {
+            "subcommands": {
+                "retrieve": {
+                    "http-method": "get", 
+                    "route": "/role-categories/{roleCategoryId}/"
+                }, 
+                "create": {
+                    "http-method": "post", 
+                    "route": "/role-categories/"
+                }, 
+                "list": {
+                    "http-method": "get", 
+                    "route": "/role-categories/"
+                }, 
+                "update": {
+                    "http-method": "patch", 
+                    "route": "/role-categories/{roleCategoryId}/"
+                }, 
+                "delete": {
+                    "http-method": "delete", 
+                    "route": "/role-categories/{roleCategoryId}/"
+                }
+            }, 
+            "descr": "Manage current Role categories"
+        }, 
+        "team": {
+            "subcommands": {
+                "create": {
+                    "http-method": "post", 
+                    "route": "/environments/{envId}/teams/"
+                }, 
+                "list": {
+                    "http-method": "get", 
+                    "route": "/environments/{envId}/teams/"
+                }, 
+                "delete": {
+                    "http-method": "delete", 
+                    "route": "/environments/{envId}/teams/{teamId}/"
+                }
+            }, 
+            "descr": "Manage teams"
+        }, 
+        "os": {
+            "subcommands": {
+                "retrieve": {
+                    "http-method": "get", 
+                    "route": "/os/{osId}/"
+                }, 
+                "list": {
+                    "http-method": "get", 
+                    "route": "/os/"
+                }
+            }, 
+            "descr": "Supported operating systems"
+        }, 
+        "event": {
+            "subcommands": {
+                "retrieve": {
+                    "http-method": "get", 
+                    "route": "/events/{eventId}/"
+                }, 
+                "create": {
+                    "http-method": "post", 
+                    "route": "/events/"
+                }, 
+                "list": {
+                    "http-method": "get", 
+                    "route": "/events/"
+                }, 
+                "delete": {
+                    "http-method": "delete", 
+                    "route": "/events/{eventId}/"
+                }
+            }, 
+            "descr": "Manage events available in the Scalr Account"
+        }, 
+        "cloud": {
+            "subcommands": {
+                "retrieve": {
+                    "http-method": "get", 
+                    "route": "/environments/{envId}/clouds/{cloud}/"
+                }, 
+                "list": {
+                    "http-method": "get", 
+                    "route": "/environments/{envId}/clouds/"
+                }, 
+                "update": {
+                    "http-method": "post", 
+                    "route": "/environments/{envId}/clouds/{cloud}/"
+                }, 
+                "delete": {
+                    "http-method": "delete", 
+                    "route": "/environments/{envId}/clouds/{cloud}/"
+                }
+            }, 
+            "descr": "Manage cloud providers"
+        }
+    }, 
+    "user": {
+        "project": {
+            "subcommands": {
+                "retrieve": {
+                    "http-method": "get", 
+                    "route": "/{envId}/projects/{projectId}/"
+                }, 
+                "create": {
+                    "http-method": "post", 
+                    "route": "/{envId}/projects/"
+                }, 
+                "list": {
+                    "http-method": "get", 
+                    "route": "/{envId}/projects/"
+                }
+            }, 
+            "descr": "View projects"
+        }, 
+        "role-category": {
+            "subcommands": {
+                "retrieve": {
+                    "http-method": "get", 
+                    "route": "/{envId}/role-categories/{roleCategoryId}/"
+                }, 
+                "create": {
+                    "http-method": "post", 
+                    "route": "/{envId}/role-categories/"
+                }, 
+                "list": {
+                    "http-method": "get", 
+                    "route": "/{envId}/role-categories/"
+                }, 
+                "update": {
+                    "http-method": "patch", 
+                    "route": "/{envId}/role-categories/{roleCategoryId}/"
+                }, 
+                "delete": {
+                    "http-method": "delete", 
+                    "route": "/{envId}/role-categories/{roleCategoryId}/"
+                }
+            }, 
+            "descr": "Current Role categories"
+        }, 
+        "os": {
+            "subcommands": {
+                "retrieve": {
+                    "http-method": "get", 
+                    "route": "/{envId}/os/{osId}/"
+                }, 
+                "list": {
+                    "http-method": "get", 
+                    "route": "/{envId}/os/"
+                }
+            }, 
+            "descr": "Supported operating systems"
+        }, 
+        "script": {
+            "subcommands": {
+                "retrieve": {
+                    "http-method": "get", 
+                    "route": "/{envId}/scripts/{scriptId}/"
+                }, 
+                "create": {
+                    "http-method": "post", 
+                    "route": "/{envId}/scripts/"
+                }, 
+                "delete": {
+                    "http-method": "delete", 
+                    "route": "/{envId}/scripts/{scriptId}/"
+                }, 
+                "list": {
+                    "http-method": "get", 
+                    "route": "/{envId}/scripts/"
+                }, 
+                "change-attributes": {
+                    "http-method": "patch", 
+                    "route": "/{envId}/scripts/{scriptId}/"
+                }
+            }, 
+            "descr": "Script management"
+        }, 
+        "farm": {
+            "subcommands": {
+                "retrieve": {
+                    "http-method": "get", 
+                    "route": "/{envId}/farms/{farmId}/"
+                }, 
+                "launch": {
+                    "http-method": "post", 
+                    "route": "/{envId}/farms/{farmId}/actions/launch/"
+                }, 
+                "terminate": {
+                    "http-method": "post", 
+                    "route": "/{envId}/farms/{farmId}/actions/terminate/"
+                }, 
+                "clone": {
+                    "http-method": "post", 
+                    "route": "/{envId}/farms/{farmId}/actions/clone/"
+                }, 
+                "list": {
+                    "http-method": "get", 
+                    "route": "/{envId}/farms/"
+                }, 
+                "change-attributes": {
+                    "http-method": "patch", 
+                    "route": "/{envId}/farms/{farmId}/"
+                }, 
+                "create": {
+                    "http-method": "post", 
+                    "route": "/{envId}/farms/"
+                }, 
+                "delete": {
+                    "http-method": "delete", 
+                    "route": "/{envId}/farms/{farmId}/"
+                }
+            }, 
+            "descr": "Farm management"
+        }, 
+        "farm-role-scaling": {
+            "subcommands": {
+                "change-defaults": {
+                    "http-method": "patch", 
+                    "route": "/{envId}/farm-roles/{farmRoleId}/scaling/"
+                }, 
+                "create": {
+                    "http-method": "post", 
+                    "route": "/{envId}/farm-roles/{farmRoleId}/scaling/"
+                }, 
+                "list": {
+                    "http-method": "get", 
+                    "route": "/{envId}/farm-roles/{farmRoleId}/scaling/"
+                }, 
+                "update": {
+                    "http-method": "patch", 
+                    "route": "/{envId}/farm-roles/{farmRoleId}/scaling/{metricName}/"
+                }, 
+                "retrieve": {
+                    "http-method": "get", 
+                    "route": "/{envId}/farm-roles/{farmRoleId}/scaling/{metricName}/"
+                }, 
+                "delete": {
+                    "http-method": "delete", 
+                    "route": "/{envId}/farm-roles/{farmRoleId}/scaling/{metricName}/"
+                }
+            }, 
+            "descr": "Manage farmrole scaling"
+        }, 
+        "image": {
+            "subcommands": {
+                "retrieve": {
+                    "http-method": "get", 
+                    "route": "/{envId}/images/{imageId}/"
+                }, 
+                "register": {
+                    "http-method": "post", 
+                    "route": "/{envId}/images/"
+                }, 
+                "list": {
+                    "http-method": "get", 
+                    "route": "/{envId}/images/"
+                }, 
+                "change-attributes": {
+                    "http-method": "patch", 
+                    "route": "/{envId}/images/{imageId}/"
+                }, 
+                "copy": {
+                    "http-method": "post", 
+                    "route": "/{envId}/images/{imageId}/actions/copy/"
+                }, 
+                "delete": {
+                    "http-method": "delete", 
+                    "route": "/{envId}/images/{imageId}/"
+                }
+            }, 
+            "descr": "Image management"
+        }, 
+        "role-global-variables": {
+            "subcommands": {
+                "retrieve": {
+                    "http-method": "get", 
+                    "route": "/{envId}/roles/{roleId}/global-variables/{globalVariableName}/"
+                }, 
+                "create": {
+                    "http-method": "post", 
+                    "route": "/{envId}/roles/{roleId}/global-variables/"
+                }, 
+                "list": {
+                    "http-method": "get", 
+                    "route": "/{envId}/roles/{roleId}/global-variables/"
+                }, 
+                "update": {
+                    "http-method": "patch", 
+                    "route": "/{envId}/roles/{roleId}/global-variables/{globalVariableName}/"
+                }, 
+                "delete": {
+                    "http-method": "delete", 
+                    "route": "/{envId}/roles/{roleId}/global-variables/{globalVariableName}/"
+                }
+            }, 
+            "descr": "Manage global variables for roles"
+        }, 
+        "script-version": {
+            "subcommands": {
+                "retrieve": {
+                    "http-method": "get", 
+                    "route": "/{envId}/scripts/{scriptId}/script-versions/{scriptVersionNumber}/"
+                }, 
+                "create": {
+                    "http-method": "post", 
+                    "route": "/{envId}/scripts/{scriptId}/script-versions/"
+                }, 
+                "delete": {
+                    "http-method": "delete", 
+                    "route": "/{envId}/scripts/{scriptId}/script-versions/{scriptVersionNumber}/"
+                }, 
+                "list": {
+                    "http-method": "get", 
+                    "route": "/{envId}/scripts/{scriptId}/script-versions/"
+                }, 
+                "change-attributes": {
+                    "http-method": "patch", 
+                    "route": "/{envId}/scripts/{scriptId}/script-versions/{scriptVersionNumber}/"
+                }
+            }, 
+            "descr": "Script Version management"
+        }, 
+        "farm-global-variables": {
+            "subcommands": {
+                "retrieve": {
+                    "http-method": "get", 
+                    "route": "/{envId}/farms/{farmId}/global-variables/{globalVariableName}/"
+                }, 
+                "create": {
+                    "http-method": "post", 
+                    "route": "/{envId}/farms/{farmId}/global-variables/"
+                }, 
+                "list": {
+                    "http-method": "get", 
+                    "route": "/{envId}/farms/{farmId}/global-variables/"
+                }, 
+                "update": {
+                    "http-method": "patch", 
+                    "route": "/{envId}/farms/{farmId}/global-variables/{globalVariableName}/"
+                }, 
+                "delete": {
+                    "http-method": "delete", 
+                    "route": "/{envId}/farms/{farmId}/global-variables/{globalVariableName}/"
+                }
+            }, 
+            "descr": "Manage global variables for farms"
+        }, 
+        "role-image": {
+            "subcommands": {
+                "retrieve": {
+                    "http-method": "get", 
+                    "route": "/{envId}/roles/{roleId}/images/{imageId}/"
+                }, 
+                "replace": {
+                    "http-method": "post", 
+                    "route": "/{envId}/roles/{roleId}/images/{imageId}/actions/replace/"
+                }, 
+                "list": {
+                    "http-method": "get", 
+                    "route": "/{envId}/roles/{roleId}/images/"
+                }, 
+                "update": {
+                    "http-method": "post", 
+                    "route": "/{envId}/roles/{roleId}/images/"
+                }, 
+                "delete": {
+                    "http-method": "delete", 
+                    "route": "/{envId}/roles/{roleId}/images/{imageId}/"
+                }
+            }, 
+            "descr": "Manage images in roles"
+        }, 
+        "cost-center": {
+            "subcommands": {
+                "retrieve": {
+                    "http-method": "get", 
+                    "route": "/{envId}/cost-centers/{costCenterId}/"
+                }, 
+                "list": {
+                    "http-method": "get", 
+                    "route": "/{envId}/cost-centers/"
+                }
+            }, 
+            "descr": "Cost Centrer management"
+        }, 
+        "export": {
+            "subcommands": {
+                "farm-role-scaling-metric": {
+                    "http-method": "get", 
+                    "route": "/{envId}/farm-roles/{farmRoleId}/scaling/{metricName}/"
+                }, 
+                "image": {
+                    "http-method": "get", 
+                    "route": "/{envId}/images/{imageId}/"
+                }, 
+                "script-version": {
+                    "http-method": "get", 
+                    "route": "/{envId}/scripts/{scriptId}/script-versions/{scriptVersionNumber}/"
+                }, 
+                "farm-role-global-variable": {
+                    "http-method": "get", 
+                    "route": "/{envId}/farm-roles/{farmRoleId}/global-variables/{globalVariableName}/"
+                }, 
+                "scaling-metric": {
+                    "http-method": "get", 
+                    "route": "/{envId}/scaling-metrics/{metricName}/"
+                }, 
+                "farm-role-placement-configuration": {
+                    "http-method": "get", 
+                    "route": "/{envId}/farm-roles/{farmRoleId}/placement/"
+                }, 
+                "orchestration-rule": {
+                    "http-method": "get", 
+                    "route": "/{envId}/roles/{roleId}/orchestration-rules/{orchestrationRuleId}/"
+                }, 
+                "event": {
+                    "http-method": "get", 
+                    "route": "/{envId}/events/{eventId}/"
+                }, 
+                "cost-center": {
+                    "http-method": "get", 
+                    "route": "/{envId}/cost-centers/{costCenterId}/"
+                }, 
+                "script": {
+                    "http-method": "get", 
+                    "route": "/{envId}/scripts/{scriptId}/"
+                }, 
+                "farm-role": {
+                    "http-method": "get", 
+                    "route": "/{envId}/farm-roles/{farmRoleId}/"
+                }, 
+                "farm-role-scaling-configuration": {
+                    "http-method": "get", 
+                    "route": "/{envId}/farm-roles/{farmRoleId}/scaling/"
+                }, 
+                "role": {
+                    "http-method": "get", 
+                    "route": "/{envId}/roles/{roleId}/"
+                }, 
+                "farm": {
+                    "http-method": "get", 
+                    "route": "/{envId}/farms/{farmId}/"
+                }, 
+                "farm-global-variable": {
+                    "http-method": "get", 
+                    "route": "/{envId}/farms/{farmId}/global-variables/{globalVariableName}/"
+                }, 
+                "cloud-credentials": {
+                    "http-method": "get", 
+                    "route": "/{envId}/cloud-credentials/{cloudCredentialsId}/"
+                }, 
+                "role-global-variable": {
+                    "http-method": "get", 
+                    "route": "/{envId}/roles/{roleId}/global-variables/{globalVariableName}/"
+                }, 
+                "farm-role-instance-configuration": {
+                    "http-method": "get", 
+                    "route": "/{envId}/farm-roles/{farmRoleId}/instance/"
+                }, 
+                "role-image": {
+                    "http-method": "get", 
+                    "route": "/{envId}/roles/{roleId}/images/{imageId}/"
+                }, 
+                "project": {
+                    "http-method": "get", 
+                    "route": "/{envId}/projects/{projectId}/"
+                }, 
+                "role-category": {
+                    "http-method": "get", 
+                    "route": "/{envId}/role-categories/{roleCategoryId}/"
+                }, 
+                "os": {
+                    "http-method": "get", 
+                    "route": "/{envId}/os/{osId}/"
+                }
+            }, 
+            "descr": "Export Scalr Objects"
+        }, 
+        "farm-role-global-variables": {
+            "subcommands": {
+                "retrieve": {
+                    "http-method": "get", 
+                    "route": "/{envId}/farm-roles/{farmRoleId}/global-variables/{globalVariableName}/"
+                }, 
+                "create": {
+                    "http-method": "post", 
+                    "route": "/{envId}/farm-roles/{farmRoleId}/global-variables/"
+                }, 
+                "list": {
+                    "http-method": "get", 
+                    "route": "/{envId}/farm-roles/{farmRoleId}/global-variables/"
+                }, 
+                "update": {
+                    "http-method": "patch", 
+                    "route": "/{envId}/farm-roles/{farmRoleId}/global-variables/{globalVariableName}/"
+                }, 
+                "delete": {
+                    "http-method": "delete", 
+                    "route": "/{envId}/farm-roles/{farmRoleId}/global-variables/{globalVariableName}/"
+                }
+            }, 
+            "descr": "Manage global variables for farm roles"
+        }, 
+        "cloud-credentials": {
+            "subcommands": {
+                "retrieve": {
+                    "http-method": "get", 
+                    "route": "/{envId}/cloud-credentials/{cloudCredentialsId}/"
+                }, 
+                "create": {
+                    "http-method": "post", 
+                    "route": "/{envId}/cloud-credentials/"
+                }, 
+                "delete": {
+                    "http-method": "delete", 
+                    "route": "/{envId}/cloud-credentials/{cloudCredentialsId}/"
+                }, 
+                "list": {
+                    "http-method": "get", 
+                    "route": "/{envId}/cloud-credentials/"
+                }, 
+                "change-attributes": {
+                    "http-method": "patch", 
+                    "route": "/{envId}/cloud-credentials/{cloudCredentialsId}/"
+                }
+            }, 
+            "descr": "Manage cloud credentials available in the Scalr Environment"
+        }, 
+        "role-orchestration-rule": {
+            "subcommands": {
+                "retrieve": {
+                    "http-method": "get", 
+                    "route": "/{envId}/roles/{roleId}/orchestration-rules/{orchestrationRuleId}/"
+                }, 
+                "create": {
+                    "http-method": "post", 
+                    "route": "/{envId}/roles/{roleId}/orchestration-rules/"
+                }, 
+                "delete": {
+                    "http-method": "delete", 
+                    "route": "/{envId}/roles/{roleId}/orchestration-rules/{orchestrationRuleId}/"
+                }, 
+                "list": {
+                    "http-method": "get", 
+                    "route": "/{envId}/roles/{roleId}/orchestration-rules/"
+                }, 
+                "change-attributes": {
+                    "http-method": "patch", 
+                    "route": "/{envId}/roles/{roleId}/orchestration-rules/{orchestrationRuleId}/"
+                }
+            }, 
+            "descr": "Orchestration Rule management"
+        }, 
+        "farm-role-orchestration-rule": {
+            "subcommands": {
+                "retrieve": {
+                    "http-method": "get", 
+                    "route": "/{envId}/farm-roles/{farmRoleId}/orchestration-rules/{orchestrationRuleId}/"
+                }, 
+                "create": {
+                    "http-method": "post", 
+                    "route": "/{envId}/farm-roles/{farmRoleId}/orchestration-rules/"
+                }, 
+                "delete": {
+                    "http-method": "delete", 
+                    "route": "/{envId}/farm-roles/{farmRoleId}/orchestration-rules/{orchestrationRuleId}/"
+                }, 
+                "list": {
+                    "http-method": "get", 
+                    "route": "/{envId}/farm-roles/{farmRoleId}/orchestration-rules/"
+                }, 
+                "change-attributes": {
+                    "http-method": "patch", 
+                    "route": "/{envId}/farm-roles/{farmRoleId}/orchestration-rules/{orchestrationRuleId}/"
+                }
+            }, 
+            "descr": "Orchestration Rule management"
+        }, 
+        "scaling-metric": {
+            "subcommands": {
+                "retrieve": {
+                    "http-method": "get", 
+                    "route": "/{envId}/scaling-metrics/{metricName}/"
+                }, 
+                "create": {
+                    "http-method": "post", 
+                    "route": "/{envId}/scaling-metrics/"
+                }, 
+                "list": {
+                    "http-method": "get", 
+                    "route": "/{envId}/scaling-metrics/"
+                }, 
+                "update": {
+                    "http-method": "patch", 
+                    "route": "/{envId}/scaling-metrics/{metricName}/"
+                }, 
+                "delete": {
+                    "http-method": "delete", 
+                    "route": "/{envId}/scaling-metrics/{metricName}/"
+                }
+            }, 
+            "descr": "Manage scaling metrics"
+        }, 
+        "role": {
+            "subcommands": {
+                "retrieve": {
+                    "http-method": "get", 
+                    "route": "/{envId}/roles/{roleId}/"
+                }, 
+                "create": {
+                    "http-method": "post", 
+                    "route": "/{envId}/roles/"
+                }, 
+                "delete": {
+                    "http-method": "delete", 
+                    "route": "/{envId}/roles/{roleId}/"
+                }, 
+                "list": {
+                    "http-method": "get", 
+                    "route": "/{envId}/roles/"
+                }, 
+                "change-attributes": {
+                    "http-method": "patch", 
+                    "route": "/{envId}/roles/{roleId}/"
+                }
+            }, 
+            "descr": "Role management"
+        }, 
+        "farm-role": {
+            "subcommands": {
+                "change-instance-configuration": {
+                    "http-method": "patch", 
+                    "route": "/{envId}/farm-roles/{farmRoleId}/instance/"
+                }, 
+                "change-placement-configuration": {
+                    "http-method": "patch", 
+                    "route": "/{envId}/farm-roles/{farmRoleId}/placement/"
+                }, 
+                "create": {
+                    "http-method": "post", 
+                    "route": "/{envId}/farms/{farmId}/farm-roles/"
+                }, 
+                "list": {
+                    "http-method": "get", 
+                    "route": "/{envId}/farms/{farmId}/farm-roles/"
+                }, 
+                "retrieve": {
+                    "http-method": "get", 
+                    "route": "/{envId}/farm-roles/{farmRoleId}/"
+                }, 
+                "retrieve-scaling-configuration": {
+                    "http-method": "get", 
+                    "route": "/{envId}/farm-roles/{farmRoleId}/scaling/"
+                }, 
+                "import-server": {
+                    "http-method": "post", 
+                    "route": "/{envId}/farm-roles/{farmRoleId}/actions/import-server/"
+                }, 
+                "change-attributes": {
+                    "http-method": "patch", 
+                    "route": "/{envId}/farm-roles/{farmRoleId}/"
+                }, 
+                "change-scaling-configuration": {
+                    "http-method": "patch", 
+                    "route": "/{envId}/farm-roles/{farmRoleId}/scaling/"
+                }, 
+                "retrieve-placement-configuration": {
+                    "http-method": "get", 
+                    "route": "/{envId}/farm-roles/{farmRoleId}/placement/"
+                }, 
+                "retrieve-instance-configuration": {
+                    "http-method": "get", 
+                    "route": "/{envId}/farm-roles/{farmRoleId}/instance/"
+                }, 
+                "delete": {
+                    "http-method": "delete", 
+                    "route": "/{envId}/farm-roles/{farmRoleId}/"
+                }
+            }, 
+            "descr": "FarmRole management"
+        }, 
+        "event": {
+            "subcommands": {
+                "retrieve": {
+                    "http-method": "get", 
+                    "route": "/{envId}/events/{eventId}/"
+                }, 
+                "create": {
+                    "http-method": "post", 
+                    "route": "/{envId}/events/"
+                }, 
+                "delete": {
+                    "http-method": "delete", 
+                    "route": "/{envId}/events/{eventId}/"
+                }, 
+                "list": {
+                    "http-method": "get", 
+                    "route": "/{envId}/events/"
+                }, 
+                "change-attributes": {
+                    "http-method": "patch", 
+                    "route": "/{envId}/events/{eventId}/"
+                }
+            }, 
+            "descr": "Manage events available in the Scalr Environment"
+        }
+    }
+}
