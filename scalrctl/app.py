@@ -324,7 +324,8 @@ class ScalrCLI(click.Group):
         if name in self.scheme:
             args["scheme"] = self.scheme[name]
 
-
+            if "descr" in self.scheme[name]:
+                args["help"] = self.scheme[name]["descr"]
 
         return ScalrCLI(**args)
 
