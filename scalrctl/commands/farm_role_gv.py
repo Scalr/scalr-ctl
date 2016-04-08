@@ -18,39 +18,11 @@ def callback(*args, **kwargs):
     pass
 
 
-class GV(commands.SubCommand):
-    route = "/{envId}/farm-roles/{farmRoleId}/global-variables/{globalVariableName}/"
-
-
-class DeleteFarmRoleGlobalVariable(GV):
-    name = "delete"
-    method = "delete"
-    enabled = True
-
-
-class ListFarmRoleGlobalVariables(GV):
-    route = "/{envId}/farm-roles/{farmRoleId}/global-variables/"
-    name = "list"
-    method = "get"
-    enabled = True
-
-
-class NewFarmRoleGV(GV):
-    route = "/{envId}/farm-roles/{farmRoleId}/global-variables/"
-    name = "create"
-    method = "post"
-    enabled = True
-
-
-class RetrieveFarmRoleGlobalVariable(GV):
-    name = "retrieve"
-    method = "get"
-    enabled = True
-
-
-class UpdateFarmRoleGlobalVariable(GV):
+class UpdateFarmRoleGlobalVariable(commands.SubCommand):
     name = "update"
     method = "patch"
     enabled = True
-    #object_reference = "#/definitions/GlobalVariable"
+    route = "/{envId}/farm-roles/{farmRoleId}/global-variables/{globalVariableName}/"
+
     prompt_for = ["roleId", "globalVariableName"]
+    #object_reference = "#/definitions/GlobalVariable"

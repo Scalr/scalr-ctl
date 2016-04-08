@@ -17,15 +17,12 @@ def callback(*args, **kwargs):
     pass
 
 
-class Image(commands.SubCommand):
-    pass
-
-
-class ChangeImageAttrs(Image):
+class ChangeImageAttrs(commands.SubCommand):
     name = "change-attributes"
     route = "/{envId}/images/{imageId}/"
     method = "patch"
     enabled = True
+
     mutable_body_parts = ["name"]
     prompt_for = ["imageId"]
 
@@ -35,28 +32,7 @@ class ChangeImageAttrs(Image):
         return options
 
 
-class CopyImage(Image):
-    name = "copy"
-    route = "/{envId}/images/{imageId}/actions/copy/"
-    method = "post"
-    enabled = True
-
-
-class DeleteImage(Image):
-    name = "delete"
-    route = "/{envId}/images/{imageId}/"
-    method = "delete"
-    enabled = True
-
-
-class ListImages(Image):
-    name = "list"
-    route = "/{envId}/images/"
-    method = "get"
-    enabled = True
-
-
-class RegisterImage(Image):
+class RegisterImage(commands.SubCommand):
     name = "register"
     route = "/{envId}/images/"
     method = "post"
@@ -69,11 +45,12 @@ class RegisterImage(Image):
         return args, kwargs
 
 
-class RetrieveImage(Image):
+class RetrieveImage(commands.SubCommand):
     name = "retrieve"
     route = "/{envId}/images/{imageId}/"
     method = "get"
     enabled = True
+
     prompt_for = ["imageId"]
 
 

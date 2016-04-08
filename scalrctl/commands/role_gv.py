@@ -18,39 +18,11 @@ def callback(*args, **kwargs):
     pass
 
 
-class GV(commands.SubCommand):
-    route = "/{envId}/roles/{roleId}/global-variables/{globalVariableName}/"
-
-
-class DeleteRoleGlobalVariable(GV):
-    name = "delete"
-    method = "delete"
-    enabled = True
-
-
-class ListRoleGlobalVariables(GV):
-    route = "/{envId}/roles/{roleId}/global-variables/"
-    name = "list"
-    method = "get"
-    enabled = True
-
-
-class NewRoleGV(GV):
-    route = "/{envId}/roles/{roleId}/global-variables/"
-    name = "create"
-    method = "post"
-    enabled = True
-
-
-class RetrieveRoleGlobalVariable(GV):
-    name = "retrieve"
-    method = "get"
-    enabled = True
-
-
-class UpdateRoleGlobalVariable(GV):
+class UpdateRoleGlobalVariable(commands.SubCommand):
     name = "update"
     method = "patch"
     enabled = True
-    #object_reference = "#/definitions/GlobalVariable"
+    route = "/{envId}/roles/{roleId}/global-variables/{globalVariableName}/"
+
     prompt_for = ["roleId", "globalVariableName"]
+    #object_reference = "#/definitions/GlobalVariable"

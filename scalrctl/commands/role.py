@@ -18,44 +18,13 @@ def callback(*args, **kwargs):
     pass
 
 
-class Role(commands.SubCommand):
-    pass
-
-
-class ChangeRoleAttrs(Role):
+class ChangeRoleAttrs(commands.SubCommand):
     name = "change-attributes"
     route = "/{envId}/roles/{roleId}/"
     method = "patch"
     enabled = True
+
     prompt_for = ["roleId"]
-
-
-class CreateRole(Role):
-    name = "create"
-    route = "/{envId}/roles/"
-    method = "post"
-    enabled = True
-
-
-class DeleteRole(Role):
-    name = "delete"
-    route = "/{envId}/roles/{roleId}/"
-    method = "delete"
-    enabled = True
-
-
-class ListRoles(Role):
-    name = "list"
-    route = "/{envId}/roles/"
-    method = "get"
-    enabled = True
-
-
-class RetrieveRole(Role):
-    name = "retrieve"
-    route = "/{envId}/roles/{roleId}/"
-    method = "get"
-    enabled = True
 
 
 
