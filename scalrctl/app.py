@@ -2,6 +2,7 @@ __author__ = 'Dmitriy Korsakov'
 
 import os
 import sys
+import json
 import inspect
 
 import yaml
@@ -294,7 +295,42 @@ if update.is_update_required():
     update.update()  # [ST-53]
 
 
-@click.command(cls=MyCLI)
+class ScalrCLI(click.Group):
+
+    def __init__(self, name=None, commands=None, **attrs):
+        if not "scheme" in attrs:
+            with open(os.path.join(os.path.dirname(__file__), 'scheme/scheme.json')) as fp:
+                self.scheme = json.load(fp)
+        else:
+            self.scheme = attrs.pop("scheme")
+        super(ScalrCLI, self).__init__(name, commands, **attrs)
+
+    def list_commands(self, ctx):
+        keys = self.scheme.keys()
+        if "subcommands" not in keys:
+            names = keys
+        else:
+            names = self.scheme["subcommands"].keys()
+        names.sort()
+        return names
+
+    def get_command(self, ctx, name):
+
+        args = dict(
+            callback=lambda: None,
+            help=""
+        )
+
+        if name in self.scheme:
+            args["scheme"] = self.scheme[name]
+
+
+
+        return ScalrCLI(**args)
+
+
+#@click.command(cls=MyCLI)
+@click.command(cls=ScalrCLI)
 @click.version_option()
 @click.pass_context
 @click.option('--key_id', help="API key ID")
