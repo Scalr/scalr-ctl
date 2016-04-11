@@ -51,6 +51,9 @@ if __name__ == '__main__':
             "scalrctl.commands.internal"
         ],
         include_package_data=True,
+        package_data={
+            '': ['scheme/scheme.json'],
+        },
         install_requires=[
             'prettytable',
             'pyyaml',
