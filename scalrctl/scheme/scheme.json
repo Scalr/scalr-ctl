@@ -4,77 +4,109 @@
             "subcommands": {
                 "retrieve": {
                     "http-method": "get", 
-                    "route": "/images/{imageId}/"
+                    "route": "/images/{imageId}/", 
+                    "class": "scalrctl.commands.image.RetrieveImage", 
+                    "api_level": "account"
                 }, 
                 "register": {
                     "http-method": "post", 
-                    "route": "/images/"
+                    "route": "/images/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "account"
                 }, 
                 "list": {
                     "http-method": "get", 
-                    "route": "/images/"
+                    "route": "/images/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "account"
                 }, 
                 "change-attributes": {
                     "http-method": "patch", 
-                    "route": "/images/{imageId}/"
+                    "route": "/images/{imageId}/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "account"
                 }, 
                 "copy": {
                     "http-method": "post", 
-                    "route": "/images/{imageId}/actions/copy/"
+                    "route": "/images/{imageId}/actions/copy/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "account"
                 }, 
                 "delete": {
                     "http-method": "delete", 
-                    "route": "/images/{imageId}/"
+                    "route": "/images/{imageId}/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "account"
                 }
             }, 
             "descr": "Image management"
         }, 
-        "role-global-variables": {
+        "cloud-credentials": {
             "subcommands": {
                 "retrieve": {
                     "http-method": "get", 
-                    "route": "/roles/{roleId}/global-variables/{globalVariableName}/"
+                    "route": "/cloud-credentials/{cloudCredentialsId}/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "account"
                 }, 
                 "create": {
                     "http-method": "post", 
-                    "route": "/roles/{roleId}/global-variables/"
+                    "route": "/cloud-credentials/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "account"
                 }, 
                 "list": {
                     "http-method": "get", 
-                    "route": "/roles/{roleId}/global-variables/"
+                    "route": "/cloud-credentials/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "account"
                 }, 
                 "update": {
                     "http-method": "patch", 
-                    "route": "/roles/{roleId}/global-variables/{globalVariableName}/"
+                    "route": "/cloud-credentials/{cloudCredentialsId}/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "account"
                 }, 
                 "delete": {
                     "http-method": "delete", 
-                    "route": "/roles/{roleId}/global-variables/{globalVariableName}/"
+                    "route": "/cloud-credentials/{cloudCredentialsId}/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "account"
                 }
             }, 
-            "descr": "Manage global variables for roles"
+            "descr": "Manage Cloud Credentials for Account scope"
         }, 
         "role-image": {
             "subcommands": {
                 "retrieve": {
                     "http-method": "get", 
-                    "route": "/roles/{roleId}/images/{imageId}/"
+                    "route": "/roles/{roleId}/images/{imageId}/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "account"
                 }, 
                 "replace": {
                     "http-method": "post", 
-                    "route": "/roles/{roleId}/images/{imageId}/actions/replace/"
+                    "route": "/roles/{roleId}/images/{imageId}/actions/replace/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "account"
                 }, 
                 "list": {
                     "http-method": "get", 
-                    "route": "/roles/{roleId}/images/"
+                    "route": "/roles/{roleId}/images/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "account"
                 }, 
                 "update": {
                     "http-method": "post", 
-                    "route": "/roles/{roleId}/images/"
+                    "route": "/roles/{roleId}/images/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "account"
                 }, 
                 "delete": {
                     "http-method": "delete", 
-                    "route": "/roles/{roleId}/images/{imageId}/"
+                    "route": "/roles/{roleId}/images/{imageId}/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "account"
                 }
             }, 
             "descr": "Manage images in roles"
@@ -83,23 +115,33 @@
             "subcommands": {
                 "retrieve": {
                     "http-method": "get", 
-                    "route": "/environments/{envId}/"
+                    "route": "/environments/{envId}/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "account"
                 }, 
                 "create": {
                     "http-method": "post", 
-                    "route": "/environments/"
+                    "route": "/environments/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "account"
                 }, 
                 "list": {
                     "http-method": "get", 
-                    "route": "/environments/"
+                    "route": "/environments/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "account"
                 }, 
                 "update": {
                     "http-method": "patch", 
-                    "route": "/environments/{envId}/"
+                    "route": "/environments/{envId}/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "account"
                 }, 
                 "delete": {
                     "http-method": "delete", 
-                    "route": "/environments/{envId}/"
+                    "route": "/environments/{envId}/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "account"
                 }
             }, 
             "descr": "Manage environments"
@@ -108,69 +150,120 @@
             "subcommands": {
                 "retrieve": {
                     "http-method": "get", 
-                    "route": "/roles/{roleId}/"
+                    "route": "/roles/{roleId}/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "account"
                 }, 
                 "create": {
                     "http-method": "post", 
-                    "route": "/roles/"
+                    "route": "/roles/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "account"
                 }, 
                 "delete": {
                     "http-method": "delete", 
-                    "route": "/roles/{roleId}/"
+                    "route": "/roles/{roleId}/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "account"
                 }, 
                 "list": {
                     "http-method": "get", 
-                    "route": "/roles/"
+                    "route": "/roles/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "account"
                 }, 
                 "change-attributes": {
                     "http-method": "patch", 
-                    "route": "/roles/{roleId}/"
+                    "route": "/roles/{roleId}/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "account"
                 }
             }, 
             "descr": "Role management"
         }, 
-        "cloud-credentials": {
+        "role-global-variables": {
             "subcommands": {
                 "retrieve": {
                     "http-method": "get", 
-                    "route": "/cloud-credentials/{cloudCredentialsId}/"
+                    "route": "/roles/{roleId}/global-variables/{globalVariableName}/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "account"
                 }, 
                 "create": {
                     "http-method": "post", 
-                    "route": "/cloud-credentials/"
+                    "route": "/roles/{roleId}/global-variables/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "account"
                 }, 
                 "list": {
                     "http-method": "get", 
-                    "route": "/cloud-credentials/"
+                    "route": "/roles/{roleId}/global-variables/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "account"
                 }, 
                 "update": {
                     "http-method": "patch", 
-                    "route": "/cloud-credentials/{cloudCredentialsId}/"
+                    "route": "/roles/{roleId}/global-variables/{globalVariableName}/", 
+                    "class": "scalrctl.commands.role_gv.UpdateRoleGlobalVariable", 
+                    "api_level": "account"
                 }, 
                 "delete": {
                     "http-method": "delete", 
-                    "route": "/cloud-credentials/{cloudCredentialsId}/"
+                    "route": "/roles/{roleId}/global-variables/{globalVariableName}/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "account"
                 }
             }, 
-            "descr": "Manage Cloud Credentials for Account scope"
+            "descr": "Manage global variables for roles"
+        }, 
+        "team": {
+            "subcommands": {
+                "create": {
+                    "http-method": "post", 
+                    "route": "/environments/{envId}/teams/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "account"
+                }, 
+                "list": {
+                    "http-method": "get", 
+                    "route": "/environments/{envId}/teams/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "account"
+                }, 
+                "delete": {
+                    "http-method": "delete", 
+                    "route": "/environments/{envId}/teams/{teamId}/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "account"
+                }
+            }, 
+            "descr": "Manage teams"
         }, 
         "role-orchestration-rule": {
             "subcommands": {
                 "retrieve": {
                     "http-method": "get", 
-                    "route": "/roles/{roleId}/orchestration-rules/{orchestrationRuleId}/"
+                    "route": "/roles/{roleId}/orchestration-rules/{orchestrationRuleId}/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "account"
                 }, 
                 "create": {
                     "http-method": "post", 
-                    "route": "/roles/{roleId}/orchestration-rules/"
+                    "route": "/roles/{roleId}/orchestration-rules/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "account"
                 }, 
                 "list": {
                     "http-method": "get", 
-                    "route": "/roles/{roleId}/orchestration-rules/"
+                    "route": "/roles/{roleId}/orchestration-rules/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "account"
                 }, 
                 "delete": {
                     "http-method": "delete", 
-                    "route": "/roles/{roleId}/orchestration-rules/{orchestrationRuleId}/"
+                    "route": "/roles/{roleId}/orchestration-rules/{orchestrationRuleId}/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "account"
                 }
             }, 
             "descr": "Orchestration Rule management"
@@ -179,53 +272,50 @@
             "subcommands": {
                 "retrieve": {
                     "http-method": "get", 
-                    "route": "/role-categories/{roleCategoryId}/"
+                    "route": "/role-categories/{roleCategoryId}/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "account"
                 }, 
                 "create": {
                     "http-method": "post", 
-                    "route": "/role-categories/"
+                    "route": "/role-categories/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "account"
                 }, 
                 "list": {
                     "http-method": "get", 
-                    "route": "/role-categories/"
+                    "route": "/role-categories/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "account"
                 }, 
                 "update": {
                     "http-method": "patch", 
-                    "route": "/role-categories/{roleCategoryId}/"
+                    "route": "/role-categories/{roleCategoryId}/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "account"
                 }, 
                 "delete": {
                     "http-method": "delete", 
-                    "route": "/role-categories/{roleCategoryId}/"
+                    "route": "/role-categories/{roleCategoryId}/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "account"
                 }
             }, 
             "descr": "Manage current Role categories"
-        }, 
-        "team": {
-            "subcommands": {
-                "create": {
-                    "http-method": "post", 
-                    "route": "/environments/{envId}/teams/"
-                }, 
-                "list": {
-                    "http-method": "get", 
-                    "route": "/environments/{envId}/teams/"
-                }, 
-                "delete": {
-                    "http-method": "delete", 
-                    "route": "/environments/{envId}/teams/{teamId}/"
-                }
-            }, 
-            "descr": "Manage teams"
         }, 
         "os": {
             "subcommands": {
                 "retrieve": {
                     "http-method": "get", 
-                    "route": "/os/{osId}/"
+                    "route": "/os/{osId}/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "account"
                 }, 
                 "list": {
                     "http-method": "get", 
-                    "route": "/os/"
+                    "route": "/os/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "account"
                 }
             }, 
             "descr": "Supported operating systems"
@@ -234,19 +324,27 @@
             "subcommands": {
                 "retrieve": {
                     "http-method": "get", 
-                    "route": "/events/{eventId}/"
+                    "route": "/events/{eventId}/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "account"
                 }, 
                 "create": {
                     "http-method": "post", 
-                    "route": "/events/"
+                    "route": "/events/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "account"
                 }, 
                 "list": {
                     "http-method": "get", 
-                    "route": "/events/"
+                    "route": "/events/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "account"
                 }, 
                 "delete": {
                     "http-method": "delete", 
-                    "route": "/events/{eventId}/"
+                    "route": "/events/{eventId}/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "account"
                 }
             }, 
             "descr": "Manage events available in the Scalr Account"
@@ -255,19 +353,27 @@
             "subcommands": {
                 "retrieve": {
                     "http-method": "get", 
-                    "route": "/environments/{envId}/clouds/{cloud}/"
+                    "route": "/environments/{envId}/clouds/{cloud}/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "account"
                 }, 
                 "list": {
                     "http-method": "get", 
-                    "route": "/environments/{envId}/clouds/"
+                    "route": "/environments/{envId}/clouds/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "account"
                 }, 
                 "update": {
                     "http-method": "post", 
-                    "route": "/environments/{envId}/clouds/{cloud}/"
+                    "route": "/environments/{envId}/clouds/{cloud}/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "account"
                 }, 
                 "delete": {
                     "http-method": "delete", 
-                    "route": "/environments/{envId}/clouds/{cloud}/"
+                    "route": "/environments/{envId}/clouds/{cloud}/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "account"
                 }
             }, 
             "descr": "Manage cloud providers"
@@ -278,15 +384,21 @@
             "subcommands": {
                 "retrieve": {
                     "http-method": "get", 
-                    "route": "/{envId}/projects/{projectId}/"
+                    "route": "/{envId}/projects/{projectId}/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "user"
                 }, 
                 "create": {
                     "http-method": "post", 
-                    "route": "/{envId}/projects/"
+                    "route": "/{envId}/projects/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "user"
                 }, 
                 "list": {
                     "http-method": "get", 
-                    "route": "/{envId}/projects/"
+                    "route": "/{envId}/projects/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "user"
                 }
             }, 
             "descr": "View projects"
@@ -295,61 +407,68 @@
             "subcommands": {
                 "retrieve": {
                     "http-method": "get", 
-                    "route": "/{envId}/role-categories/{roleCategoryId}/"
+                    "route": "/{envId}/role-categories/{roleCategoryId}/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "user"
                 }, 
                 "create": {
                     "http-method": "post", 
-                    "route": "/{envId}/role-categories/"
+                    "route": "/{envId}/role-categories/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "user"
                 }, 
                 "list": {
                     "http-method": "get", 
-                    "route": "/{envId}/role-categories/"
+                    "route": "/{envId}/role-categories/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "user"
                 }, 
                 "update": {
                     "http-method": "patch", 
-                    "route": "/{envId}/role-categories/{roleCategoryId}/"
+                    "route": "/{envId}/role-categories/{roleCategoryId}/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "user"
                 }, 
                 "delete": {
                     "http-method": "delete", 
-                    "route": "/{envId}/role-categories/{roleCategoryId}/"
+                    "route": "/{envId}/role-categories/{roleCategoryId}/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "user"
                 }
             }, 
             "descr": "Current Role categories"
-        }, 
-        "os": {
-            "subcommands": {
-                "retrieve": {
-                    "http-method": "get", 
-                    "route": "/{envId}/os/{osId}/"
-                }, 
-                "list": {
-                    "http-method": "get", 
-                    "route": "/{envId}/os/"
-                }
-            }, 
-            "descr": "Supported operating systems"
         }, 
         "script": {
             "subcommands": {
                 "retrieve": {
                     "http-method": "get", 
-                    "route": "/{envId}/scripts/{scriptId}/"
+                    "route": "/{envId}/scripts/{scriptId}/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "user"
                 }, 
                 "create": {
                     "http-method": "post", 
-                    "route": "/{envId}/scripts/"
+                    "route": "/{envId}/scripts/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "user"
                 }, 
                 "delete": {
                     "http-method": "delete", 
-                    "route": "/{envId}/scripts/{scriptId}/"
+                    "route": "/{envId}/scripts/{scriptId}/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "user"
                 }, 
                 "list": {
                     "http-method": "get", 
-                    "route": "/{envId}/scripts/"
+                    "route": "/{envId}/scripts/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "user"
                 }, 
                 "change-attributes": {
                     "http-method": "patch", 
-                    "route": "/{envId}/scripts/{scriptId}/"
+                    "route": "/{envId}/scripts/{scriptId}/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "user"
                 }
             }, 
             "descr": "Script management"
@@ -358,93 +477,109 @@
             "subcommands": {
                 "retrieve": {
                     "http-method": "get", 
-                    "route": "/{envId}/farms/{farmId}/"
+                    "route": "/{envId}/farms/{farmId}/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "user"
                 }, 
                 "launch": {
                     "http-method": "post", 
-                    "route": "/{envId}/farms/{farmId}/actions/launch/"
+                    "route": "/{envId}/farms/{farmId}/actions/launch/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "user"
                 }, 
                 "terminate": {
                     "http-method": "post", 
-                    "route": "/{envId}/farms/{farmId}/actions/terminate/"
+                    "route": "/{envId}/farms/{farmId}/actions/terminate/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "user"
                 }, 
                 "clone": {
                     "http-method": "post", 
-                    "route": "/{envId}/farms/{farmId}/actions/clone/"
+                    "route": "/{envId}/farms/{farmId}/actions/clone/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "user"
                 }, 
                 "list": {
                     "http-method": "get", 
-                    "route": "/{envId}/farms/"
+                    "route": "/{envId}/farms/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "user"
                 }, 
                 "change-attributes": {
                     "http-method": "patch", 
-                    "route": "/{envId}/farms/{farmId}/"
+                    "route": "/{envId}/farms/{farmId}/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "user"
                 }, 
                 "create": {
                     "http-method": "post", 
-                    "route": "/{envId}/farms/"
+                    "route": "/{envId}/farms/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "user"
                 }, 
                 "delete": {
                     "http-method": "delete", 
-                    "route": "/{envId}/farms/{farmId}/"
+                    "route": "/{envId}/farms/{farmId}/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "user"
                 }
             }, 
             "descr": "Farm management"
         }, 
-        "farm-role-scaling": {
+        "os": {
             "subcommands": {
-                "change-defaults": {
-                    "http-method": "patch", 
-                    "route": "/{envId}/farm-roles/{farmRoleId}/scaling/"
-                }, 
-                "create": {
-                    "http-method": "post", 
-                    "route": "/{envId}/farm-roles/{farmRoleId}/scaling/"
+                "retrieve": {
+                    "http-method": "get", 
+                    "route": "/{envId}/os/{osId}/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "user"
                 }, 
                 "list": {
                     "http-method": "get", 
-                    "route": "/{envId}/farm-roles/{farmRoleId}/scaling/"
-                }, 
-                "update": {
-                    "http-method": "patch", 
-                    "route": "/{envId}/farm-roles/{farmRoleId}/scaling/{metricName}/"
-                }, 
-                "retrieve": {
-                    "http-method": "get", 
-                    "route": "/{envId}/farm-roles/{farmRoleId}/scaling/{metricName}/"
-                }, 
-                "delete": {
-                    "http-method": "delete", 
-                    "route": "/{envId}/farm-roles/{farmRoleId}/scaling/{metricName}/"
+                    "route": "/{envId}/os/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "user"
                 }
             }, 
-            "descr": "Manage farmrole scaling"
+            "descr": "Supported operating systems"
         }, 
         "image": {
             "subcommands": {
                 "retrieve": {
                     "http-method": "get", 
-                    "route": "/{envId}/images/{imageId}/"
+                    "route": "/{envId}/images/{imageId}/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "user"
                 }, 
                 "register": {
                     "http-method": "post", 
-                    "route": "/{envId}/images/"
+                    "route": "/{envId}/images/", 
+                    "class": "scalrctl.commands.image.RegisterImage", 
+                    "api_level": "user"
                 }, 
                 "list": {
                     "http-method": "get", 
-                    "route": "/{envId}/images/"
+                    "route": "/{envId}/images/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "user"
                 }, 
                 "change-attributes": {
                     "http-method": "patch", 
-                    "route": "/{envId}/images/{imageId}/"
+                    "route": "/{envId}/images/{imageId}/", 
+                    "class": "scalrctl.commands.image.ChangeImageAttrs", 
+                    "api_level": "user"
                 }, 
                 "copy": {
                     "http-method": "post", 
-                    "route": "/{envId}/images/{imageId}/actions/copy/"
+                    "route": "/{envId}/images/{imageId}/actions/copy/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "user"
                 }, 
                 "delete": {
                     "http-method": "delete", 
-                    "route": "/{envId}/images/{imageId}/"
+                    "route": "/{envId}/images/{imageId}/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "user"
                 }
             }, 
             "descr": "Image management"
@@ -453,23 +588,33 @@
             "subcommands": {
                 "retrieve": {
                     "http-method": "get", 
-                    "route": "/{envId}/roles/{roleId}/global-variables/{globalVariableName}/"
+                    "route": "/{envId}/roles/{roleId}/global-variables/{globalVariableName}/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "user"
                 }, 
                 "create": {
                     "http-method": "post", 
-                    "route": "/{envId}/roles/{roleId}/global-variables/"
+                    "route": "/{envId}/roles/{roleId}/global-variables/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "user"
                 }, 
                 "list": {
                     "http-method": "get", 
-                    "route": "/{envId}/roles/{roleId}/global-variables/"
+                    "route": "/{envId}/roles/{roleId}/global-variables/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "user"
                 }, 
                 "update": {
                     "http-method": "patch", 
-                    "route": "/{envId}/roles/{roleId}/global-variables/{globalVariableName}/"
+                    "route": "/{envId}/roles/{roleId}/global-variables/{globalVariableName}/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "user"
                 }, 
                 "delete": {
                     "http-method": "delete", 
-                    "route": "/{envId}/roles/{roleId}/global-variables/{globalVariableName}/"
+                    "route": "/{envId}/roles/{roleId}/global-variables/{globalVariableName}/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "user"
                 }
             }, 
             "descr": "Manage global variables for roles"
@@ -478,23 +623,33 @@
             "subcommands": {
                 "retrieve": {
                     "http-method": "get", 
-                    "route": "/{envId}/scripts/{scriptId}/script-versions/{scriptVersionNumber}/"
+                    "route": "/{envId}/scripts/{scriptId}/script-versions/{scriptVersionNumber}/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "user"
                 }, 
                 "create": {
                     "http-method": "post", 
-                    "route": "/{envId}/scripts/{scriptId}/script-versions/"
+                    "route": "/{envId}/scripts/{scriptId}/script-versions/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "user"
                 }, 
                 "delete": {
                     "http-method": "delete", 
-                    "route": "/{envId}/scripts/{scriptId}/script-versions/{scriptVersionNumber}/"
+                    "route": "/{envId}/scripts/{scriptId}/script-versions/{scriptVersionNumber}/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "user"
                 }, 
                 "list": {
                     "http-method": "get", 
-                    "route": "/{envId}/scripts/{scriptId}/script-versions/"
+                    "route": "/{envId}/scripts/{scriptId}/script-versions/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "user"
                 }, 
                 "change-attributes": {
                     "http-method": "patch", 
-                    "route": "/{envId}/scripts/{scriptId}/script-versions/{scriptVersionNumber}/"
+                    "route": "/{envId}/scripts/{scriptId}/script-versions/{scriptVersionNumber}/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "user"
                 }
             }, 
             "descr": "Script Version management"
@@ -503,23 +658,33 @@
             "subcommands": {
                 "retrieve": {
                     "http-method": "get", 
-                    "route": "/{envId}/farms/{farmId}/global-variables/{globalVariableName}/"
+                    "route": "/{envId}/farms/{farmId}/global-variables/{globalVariableName}/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "user"
                 }, 
                 "create": {
                     "http-method": "post", 
-                    "route": "/{envId}/farms/{farmId}/global-variables/"
+                    "route": "/{envId}/farms/{farmId}/global-variables/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "user"
                 }, 
                 "list": {
                     "http-method": "get", 
-                    "route": "/{envId}/farms/{farmId}/global-variables/"
+                    "route": "/{envId}/farms/{farmId}/global-variables/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "user"
                 }, 
                 "update": {
                     "http-method": "patch", 
-                    "route": "/{envId}/farms/{farmId}/global-variables/{globalVariableName}/"
+                    "route": "/{envId}/farms/{farmId}/global-variables/{globalVariableName}/", 
+                    "class": "scalrctl.commands.farm_gv.UpdateFarmGlobalVariable", 
+                    "api_level": "user"
                 }, 
                 "delete": {
                     "http-method": "delete", 
-                    "route": "/{envId}/farms/{farmId}/global-variables/{globalVariableName}/"
+                    "route": "/{envId}/farms/{farmId}/global-variables/{globalVariableName}/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "user"
                 }
             }, 
             "descr": "Manage global variables for farms"
@@ -528,23 +693,33 @@
             "subcommands": {
                 "retrieve": {
                     "http-method": "get", 
-                    "route": "/{envId}/roles/{roleId}/images/{imageId}/"
+                    "route": "/{envId}/roles/{roleId}/images/{imageId}/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "user"
                 }, 
                 "replace": {
                     "http-method": "post", 
-                    "route": "/{envId}/roles/{roleId}/images/{imageId}/actions/replace/"
+                    "route": "/{envId}/roles/{roleId}/images/{imageId}/actions/replace/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "user"
                 }, 
                 "list": {
                     "http-method": "get", 
-                    "route": "/{envId}/roles/{roleId}/images/"
+                    "route": "/{envId}/roles/{roleId}/images/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "user"
                 }, 
                 "update": {
                     "http-method": "post", 
-                    "route": "/{envId}/roles/{roleId}/images/"
+                    "route": "/{envId}/roles/{roleId}/images/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "user"
                 }, 
                 "delete": {
                     "http-method": "delete", 
-                    "route": "/{envId}/roles/{roleId}/images/{imageId}/"
+                    "route": "/{envId}/roles/{roleId}/images/{imageId}/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "user"
                 }
             }, 
             "descr": "Manage images in roles"
@@ -553,11 +728,15 @@
             "subcommands": {
                 "retrieve": {
                     "http-method": "get", 
-                    "route": "/{envId}/cost-centers/{costCenterId}/"
+                    "route": "/{envId}/cost-centers/{costCenterId}/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "user"
                 }, 
                 "list": {
                     "http-method": "get", 
-                    "route": "/{envId}/cost-centers/"
+                    "route": "/{envId}/cost-centers/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "user"
                 }
             }, 
             "descr": "Cost Centrer management"
@@ -566,91 +745,135 @@
             "subcommands": {
                 "farm-role-scaling-metric": {
                     "http-method": "get", 
-                    "route": "/{envId}/farm-roles/{farmRoleId}/scaling/{metricName}/"
+                    "route": "/{envId}/farm-roles/{farmRoleId}/scaling/{metricName}/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "user"
                 }, 
                 "image": {
                     "http-method": "get", 
-                    "route": "/{envId}/images/{imageId}/"
+                    "route": "/{envId}/images/{imageId}/", 
+                    "class": "scalrctl.commands.image.RetrieveImage", 
+                    "api_level": "user"
                 }, 
                 "script-version": {
                     "http-method": "get", 
-                    "route": "/{envId}/scripts/{scriptId}/script-versions/{scriptVersionNumber}/"
+                    "route": "/{envId}/scripts/{scriptId}/script-versions/{scriptVersionNumber}/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "user"
                 }, 
                 "farm-role-global-variable": {
                     "http-method": "get", 
-                    "route": "/{envId}/farm-roles/{farmRoleId}/global-variables/{globalVariableName}/"
+                    "route": "/{envId}/farm-roles/{farmRoleId}/global-variables/{globalVariableName}/", 
+                    "class": "scalrctl.commands.farm_role_gv.UpdateFarmRoleGlobalVariable", 
+                    "api_level": "user"
                 }, 
                 "scaling-metric": {
                     "http-method": "get", 
-                    "route": "/{envId}/scaling-metrics/{metricName}/"
+                    "route": "/{envId}/scaling-metrics/{metricName}/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "user"
                 }, 
                 "farm-role-placement-configuration": {
                     "http-method": "get", 
-                    "route": "/{envId}/farm-roles/{farmRoleId}/placement/"
+                    "route": "/{envId}/farm-roles/{farmRoleId}/placement/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "user"
                 }, 
                 "orchestration-rule": {
                     "http-method": "get", 
-                    "route": "/{envId}/roles/{roleId}/orchestration-rules/{orchestrationRuleId}/"
+                    "route": "/{envId}/roles/{roleId}/orchestration-rules/{orchestrationRuleId}/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "user"
                 }, 
                 "event": {
                     "http-method": "get", 
-                    "route": "/{envId}/events/{eventId}/"
+                    "route": "/{envId}/events/{eventId}/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "user"
                 }, 
                 "cost-center": {
                     "http-method": "get", 
-                    "route": "/{envId}/cost-centers/{costCenterId}/"
+                    "route": "/{envId}/cost-centers/{costCenterId}/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "user"
                 }, 
                 "script": {
                     "http-method": "get", 
-                    "route": "/{envId}/scripts/{scriptId}/"
+                    "route": "/{envId}/scripts/{scriptId}/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "user"
                 }, 
                 "farm-role": {
                     "http-method": "get", 
-                    "route": "/{envId}/farm-roles/{farmRoleId}/"
+                    "route": "/{envId}/farm-roles/{farmRoleId}/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "user"
                 }, 
                 "farm-role-scaling-configuration": {
                     "http-method": "get", 
-                    "route": "/{envId}/farm-roles/{farmRoleId}/scaling/"
+                    "route": "/{envId}/farm-roles/{farmRoleId}/scaling/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "user"
                 }, 
                 "role": {
                     "http-method": "get", 
-                    "route": "/{envId}/roles/{roleId}/"
+                    "route": "/{envId}/roles/{roleId}/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "user"
                 }, 
                 "farm": {
                     "http-method": "get", 
-                    "route": "/{envId}/farms/{farmId}/"
+                    "route": "/{envId}/farms/{farmId}/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "user"
                 }, 
                 "farm-global-variable": {
                     "http-method": "get", 
-                    "route": "/{envId}/farms/{farmId}/global-variables/{globalVariableName}/"
+                    "route": "/{envId}/farms/{farmId}/global-variables/{globalVariableName}/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "user"
                 }, 
                 "cloud-credentials": {
                     "http-method": "get", 
-                    "route": "/{envId}/cloud-credentials/{cloudCredentialsId}/"
+                    "route": "/{envId}/cloud-credentials/{cloudCredentialsId}/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "user"
                 }, 
                 "role-global-variable": {
                     "http-method": "get", 
-                    "route": "/{envId}/roles/{roleId}/global-variables/{globalVariableName}/"
+                    "route": "/{envId}/roles/{roleId}/global-variables/{globalVariableName}/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "user"
                 }, 
                 "farm-role-instance-configuration": {
                     "http-method": "get", 
-                    "route": "/{envId}/farm-roles/{farmRoleId}/instance/"
+                    "route": "/{envId}/farm-roles/{farmRoleId}/instance/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "user"
                 }, 
                 "role-image": {
                     "http-method": "get", 
-                    "route": "/{envId}/roles/{roleId}/images/{imageId}/"
+                    "route": "/{envId}/roles/{roleId}/images/{imageId}/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "user"
                 }, 
                 "project": {
                     "http-method": "get", 
-                    "route": "/{envId}/projects/{projectId}/"
+                    "route": "/{envId}/projects/{projectId}/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "user"
                 }, 
                 "role-category": {
                     "http-method": "get", 
-                    "route": "/{envId}/role-categories/{roleCategoryId}/"
+                    "route": "/{envId}/role-categories/{roleCategoryId}/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "user"
                 }, 
                 "os": {
                     "http-method": "get", 
-                    "route": "/{envId}/os/{osId}/"
+                    "route": "/{envId}/os/{osId}/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "user"
                 }
             }, 
             "descr": "Export Scalr Objects"
@@ -659,23 +882,33 @@
             "subcommands": {
                 "retrieve": {
                     "http-method": "get", 
-                    "route": "/{envId}/farm-roles/{farmRoleId}/global-variables/{globalVariableName}/"
+                    "route": "/{envId}/farm-roles/{farmRoleId}/global-variables/{globalVariableName}/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "user"
                 }, 
                 "create": {
                     "http-method": "post", 
-                    "route": "/{envId}/farm-roles/{farmRoleId}/global-variables/"
+                    "route": "/{envId}/farm-roles/{farmRoleId}/global-variables/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "user"
                 }, 
                 "list": {
                     "http-method": "get", 
-                    "route": "/{envId}/farm-roles/{farmRoleId}/global-variables/"
+                    "route": "/{envId}/farm-roles/{farmRoleId}/global-variables/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "user"
                 }, 
                 "update": {
                     "http-method": "patch", 
-                    "route": "/{envId}/farm-roles/{farmRoleId}/global-variables/{globalVariableName}/"
+                    "route": "/{envId}/farm-roles/{farmRoleId}/global-variables/{globalVariableName}/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "user"
                 }, 
                 "delete": {
                     "http-method": "delete", 
-                    "route": "/{envId}/farm-roles/{farmRoleId}/global-variables/{globalVariableName}/"
+                    "route": "/{envId}/farm-roles/{farmRoleId}/global-variables/{globalVariableName}/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "user"
                 }
             }, 
             "descr": "Manage global variables for farm roles"
@@ -684,23 +917,33 @@
             "subcommands": {
                 "retrieve": {
                     "http-method": "get", 
-                    "route": "/{envId}/cloud-credentials/{cloudCredentialsId}/"
+                    "route": "/{envId}/cloud-credentials/{cloudCredentialsId}/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "user"
                 }, 
                 "create": {
                     "http-method": "post", 
-                    "route": "/{envId}/cloud-credentials/"
+                    "route": "/{envId}/cloud-credentials/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "user"
                 }, 
                 "delete": {
                     "http-method": "delete", 
-                    "route": "/{envId}/cloud-credentials/{cloudCredentialsId}/"
+                    "route": "/{envId}/cloud-credentials/{cloudCredentialsId}/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "user"
                 }, 
                 "list": {
                     "http-method": "get", 
-                    "route": "/{envId}/cloud-credentials/"
+                    "route": "/{envId}/cloud-credentials/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "user"
                 }, 
                 "change-attributes": {
                     "http-method": "patch", 
-                    "route": "/{envId}/cloud-credentials/{cloudCredentialsId}/"
+                    "route": "/{envId}/cloud-credentials/{cloudCredentialsId}/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "user"
                 }
             }, 
             "descr": "Manage cloud credentials available in the Scalr Environment"
@@ -709,23 +952,33 @@
             "subcommands": {
                 "retrieve": {
                     "http-method": "get", 
-                    "route": "/{envId}/roles/{roleId}/orchestration-rules/{orchestrationRuleId}/"
+                    "route": "/{envId}/roles/{roleId}/orchestration-rules/{orchestrationRuleId}/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "user"
                 }, 
                 "create": {
                     "http-method": "post", 
-                    "route": "/{envId}/roles/{roleId}/orchestration-rules/"
+                    "route": "/{envId}/roles/{roleId}/orchestration-rules/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "user"
                 }, 
                 "delete": {
                     "http-method": "delete", 
-                    "route": "/{envId}/roles/{roleId}/orchestration-rules/{orchestrationRuleId}/"
+                    "route": "/{envId}/roles/{roleId}/orchestration-rules/{orchestrationRuleId}/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "user"
                 }, 
                 "list": {
                     "http-method": "get", 
-                    "route": "/{envId}/roles/{roleId}/orchestration-rules/"
+                    "route": "/{envId}/roles/{roleId}/orchestration-rules/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "user"
                 }, 
                 "change-attributes": {
                     "http-method": "patch", 
-                    "route": "/{envId}/roles/{roleId}/orchestration-rules/{orchestrationRuleId}/"
+                    "route": "/{envId}/roles/{roleId}/orchestration-rules/{orchestrationRuleId}/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "user"
                 }
             }, 
             "descr": "Orchestration Rule management"
@@ -734,23 +987,33 @@
             "subcommands": {
                 "retrieve": {
                     "http-method": "get", 
-                    "route": "/{envId}/farm-roles/{farmRoleId}/orchestration-rules/{orchestrationRuleId}/"
+                    "route": "/{envId}/farm-roles/{farmRoleId}/orchestration-rules/{orchestrationRuleId}/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "user"
                 }, 
                 "create": {
                     "http-method": "post", 
-                    "route": "/{envId}/farm-roles/{farmRoleId}/orchestration-rules/"
+                    "route": "/{envId}/farm-roles/{farmRoleId}/orchestration-rules/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "user"
                 }, 
                 "delete": {
                     "http-method": "delete", 
-                    "route": "/{envId}/farm-roles/{farmRoleId}/orchestration-rules/{orchestrationRuleId}/"
+                    "route": "/{envId}/farm-roles/{farmRoleId}/orchestration-rules/{orchestrationRuleId}/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "user"
                 }, 
                 "list": {
                     "http-method": "get", 
-                    "route": "/{envId}/farm-roles/{farmRoleId}/orchestration-rules/"
+                    "route": "/{envId}/farm-roles/{farmRoleId}/orchestration-rules/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "user"
                 }, 
                 "change-attributes": {
                     "http-method": "patch", 
-                    "route": "/{envId}/farm-roles/{farmRoleId}/orchestration-rules/{orchestrationRuleId}/"
+                    "route": "/{envId}/farm-roles/{farmRoleId}/orchestration-rules/{orchestrationRuleId}/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "user"
                 }
             }, 
             "descr": "Orchestration Rule management"
@@ -759,23 +1022,33 @@
             "subcommands": {
                 "retrieve": {
                     "http-method": "get", 
-                    "route": "/{envId}/scaling-metrics/{metricName}/"
+                    "route": "/{envId}/scaling-metrics/{metricName}/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "user"
                 }, 
                 "create": {
                     "http-method": "post", 
-                    "route": "/{envId}/scaling-metrics/"
+                    "route": "/{envId}/scaling-metrics/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "user"
                 }, 
                 "list": {
                     "http-method": "get", 
-                    "route": "/{envId}/scaling-metrics/"
+                    "route": "/{envId}/scaling-metrics/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "user"
                 }, 
                 "update": {
                     "http-method": "patch", 
-                    "route": "/{envId}/scaling-metrics/{metricName}/"
+                    "route": "/{envId}/scaling-metrics/{metricName}/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "user"
                 }, 
                 "delete": {
                     "http-method": "delete", 
-                    "route": "/{envId}/scaling-metrics/{metricName}/"
+                    "route": "/{envId}/scaling-metrics/{metricName}/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "user"
                 }
             }, 
             "descr": "Manage scaling metrics"
@@ -784,104 +1057,189 @@
             "subcommands": {
                 "retrieve": {
                     "http-method": "get", 
-                    "route": "/{envId}/roles/{roleId}/"
+                    "route": "/{envId}/roles/{roleId}/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "user"
                 }, 
                 "create": {
                     "http-method": "post", 
-                    "route": "/{envId}/roles/"
+                    "route": "/{envId}/roles/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "user"
                 }, 
                 "delete": {
                     "http-method": "delete", 
-                    "route": "/{envId}/roles/{roleId}/"
+                    "route": "/{envId}/roles/{roleId}/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "user"
                 }, 
                 "list": {
                     "http-method": "get", 
-                    "route": "/{envId}/roles/"
+                    "route": "/{envId}/roles/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "user"
                 }, 
                 "change-attributes": {
                     "http-method": "patch", 
-                    "route": "/{envId}/roles/{roleId}/"
+                    "route": "/{envId}/roles/{roleId}/", 
+                    "class": "scalrctl.commands.role.ChangeRoleAttrs", 
+                    "api_level": "user"
                 }
             }, 
             "descr": "Role management"
         }, 
-        "farm-role": {
+        "farm-role-scaling": {
             "subcommands": {
-                "change-instance-configuration": {
+                "change-defaults": {
                     "http-method": "patch", 
-                    "route": "/{envId}/farm-roles/{farmRoleId}/instance/"
-                }, 
-                "change-placement-configuration": {
-                    "http-method": "patch", 
-                    "route": "/{envId}/farm-roles/{farmRoleId}/placement/"
+                    "route": "/{envId}/farm-roles/{farmRoleId}/scaling/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "user"
                 }, 
                 "create": {
                     "http-method": "post", 
-                    "route": "/{envId}/farms/{farmId}/farm-roles/"
+                    "route": "/{envId}/farm-roles/{farmRoleId}/scaling/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "user"
                 }, 
                 "list": {
                     "http-method": "get", 
-                    "route": "/{envId}/farms/{farmId}/farm-roles/"
+                    "route": "/{envId}/farm-roles/{farmRoleId}/scaling/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "user"
+                }, 
+                "update": {
+                    "http-method": "patch", 
+                    "route": "/{envId}/farm-roles/{farmRoleId}/scaling/{metricName}/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "user"
                 }, 
                 "retrieve": {
                     "http-method": "get", 
-                    "route": "/{envId}/farm-roles/{farmRoleId}/"
-                }, 
-                "retrieve-scaling-configuration": {
-                    "http-method": "get", 
-                    "route": "/{envId}/farm-roles/{farmRoleId}/scaling/"
-                }, 
-                "import-server": {
-                    "http-method": "post", 
-                    "route": "/{envId}/farm-roles/{farmRoleId}/actions/import-server/"
-                }, 
-                "change-attributes": {
-                    "http-method": "patch", 
-                    "route": "/{envId}/farm-roles/{farmRoleId}/"
-                }, 
-                "change-scaling-configuration": {
-                    "http-method": "patch", 
-                    "route": "/{envId}/farm-roles/{farmRoleId}/scaling/"
-                }, 
-                "retrieve-placement-configuration": {
-                    "http-method": "get", 
-                    "route": "/{envId}/farm-roles/{farmRoleId}/placement/"
-                }, 
-                "retrieve-instance-configuration": {
-                    "http-method": "get", 
-                    "route": "/{envId}/farm-roles/{farmRoleId}/instance/"
+                    "route": "/{envId}/farm-roles/{farmRoleId}/scaling/{metricName}/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "user"
                 }, 
                 "delete": {
                     "http-method": "delete", 
-                    "route": "/{envId}/farm-roles/{farmRoleId}/"
+                    "route": "/{envId}/farm-roles/{farmRoleId}/scaling/{metricName}/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "user"
                 }
             }, 
-            "descr": "FarmRole management"
+            "descr": "Manage farmrole scaling"
         }, 
         "event": {
             "subcommands": {
                 "retrieve": {
                     "http-method": "get", 
-                    "route": "/{envId}/events/{eventId}/"
+                    "route": "/{envId}/events/{eventId}/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "user"
                 }, 
                 "create": {
                     "http-method": "post", 
-                    "route": "/{envId}/events/"
+                    "route": "/{envId}/events/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "user"
                 }, 
                 "delete": {
                     "http-method": "delete", 
-                    "route": "/{envId}/events/{eventId}/"
+                    "route": "/{envId}/events/{eventId}/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "user"
                 }, 
                 "list": {
                     "http-method": "get", 
-                    "route": "/{envId}/events/"
+                    "route": "/{envId}/events/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "user"
                 }, 
                 "change-attributes": {
                     "http-method": "patch", 
-                    "route": "/{envId}/events/{eventId}/"
+                    "route": "/{envId}/events/{eventId}/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "user"
                 }
             }, 
             "descr": "Manage events available in the Scalr Environment"
+        }, 
+        "farm-role": {
+            "subcommands": {
+                "change-instance-configuration": {
+                    "http-method": "patch", 
+                    "route": "/{envId}/farm-roles/{farmRoleId}/instance/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "user"
+                }, 
+                "change-placement-configuration": {
+                    "http-method": "patch", 
+                    "route": "/{envId}/farm-roles/{farmRoleId}/placement/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "user"
+                }, 
+                "create": {
+                    "http-method": "post", 
+                    "route": "/{envId}/farms/{farmId}/farm-roles/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "user"
+                }, 
+                "list": {
+                    "http-method": "get", 
+                    "route": "/{envId}/farms/{farmId}/farm-roles/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "user"
+                }, 
+                "retrieve": {
+                    "http-method": "get", 
+                    "route": "/{envId}/farm-roles/{farmRoleId}/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "user"
+                }, 
+                "retrieve-scaling-configuration": {
+                    "http-method": "get", 
+                    "route": "/{envId}/farm-roles/{farmRoleId}/scaling/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "user"
+                }, 
+                "import-server": {
+                    "http-method": "post", 
+                    "route": "/{envId}/farm-roles/{farmRoleId}/actions/import-server/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "user"
+                }, 
+                "change-attributes": {
+                    "http-method": "patch", 
+                    "route": "/{envId}/farm-roles/{farmRoleId}/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "user"
+                }, 
+                "change-scaling-configuration": {
+                    "http-method": "patch", 
+                    "route": "/{envId}/farm-roles/{farmRoleId}/scaling/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "user"
+                }, 
+                "retrieve-placement-configuration": {
+                    "http-method": "get", 
+                    "route": "/{envId}/farm-roles/{farmRoleId}/placement/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "user"
+                }, 
+                "retrieve-instance-configuration": {
+                    "http-method": "get", 
+                    "route": "/{envId}/farm-roles/{farmRoleId}/instance/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "user"
+                }, 
+                "delete": {
+                    "http-method": "delete", 
+                    "route": "/{envId}/farm-roles/{farmRoleId}/", 
+                    "class": "scalrctl.commands.SubCommand", 
+                    "api_level": "user"
+                }
+            }, 
+            "descr": "FarmRole management"
         }
     }
 }
