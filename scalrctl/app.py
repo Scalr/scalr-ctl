@@ -276,7 +276,7 @@ class MyCLI(click.Group):
         return group
 
 def account():
-    # debug code
+    #print "ACCOUNT"
     pass
 
 def apply_settings(data):
@@ -306,28 +306,37 @@ class ScalrCLI(click.Group):
         super(ScalrCLI, self).__init__(name, commands, **attrs)
 
     def list_commands(self, ctx):
+        """
         keys = self.scheme.keys()
-        if "subcommands" not in keys:
-            names = keys
+        if "subcommands" in keys:
+            commands = self.scheme["subcommands"].keys()
         else:
-            names = self.scheme["subcommands"].keys()
-        names.sort()
-        return names
+            commands = keys
+        commands.sort()
+        return commands
+        """
+        commands = self.scheme.keys()
+        commands.sort()
+        return commands
 
     def get_command(self, ctx, name):
-
         args = dict(
             callback=lambda: None,
             help=""
         )
 
         if name in self.scheme:
-            args["scheme"] = self.scheme[name]
 
-            if "descr" in self.scheme[name]:
-                args["help"] = self.scheme[name]["descr"]
+            if "subcommands" in self.scheme[name]:
+                args["scheme"] = self.scheme[name]["subcommands"]
+            else:
+                args["scheme"] = self.scheme[name]
 
-        return ScalrCLI(**args)
+            if "group_descr" in self.scheme[name]:
+                args["help"] = self.scheme[name]["group_descr"]
+
+        group = ScalrCLI(**args)
+        return group
 
 
 #@click.command(cls=MyCLI)
