@@ -306,23 +306,20 @@ class ScalrCLI(click.Group):
         super(ScalrCLI, self).__init__(name, commands, **attrs)
 
     def list_commands(self, ctx):
-        """
-        keys = self.scheme.keys()
-        if "subcommands" in keys:
-            commands = self.scheme["subcommands"].keys()
-        else:
-            commands = keys
-        commands.sort()
-        return commands
-        """
         commands = self.scheme.keys()
+
+        if "group_descr" in commands:
+            commands.remove("group_descr")
+
+        if "route" in commands and "http-method" in commands:
+            return []
+
         commands.sort()
         return commands
 
     def get_command(self, ctx, name):
         args = dict(
             callback=lambda: None,
-            help=""
         )
 
         if name in self.scheme:
@@ -333,7 +330,7 @@ class ScalrCLI(click.Group):
                 args["scheme"] = self.scheme[name]
 
             if "group_descr" in self.scheme[name]:
-                args["help"] = self.scheme[name]["group_descr"]
+                args["short_help"] = self.scheme[name]["group_descr"]
 
         group = ScalrCLI(**args)
         return group
