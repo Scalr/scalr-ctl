@@ -276,7 +276,7 @@ class MyCLI(click.Group):
         return group
 
 def account():
-    #print "ACCOUNT"
+    print "ACCOUNT"
     pass
 
 def apply_settings(data):
@@ -293,6 +293,64 @@ if os.path.exists(defaults.CONFIG_PATH):
 
 if update.is_update_required():
     update.update()  # [ST-53]
+
+
+class Action(object):
+
+    raw_spec = None
+
+    def __init__(self, route, http_method, api_level, *args, **kwargs):
+        self.route = route
+        self.http_method = http_method
+        self.api_level = api_level
+        self._init()
+
+    def _init(self):
+        # TBD: load spec only once
+        self.raw_spec = spec.get_raw_spec(self.api_level)
+
+
+    def run(self, *args, **kwargs):
+        print "run %s @ %s with arguments:" % (self.http_method, self.route), args, kwargs
+
+    def get_description(self):
+        return self.raw_spec["paths"][self.route][self.http_method]["description"]
+
+    def get_options(self):
+        return self._get_default_options() + self._get_custom_options()
+
+    def _get_default_options(self):
+        options = []
+        for param in self._get_raw_params():
+            option = click.Option(("--%s" % param['name'], param['name']), required=param['required'], help=param["description"])
+            options.append(option)
+        return options
+
+    def _get_custom_options(self):
+        return []
+
+    def _get_body_type_params(self):
+        params = []
+        m = self.raw_spec["paths"][self.route][self.http_method]
+        if "parameters" in m:
+            for parameter in m['parameters']:
+                params.append(parameter)
+        return params
+
+    def _get_path_type_params(self):
+        params = []
+        d = self.raw_spec["paths"][self.route]
+        if "parameters" in d:
+            for parameter in d['parameters']:
+                params.append(parameter)
+        return params
+
+    def _get_raw_params(self):
+        result = self._get_path_type_params()
+        if self.http_method.upper() in ("GET", "DELETE"):
+            body_params = self._get_body_type_params()
+            result += body_params
+        return result
 
 
 class ScalrCLI(click.Group):
@@ -324,19 +382,26 @@ class ScalrCLI(click.Group):
 
         if name in self.scheme:
 
-            if "subcommands" in self.scheme[name]:
-                args["scheme"] = self.scheme[name]["subcommands"]
-            else:
-                args["scheme"] = self.scheme[name]
+            args["scheme"] = self.scheme[name]
 
             if "group_descr" in self.scheme[name]:
                 args["short_help"] = self.scheme[name]["group_descr"]
 
-        group = ScalrCLI(**args)
-        return group
+            action_level = "route" in self.scheme[name] and "http-method" in self.scheme[name]
+            if action_level:
+                route = self.scheme[name]["route"]
+                http_method = self.scheme[name]["http-method"]
+                api_level = self.scheme[name]["api_level"]
+                action = Action(route=route, http_method=http_method, api_level=api_level)
+                hlp = action.get_description()
+                options = action.get_options()
+                return click.Command(name, params=options, callback=action.run, short_help=hlp)
+        else:
+            raise click.ClickException("No such command: %s" % name)
+
+        return ScalrCLI(**args)
 
 
-#@click.command(cls=MyCLI)
 @click.command(cls=ScalrCLI)
 @click.version_option()
 @click.pass_context
@@ -344,10 +409,13 @@ class ScalrCLI(click.Group):
 @click.option('--secret_key', help="API secret key")
 def cli(ctx, key_id, secret_key, *args, **kvargs):
     """Scalr-ctl is a command-line interface to your Scalr account"""
+
     if key_id:
         settings.API_KEY_ID = str(key_id)
+
     if secret_key:
         settings.API_SECRET_KEY = str(secret_key)
+
     elif settings.API_KEY_ID and settings.API_KEY_ID.strip() and not settings.API_SECRET_KEY:  # [ST-21]
         if ctx.invoked_subcommand not in ("configure", "update"):
             raw = click.prompt(text="API SECRET KEY", hide_input=True)

@@ -181,6 +181,7 @@ class Spec(object):
     def __repr__(self):
         return 'Spec("%s", "%s")' % (self.route, self.method)
 
+
 def get_raw_spec(api_level="user"):
     api_level = api_level or "user"  #XXX: Ugly,  SubCommand class needs to be changed first
     path = os.path.join(os.path.expanduser(os.environ.get("SCALRCLI_HOME", "~/.scalr")), "%s.json" % api_level)
