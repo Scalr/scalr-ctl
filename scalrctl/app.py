@@ -1,17 +1,17 @@
 __author__ = 'Dmitriy Korsakov'
 
 import os
-import sys
+import re
 import json
-import inspect
+import traceback
 
 import yaml
 
 from scalrctl import click
-from scalrctl import commands
 from scalrctl import settings
-from scalrctl import spec
 from scalrctl import defaults
+from scalrctl import request
+from scalrctl.view import build_table, build_tree
 
 from scalrctl.commands.internal import configure, update
 
@@ -19,265 +19,9 @@ from scalrctl.commands.internal import configure, update
 CMD_FOLDER = os.path.abspath(os.path.join(os.path.dirname(__file__), 'commands'))
 
 
-class HelpBuilder(object):
-    document = None
-
-    def __init__(self, document):
-        #XXX: move methods to spec module
-        self.document = document
-
-    def list_paths(self):
-        return list(self.document["paths"])
-
-    def list_http_methods(self, path):
-        l = list(self.document["paths"][path])
-        if "parameters" in l:
-            l.remove("parameters")
-        return l
-
-    def get_body_type_params(self, path, method="get"):
-        params = []
-        m = self.document["paths"][path][method]
-        if "parameters" in m:
-            for parameter in m['parameters']:
-                params.append(parameter)
-        return params
-
-    def get_path_type_params(self, path):
-        params = []
-        d = self.document["paths"][path]
-        if "parameters" in d:
-            for parameter in d['parameters']:
-                params.append(parameter)
-        return params
-
-    def get_params(self, path, method="get"):
-        result = self.get_path_type_params(path)
-        if method.upper() in ("GET", "DELETE"):
-            body_params = self.get_body_type_params(path, method)
-            result += body_params
-        return result
-
-    def returns_iterable(self, path):
-        responces = self.document["paths"][path]["get"]['responses']
-        if '200' in responces:
-            ok200 = responces['200']
-            if 'schema' in ok200:
-                schema = ok200['schema']
-                if '$ref' in schema:
-                    reference = schema['$ref']
-                    object_key = reference.split("/")[-1]
-                    object_descr = self.document["definitions"][object_key]
-                    object_properties = object_descr["properties"]
-                    data_structure = object_properties["data"]
-                    if "type" in data_structure:
-                        responce_type = data_structure["type"]
-                        if "array" == responce_type:
-                            return True
-        return False
-
-
-class MyCLI(click.Group):
-
-    _modules = None
-
-    def __init__(self, name=None, commands=None, **attrs):
-        super(MyCLI, self).__init__(name, commands, **attrs)
-        self._modules = {}
-        self._init()
-        self.metaspec = spec.MetaSpec.lookup()
-
-
-    def get_help_builder(self, api_level="user"):
-        spec_dict = self.metaspec._get_spec_dict(api_level=api_level)
-        return HelpBuilder(spec_dict)
-
-
-    def _list_module_objects(self):
-        objects = [module for module in self._modules.values() if module.enabled]
-        return objects
-
-
-    def _list_subcommands(self, command_name):
-        objects = []
-        for name, obj in inspect.getmembers(self._modules[command_name]):
-            if inspect.isclass(obj) and hasattr(obj, 'enabled') and getattr(obj, 'enabled'):
-                subcommand = obj()
-                if isinstance(subcommand, commands.SubCommand):
-                    objects.append(subcommand)
-        return objects
-
-
-    def _list_options(self, route, method, command_name, subcommand_name, api_level="user"):
-        # XXX: subcommand_name, command_name
-        help_builder = self.get_help_builder(api_level=api_level)
-        params = help_builder.get_params(route, method)
-        options = []
-
-        debug = click.Option(('--debug/--no-debug', 'debug'), default=False, help="Print debug messages")
-        options.append(debug)
-
-        for param in params:
-            option = click.Option(("--%s" % param['name'], param['name']), required=param['required'], help=param["description"])
-            options.append(option)
-
-        if method.upper() == 'GET' and command_name != "export":  # [ST-88]
-            raw = click.Option(('--raw', 'transformation'), is_flag=True, flag_value='raw', default=False, help="Print raw response")
-            tree = click.Option(('--tree', 'transformation'), is_flag=True, flag_value='tree', default=True, help="Print response as a colored tree")
-            nocolor = click.Option(('--nocolor', 'nocolor'), is_flag=True, default=False, help="Use colors")
-            options += [raw, tree, nocolor]
-
-            if subcommand_name not in ("get", "retrieve"):  # [ST-54] [ST-102]
-                table = click.Option(('--table', 'transformation'), is_flag=True, flag_value='table', default=False, help="Print response as a colored table")
-                options.append(table)
-            else:
-                export = click.Option(('--export', 'export'), required=False, type=click.Path(), help="Export Scalr Object to JSON file")  # [ST-88]
-                options.append(export)
-
-            if help_builder.returns_iterable(route):
-                maxrez = click.Option(("--maxresults", "maxResults"), type=int, required=False, help="Maximum number of records. Example: --maxresults=2")
-                options.append(maxrez)
-
-                pagenum = click.Option(("--pagenumber", "pageNum"), type=int, required=False, help="Current page number. Example: --pagenumber=3")
-                options.append(pagenum)
-
-                filthelp = "Apply filters. Example: type=ebs,size=8. "
-                spc = spec.Spec(spec.get_raw_spec(api_level=api_level), route, method)
-                if spc.filters:
-                    filters = sorted(spc.filters)
-                    filthelp += "Available filters: %s." % ", ".join(filters)
-                    filters = click.Option(("--filters", "filters"), required=False, help=filthelp)
-                    options.append(filters)
-
-                columnshelp = "Filter columns in table view [--table required]. Example: NAME,SIZE,SCOPE. "
-                available_columns = spc.get_column_names()
-                columnshelp +=  "Available columns: %s." % ", ".join(available_columns)
-                columns = click.Option(("--columns", "columns"), required=False, help=columnshelp)
-                options.append(columns)
-
-        if method.upper() in ('PATCH','POST'):
-            stdin_help = "Ask for input instead of opening default text editor"
-            stdin = click.Option(("--stdin", "stdin"), is_flag=True, default=False, help=stdin_help)
-            options.append(stdin)
-
-            import_help = "Import object from file"
-            from_file = click.Option(("--import", "from_file"), required=False, type=click.Path(), help=import_help)
-            options.append(from_file)
-
-
-        return options
-
-
-    def _init(self):
-        files = os.listdir(CMD_FOLDER)
-        list_module_filenames = [fname for fname in files if fname.endswith('.py') and not fname.startswith("_")]
-
-        for name in list_module_filenames:
-            try:
-                if sys.version_info[0] == 2:
-                    name = name.encode('ascii', 'replace')
-                mod = __import__('scalrctl.commands.' + name[:-3], None, None, ['enabled'])
-                if hasattr(mod, "NAME"):
-                    self._modules[mod.NAME] = mod
-            except ImportError:
-                raise  # pass
-
-
-    def list_commands(self, ctx):
-        rv = [module.NAME for module in self._list_module_objects()]
-        rv += ["configure", "update", "account"]
-        rv.sort()
-        return rv
-
-
-    def get_command(self, ctx, name):
-
-        if name == "account":
-            account_help = "All AccountAPI commands"  # TODO: HelpStr
-            account_group = click.Group("account", callback=lambda: None, help=account_help)
-
-            for command_name in self.metaspec._list_cmd_aliases(api_level="account"):
-                command_descr = self.metaspec._get_cmd_descr(command_name=command_name, api_level="account")
-                grp = click.Group(command_name, callback=lambda: None, help=command_descr)
-
-                for subcommand_name in self.metaspec._list_subcmd_aliases(command_name=command_name, api_level="account"):
-
-                    route = self.metaspec.get_route(command_name, subcommand_name, api_level="account")
-                    method = self.metaspec.get_http_method(command_name, subcommand_name, api_level="account")
-                    subcommand = commands.SubCommand()
-                    subcommand.name = subcommand_name
-                    subcommand.route = route
-                    subcommand.method = method
-                    subcommand.api_level = "account"
-                    options = self._list_options(route, method, command_name, subcommand_name, api_level="account")
-                    options = subcommand.modify_options(options)
-                    acc_spec = spec.Spec(spec.get_raw_spec(api_level="account"), route, method)
-                    subcommand_descr = acc_spec.description
-                    cmd = click.Command(subcommand.name, params=options, callback=subcommand.run, short_help=subcommand_descr)
-
-                    if subcommand_name == "retrieve":  # [ST-102]
-                        new_cmd = click.Command("get", params=options, callback=subcommand.run, short_help=subcommand_descr)
-                        grp.add_command(new_cmd)
-                        cmd.hidden = True
-                    elif subcommand_name == "change-attributes":  # [ST-104]
-                        new_cmd = click.Command("update", params=options, callback=subcommand.run, short_help=subcommand_descr)
-                        grp.add_command(new_cmd)
-                        cmd.hidden = True
-
-                    grp.add_command(cmd)
-
-                account_group.add_command(grp)
-            return account_group
-
-        elif name == "configure":
-            configure_help = "Set configuration options in interactive mode"
-            profile_argument = click.Argument(("profile",), required=False)  # [ST-30]
-            configure_cmd = click.Command("configure", callback=configure.configure, help=configure_help, params=[profile_argument,])
-            return configure_cmd
-
-        elif name == "update":
-            update_help = "Fetch new API specification if available."
-            update_cmd = click.Command("update", callback=update.update, help=update_help)
-            return update_cmd
-
-        elif name not in self._modules:
-            raise click.ClickException("No such command: %s" % name)
-
-        group = click.Group(name, callback=self._modules[name].callback, help=self._modules[name].__doc__)
-
-        hb = self.get_help_builder(api_level="user")
-        subcommands = self._list_subcommands(name)
-        routes = hb.list_paths()
-        for subcommand in subcommands:
-            if subcommand.route in routes \
-                    and subcommand.method in hb.list_http_methods(subcommand.route):
-                options = self._list_options(
-                    route=subcommand.route,
-                    method=subcommand.method,
-                    command_name = name,
-                    subcommand_name=subcommand.name,
-                    api_level="user")
-
-                options = subcommand.modify_options(options)
-
-                spc = spec.Spec(spec.get_raw_spec(api_level="user"), subcommand.route, subcommand.method)
-                cmd = click.Command(subcommand.name, params=options, callback=subcommand.run, short_help=spc.description)
-
-                if subcommand.name == "retrieve":  # [ST-102]
-                    new_cmd = click.Command("get", params=options, callback=subcommand.run, short_help=spc.description)
-                    group.add_command(new_cmd)
-                    cmd.hidden = True
-                elif subcommand.name == "change-attributes":  # [ST-104]
-                    new_cmd = click.Command("update", params=options, callback=subcommand.run, short_help=spc.description)
-                    group.add_command(new_cmd)
-                    cmd.hidden = True
-
-                group.add_command(cmd)
-        return group
-
 def account():
-    print "ACCOUNT"
     pass
+
 
 def apply_settings(data):
     for key, value in data.items():
@@ -298,20 +42,180 @@ if update.is_update_required():
 class Action(object):
 
     raw_spec = None
+    prompt_for = None  # Optional. Some values like GCE imageId cannot be passed through command lines
+    mutable_body_parts = None  # Temporary. Object definitions in YAML spec are not always correct
+    object_reference = None # optional, e.g. '#/definitions/GlobalVariable'
 
-    def __init__(self, route, http_method, api_level, *args, **kwargs):
+    _table_columns = None
+
+    def __init__(self, name, route, http_method, api_level, *args, **kwargs):
+        self.name = name
         self.route = route
         self.http_method = http_method
         self.api_level = api_level
+
+        self._table_columns = []
+
         self._init()
 
     def _init(self):
-        # TBD: load spec only once
-        self.raw_spec = spec.get_raw_spec(self.api_level)
+        path = os.path.join(os.path.expanduser(os.environ.get("SCALRCLI_HOME", "~/.scalr")), "%s.json" % self.api_level)
+        self.raw_spec = json.load(open(path, "r"))
 
+    def pre(self, *args, **kwargs):
+        """
+        before request is made
+        """
+        raw_columns = kwargs.pop("columns", False)
+        if raw_columns:
+            self._table_columns = raw_columns.split(",")
+
+        raw_filters = kwargs.pop("filters", None)
+        if raw_filters:
+            for pair in raw_filters.split(","):
+                kv = pair.split("=")
+                if 2 == len(kv):
+                    kwargs[kv[0]] = kv[1]
+
+        if "debug" in kwargs:
+            settings.debug_mode = kwargs.pop("debug")
+        if "transformation" in kwargs:
+            settings.view = kwargs.pop("transformation")
+        if "nocolor" in kwargs:
+            settings.colored_output = not kwargs.pop("nocolor")
+
+        if self.http_method.upper() in ("PATCH", "POST"):
+            # prompting for body and then validating it
+            for param in self._get_body_type_params():
+                name = param["name"]
+
+                text = ''
+                if self.http_method.upper() == "PATCH":
+                    try:
+                        get_object = Action(
+                            name="get",
+                            route=self.route,
+                            http_method=self.http_method,
+                            api_level=self.api_level
+                        )  # XXX: can be custom class
+                        raw_text = get_object.run(*args, **kwargs)
+
+                        if settings.debug_mode:
+                            click.echo(raw_text)
+
+                        json_text = json.loads(raw_text)
+                        filtered = self._filter_json_object(json_text['data'], filter_createonly=True)
+                        text = json.dumps(filtered)
+                    except (Exception, BaseException) as e:
+                        if settings.debug_mode:
+                            click.echo(traceback.format_exc())
+                        else:
+                            click.echo(e)
+                raw = click.edit(text)
+
+                try:
+                    user_object = json.loads(raw)
+                except (Exception, BaseException) as e:
+                    if settings.debug_mode:
+                        raise
+                    raise click.ClickException(str(e))
+
+                valid_object = self._filter_json_object(user_object)
+                valid_object_str = json.dumps(valid_object)
+                kwargs[name] = valid_object_str
+        return args, kwargs
+
+    def post(self, response):
+        """
+        after request is made
+        """
+        return response
 
     def run(self, *args, **kwargs):
-        print "run %s @ %s with arguments:" % (self.http_method, self.route), args, kwargs
+        """
+        callback for click subcommand
+        """
+        # print "run %s @ %s with arguments:" % (self.http_method, self.route), args, kwargs
+        args, kwargs = self.pre(*args, **kwargs)
+
+        uri = self._request_template
+        payload = {}
+        data = None
+
+        if settings.envId and '{envId}' in uri and ('envId' not in kwargs or not kwargs['envId']):
+            kwargs['envId'] = settings.envId  # XXX
+
+        if kwargs:
+            uri = self._request_template.format(**kwargs)
+
+            for key, value in kwargs.items():
+                t = "{%s}" % key
+                # filtering in-body and empty params
+                if value and t not in self._request_template:
+                    if self.http_method.upper() in ("GET", "DELETE"):
+                        payload[key] = value
+                    elif self.http_method.upper() in ("POST", "PATCH"):
+                        data = value  # XXX
+
+        raw_response = request.request(self.http_method, uri, payload, data)
+        response = self.post(raw_response)
+
+        if settings.view == "raw":
+            click.echo(raw_response)
+
+        if raw_response:
+
+            try:
+                response_json = json.loads(response)
+            except ValueError, e:
+                if settings.debug_mode:
+                    raise
+                raise click.ClickException(str(e))
+
+            if "errors" in response_json and response_json["errors"]:
+                raise click.ClickException(response_json["errors"][0]['message'])
+
+            data = response_json["data"]
+            text = json.dumps(data)
+
+            if settings.debug_mode:
+                click.echo(response_json["meta"])
+
+            if settings.view == "tree":
+                click.echo(build_tree(text))
+
+            elif settings.view == "table":
+                columns = self._table_columns or self._get_column_names()
+                rows = []
+                for block in data:
+                    row = []
+                    for name in columns:
+                        for item in block:
+                            if name.lower() == item.lower():
+                                row.append(block[item])
+                                break
+                        else:
+                            raise click.ClickException("Cannot apply filter. No such column: %s" % name)
+                    if row:
+                        rows.append(row)
+
+                pagination = response_json.get("pagination", None)
+                if pagination:
+                    pagenum_last, current_pagenum = 1, 1
+                    url_last = pagination.get('last', None)
+                    if url_last:
+                        number = re.search("pageNum=(\d*)", url_last)
+                        pagenum_last = number.group(1) if number else 1
+
+                    url_next = pagination.get('next', None)
+                    if url_next:
+                        num = re.search("pageNum=(\d*)", url_next)
+                        pagenum_next = num.group(1) if num else 1
+                        current_pagenum = int(pagenum_next) - 1
+
+                click.echo(build_table(columns, rows, "Page: %s of %s" % (current_pagenum, pagenum_last)))  # XXX
+
+        return response
 
     def get_description(self):
         return self.raw_spec["paths"][self.route][self.http_method]["description"]
@@ -319,15 +223,96 @@ class Action(object):
     def get_options(self):
         return self._get_default_options() + self._get_custom_options()
 
+    def modify_options(self, options):
+        """
+        this is the place where command line options can be fixed
+        after they are loaded from yaml spec
+        """
+        for option in options:
+            if self.prompt_for and option.name in self.prompt_for:
+                option.prompt = option.name
+
+            if option.name == "envId" and settings.envId:
+                option.required = False
+
+        return options
+
     def _get_default_options(self):
         options = []
         for param in self._get_raw_params():
-            option = click.Option(("--%s" % param['name'], param['name']), required=param['required'], help=param["description"])
+            option = click.Option(
+                ("--%s" % param['name'], param['name']),
+                required=param['required'],
+                help=param["description"]
+            )
             options.append(option)
         return options
 
     def _get_custom_options(self):
-        return []
+        options = []
+        debug = click.Option(('--debug/--no-debug', 'debug'), default=False, help="Print debug messages")
+        options.append(debug)
+
+        if self.http_method.upper() == 'GET' and self.name != "export":  # [ST-88]
+            raw = click.Option(
+                ('--raw', 'transformation'),
+                is_flag=True,
+                flag_value='raw',
+                default=False,
+                help="Print raw response"
+            )
+            tree = click.Option(
+                ('--tree', 'transformation'),
+                is_flag=True,
+                flag_value='tree',
+                default=True,
+                help="Print response as a colored tree"
+            )
+            nocolor = click.Option(('--nocolor', 'nocolor'), is_flag=True, default=False, help="Use colors")
+            options += [raw, tree, nocolor]
+
+            if self.name not in ("get", "retrieve"):  # [ST-54] [ST-102]
+                table = click.Option(
+                    ('--table', 'transformation'),
+                    is_flag=True,
+                    flag_value='table',
+                    default=False,
+                    help="Print response as a colored table"
+                )
+                options.append(table)
+
+            if self._returns_iterable():
+                maxrez = click.Option(
+                    ("--maxresults", "maxResults"),
+                    type=int,
+                    required=False,
+                    help="Maximum number of records. Example: --maxresults=2"
+                )
+                options.append(maxrez)
+
+                pagenum = click.Option(
+                    ("--pagenumber", "pageNum"),
+                    type=int,
+                    required=False,
+                    help="Current page number. Example: --pagenumber=3"
+                )
+                options.append(pagenum)
+
+                filter_help = "Apply filters. Example: type=ebs,size=8. "
+                filters = self._get_available_filters()
+                if filters:
+                    filters = sorted(filters)
+                    filter_help += "Available filters: %s." % ", ".join(filters)
+                    filters = click.Option(("--filters", "filters"), required=False, help=filter_help)
+                    options.append(filters)
+
+                columns_help = "Filter columns in table view [--table required]. Example: NAME,SIZE,SCOPE. "
+                available_columns = self._get_column_names()
+                columns_help += "Available columns: %s." % ", ".join(available_columns)
+                columns = click.Option(("--columns", "columns"), required=False, help=columns_help)
+                options.append(columns)
+
+        return options
 
     def _get_body_type_params(self):
         params = []
@@ -351,6 +336,140 @@ class Action(object):
             body_params = self._get_body_type_params()
             result += body_params
         return result
+
+    def _returns_iterable(self):
+        responses = self.raw_spec["paths"][self.route]["get"]['responses']
+        if '200' in responses:
+            ok200 = responses['200']
+            if 'schema' in ok200:
+                schema = ok200['schema']
+                if '$ref' in schema:
+                    reference = schema['$ref']
+                    object_key = reference.split("/")[-1]
+                    object_descr = self.raw_spec["definitions"][object_key]
+                    object_properties = object_descr["properties"]
+                    data_structure = object_properties["data"]
+                    if "type" in data_structure:
+                        response_type = data_structure["type"]
+                        if "array" == response_type:
+                            return True
+        return False
+
+    def _get_available_filters(self):
+        if self._returns_iterable():
+            response_ref = self._result_descr["properties"]["data"]["items"]["$ref"]
+            response_descr = self._lookup(response_ref)
+            if "x-filterable" in response_descr:
+                filters = response_descr["x-filterable"]
+                return filters
+        return []
+
+    def _get_column_names(self):
+        fields = []
+        data = self._result_descr["properties"]["data"]
+        response_ref = data["items"]["$ref"]
+        response_descr = self._lookup(response_ref)
+        for k, v in response_descr["properties"].items():
+            if "$ref" not in v:
+                fields.append(k)
+        return sorted(fields)
+
+    def _lookup(self, refstr):
+        """
+        Returns document section
+        Example: #/definitions/Image returns Image defenition section
+        """
+        if refstr.startswith("#"):
+            paths = refstr.split("/")[1:]
+            result = self.raw_spec
+            for path in paths:
+                if path not in result:
+                    return
+                result = result[path]
+            return result
+
+    @property
+    def _result_descr(self):
+        responses = self.raw_spec["paths"][self.route][self.http_method]['responses']
+        if '200' in responses:
+            ok200 = responses['200']
+            if 'schema' in ok200:
+                schema = ok200['schema']
+                if '$ref' in schema:
+                    reference = schema['$ref']
+                    return self._lookup(reference)
+
+    def _filter_json_object(self, obj, filter_createonly=False):
+        """
+        removes immutable parts from JSON object before sending it in POST or PATCH
+        """
+        # XXX: make it recursive
+        result = {}
+        mutable_parts = self.mutable_body_parts or self._list_mutable_body_parts()
+        for name, value in obj.items():
+            if filter_createonly and name in self._list_createonly_properties():
+                continue
+            elif name in mutable_parts:
+                result[name] = obj[name]
+        return result
+
+    def _list_mutable_body_parts(self):
+        """
+        finds object in yaml spec and determines it's mutable fields
+        to filter user JSON
+        """
+        mutable = []
+        reference_path = None
+
+        if not self.object_reference:
+            for param in self._get_body_type_params():
+                name = param["name"]  # e.g. image
+                if "schema" in param:
+                    if '$ref' in param["schema"]:
+                        reference_path = param["schema"]['$ref']  # e.g. #/definitions/Image
+                    elif "properties" in param["schema"]:  # ST-98, got object instead of $ref
+                        for _property, description in param["schema"]["properties"].items():
+                            if 'readOnly' not in description or not description['readOnly']:
+                                mutable.append(_property)
+
+                elif 'readOnly' not in param:
+                    # e.g. POST /{envId}/farms/{farmId}/actions/terminate/
+                    mutable.append(name)
+
+        else:
+            # XXX: Temporary code, see GlobalVariableDetailEnvelope or "role-global-variables update"
+            reference_path = self.object_reference
+
+        if reference_path:
+            parts = reference_path.split("/")
+            obj = self.raw_spec[parts[1]][parts[2]]
+            object_properties = obj["properties"]
+            for _property, description in object_properties.items():
+                if 'readOnly' not in description or not description['readOnly']:
+                        mutable.append(_property)
+        return mutable
+
+    def _list_createonly_properties(self):
+        """
+        Some properties (mostly IDs) cannot be marked as read-only because they are
+        passed in PUT-methods (but still must be filtered in UPDATE-methods)
+        """
+        result = []
+        properties = self._result_descr['properties']
+        data = properties['data']
+        if 'items' in data:
+            path = data['items']['$ref']
+        else:
+            path = data['$ref']
+        obj = self._lookup(path)
+        if 'x-createOnly' in obj:
+            result = obj['x-createOnly']
+        return result
+
+    @property
+    def _request_template(self):
+        basepath_uri = self.raw_spec["basePath"]
+        return "%s%s" % (basepath_uri, self.route)
 
 
 class ScalrCLI(click.Group):
@@ -392,9 +511,9 @@ class ScalrCLI(click.Group):
                 route = self.scheme[name]["route"]
                 http_method = self.scheme[name]["http-method"]
                 api_level = self.scheme[name]["api_level"]
-                action = Action(route=route, http_method=http_method, api_level=api_level)
+                action = Action(name=name, route=route, http_method=http_method, api_level=api_level)
                 hlp = action.get_description()
-                options = action.get_options()
+                options = action.modify_options(action.get_options())
                 return click.Command(name, params=options, callback=action.run, short_help=hlp)
         else:
             raise click.ClickException("No such command: %s" % name)
