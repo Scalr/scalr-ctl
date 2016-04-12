@@ -514,7 +514,8 @@ class ScalrCLI(click.Group):
                 action = Action(name=name, route=route, http_method=http_method, api_level=api_level)
                 hlp = action.get_description()
                 options = action.modify_options(action.get_options())
-                return click.Command(name, params=options, callback=action.run, short_help=hlp)
+                hidden = "hidden" in self.scheme[name] and self.scheme[name]['hidden']
+                return click.Command(name, params=options, callback=action.run, short_help=hlp, hidden=hidden)
         else:
             raise click.ClickException("No such command: %s" % name)
 
