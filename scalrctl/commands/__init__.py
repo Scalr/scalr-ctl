@@ -79,18 +79,16 @@ class Action(BaseAction):
             # prompting for body and then validating it
             for param in self._get_body_type_params():
                 name = param["name"]
-
                 text = ''
                 if self.http_method.upper() == "PATCH":
                     try:
                         get_object = Action(
                             name="get",
                             route=self.route,
-                            http_method=self.http_method,
+                            http_method="get",
                             api_level=self.api_level
                         )  # XXX: can be custom class
                         raw_text = get_object.run(*args, **kwargs)
-
                         if settings.debug_mode:
                             click.echo(raw_text)
 
@@ -102,6 +100,7 @@ class Action(BaseAction):
                             click.echo(traceback.format_exc())
                         else:
                             click.echo(e)
+
                 raw = click.edit(text)
 
                 try:
@@ -114,6 +113,7 @@ class Action(BaseAction):
                 valid_object = self._filter_json_object(user_object)
                 valid_object_str = json.dumps(valid_object)
                 kwargs[name] = valid_object_str
+
         return args, kwargs
 
     def post(self, response):

@@ -2,7 +2,6 @@ import time
 import hmac
 import hashlib
 import binascii
-import urllib
 import json
 import yaml
 

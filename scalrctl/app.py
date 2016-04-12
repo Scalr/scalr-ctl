@@ -11,7 +11,7 @@ from scalrctl import settings
 from scalrctl import defaults
 from scalrctl import commands
 
-from scalrctl.commands.internal import configure, update
+from scalrctl.commands.internal import update
 
 
 CMD_FOLDER = os.path.abspath(os.path.join(os.path.dirname(__file__), 'commands'))
@@ -95,7 +95,9 @@ class ScalrCLI(click.Group):
                 hidden = "hidden" in self.scheme[name] and self.scheme[name]['hidden']
                 return click.Command(name, params=options, callback=action.run, short_help=hlp, hidden=hidden)
         else:
-            raise click.ClickException("No such command: %s" % name)
+            raise click.ClickException("No such command: %s." % name)
+            # raise click.ClickException(
+            # "No such command: %s. Scheme: %s, attrs: %s" % (name, self.scheme.keys(), str(self.attrs)))
 
         return ScalrCLI(**args)
 
