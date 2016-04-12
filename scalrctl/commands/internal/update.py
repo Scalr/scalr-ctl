@@ -143,4 +143,3 @@ def update():
             click.echo("Done")
         else:
             click.echo("Failed")
-            

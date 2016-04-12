@@ -4,6 +4,12 @@
                 "http-method": "",
                 "route": ""
             },
+    "configure": {
+                "api_level": "",
+                "class": "scalrctl.commands.internal.configure.ConfigureScalrCTL",
+                "http-method": "",
+                "route": ""
+            },
     "account": {
         "cloud": {
             "delete": {

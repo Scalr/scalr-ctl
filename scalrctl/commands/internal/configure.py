@@ -7,7 +7,22 @@ import yaml
 from scalrctl import click
 from scalrctl import defaults
 from scalrctl import settings
+from scalrctl import commands
 from scalrctl.commands.internal import bash_complete, update
+
+
+class ConfigureScalrCTL(commands.BaseAction):
+
+    def run(self, *args, **kwargs):
+        configure(**kwargs)
+
+    def get_description(self):
+        return "Set configuration options in interactive mode"
+
+    def get_options(self):
+        profile_argument = click.Argument(("profile",), required=False)  # [ST-30]
+        return [profile_argument, ]
+
 
 def configure(profile=None):
     """
