@@ -12,6 +12,7 @@ import requests
 from scalrctl import click
 from scalrctl import defaults
 from scalrctl import settings
+from scalrctl import commands
 
 SWAGGER_USER_NOUPDATE_TRIGGER = ".noupdate.user"
 SWAGGER_USER_FILE = "user.yaml"
@@ -26,12 +27,23 @@ SWAGGER_ACCOUNT_JSONSPEC_FILE = SWAGGER_ACCOUNT_FILE.split(".")[0] + ".json"
 SWAGGER_ACCOUNT_JSONSPEC_PATH = os.path.join(defaults.CONFIG_FOLDER, SWAGGER_ACCOUNT_JSONSPEC_FILE)
 
 
+class UpdateScalrCTL(commands.BaseAction):
+
+    def run(self, *args, **kwargs):
+        update()
+
+    def get_description(self):
+        return "Fetch new API specification if available."
+
+
 def is_update_required():
     return not os.path.exists(SWAGGER_USER_PATH) or not os.path.exists(SWAGGER_USER_JSONSPEC_PATH)
+
 
 def get_spec_url(api_level="user"):
     api_level = api_level or "user"  #XXX: Ugly,  SubCommand class needs to be changed first
     return "{0}://{1}/api/{2}.{3}.yml".format(settings.API_SCHEME, settings.API_HOST, api_level, settings.API_VERSION)
+
 
 def update():
     """
@@ -131,3 +143,4 @@ def update():
             click.echo("Done")
         else:
             click.echo("Failed")
+            

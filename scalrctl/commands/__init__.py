@@ -11,7 +11,26 @@ from scalrctl import request
 from scalrctl.view import build_table, build_tree
 
 
-class Action(object):
+
+class BaseAction(object):
+
+    def __init__(self, *args, **kwargs):
+        pass
+
+    def run(self, *args, **kwargs):
+        pass
+
+    def get_description(self):
+        return ""
+
+    def modify_options(self, options):
+        return options
+
+    def get_options(self):
+        return []
+
+
+class Action(BaseAction):
 
     raw_spec = None
     prompt_for = None  # Optional. Some values like GCE imageId cannot be passed through command lines

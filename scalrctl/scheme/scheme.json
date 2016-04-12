@@ -1,4 +1,9 @@
-{
+{   "update": {
+                "api_level": "",
+                "class": "scalrctl.commands.internal.update.UpdateScalrCTL",
+                "http-method": "",
+                "route": ""
+            },
     "account": {
         "cloud": {
             "delete": {
