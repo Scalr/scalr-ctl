@@ -5,20 +5,7 @@ __doc__ = 'Manage global variables for roles'
 from scalrctl import commands
 
 
-NAME = "role-global-variables"
-enabled = True
-
-
-def callback(*args, **kwargs):
-    """
-    print('in role-global-variables module')
-    print(args)
-    print(kwargs)
-    """
-    pass
-
-
-class UpdateRoleGlobalVariable(commands.SubCommand):
+class UpdateRoleGlobalVariable(commands.Action):
     name = "update"
     method = "patch"
     enabled = True

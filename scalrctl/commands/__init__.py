@@ -3,79 +3,36 @@ __author__ = 'Dmitriy Korsakov'
 import os
 import re
 import json
-import datetime
 import traceback
-from collections import defaultdict
 
 from scalrctl import click
 from scalrctl import settings
 from scalrctl import request
-from scalrctl import spec
 from scalrctl.view import build_table, build_tree
 
-import yaml
 
-NAME = ""
-enabled = False
+class Action(object):
 
-
-class SubCommandMeta(type):
-
-    def __new__(mcs, name, parents, dct):
-        route = dct.get("route")
-        c = super(SubCommandMeta, mcs).__new__(mcs, name, parents, dct)
-        if name!="SubCommand" and route:
-            SubCommand._siblings[route].append(c)
-        return c
-
-
-class SubCommand(object):
-    __metaclass__ = SubCommandMeta
-    _siblings = defaultdict(list)
-    name = None
-    route = None
-    method = None
-    enabled = False
-    _table_columns = None
-    api_level = "user"
-
-    mutable_body_parts = None # temporary, object definitions in YAML spec are not always correct
+    raw_spec = None
+    prompt_for = None  # Optional. Some values like GCE imageId cannot be passed through command lines
+    mutable_body_parts = None  # Temporary. Object definitions in YAML spec are not always correct
     object_reference = None # optional, e.g. '#/definitions/GlobalVariable'
-    prompt_for = None #optional, Some values like GCE imageId cannot be passed through command line
 
-    def __init__(self):
+    _table_columns = None
+
+    def __init__(self, name, route, http_method, api_level, *args, **kwargs):
+        self.name = name
+        self.route = route
+        self.http_method = http_method
+        self.api_level = api_level
+
         self._table_columns = []
 
-    @property
-    def spc(self):
-        return spec.Spec(spec.get_raw_spec(self.api_level), self.route, self.method)
+        self._init()
 
-    def get_siblings(self):
-        return SubCommand._siblings.get(self.route)
-
-    @property
-    def _basepath_uri(self):
-        return spec.get_raw_spec(self.api_level)["basePath"]
-
-    @property
-    def _request_template(self):
-        return "%s%s" % (self._basepath_uri, self.route)
-
-    def modify_options(self, options):
-        """
-        this is the place where command line options can be fixed
-        after they are loaded from yaml spec
-        """
-        #print "In SubCommand modifier"
-        for option in options:
-            if self.prompt_for and option.name in self.prompt_for:
-                option.prompt = option.name
-
-            if option.name == "envId" and settings.envId:
-                option.required = False
-
-        return options
-
+    def _init(self):
+        path = os.path.join(os.path.expanduser(os.environ.get("SCALRCLI_HOME", "~/.scalr")), "%s.json" % self.api_level)
+        self.raw_spec = json.load(open(path, "r"))
 
     def pre(self, *args, **kwargs):
         """
@@ -85,59 +42,48 @@ class SubCommand(object):
         if raw_columns:
             self._table_columns = raw_columns.split(",")
 
-        settings.debug_mode = kwargs.pop("debug", False)
-        settings.view = kwargs.pop("transformation", "tree")
-        settings.colored_output = not kwargs.pop("nocolor", False)
-
         raw_filters = kwargs.pop("filters", None)
-
         if raw_filters:
             for pair in raw_filters.split(","):
                 kv = pair.split("=")
-                if 2==len(kv):
-                    kwargs[kv[0]]=kv[1]
+                if 2 == len(kv):
+                    kwargs[kv[0]] = kv[1]
 
+        if "debug" in kwargs:
+            settings.debug_mode = kwargs.pop("debug")
+        if "transformation" in kwargs:
+            settings.view = kwargs.pop("transformation")
+        if "nocolor" in kwargs:
+            settings.colored_output = not kwargs.pop("nocolor")
 
-        stdin = kwargs.pop("stdin", False)
-        from_file = kwargs.pop("from_file", False)  # [ST-88]
-
-        if self.method.upper() in ("PATCH", "POST"):
-            #prompting for body and then validating it
-            for param in self._post_params():
+        if self.http_method.upper() in ("PATCH", "POST"):
+            # prompting for body and then validating it
+            for param in self._get_body_type_params():
                 name = param["name"]
 
-                if stdin:
-                    raw = click.termui.prompt("Input %s in JSON format" % name)
-                elif from_file:  # [ST-88]
-                    path = os.path.expanduser(from_file)
+                text = ''
+                if self.http_method.upper() == "PATCH":
+                    try:
+                        get_object = Action(
+                            name="get",
+                            route=self.route,
+                            http_method=self.http_method,
+                            api_level=self.api_level
+                        )  # XXX: can be custom class
+                        raw_text = get_object.run(*args, **kwargs)
 
-                    if not os.path.exists(path):
-                        raise click.ClickException("Cannot import Scalr object: file not found")
+                        if settings.debug_mode:
+                            click.echo(raw_text)
 
-                    t = yaml.load(open(path, "r"))
-                    assert t["data"], "Incorrect data structure"
-                    raw = json.dumps(t["data"])  # XXX assert meta information first! # XXX excessive transformation
-
-                else:
-                    text = ''
-                    if self.method.upper() == "PATCH":
-                        try:
-                            for cls in self.get_siblings():
-                                if cls.method.upper() == "GET":
-                                    rawtext = cls().run(*args, **kwargs)
-
-                                    if settings.debug_mode:
-                                        click.echo(rawtext)
-
-                                    json_text = json.loads(rawtext)
-                                    filtered = self._filter_json_object(json_text['data'], filter_createonly=True)
-                                    text = json.dumps(filtered)
-                        except (Exception, BaseException) as e:
-                            if settings.debug_mode:
-                                click.echo(traceback.format_exc())
-                            else:
-                                click.echo(e)
-                    raw = click.edit(text)
+                        json_text = json.loads(raw_text)
+                        filtered = self._filter_json_object(json_text['data'], filter_createonly=True)
+                        text = json.dumps(filtered)
+                    except (Exception, BaseException) as e:
+                        if settings.debug_mode:
+                            click.echo(traceback.format_exc())
+                        else:
+                            click.echo(e)
+                raw = click.edit(text)
 
                 try:
                     user_object = json.loads(raw)
@@ -151,22 +97,19 @@ class SubCommand(object):
                 kwargs[name] = valid_object_str
         return args, kwargs
 
-
     def post(self, response):
         """
         after request is made
         """
         return response
 
-
     def run(self, *args, **kwargs):
         """
         callback for click subcommand
         """
-        export_path = kwargs.pop("export", None)  # [ST-88]
-        hide_output = kwargs.pop("hide_output", False)  # [ST-88]
-
+        # print "run %s @ %s with arguments:" % (self.http_method, self.route), args, kwargs
         args, kwargs = self.pre(*args, **kwargs)
+
         uri = self._request_template
         payload = {}
         data = None
@@ -181,15 +124,15 @@ class SubCommand(object):
                 t = "{%s}" % key
                 # filtering in-body and empty params
                 if value and t not in self._request_template:
-                    if self.method.upper() in ("GET", "DELETE"):
+                    if self.http_method.upper() in ("GET", "DELETE"):
                         payload[key] = value
-                    elif self.method.upper() in ("POST", "PATCH"):
-                        data = value  #XXX
+                    elif self.http_method.upper() in ("POST", "PATCH"):
+                        data = value  # XXX
 
-        raw_response = request.request(self.method, uri, payload, data)
+        raw_response = request.request(self.http_method, uri, payload, data)
         response = self.post(raw_response)
 
-        if settings.view == "raw" and not hide_output:
+        if settings.view == "raw":
             click.echo(raw_response)
 
         if raw_response:
@@ -204,37 +147,17 @@ class SubCommand(object):
             if "errors" in response_json and response_json["errors"]:
                 raise click.ClickException(response_json["errors"][0]['message'])
 
-            if export_path:  # [ST-88]
-                d = {
-                        "API_VERSION": settings.API_VERSION,
-                        "envId": settings.envId,
-                        "date": datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"),
-                        "API_HOST": settings.API_HOST,
-                        "METHOD": self.method,
-                        "URI": uri,
-                        "command": NAME,
-                        "action": self.name,
-                        }
-                o = response_json.copy()
-                o["meta"]["scalrctl"] = d
-                dump = yaml.safe_dump(o, encoding='utf-8', allow_unicode=True, default_flow_style=False)
-                try:
-                    with open(os.path.expanduser(export_path), "w") as fp:
-                        fp.write(dump)
-                except IOError as err:
-                    raise click.ClickException(str(err))
-
             data = response_json["data"]
             text = json.dumps(data)
 
-            if settings.debug_mode and not hide_output:
+            if settings.debug_mode:
                 click.echo(response_json["meta"])
 
-            if settings.view == "tree" and not hide_output:
+            if settings.view == "tree":
                 click.echo(build_tree(text))
 
             elif settings.view == "table":
-                columns = self._table_columns or self.spc.get_column_names()
+                columns = self._table_columns or self._get_column_names()
                 rows = []
                 for block in data:
                     row = []
@@ -262,72 +185,197 @@ class SubCommand(object):
                         pagenum_next = num.group(1) if num else 1
                         current_pagenum = int(pagenum_next) - 1
 
-                if not hide_output:
-                    click.echo(build_table(columns, rows, "Page: %s of %s" % (current_pagenum, pagenum_last))) #XXX
+                click.echo(build_table(columns, rows, "Page: %s of %s" % (current_pagenum, pagenum_last)))  # XXX
 
         return response
 
+    def get_description(self):
+        return self.raw_spec["paths"][self.route][self.http_method]["description"]
 
-    def _list_mutable_body_parts(self):
+    def get_options(self):
+        return self._get_default_options() + self._get_custom_options()
+
+    def modify_options(self, options):
         """
-        finds object in yaml spec and determines it's mutable fields
-        to filter user JSON
-        XXX: Move to Spec (?) after TODO#3
+        this is the place where command line options can be fixed
+        after they are loaded from yaml spec
         """
-        mutable = []
-        reference_path = None
+        for option in options:
+            if self.prompt_for and option.name in self.prompt_for:
+                option.prompt = option.name
 
-        if not self.object_reference:
-            for param in spec.get_raw_spec(self.api_level)["paths"][self.route][self.method]["parameters"]:
-                name = param["name"] # image
-                if "schema" in param:
-                    if '$ref' in param["schema"]:
-                        reference_path = param["schema"]['$ref']  # e.g. #/definitions/Image
-                    elif "properties" in param["schema"]:  # ST-98, got object instead of $ref
-                        #reference_path = param["schema"]
-                        for property, descr in param["schema"]["properties"].items():
-                            if 'readOnly' not in descr or not descr['readOnly']:
-                                mutable.append(property)
+            if option.name == "envId" and settings.envId:
+                option.required = False
 
-                elif 'readOnly' not in param:
-                    # e.g. POST /{envId}/farms/{farmId}/actions/terminate/
-                    mutable.append(name)
+        return options
 
-        else:
-            #XXX: Temporary code, see GlobalVariableDetailEnvelope or "role-global-variables update"
-            reference_path = self.object_reference
-        
-        if reference_path:
-            parts = reference_path.split("/")
-            object =  spec.get_raw_spec(self.api_level)[parts[1]][parts[2]]
-            object_properties = object["properties"]
-            for property, descr in object_properties.items():
-                if 'readOnly' not in descr or not descr['readOnly']:
-                        mutable.append(property)
-        return mutable
+    def _get_default_options(self):
+        options = []
+        for param in self._get_raw_params():
+            option = click.Option(
+                ("--%s" % param['name'], param['name']),
+                required=param['required'],
+                help=param["description"]
+            )
+            options.append(option)
+        return options
 
-    def _list_createonly_properties(self):
-        """
-        Some properties (mostly IDs) cannot be marked as read-only because they are
-        passed in PUT-methods (but still must be filtered in UPDATE-methods)
-        """
-        result = []
-        properties = self.spc._result_descr['properties']
-        data = properties['data']
-        if 'items' in data:
-            path = data['items']['$ref']
-        else:
-            path = data['$ref']
-        obj = self.spc.lookup(path)
-        if 'x-createOnly' in obj:
-            result = obj['x-createOnly']
+    def _get_custom_options(self):
+        options = []
+        debug = click.Option(('--debug/--no-debug', 'debug'), default=False, help="Print debug messages")
+        options.append(debug)
+
+        if self.http_method.upper() == 'GET' and self.name != "export":  # [ST-88]
+            raw = click.Option(
+                ('--raw', 'transformation'),
+                is_flag=True,
+                flag_value='raw',
+                default=False,
+                help="Print raw response"
+            )
+            tree = click.Option(
+                ('--tree', 'transformation'),
+                is_flag=True,
+                flag_value='tree',
+                default=True,
+                help="Print response as a colored tree"
+            )
+            nocolor = click.Option(('--nocolor', 'nocolor'), is_flag=True, default=False, help="Use colors")
+            options += [raw, tree, nocolor]
+
+            if self.name not in ("get", "retrieve"):  # [ST-54] [ST-102]
+                table = click.Option(
+                    ('--table', 'transformation'),
+                    is_flag=True,
+                    flag_value='table',
+                    default=False,
+                    help="Print response as a colored table"
+                )
+                options.append(table)
+
+            if self._returns_iterable():
+                maxrez = click.Option(
+                    ("--maxresults", "maxResults"),
+                    type=int,
+                    required=False,
+                    help="Maximum number of records. Example: --maxresults=2"
+                )
+                options.append(maxrez)
+
+                pagenum = click.Option(
+                    ("--pagenumber", "pageNum"),
+                    type=int,
+                    required=False,
+                    help="Current page number. Example: --pagenumber=3"
+                )
+                options.append(pagenum)
+
+                filter_help = "Apply filters. Example: type=ebs,size=8. "
+                filters = self._get_available_filters()
+                if filters:
+                    filters = sorted(filters)
+                    filter_help += "Available filters: %s." % ", ".join(filters)
+                    filters = click.Option(("--filters", "filters"), required=False, help=filter_help)
+                    options.append(filters)
+
+                columns_help = "Filter columns in table view [--table required]. Example: NAME,SIZE,SCOPE. "
+                available_columns = self._get_column_names()
+                columns_help += "Available columns: %s." % ", ".join(available_columns)
+                columns = click.Option(("--columns", "columns"), required=False, help=columns_help)
+                options.append(columns)
+
+        return options
+
+    def _get_body_type_params(self):
+        params = []
+        m = self.raw_spec["paths"][self.route][self.http_method]
+        if "parameters" in m:
+            for parameter in m['parameters']:
+                params.append(parameter)
+        return params
+
+    def _get_path_type_params(self):
+        params = []
+        d = self.raw_spec["paths"][self.route]
+        if "parameters" in d:
+            for parameter in d['parameters']:
+                params.append(parameter)
+        return params
+
+    def _get_raw_params(self):
+        result = self._get_path_type_params()
+        if self.http_method.upper() in ("GET", "DELETE"):
+            body_params = self._get_body_type_params()
+            result += body_params
         return result
+
+    def _returns_iterable(self):
+        responses = self.raw_spec["paths"][self.route]["get"]['responses']
+        if '200' in responses:
+            ok200 = responses['200']
+            if 'schema' in ok200:
+                schema = ok200['schema']
+                if '$ref' in schema:
+                    reference = schema['$ref']
+                    object_key = reference.split("/")[-1]
+                    object_descr = self.raw_spec["definitions"][object_key]
+                    object_properties = object_descr["properties"]
+                    data_structure = object_properties["data"]
+                    if "type" in data_structure:
+                        response_type = data_structure["type"]
+                        if "array" == response_type:
+                            return True
+        return False
+
+    def _get_available_filters(self):
+        if self._returns_iterable():
+            response_ref = self._result_descr["properties"]["data"]["items"]["$ref"]
+            response_descr = self._lookup(response_ref)
+            if "x-filterable" in response_descr:
+                filters = response_descr["x-filterable"]
+                return filters
+        return []
+
+    def _get_column_names(self):
+        fields = []
+        data = self._result_descr["properties"]["data"]
+        response_ref = data["items"]["$ref"]
+        response_descr = self._lookup(response_ref)
+        for k, v in response_descr["properties"].items():
+            if "$ref" not in v:
+                fields.append(k)
+        return sorted(fields)
+
+    def _lookup(self, refstr):
+        """
+        Returns document section
+        Example: #/definitions/Image returns Image defenition section
+        """
+        if refstr.startswith("#"):
+            paths = refstr.split("/")[1:]
+            result = self.raw_spec
+            for path in paths:
+                if path not in result:
+                    return
+                result = result[path]
+            return result
+
+    @property
+    def _result_descr(self):
+        responses = self.raw_spec["paths"][self.route][self.http_method]['responses']
+        if '200' in responses:
+            ok200 = responses['200']
+            if 'schema' in ok200:
+                schema = ok200['schema']
+                if '$ref' in schema:
+                    reference = schema['$ref']
+                    return self._lookup(reference)
 
     def _filter_json_object(self, obj, filter_createonly=False):
         """
         removes immutable parts from JSON object before sending it in POST or PATCH
         """
-        #XXX: make it recursive
+        # XXX: make it recursive
         result = {}
         mutable_parts = self.mutable_body_parts or self._list_mutable_body_parts()
         for name, value in obj.items():
@@ -337,14 +385,60 @@ class SubCommand(object):
                 result[name] = obj[name]
         return result
 
-    def _post_params(self):
+    def _list_mutable_body_parts(self):
         """
-        Determines list of body params
-        e.g. 'image' JSON object for 'change-attributes' command
+        finds object in yaml spec and determines it's mutable fields
+        to filter user JSON
         """
-        params = []
-        m = spec.get_raw_spec(self.api_level)["paths"][self.route][self.method]
-        if "parameters" in m:
-            for parameter in m['parameters']:
-                params.append(parameter)
-        return params
+        mutable = []
+        reference_path = None
+
+        if not self.object_reference:
+            for param in self._get_body_type_params():
+                name = param["name"]  # e.g. image
+                if "schema" in param:
+                    if '$ref' in param["schema"]:
+                        reference_path = param["schema"]['$ref']  # e.g. #/definitions/Image
+                    elif "properties" in param["schema"]:  # ST-98, got object instead of $ref
+                        for _property, description in param["schema"]["properties"].items():
+                            if 'readOnly' not in description or not description['readOnly']:
+                                mutable.append(_property)
+
+                elif 'readOnly' not in param:
+                    # e.g. POST /{envId}/farms/{farmId}/actions/terminate/
+                    mutable.append(name)
+
+        else:
+            # XXX: Temporary code, see GlobalVariableDetailEnvelope or "role-global-variables update"
+            reference_path = self.object_reference
+
+        if reference_path:
+            parts = reference_path.split("/")
+            obj = self.raw_spec[parts[1]][parts[2]]
+            object_properties = obj["properties"]
+            for _property, description in object_properties.items():
+                if 'readOnly' not in description or not description['readOnly']:
+                        mutable.append(_property)
+        return mutable
+
+    def _list_createonly_properties(self):
+        """
+        Some properties (mostly IDs) cannot be marked as read-only because they are
+        passed in PUT-methods (but still must be filtered in UPDATE-methods)
+        """
+        result = []
+        properties = self._result_descr['properties']
+        data = properties['data']
+        if 'items' in data:
+            path = data['items']['$ref']
+        else:
+            path = data['$ref']
+        obj = self._lookup(path)
+        if 'x-createOnly' in obj:
+            result = obj['x-createOnly']
+        return result
+
+    @property
+    def _request_template(self):
+        basepath_uri = self.raw_spec["basePath"]
+        return "%s%s" % (basepath_uri, self.route)

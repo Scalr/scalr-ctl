@@ -5,20 +5,7 @@ __doc__ = 'Manage global variables for farm roles'
 from scalrctl import commands
 
 
-NAME = "farm-role-global-variables"
-enabled = True
-
-
-def callback(*args, **kwargs):
-    """
-    print('in farm-role-global-variables module')
-    print(args)
-    print(kwargs)
-    """
-    pass
-
-
-class UpdateFarmRoleGlobalVariable(commands.SubCommand):
+class UpdateFarmRoleGlobalVariable(commands.Action):
     name = "update"
     method = "patch"
     enabled = True

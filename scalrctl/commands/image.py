@@ -4,20 +4,8 @@ __doc__ = 'Image management'
 from scalrctl import commands
 from scalrctl import click
 
-NAME = "image"
-enabled = True
 
-
-def callback(*args, **kwargs):
-    """
-    print('in image module')
-    print(args)
-    print(kwargs)
-    """
-    pass
-
-
-class ChangeImageAttrs(commands.SubCommand):
+class ChangeImageAttrs(commands.Action):
     name = "change-attributes"
     route = "/{envId}/images/{imageId}/"
     method = "patch"
@@ -26,13 +14,12 @@ class ChangeImageAttrs(commands.SubCommand):
     mutable_body_parts = ["name"]
     prompt_for = ["imageId"]
 
-
     def modify_options(self, options):
         options = super(ChangeImageAttrs, self).modify_options(options)
         return options
 
 
-class RegisterImage(commands.SubCommand):
+class RegisterImage(commands.Action):
     name = "register"
     route = "/{envId}/images/"
     method = "post"
@@ -45,7 +32,7 @@ class RegisterImage(commands.SubCommand):
         return args, kwargs
 
 
-class RetrieveImage(commands.SubCommand):
+class RetrieveImage(commands.Action):
     name = "retrieve"
     route = "/{envId}/images/{imageId}/"
     method = "get"

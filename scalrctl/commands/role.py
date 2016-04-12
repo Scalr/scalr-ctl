@@ -5,20 +5,7 @@ __doc__ = 'Role management'
 from scalrctl import commands
 
 
-NAME = "role"
-enabled = True
-
-
-def callback(*args, **kwargs):
-    """
-    print('in role module')
-    print(args)
-    print(kwargs)
-    """
-    pass
-
-
-class ChangeRoleAttrs(commands.SubCommand):
+class ChangeRoleAttrs(commands.Action):
     name = "change-attributes"
     route = "/{envId}/roles/{roleId}/"
     method = "patch"
