@@ -576,134 +576,134 @@
         "export": {
             "cloud-credentials": {
                 "api_level": "user",
-                "class": "scalrctl.commands.Action",
+                "class": "scalrctl.commands.export.Export",
                 "http-method": "get",
                 "route": "/{envId}/cloud-credentials/{cloudCredentialsId}/"
             },
             "cost-center": {
                 "api_level": "user",
-                "class": "scalrctl.commands.Action",
+                "class": "scalrctl.commands.export.Export",
                 "http-method": "get",
                 "route": "/{envId}/cost-centers/{costCenterId}/"
             },
             "event": {
                 "api_level": "user",
-                "class": "scalrctl.commands.Action",
+                "class": "scalrctl.commands.export.Export",
                 "http-method": "get",
                 "route": "/{envId}/events/{eventId}/"
             },
             "farm": {
                 "api_level": "user",
-                "class": "scalrctl.commands.Action",
+                "class": "scalrctl.commands.export.Export",
                 "http-method": "get",
                 "route": "/{envId}/farms/{farmId}/"
             },
             "farm-global-variable": {
                 "api_level": "user",
-                "class": "scalrctl.commands.Action",
+                "class": "scalrctl.commands.export.Export",
                 "http-method": "get",
                 "route": "/{envId}/farms/{farmId}/global-variables/{globalVariableName}/"
             },
             "farm-role": {
                 "api_level": "user",
-                "class": "scalrctl.commands.Action",
+                "class": "scalrctl.commands.export.Export",
                 "http-method": "get",
                 "route": "/{envId}/farm-roles/{farmRoleId}/"
             },
             "farm-role-global-variable": {
                 "api_level": "user",
-                "class": "scalrctl.commands.farm_role_gv.UpdateFarmRoleGlobalVariable",
+                "class": "scalrctl.commands.export.ExportFarmRoleGlobalVariable",
                 "http-method": "get",
                 "route": "/{envId}/farm-roles/{farmRoleId}/global-variables/{globalVariableName}/"
             },
             "farm-role-instance-configuration": {
                 "api_level": "user",
-                "class": "scalrctl.commands.Action",
+                "class": "scalrctl.commands.export.Export",
                 "http-method": "get",
                 "route": "/{envId}/farm-roles/{farmRoleId}/instance/"
             },
             "farm-role-placement-configuration": {
                 "api_level": "user",
-                "class": "scalrctl.commands.Action",
+                "class": "scalrctl.commands.export.Export",
                 "http-method": "get",
                 "route": "/{envId}/farm-roles/{farmRoleId}/placement/"
             },
             "farm-role-scaling-configuration": {
                 "api_level": "user",
-                "class": "scalrctl.commands.Action",
+                "class": "scalrctl.commands.export.Export",
                 "http-method": "get",
                 "route": "/{envId}/farm-roles/{farmRoleId}/scaling/"
             },
             "farm-role-scaling-metric": {
                 "api_level": "user",
-                "class": "scalrctl.commands.Action",
+                "class": "scalrctl.commands.export.Export",
                 "http-method": "get",
                 "route": "/{envId}/farm-roles/{farmRoleId}/scaling/{metricName}/"
             },
             "group_descr": "Export Scalr Objects",
             "image": {
                 "api_level": "user",
-                "class": "scalrctl.commands.image.RetrieveImage",
+                "class": "scalrctl.commands.export.ExportImage",
                 "http-method": "get",
                 "route": "/{envId}/images/{imageId}/"
             },
             "orchestration-rule": {
                 "api_level": "user",
-                "class": "scalrctl.commands.Action",
+                "class": "scalrctl.commands.export.Export",
                 "http-method": "get",
                 "route": "/{envId}/roles/{roleId}/orchestration-rules/{orchestrationRuleId}/"
             },
             "os": {
                 "api_level": "user",
-                "class": "scalrctl.commands.Action",
+                "class": "scalrctl.commands.export.Export",
                 "http-method": "get",
                 "route": "/{envId}/os/{osId}/"
             },
             "project": {
                 "api_level": "user",
-                "class": "scalrctl.commands.Action",
+                "class": "scalrctl.commands.export.Export",
                 "http-method": "get",
                 "route": "/{envId}/projects/{projectId}/"
             },
             "role": {
                 "api_level": "user",
-                "class": "scalrctl.commands.Action",
+                "class": "scalrctl.commands.export.Export",
                 "http-method": "get",
                 "route": "/{envId}/roles/{roleId}/"
             },
             "role-category": {
                 "api_level": "user",
-                "class": "scalrctl.commands.Action",
+                "class": "scalrctl.commands.export.Export",
                 "http-method": "get",
                 "route": "/{envId}/role-categories/{roleCategoryId}/"
             },
             "role-global-variable": {
                 "api_level": "user",
-                "class": "scalrctl.commands.Action",
+                "class": "scalrctl.commands.export.Export",
                 "http-method": "get",
                 "route": "/{envId}/roles/{roleId}/global-variables/{globalVariableName}/"
             },
             "role-image": {
                 "api_level": "user",
-                "class": "scalrctl.commands.Action",
+                "class": "scalrctl.commands.export.Export",
                 "http-method": "get",
                 "route": "/{envId}/roles/{roleId}/images/{imageId}/"
             },
             "scaling-metric": {
                 "api_level": "user",
-                "class": "scalrctl.commands.Action",
+                "class": "scalrctl.commands.export.Export",
                 "http-method": "get",
                 "route": "/{envId}/scaling-metrics/{metricName}/"
             },
             "script": {
                 "api_level": "user",
-                "class": "scalrctl.commands.Action",
+                "class": "scalrctl.commands.export.Export",
                 "http-method": "get",
                 "route": "/{envId}/scripts/{scriptId}/"
             },
             "script-version": {
                 "api_level": "user",
-                "class": "scalrctl.commands.Action",
+                "class": "scalrctl.commands.export.Export",
                 "http-method": "get",
                 "route": "/{envId}/scripts/{scriptId}/script-versions/{scriptVersionNumber}/"
             }
