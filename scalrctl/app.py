@@ -17,10 +17,6 @@ from scalrctl.commands.internal import update
 CMD_FOLDER = os.path.abspath(os.path.join(os.path.dirname(__file__), 'commands'))
 
 
-def account():
-    pass
-
-
 def apply_settings(data):
     for key, value in data.items():
         if hasattr(settings, key):
