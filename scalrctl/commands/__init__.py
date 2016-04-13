@@ -127,6 +127,8 @@ class Action(BaseAction):
         callback for click subcommand
         """
         # print "run %s @ %s with arguments:" % (self.http_method, self.route), args, kwargs
+        hide_output = kwargs.pop("hide_output", False) # [ST-88]
+
         args, kwargs = self.pre(*args, **kwargs)
 
         uri = self._request_template
@@ -151,7 +153,7 @@ class Action(BaseAction):
         raw_response = request.request(self.http_method, uri, payload, data)
         response = self.post(raw_response)
 
-        if settings.view == "raw":
+        if settings.view == "raw" and not hide_output:
             click.echo(raw_response)
 
         if raw_response:
@@ -169,10 +171,10 @@ class Action(BaseAction):
             data = response_json["data"]
             text = json.dumps(data)
 
-            if settings.debug_mode:
+            if settings.debug_mode and not hide_output:
                 click.echo(response_json["meta"])
 
-            if settings.view == "tree":
+            if settings.view == "tree" and not hide_output:
                 click.echo(build_tree(text))
 
             elif settings.view == "table":
@@ -204,7 +206,8 @@ class Action(BaseAction):
                         pagenum_next = num.group(1) if num else 1
                         current_pagenum = int(pagenum_next) - 1
 
-                click.echo(build_table(columns, rows, "Page: %s of %s" % (current_pagenum, pagenum_last)))  # XXX
+                if not hide_output:
+                    click.echo(build_table(columns, rows, "Page: %s of %s" % (current_pagenum, pagenum_last)))  # XXX
 
         return response
 
