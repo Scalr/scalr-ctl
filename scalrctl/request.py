@@ -37,6 +37,7 @@ try:
 except:
     pass
 
+
 def request(method, request_uri, payload=None, data=None):
     scheme = settings.API_SCHEME
     api_host = settings.API_HOST
