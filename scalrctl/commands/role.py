@@ -7,6 +7,3 @@ from scalrctl import commands
 
 class ChangeRoleAttrs(commands.Action):
     prompt_for = ["roleId"]
-
-
-

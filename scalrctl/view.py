@@ -65,5 +65,3 @@ def build_tree(data):
     result += yaml_text[last_pos:]
 
     return result
-
-

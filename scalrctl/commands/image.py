@@ -21,11 +21,3 @@ class RegisterImage(commands.Action):
 
 class RetrieveImage(commands.Action):
     prompt_for = ["imageId"]
-
-
-
-
-
-
-
-
