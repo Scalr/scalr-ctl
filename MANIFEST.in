@@ -1,1 +1,2 @@
+include scalrctl/scheme/scheme.json
 include VERSION

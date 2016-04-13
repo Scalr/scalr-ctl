@@ -4,63 +4,13 @@ __doc__ = 'Image management'
 from scalrctl import commands
 from scalrctl import click
 
-NAME = "image"
-enabled = True
 
-
-def callback(*args, **kwargs):
-    """
-    print('in image module')
-    print(args)
-    print(kwargs)
-    """
-    pass
-
-
-class Image(commands.SubCommand):
-    pass
-
-
-class ChangeImageAttrs(Image):
-    name = "change-attributes"
-    route = "/{envId}/images/{imageId}/"
-    method = "patch"
-    enabled = True
+class ChangeImageAttrs(commands.Action):
     mutable_body_parts = ["name"]
     prompt_for = ["imageId"]
 
 
-    def modify_options(self, options):
-        options = super(ChangeImageAttrs, self).modify_options(options)
-        return options
-
-
-class CopyImage(Image):
-    name = "copy"
-    route = "/{envId}/images/{imageId}/actions/copy/"
-    method = "post"
-    enabled = True
-
-
-class DeleteImage(Image):
-    name = "delete"
-    route = "/{envId}/images/{imageId}/"
-    method = "delete"
-    enabled = True
-
-
-class ListImages(Image):
-    name = "list"
-    route = "/{envId}/images/"
-    method = "get"
-    enabled = True
-
-
-class RegisterImage(Image):
-    name = "register"
-    route = "/{envId}/images/"
-    method = "post"
-    enabled = True
+class RegisterImage(commands.Action):
 
     def pre(self, *args, **kwargs):
         #XXX: this code does not work yet!
@@ -69,17 +19,5 @@ class RegisterImage(Image):
         return args, kwargs
 
 
-class RetrieveImage(Image):
-    name = "retrieve"
-    route = "/{envId}/images/{imageId}/"
-    method = "get"
-    enabled = True
+class RetrieveImage(commands.Action):
     prompt_for = ["imageId"]
-
-
-
-
-
-
-
-

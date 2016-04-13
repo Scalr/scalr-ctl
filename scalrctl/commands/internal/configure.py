@@ -7,7 +7,22 @@ import yaml
 from scalrctl import click
 from scalrctl import defaults
 from scalrctl import settings
+from scalrctl import commands
 from scalrctl.commands.internal import bash_complete, update
+
+
+class ConfigureScalrCTL(commands.BaseAction):
+
+    def run(self, *args, **kwargs):
+        configure(**kwargs)
+
+    def get_description(self):
+        return "Set configuration options in interactive mode"
+
+    def get_options(self):
+        profile_argument = click.Argument(("profile",), required=False)  # [ST-30]
+        return [profile_argument, ]
+
 
 def configure(profile=None):
     """
@@ -16,7 +31,7 @@ def configure(profile=None):
     and downloads spec file.
     :param profile: Profile name
     """
-    confpath = os.path.join(defaults.CONFIG_FOLDER, "%s.yaml" % profile) if profile else defaults.CONFIG_PATH
+    confpath = os.path.join(defaults.CONFIG_DIRECTORY, "%s.yaml" % profile) if profile else defaults.CONFIG_PATH
     data = {}
 
     if os.path.exists(confpath):
@@ -33,8 +48,8 @@ def configure(profile=None):
             elif not default_value or type(default_value) in (int, str):
                 data[obj] = str(click.prompt(obj, default=getattr(settings, obj))).strip()
 
-    if not os.path.exists(defaults.CONFIG_FOLDER):
-        os.makedirs(defaults.CONFIG_FOLDER)
+    if not os.path.exists(defaults.CONFIG_DIRECTORY):
+        os.makedirs(defaults.CONFIG_DIRECTORY)
 
     raw = yaml.dump(data, default_flow_style=False, default_style='')
     with open(confpath, 'w') as fp:
