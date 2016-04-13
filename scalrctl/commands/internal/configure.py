@@ -31,7 +31,7 @@ def configure(profile=None):
     and downloads spec file.
     :param profile: Profile name
     """
-    confpath = os.path.join(defaults.CONFIG_FOLDER, "%s.yaml" % profile) if profile else defaults.CONFIG_PATH
+    confpath = os.path.join(defaults.CONFIG_DIRECTORY, "%s.yaml" % profile) if profile else defaults.CONFIG_PATH
     data = {}
 
     if os.path.exists(confpath):
@@ -48,8 +48,8 @@ def configure(profile=None):
             elif not default_value or type(default_value) in (int, str):
                 data[obj] = str(click.prompt(obj, default=getattr(settings, obj))).strip()
 
-    if not os.path.exists(defaults.CONFIG_FOLDER):
-        os.makedirs(defaults.CONFIG_FOLDER)
+    if not os.path.exists(defaults.CONFIG_DIRECTORY):
+        os.makedirs(defaults.CONFIG_DIRECTORY)
 
     raw = yaml.dump(data, default_flow_style=False, default_style='')
     with open(confpath, 'w') as fp:

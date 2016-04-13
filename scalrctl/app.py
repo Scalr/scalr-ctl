@@ -27,8 +27,8 @@ def apply_settings(data):
             setattr(settings, key, value)
 
 
-if not os.path.exists(defaults.CONFIG_FOLDER):
-    os.makedirs(defaults.CONFIG_FOLDER)
+if not os.path.exists(defaults.CONFIG_DIRECTORY):
+    os.makedirs(defaults.CONFIG_DIRECTORY)
 
 if os.path.exists(defaults.CONFIG_PATH):
     apply_settings(yaml.load(open(defaults.CONFIG_PATH, "r")))

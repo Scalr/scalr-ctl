@@ -11,7 +11,7 @@ from scalrctl import defaults
 PROGNAME = "scalr-ctl"
 AUTOCOMPLETE_FNAME = "path.bash.inc"
 AUTOCOMPLETE_CONTENT = "_%s_COMPLETE=source %s" % (PROGNAME.upper().replace("-", "_"), PROGNAME)
-AUTOCOMPLETE_PATH = os.path.join(os.path.expanduser(defaults.CONFIG_FOLDER), AUTOCOMPLETE_FNAME)
+AUTOCOMPLETE_PATH = os.path.join(os.path.expanduser(defaults.CONFIG_DIRECTORY), AUTOCOMPLETE_FNAME)
 
 
 def setup_bash_complete():
