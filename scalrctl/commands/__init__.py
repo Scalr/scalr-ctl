@@ -6,6 +6,7 @@ import json
 import traceback
 
 from scalrctl import click
+from scalrctl import defaults
 from scalrctl import settings
 from scalrctl import request
 from scalrctl.view import build_table, build_tree
@@ -50,7 +51,7 @@ class Action(BaseAction):
         self._init()
 
     def _init(self):
-        path = os.path.join(os.path.expanduser(os.environ.get("SCALRCLI_HOME", "~/.scalr")), "%s.json" % self.api_level)
+        path = os.path.join(defaults.CONFIG_DIRECTORY, "%s.json" % self.api_level)
         self.raw_spec = json.load(open(path, "r"))
 
     def pre(self, *args, **kwargs):
