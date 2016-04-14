@@ -10,6 +10,12 @@
                 "http-method": "",
                 "route": ""
             },
+    "import": {
+                "api_level": "user",
+                "class": "scalrctl.commands.import.Import",
+                "http-method": "",
+                "route": ""
+            },
     "account": {
         "cloud": {
             "delete": {

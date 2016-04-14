@@ -32,6 +32,7 @@ class Export(commands.Action):
             "envId": settings.envId,
             "date": datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"),
             "API_HOST": settings.API_HOST,
+            "API_LEVEL": self.api_level,
             "METHOD": self.http_method,
             "route": self.route,
             "URI": uri,

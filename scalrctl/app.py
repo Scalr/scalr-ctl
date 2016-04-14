@@ -92,8 +92,6 @@ class ScalrCLI(click.Group):
                 return click.Command(name, params=options, callback=action.run, short_help=hlp, hidden=hidden)
         else:
             raise click.ClickException("No such command: %s." % name)
-            # raise click.ClickException(
-            # "No such command: %s. Scheme: %s, attrs: %s" % (name, self.scheme.keys(), str(self.attrs)))
 
         return ScalrCLI(**args)
 
