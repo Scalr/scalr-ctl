@@ -68,7 +68,7 @@ class ScalrCLI(click.Group):
                 args["short_help"] = self.scheme[name]["group_descr"]
 
             action_level = "route" in self.scheme[name] and "http-method" in self.scheme[name]
-            is_service_type_action = action_level and not self.scheme[name]["route"]
+            is_service_type_action = action_level and not self.scheme[name]["api_level"]
 
             if action_level:
                 if is_service_type_action:

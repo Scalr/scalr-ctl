@@ -3,10 +3,12 @@ __author__ = 'Dmitriy Korsakov'
 import json
 import datetime
 import copy
+from collections import OrderedDict
 
 from scalrctl import settings
 from scalrctl import commands
 from scalrctl import click
+from scalrctl import defaults
 
 import yaml
 
@@ -19,25 +21,24 @@ class Export(commands.Action):
         response = super(Export, self).run(*args, **kv)
 
         kwargs["envId"] = settings.envId
-
-        uri = self._request_template.format(**kwargs)
-
         kv = copy.deepcopy(kwargs)
         for item in ("debug", "nocolor", "transformation"):
             if item in kv:
                 del kv[item]
+        uri = self._request_template.format(**kwargs)
 
         d = {
             "API_VERSION": settings.API_VERSION,
             "envId": settings.envId,
-            "date": datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"),
+            "DATE": datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"),
             "API_HOST": settings.API_HOST,
             "API_LEVEL": self.api_level,
             "METHOD": self.http_method,
-            "route": self.route,
+            "ROUTE": self.route,
             "URI": uri,
-            "action": self.name,
-            "arguments": (args, kv)
+            "ACTION": self.name,
+            "ARGUMENTS": (args, kv),
+            "SCALRCTL_VERSION": defaults.VERSION,
              }
 
         try:
@@ -48,7 +49,13 @@ class Export(commands.Action):
             raise click.ClickException(str(e))
 
         response_json["meta"]["scalrctl"] = d
-        dump = yaml.safe_dump(response_json, encoding='utf-8', allow_unicode=True, default_flow_style=False)
+
+        dump = yaml.safe_dump(
+            response_json,
+            encoding='utf-8',
+            allow_unicode=True,
+            default_flow_style=False
+        )
         click.echo(dump)
 
 

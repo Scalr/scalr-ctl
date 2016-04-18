@@ -26,13 +26,13 @@ if __name__ == '__main__':
 
     setup(
         name='scalr-ctl',
-        version = read("VERSION").strip(),
-        description = description,
-        author = "Scalr Inc.",
-        author_email = "dmitry@scalr.com",
-        url = "https://scalr.net",
-        license = "GPL",
-        platforms = "any",
+        version=read("VERSION").strip(),
+        description=description,
+        author="Scalr Inc.",
+        author_email="dmitry@scalr.com",
+        url="https://scalr.net",
+        license="GPL",
+        platforms="any",
         long_description=read('README'),
         classifiers=[
             'Programming Language :: Python',
