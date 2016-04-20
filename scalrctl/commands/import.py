@@ -96,6 +96,7 @@ class Import(commands.Action):
                     return patch_route
 
     def _lookup_action_scheme(self, dct, route, http_method):
+        # XXX: search in Export block only
         if "route" in dct and dct["route"] == route and dct["http-method"] == http_method:
             return dct
         else:
