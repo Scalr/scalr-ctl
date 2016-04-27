@@ -2,7 +2,6 @@ import time
 import hmac
 import hashlib
 import binascii
-import urllib
 import json
 import yaml
 
@@ -37,6 +36,7 @@ try:
     requests.packages.urllib3.disable_warnings()
 except:
     pass
+
 
 def request(method, request_uri, payload=None, data=None):
     scheme = settings.API_SCHEME

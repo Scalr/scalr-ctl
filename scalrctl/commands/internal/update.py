@@ -10,24 +10,39 @@ import yaml
 import requests
 
 from scalrctl import click
-from scalrctl import spec
 from scalrctl import defaults
+from scalrctl import settings
+from scalrctl import commands
 
 SWAGGER_USER_NOUPDATE_TRIGGER = ".noupdate.user"
 SWAGGER_USER_FILE = "user.yaml"
-SWAGGER_USER_PATH = os.path.join(defaults.CONFIG_FOLDER, SWAGGER_USER_FILE)
+SWAGGER_USER_PATH = os.path.join(defaults.CONFIG_DIRECTORY, SWAGGER_USER_FILE)
 SWAGGER_USER_JSONSPEC_FILE = SWAGGER_USER_FILE.split(".")[0] + ".json"
-SWAGGER_USER_JSONSPEC_PATH = os.path.join(defaults.CONFIG_FOLDER, SWAGGER_USER_JSONSPEC_FILE)
+SWAGGER_USER_JSONSPEC_PATH = os.path.join(defaults.CONFIG_DIRECTORY, SWAGGER_USER_JSONSPEC_FILE)
 
 SWAGGER_ACCOUNT_NOUPDATE_TRIGGER = ".noupdate.account"
 SWAGGER_ACCOUNT_FILE = "account.yaml"
-SWAGGER_ACCOUNT_PATH = os.path.join(defaults.CONFIG_FOLDER, SWAGGER_ACCOUNT_FILE)
+SWAGGER_ACCOUNT_PATH = os.path.join(defaults.CONFIG_DIRECTORY, SWAGGER_ACCOUNT_FILE)
 SWAGGER_ACCOUNT_JSONSPEC_FILE = SWAGGER_ACCOUNT_FILE.split(".")[0] + ".json"
-SWAGGER_ACCOUNT_JSONSPEC_PATH = os.path.join(defaults.CONFIG_FOLDER, SWAGGER_ACCOUNT_JSONSPEC_FILE)
+SWAGGER_ACCOUNT_JSONSPEC_PATH = os.path.join(defaults.CONFIG_DIRECTORY, SWAGGER_ACCOUNT_JSONSPEC_FILE)
+
+
+class UpdateScalrCTL(commands.BaseAction):
+
+    def run(self, *args, **kwargs):
+        update()
+
+    def get_description(self):
+        return "Fetch new API specification if available."
 
 
 def is_update_required():
     return not os.path.exists(SWAGGER_USER_PATH) or not os.path.exists(SWAGGER_USER_JSONSPEC_PATH)
+
+
+def get_spec_url(api_level="user"):
+    api_level = api_level or "user"  #XXX: Ugly,  SubCommand class needs to be changed first
+    return "{0}://{1}/api/{2}.{3}.yml".format(settings.API_SCHEME, settings.API_HOST, api_level, settings.API_VERSION)
 
 
 def update():
@@ -37,10 +52,10 @@ def update():
     """
     successfull = False
     text = None
-    user_trigger_file = os.path.join(defaults.CONFIG_FOLDER, SWAGGER_USER_NOUPDATE_TRIGGER)
+    user_trigger_file = os.path.join(defaults.CONFIG_DIRECTORY, SWAGGER_USER_NOUPDATE_TRIGGER)
 
-    user_url = spec.get_spec_url(api_level="user")
-    user_dst = os.path.join(defaults.CONFIG_FOLDER, SWAGGER_USER_FILE)
+    user_url = get_spec_url(api_level="user")
+    user_dst = os.path.join(defaults.CONFIG_DIRECTORY, SWAGGER_USER_FILE)
 
     def spinning_cursor():
         while True:
@@ -92,9 +107,9 @@ def update():
 
         # Fetch AccountAPI spec and convert to JSON
         text = None
-        account_trigger_file = os.path.join(defaults.CONFIG_FOLDER, SWAGGER_ACCOUNT_NOUPDATE_TRIGGER)
-        account_url = spec.get_spec_url(api_level="account")
-        account_dst = os.path.join(defaults.CONFIG_FOLDER, SWAGGER_ACCOUNT_FILE)
+        account_trigger_file = os.path.join(defaults.CONFIG_DIRECTORY, SWAGGER_ACCOUNT_NOUPDATE_TRIGGER)
+        account_url = get_spec_url(api_level="account")
+        account_dst = os.path.join(defaults.CONFIG_DIRECTORY, SWAGGER_ACCOUNT_FILE)
 
         if account_url and not os.path.exists(account_trigger_file):
             # click.echo("Trying to get new AccountAPI Spec from %s" % account_url)
