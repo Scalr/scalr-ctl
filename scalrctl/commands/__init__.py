@@ -169,7 +169,7 @@ class Action(BaseAction):
 
             try:
                 response_json = json.loads(response)
-            except ValueError, e:
+            except ValueError as e:
                 if settings.debug_mode:
                     raise
                 raise click.ClickException(str(e))

@@ -76,7 +76,7 @@ class Import(commands.Action):
 
             return descr
 
-        except (Exception, BaseException), e:
+        except (Exception, BaseException) as e:
 
             if settings.debug_mode:
                 click.echo(e)
