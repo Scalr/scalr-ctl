@@ -38,10 +38,7 @@ class Import(commands.Action):
         obj_data = self._validate_object(raw)
 
         get_type_route = obj_data["meta"]["scalrctl"]["ROUTE"]
-
-        if "update" in kwargs:
-            update = kwargs.pop("update")
-        http_method = "patch" if update else "post"
+        http_method = "patch" if kwargs.pop("update", False) else "post"
 
         action_scheme = None
         for obj_name, section in self.scheme["export"].items():
@@ -53,14 +50,11 @@ class Import(commands.Action):
                 action_scheme["http-method"],
                 action_scheme["route"]))
 
-        if 'class' in action_scheme:
-            cls = pydoc.locate(action_scheme['class'])
-        else:
-            cls = commands.Action
-
+        cls = pydoc.locate(action_scheme['class']) if 'class' in action_scheme else commands.Action
         action = cls(name=self.name, route=action_scheme['route'], http_method=http_method, api_level=self.api_level)
-        arguments = obj_data["meta"]["scalrctl"]['ARGUMENTS']
-        return action.run(*arguments[0], **arguments[1])
+        arguments, kv = obj_data["meta"]["scalrctl"]['ARGUMENTS']
+        kv["import-data"] = {action.get_body_type_params()[0]["name"]: obj_data["data"]}
+        return action.run(*arguments, **kv)
 
     def _validate_object(self, yml):
         try:

@@ -75,43 +75,51 @@ class Action(BaseAction):
             settings.view = kwargs.pop("transformation")
         if "nocolor" in kwargs:
             settings.colored_output = not kwargs.pop("nocolor")
+        import_data = kwargs.pop("import-data", None)
 
         if self.http_method.upper() in ("PATCH", "POST"):
             # prompting for body and then validating it
-            for param in self._get_body_type_params():
+            for param in self.get_body_type_params():
                 name = param["name"]
                 text = ''
                 if self.http_method.upper() == "PATCH":
-                    try:
-                        get_object = Action(
-                            name="get",
-                            route=self.route,
-                            http_method="get",
-                            api_level=self.api_level
-                        )  # XXX: can be custom class
-                        raw_text = get_object.run(*args, **kwargs)
-                        if settings.debug_mode:
-                            click.echo(raw_text)
+                    if import_data and name in import_data:
+                        import_data[name] = self._filter_json_object(import_data[name], filter_createonly=True)
+                    else:
+                        try:
+                            get_object = Action(
+                                name="get",
+                                route=self.route,
+                                http_method="get",
+                                api_level=self.api_level
+                            )  # XXX: can be custom class
+                            raw_text = get_object.run(*args, **kwargs)
+                            if settings.debug_mode:
+                                click.echo(raw_text)
 
-                        json_text = json.loads(raw_text)
-                        filtered = self._filter_json_object(json_text['data'], filter_createonly=True)
-                        text = json.dumps(filtered)
+                            json_text = json.loads(raw_text)
+                            filtered = self._filter_json_object(json_text['data'], filter_createonly=True)
+                            text = json.dumps(filtered)
+                        except (Exception, BaseException) as e:
+                            if settings.debug_mode:
+                                click.echo(traceback.format_exc())
+                            else:
+                                click.echo(e)
+
+                if import_data and name in import_data:
+                    user_object = import_data[name]
+
+                else:
+                    raw = click.edit(text)
+                    try:
+                        user_object = json.loads(raw)
                     except (Exception, BaseException) as e:
                         if settings.debug_mode:
-                            click.echo(traceback.format_exc())
-                        else:
-                            click.echo(e)
-
-                raw = click.edit(text)
-
-                try:
-                    user_object = json.loads(raw)
-                except (Exception, BaseException) as e:
-                    if settings.debug_mode:
-                        raise
-                    raise click.ClickException(str(e))
+                            raise
+                        raise click.ClickException(str(e))
 
                 valid_object = self._filter_json_object(user_object)
+                print valid_object
                 valid_object_str = json.dumps(valid_object)
                 kwargs[name] = valid_object_str
 
@@ -309,7 +317,7 @@ class Action(BaseAction):
 
         return options
 
-    def _get_body_type_params(self):
+    def get_body_type_params(self):
         params = []
         m = self.raw_spec["paths"][self.route][self.http_method]
         if "parameters" in m:
@@ -328,7 +336,7 @@ class Action(BaseAction):
     def _get_raw_params(self):
         result = self._get_path_type_params()
         if self.http_method.upper() in ("GET", "DELETE"):
-            body_params = self._get_body_type_params()
+            body_params = self.get_body_type_params()
             result += body_params
         return result
 
@@ -417,7 +425,7 @@ class Action(BaseAction):
         reference_path = None
 
         if not self.object_reference:
-            for param in self._get_body_type_params():
+            for param in self.get_body_type_params():
                 name = param["name"]  # e.g. image
                 if "schema" in param:
                     if '$ref' in param["schema"]:
