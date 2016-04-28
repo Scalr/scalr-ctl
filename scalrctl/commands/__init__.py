@@ -15,6 +15,8 @@ from scalrctl.view import build_table, build_tree
 
 class BaseAction(object):
 
+    epilog = None
+
     def __init__(self, *args, **kwargs):
         pass
 
@@ -53,6 +55,9 @@ class Action(BaseAction):
     def _init(self):
         path = os.path.join(defaults.CONFIG_DIRECTORY, "%s.json" % self.api_level)
         self.raw_spec = json.load(open(path, "r"))
+
+        if not self.epilog and self.http_method.upper() == "POST":
+            self.epilog = "Example: scalr-ctl %s < %s.json" % (self.name, self.name)
 
     def pre(self, *args, **kwargs):
         """
@@ -110,7 +115,10 @@ class Action(BaseAction):
                     user_object = import_data[name]
 
                 else:
-                    raw = click.edit(text)
+                    if self.http_method.upper() == "PATCH":
+                        raw = click.edit(text)
+                    else:
+                        raw = click.get_text_stream("stdin").read()
                     try:
                         user_object = json.loads(raw)
                     except (Exception, BaseException) as e:
@@ -119,7 +127,6 @@ class Action(BaseAction):
                         raise click.ClickException(str(e))
 
                 valid_object = self._filter_json_object(user_object)
-                print valid_object
                 valid_object_str = json.dumps(valid_object)
                 kwargs[name] = valid_object_str
 

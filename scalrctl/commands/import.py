@@ -14,6 +14,7 @@ from scalrctl import settings
 class Import(commands.Action):
 
     action = None
+    epilog = "Example: scalr-ctl import < object.yml"
 
     def _init(self):
         super(Import, self)._init()
@@ -22,17 +23,19 @@ class Import(commands.Action):
             self.scheme = json.load(fp)
 
     def get_description(self):
-        return "Import Scalr Objects"
+        return "Import Scalr Objects."
 
     def get_options(self):
         debug = click.Option(('--debug/--no-debug', 'debug'), default=False, help="Print debug messages")
+        envid = click.Option(('--envId', 'env_id'), help="Environment ID")
         upd_helpmsg = "Update existing object instead of creating new."
         update = click.Option(('--update', 'update'), is_flag=True, default=False, help=upd_helpmsg)
-        return [debug, update]
+        return [debug, update, envid]
 
     def run(self, *args, **kwargs):
         if "debug" in kwargs:
             settings.debug_mode = kwargs.pop("debug")
+        env_id = kwargs.pop("env_id", None)
 
         raw = click.get_text_stream("stdin")
         obj_data = self._validate_object(raw)
@@ -54,6 +57,8 @@ class Import(commands.Action):
         action = cls(name=self.name, route=action_scheme['route'], http_method=http_method, api_level=self.api_level)
         arguments, kv = obj_data["meta"]["scalrctl"]['ARGUMENTS']
         kv["import-data"] = {action.get_body_type_params()[0]["name"]: obj_data["data"]}
+        if env_id:
+            kv["envId"] = env_id
         return action.run(*arguments, **kv)
 
     def _validate_object(self, yml):
