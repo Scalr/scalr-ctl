@@ -60,41 +60,49 @@ class ScalrCLI(click.Group):
             callback=lambda: None,
         )
 
-        if name in self.scheme:
+        if name not in self.scheme:
 
-            args["scheme"] = self.scheme[name]
+            if ctx.protected_args:
+                for level in ctx.protected_args:
+                    if level in self.scheme:
+                        self.scheme = self.scheme[level]
+                    else:
+                        raise click.ClickException("No such command: %s." % name)
 
-            if "group_descr" in self.scheme[name]:
-                args["short_help"] = self.scheme[name]["group_descr"]
-
-            action_level = "route" in self.scheme[name] and "http-method" in self.scheme[name]
-            is_service_type_action = action_level and not self.scheme[name]["api_level"]
-
-            if action_level:
-                if is_service_type_action:
-                    route = None
-                    http_method = None
-                    api_level = None
-                else:
-                    route = self.scheme[name]["route"]
-                    http_method = self.scheme[name]["http-method"]
-                    api_level = self.scheme[name]["api_level"]
-
-                if 'class' in self.scheme[name]:
-                    cls = pydoc.locate(self.scheme[name]['class'])
-                else:
-                    cls = commands.Action
-
-                action = cls(name=name, route=route, http_method=http_method, api_level=api_level)
-                hlp = action.get_description()
-                options = action.modify_options(action.get_options())
-                hidden = "hidden" in self.scheme[name] and self.scheme[name]['hidden']
-                cmd = click.Command(name, params=options, callback=action.run, short_help=hlp, hidden=hidden)
-                if action.epilog:
-                    cmd.epilog = action.epilog
-                return cmd
-        else:
+        if name not in self.scheme:
             raise click.ClickException("No such command: %s." % name)
+
+        args["scheme"] = self.scheme[name]
+
+        if "group_descr" in self.scheme[name]:
+            args["short_help"] = self.scheme[name]["group_descr"]
+
+        action_level = "route" in self.scheme[name] and "http-method" in self.scheme[name]
+        is_service_type_action = action_level and not self.scheme[name]["api_level"]
+
+        if action_level:
+            if is_service_type_action:
+                route = None
+                http_method = None
+                api_level = None
+            else:
+                route = self.scheme[name]["route"]
+                http_method = self.scheme[name]["http-method"]
+                api_level = self.scheme[name]["api_level"]
+
+            if 'class' in self.scheme[name]:
+                cls = pydoc.locate(self.scheme[name]['class'])
+            else:
+                cls = commands.Action
+
+            action = cls(name=name, route=route, http_method=http_method, api_level=api_level)
+            hlp = action.get_description()
+            options = action.modify_options(action.get_options())
+            hidden = "hidden" in self.scheme[name] and self.scheme[name]['hidden']
+            cmd = click.Command(name, params=options, callback=action.run, short_help=hlp, hidden=hidden)
+            if action.epilog:
+                cmd.epilog = action.epilog
+            return cmd
 
         return ScalrCLI(**args)
 
