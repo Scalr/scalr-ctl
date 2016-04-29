@@ -67,10 +67,11 @@ class ScalrCLI(click.Group):
                     if level in self.scheme:
                         self.scheme = self.scheme[level]
                     else:
-                        raise click.ClickException("No such command: %s." % name)
+                        ctx.exit()
 
         if name not in self.scheme:
-            raise click.ClickException("No such command: %s." % name)
+            click.echo("No such command: %s." % name)
+            ctx.exit()
 
         args["scheme"] = self.scheme[name]
 

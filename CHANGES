@@ -1,6 +1,29 @@
 scalr-ctl Changelog
 ===============
 
+Version 1.0.24
+-----------
+
+Bug
+
+    [ST-121] - Autocomplete for options
+
+New Feature
+
+    [ST-88] - Import/Export Scalr Objects
+    Examples:
+    scalr-ctl export [tab][tab]
+    scalr-ctl export script --scriptId 4686 > script.yml
+    cat ~/Downloads/script.yml | scalr-ctl import --envId 5345
+    cat ~/Downloads/script.yml | scalr-ctl import --update
+
+
+Improvement
+
+    [ST-105] - Bad experience with create operation
+    [ST-116] - Speed improvements
+    [ST-118] - Code refactoring
+
 
 Version 1.0.16
 -----------
@@ -27,8 +50,3 @@ Improvement
 Version 1.0.15
 -----------
 Added experimental import/export feature.
-Example:
-
-scalr-ctl scaling-metric retrieve --metricName DailyActiveUsers --envId 1 --export ~/Downloads/DailyActiveUsers.yaml
-
-scalr-ctl scaling-metric create --envId 2 --import ~/Downloads/DailyActiveUsers.yaml

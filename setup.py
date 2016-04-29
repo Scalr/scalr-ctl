@@ -26,7 +26,7 @@ if __name__ == '__main__':
 
     setup(
         name='scalr-ctl',
-        version=read("VERSION").strip(),
+        version=read("scalrctl/VERSION").strip(),
         description=description,
         author="Scalr Inc.",
         author_email="dmitry@scalr.com",
@@ -52,8 +52,9 @@ if __name__ == '__main__':
         ],
         include_package_data=True,
         package_data={
-            '': ['scheme/scheme.json'],
+            '': ['VERSION', 'scheme/scheme.json'],
         },
+        data_files=[('', ['scalrctl/scheme/scheme.json', ]), ],
         install_requires=[
             'prettytable',
             'pyyaml',
