@@ -37,7 +37,7 @@ if __name__ == '__main__':
         classifiers=[
             'Programming Language :: Python',
             'Programming Language :: Python :: 2',
-            'License :: OSI Approved :: GNU General Public License (GPL)',
+            'License :: OSI Approved :: Apache Software License',
             'Operating System :: OS Independent',
             'Development Status :: 4 - Beta',
             'Environment :: Console',
