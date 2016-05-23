@@ -462,54 +462,7 @@
                 "route": "/environments/{envId}/teams/"
             }
         }
-    }, 
-    "cloud-credentials": {
-            "change-attributes": {
-                "api_level": "user",
-                "class": "scalrctl.commands.Action",
-                "hidden": true,
-                "http-method": "patch",
-                "route": "/{envId}/cloud-credentials/{cloudCredentialsId}/"
-            },
-            "create": {
-                "api_level": "user",
-                "class": "scalrctl.commands.Action",
-                "http-method": "post",
-                "route": "/{envId}/cloud-credentials/"
-            },
-            "delete": {
-                "api_level": "user",
-                "class": "scalrctl.commands.Action",
-                "http-method": "delete",
-                "route": "/{envId}/cloud-credentials/{cloudCredentialsId}/"
-            },
-            "get": {
-                "api_level": "user",
-                "class": "scalrctl.commands.Action",
-                "http-method": "get",
-                "route": "/{envId}/cloud-credentials/{cloudCredentialsId}/"
-            },
-            "group_descr": "Manage cloud credentials available in the Scalr Environment",
-            "list": {
-                "api_level": "user",
-                "class": "scalrctl.commands.Action",
-                "http-method": "get",
-                "route": "/{envId}/cloud-credentials/"
-            },
-            "retrieve": {
-                "api_level": "user",
-                "class": "scalrctl.commands.Action",
-                "hidden": true,
-                "http-method": "get",
-                "route": "/{envId}/cloud-credentials/{cloudCredentialsId}/"
-            },
-            "update": {
-                "api_level": "user",
-                "class": "scalrctl.commands.Action",
-                "http-method": "patch",
-                "route": "/{envId}/cloud-credentials/{cloudCredentialsId}/"
-            }
-        },
+    },
         "cost-center": {
             "get": {
                 "api_level": "user",
@@ -580,26 +533,6 @@
             }
         },
         "export": {
-            "cloud-credentials": {
-                "api_level": "user",
-                "class": "scalrctl.commands.export.Export",
-                "http-method": "get",
-                "route": "/{envId}/cloud-credentials/{cloudCredentialsId}/",
-                "post-params": {
-                    "api_level": "user",
-                    "class": "scalrctl.commands.Action",
-                    "hidden": true,
-                    "http-method": "post",
-                    "route": "/{envId}/cloud-credentials/"
-                },
-                "patch-params": {
-                    "api_level": "user",
-                    "class": "scalrctl.commands.Action",
-                    "hidden": true,
-                    "http-method": "patch",
-                    "route": "/{envId}/cloud-credentials/{cloudCredentialsId}/"
-                }
-            },
             "event": {
                 "api_level": "user",
                 "class": "scalrctl.commands.export.Export",
