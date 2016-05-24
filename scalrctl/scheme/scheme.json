@@ -880,6 +880,12 @@
             }
         },
         "farm": {
+            "list-servers": {
+                "api_level": "user",
+                "class": "scalrctl.commands.Action",
+                "http-method": "get",
+                "route": "/{envId}/farms/{farmId}/servers/"
+            },
             "change-attributes": {
                 "api_level": "user",
                 "class": "scalrctl.commands.Action",
@@ -985,6 +991,12 @@
             }
         },
         "farm-role": {
+            "list-servers": {
+                "api_level": "user",
+                "class": "scalrctl.commands.Action",
+                "http-method": "get",
+                "route": "/{envId}/farm-roles/{farmRoleId}/servers/"
+            },
             "change-attributes": {
                 "api_level": "user",
                 "class": "scalrctl.commands.Action",
@@ -1655,6 +1667,45 @@
                 "class": "scalrctl.commands.Action",
                 "http-method": "patch",
                 "route": "/{envId}/scripts/{scriptId}/script-versions/{scriptVersionNumber}/"
+            }
+        },
+        "server": {
+            "list": {
+                "api_level": "user",
+                "class": "scalrctl.commands.Action",
+                "http-method": "get",
+                "route": "/{envId}/servers/"
+            },
+            "get": {
+                "api_level": "user",
+                "class": "scalrctl.commands.Action",
+                "http-method": "get",
+                "route": "/{envId}/servers/{serverId}/"
+            },
+            "group_descr": "Server management",
+            "suspend": {
+                "api_level": "user",
+                "class": "scalrctl.commands.Action",
+                "http-method": "post",
+                "route": "/{envId}/servers/{serverId}/actions/suspend/"
+            },
+            "terminate": {
+                "api_level": "user",
+                "class": "scalrctl.commands.Action",
+                "http-method": "post",
+                "route": "/{envId}/servers/{serverId}/actions/terminate/"
+            },
+            "resume": {
+                "api_level": "user",
+                "class": "scalrctl.commands.Action",
+                "http-method": "post",
+                "route": "/{envId}/servers/{serverId}/actions/resume/"
+            },
+            "reboot": {
+                "api_level": "user",
+                "class": "scalrctl.commands.Action",
+                "http-method": "post",
+                "route": "/{envId}/servers/{serverId}/actions/reboot/"
             }
         }
 }
