@@ -32,6 +32,9 @@ class BaseAction(object):
     def get_options(self):
         return []
 
+    def validate(self):
+        pass
+
 
 class Action(BaseAction):
 
@@ -58,6 +61,12 @@ class Action(BaseAction):
 
         if not self.epilog and self.http_method.upper() == "POST":
             self.epilog = "Example: scalr-ctl %s < %s.json" % (self.name, self.name)
+
+    def validate(self):
+        if self.route and self.api_level and os.path.exists(defaults.ROUTES_PATH):
+            available_api_routes = json.load(open(defaults.ROUTES_PATH))
+            assert self.api_level in available_api_routes and self.route in available_api_routes[self.api_level], \
+                self.name
 
     def pre(self, *args, **kwargs):
         """

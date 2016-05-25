@@ -1,6 +1,14 @@
 scalr-ctl Changelog
 ===============
 
+Version 1.0.27
+-----------
+
+Bug
+
+    [ST-127] - Handling deprecated routes
+
+
 Version 1.0.24
 -----------
 

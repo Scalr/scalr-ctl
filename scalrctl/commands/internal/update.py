@@ -50,6 +50,9 @@ def update():
     Downloads yaml spec and converts it to JSON
     Both files are stored in configuration directory.
     """
+    account_paths = []
+    user_paths = []
+
     successfull = False
     text = None
     user_trigger_file = os.path.join(defaults.CONFIG_DIRECTORY, SWAGGER_USER_NOUPDATE_TRIGGER)
@@ -102,6 +105,7 @@ def update():
 
         if text or os.path.exists(user_dst):
             struct = yaml.load(text or open(user_dst).read())
+            user_paths = struct["paths"].keys()
             json.dump(struct, open(SWAGGER_USER_JSONSPEC_PATH, "w"))
 
 
@@ -134,7 +138,11 @@ def update():
 
         if text or os.path.exists(account_dst):
             struct = yaml.load(text or open(account_dst).read())
+            account_paths = struct["paths"].keys()
             json.dump(struct, open(SWAGGER_ACCOUNT_JSONSPEC_PATH, "w"))
+
+        available_routes = {"user": user_paths, "account": account_paths}
+        json.dump(available_routes, open(defaults.ROUTES_PATH, "w"))
 
     finally:
         e.set()

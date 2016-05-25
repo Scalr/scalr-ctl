@@ -33,6 +33,9 @@ if update.is_update_required():
     update.update()  # [ST-53]
 
 
+def dummy_run():
+    raise click.ClickException("Not implemented in current API version")
+
 class ScalrCLI(click.Group):
 
     def __init__(self, name=None, commands=None, **attrs):
@@ -97,9 +100,18 @@ class ScalrCLI(click.Group):
                 cls = commands.Action
 
             action = cls(name=name, route=route, http_method=http_method, api_level=api_level)
+            hidden = "hidden" in self.scheme[name] and self.scheme[name]['hidden']
+
+            try:
+                action.validate()
+            except AssertionError, e:
+                dummy_help = "Not implemented in current API version"
+                dummy_cmd = click.Command(name, params=[], callback=dummy_run, short_help=dummy_help, hidden=hidden)
+                return dummy_cmd
+
             hlp = action.get_description()
             options = action.modify_options(action.get_options())
-            hidden = "hidden" in self.scheme[name] and self.scheme[name]['hidden']
+
             cmd = click.Command(name, params=options, callback=action.run, short_help=hlp, hidden=hidden)
             if action.epilog:
                 cmd.epilog = action.epilog
