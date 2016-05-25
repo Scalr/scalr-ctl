@@ -17,6 +17,15 @@
                 "route": ""
             },
     "account": {
+        "acl-roles": {
+            "list": {
+                "api_level": "account",
+                "class": "scalrctl.commands.Action",
+                "http-method": "get",
+                "route": "/acl-roles/"
+            },
+            "group_descr": "Manage ACL Roles"
+        },
         "cloud": {
             "delete": {
                 "api_level": "account", 
@@ -440,29 +449,35 @@
                 "http-method": "get", 
                 "route": "/roles/{roleId}/orchestration-rules/{orchestrationRuleId}/"
             }
-        }, 
+        },
         "team": {
-            "create": {
-                "api_level": "account", 
-                "class": "scalrctl.commands.Action", 
-                "http-method": "post", 
+            "add-to-environment": {
+                "api_level": "account",
+                "class": "scalrctl.commands.Action",
+                "http-method": "post",
                 "route": "/environments/{envId}/teams/"
-            }, 
-            "delete": {
-                "api_level": "account", 
-                "class": "scalrctl.commands.Action", 
-                "http-method": "delete", 
+            },
+            "delete-from-environment": {
+                "api_level": "account",
+                "class": "scalrctl.commands.Action",
+                "http-method": "delete",
                 "route": "/environments/{envId}/teams/{teamId}/"
-            }, 
-            "group_descr": "Manage teams", 
+            },
+            "group_descr": "Manage teams",
             "list": {
-                "api_level": "account", 
-                "class": "scalrctl.commands.Action", 
-                "http-method": "get", 
+                "api_level": "account",
+                "class": "scalrctl.commands.Action",
+                "http-method": "get",
                 "route": "/environments/{envId}/teams/"
+            },
+            "create": {
+                "api_level": "account",
+                "class": "scalrctl.commands.Action",
+                "http-method": "post",
+                "route": "/teams/"
             }
         }
-    }, 
+    },
     "cloud-credentials": {
             "change-attributes": {
                 "api_level": "user",
