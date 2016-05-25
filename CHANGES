@@ -1,6 +1,17 @@
 scalr-ctl Changelog
 ===============
 
+Version 1.0.28
+-----------
+
+New feature
+
+    [ST-117] - Added support for /teams/ and /acl-roles/
+    [ST-117] - Action renamed: scalr-ctl team create => scalr-ctl team add-to-environment
+    [ST-117] - Action renamed: scalr-ctl team delete => scalr-ctl team delete-from-environment
+    [ST-120] - Added support for server endpoints
+
+
 Version 1.0.27
 -----------
 
