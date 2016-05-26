@@ -104,7 +104,7 @@ class ScalrCLI(click.Group):
 
             try:
                 action.validate()
-            except AssertionError, e:
+            except AssertionError as e:
                 dummy_help = "Not implemented in current API version"
                 dummy_cmd = click.Command(name, params=[], callback=dummy_run, short_help=dummy_help, hidden=hidden)
                 return dummy_cmd
