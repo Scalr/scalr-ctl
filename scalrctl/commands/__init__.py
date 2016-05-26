@@ -181,7 +181,14 @@ class Action(BaseAction):
         if settings.view == "raw" and not hide_output:
             click.echo(raw_response)
 
-        if raw_response:
+        if not response and self.http_method.upper() == "DELETE":
+            obj_id = ""
+            ids = [param for param in kwargs if "Id" in param and param != "envId"]
+            if ids:
+                obj_id = kwargs[ids[0]]
+            click.echo("Deleted %s" % obj_id)
+
+        elif raw_response:
 
             try:
                 response_json = json.loads(response)
