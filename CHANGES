@@ -11,6 +11,10 @@ New feature
     [ST-117] - Action renamed: scalr-ctl team delete => scalr-ctl team delete-from-environment
     [ST-120] - Added support for server endpoints
 
+Fixed
+
+    [ST-123] - DELETE-methods return empty response
+
 
 Version 1.0.27
 -----------
