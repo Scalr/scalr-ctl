@@ -68,6 +68,21 @@ class Action(BaseAction):
             assert self.api_level in available_api_routes and self.route in available_api_routes[self.api_level], \
                 self.name
 
+    def check_argumets(self, **kwargs):
+        if "parameters" in self.raw_spec["paths"][self.route]:
+            for param_data in self.raw_spec["paths"][self.route]["parameters"]:
+                if "pattern" in param_data and "name" in param_data:
+                    param_name = param_data["name"]
+                    pattern = param_data["pattern"]
+
+                    if param_name in kwargs:
+                        import re
+                        value = kwargs[param_name]
+                        m = re.match(pattern, value.strip())
+
+                        if not m or len(m.group()) != len(value):
+                            raise click.ClickException("Invalid value for %s" % param_name)
+
     def pre(self, *args, **kwargs):
         """
         before request is made
@@ -90,6 +105,8 @@ class Action(BaseAction):
         if "nocolor" in kwargs:
             settings.colored_output = not kwargs.pop("nocolor")
         import_data = kwargs.pop("import-data", None)
+
+        self.check_argumets(**kwargs)
 
         if self.http_method.upper() in ("PATCH", "POST"):
             # prompting for body and then validating it
