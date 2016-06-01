@@ -10,7 +10,7 @@ New feature
     [ST-117] - Action renamed: scalr-ctl team create => scalr-ctl team add-to-environment
     [ST-117] - Action renamed: scalr-ctl team delete => scalr-ctl team delete-from-environment
     [ST-120] - Added support for server endpoints
-    [ST-42] - Better validation of command line parameters 
+    [ST-42] - Better validation of command line parameters
 
 Fixed
 
