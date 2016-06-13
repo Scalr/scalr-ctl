@@ -42,7 +42,7 @@ class Action(BaseAction):
     prompt_for = None  # Optional. Some values like GCE imageId cannot be passed through command lines
     mutable_body_parts = None  # Temporary. Object definitions in YAML spec are not always correct
     object_reference = None # optional, e.g. '#/definitions/GlobalVariable'
-
+    post_template = None
     _table_columns = None
 
     def __init__(self, name, route, http_method, api_level, *args, **kwargs):
@@ -50,7 +50,6 @@ class Action(BaseAction):
         self.route = route
         self.http_method = http_method
         self.api_level = api_level
-
         self._table_columns = []
 
         self._init()
