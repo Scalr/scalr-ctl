@@ -39,7 +39,6 @@ except:
 
 
 def request(method, request_uri, payload=None, data=None):
-    print "[%s]"data
     scheme = settings.API_SCHEME
     api_host = settings.API_HOST
     time_iso8601 = time.strftime("%Y-%m-%dT%H:%M:%S.000Z", time.gmtime())
@@ -59,14 +58,14 @@ def request(method, request_uri, payload=None, data=None):
             click.echo("stringToSign:")
             click.echo(string_to_sign)
 
-        digest = hmac.new(settings.API_SECRET_KEY.encode(encoding='UTF-8'), string_to_sign.encode(encoding='UTF-8'), hashlib.sha256).digest()
+        digest = hmac.new(settings.API_SECRET_KEY.encode('UTF-8'), string_to_sign.encode('UTF-8'), hashlib.sha256).digest()
         signature = binascii.b2a_base64(digest).strip()
 
         headers = dict()
         headers['Content-Type'] = 'application/json; charset=utf-8'
         headers['X-Scalr-Key-Id'] = settings.API_KEY_ID
         headers['X-Scalr-Date'] = time_iso8601
-        headers['X-Scalr-Signature'] = "%s %s" % (settings.SIGNATURE_VERSION, signature.decode(encoding='UTF-8'))
+        headers['X-Scalr-Signature'] = "%s %s" % (settings.SIGNATURE_VERSION, signature.decode('UTF-8'))
         # if hasattr(settings, "API_DEBUG") and settings.API_DEBUG:
         #    headers['X-Scalr-Debug'] = 1
 
