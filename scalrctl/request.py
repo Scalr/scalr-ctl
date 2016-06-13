@@ -39,6 +39,7 @@ except:
 
 
 def request(method, request_uri, payload=None, data=None):
+    print "[%s]"data
     scheme = settings.API_SCHEME
     api_host = settings.API_HOST
     time_iso8601 = time.strftime("%Y-%m-%dT%H:%M:%S.000Z", time.gmtime())
