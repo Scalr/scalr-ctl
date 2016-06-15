@@ -70,14 +70,14 @@ class TerminateServer(commands.Action):
 
     epilog = "Example: scalr-ctl server terminate --serverId <ID> --force"
     post_template = {
-        "serverTerminationOptions": {"hard": True}
+        "serverTerminationOptions": {"force": True}
     }
 
     def get_options(self):
         hlp = "It is used to terminate the Server immediately ignoring scalr.system.server_terminate_timeout."
-        hard_terminate = click.Option(('--force', 'hard'), is_flag=True, default=False, help=hlp)
+        force_terminate = click.Option(('--force', 'force'), is_flag=True, default=False, help=hlp)
         options = super(TerminateServer, self).get_options()
-        options.append(hard_terminate)
+        options.append(force_terminate)
         return options
 
 
@@ -85,9 +85,9 @@ class TerminateServer(commands.Action):
         """
         before request is made
         """
-        hard = kwargs.pop("hard", None)
+        force = kwargs.pop("force", None)
         post_data = copy.deepcopy(self.post_template)
-        post_data["serverTerminationOptions"]["hard"] = hard
+        post_data["serverTerminationOptions"]["force"] = force
         kv = {"import-data": post_data}
         kv.update(kwargs)
         arguments, kw = super(TerminateServer, self).pre(*args, **kv)
