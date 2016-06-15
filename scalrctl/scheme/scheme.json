@@ -910,7 +910,7 @@
             },
             "clone": {
                 "api_level": "user",
-                "class": "scalrctl.commands.Action",
+                "class": "scalrctl.commands.farm.FarmClone",
                 "http-method": "post",
                 "route": "/{envId}/farms/{farmId}/actions/clone/"
             },
@@ -935,7 +935,7 @@
             "group_descr": "Farm management",
             "launch": {
                 "api_level": "user",
-                "class": "scalrctl.commands.Action",
+                "class": "scalrctl.commands.farm.FarmLaunch",
                 "http-method": "post",
                 "route": "/{envId}/farms/{farmId}/actions/launch/"
             },
@@ -954,7 +954,7 @@
             },
             "terminate": {
                 "api_level": "user",
-                "class": "scalrctl.commands.Action",
+                "class": "scalrctl.commands.farm.FarmTerminate",
                 "http-method": "post",
                 "route": "/{envId}/farms/{farmId}/actions/terminate/"
             },
