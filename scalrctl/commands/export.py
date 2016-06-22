@@ -3,7 +3,6 @@ __author__ = 'Dmitriy Korsakov'
 import json
 import datetime
 import copy
-from collections import OrderedDict
 
 from scalrctl import settings
 from scalrctl import commands
