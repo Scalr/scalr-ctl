@@ -30,18 +30,22 @@ class Import(commands.Action):
         envid = click.Option(('--envId', 'env_id'), help="Environment ID")
         upd_helpmsg = "Update existing object instead of creating new."
         update = click.Option(('--update', 'update'), is_flag=True, default=False, help=upd_helpmsg)
-        return [debug, update, envid]
+        dry_run = click.Option(('--dryrun', 'dryrun'), is_flag=True, default=False, help=upd_helpmsg, hidden=True)
+        return [debug, update, envid, dry_run]
 
     def run(self, *args, **kwargs):
         if "debug" in kwargs:
             settings.debug_mode = kwargs.pop("debug")
+        if "dryrun" in kwargs:
+            dry_run_mode = kwargs.pop("dryrun")
         env_id = kwargs.pop("env_id", None)
 
-        raw = click.get_text_stream("stdin")
+        raw = kwargs.pop("raw", None) or click.get_text_stream("stdin")
         obj_data = self._validate_object(raw)
 
         get_type_route = obj_data["meta"]["scalrctl"]["ROUTE"]
-        http_method = "patch" if kwargs.pop("update", False) else "post"
+        update_mode = kwargs.pop("update", False)
+        http_method = "patch" if update_mode else "post"
 
         action_scheme = None
         for obj_name, section in self.scheme["export"].items():
@@ -55,21 +59,45 @@ class Import(commands.Action):
 
         cls = pydoc.locate(action_scheme['class']) if 'class' in action_scheme else commands.Action
         action = cls(name=self.name, route=action_scheme['route'], http_method=http_method, api_level=self.api_level)
+
         arguments, kv = obj_data["meta"]["scalrctl"]['ARGUMENTS']
-        kv["import-data"] = {action.get_body_type_params()[0]["name"]: obj_data["data"]}
+        obj_type = action.get_body_type_params()[0]["name"]
+        kv["import-data"] = {obj_type: obj_data["data"]}
         if env_id:
             kv["envId"] = env_id
-        return action.run(*arguments, **kv)
+        if dry_run_mode:
+            kv["dryrun"] = dry_run_mode
+
+        click.echo("%s object %s %s" % (
+            "Updating" if update_mode else "Creating",
+            obj_type,
+            "ID" if update_mode else ""  # TBD: ID
+        ))
+        rezult = action.run(*arguments, **kv)
+
+        if "include" in obj_data:
+            included_objects = obj_data["include"]
+            for obj in included_objects:
+                inc_raw = yaml.dump(obj)
+                inc_kv = {
+                    "debug": settings.debug_mode,
+                    "env_id": env_id,
+                    "dryrun": dry_run_mode,
+                    "update": update_mode,
+                    "raw": inc_raw,
+                }
+                self.run(**inc_kv)
+
+        return rezult
 
     def _validate_object(self, yml):
         try:
-            descr = yaml.load(yml)
+            descr = yaml.safe_load(yml)
             assert "data" in descr
             assert "meta" in descr
             meta = descr["meta"]
             assert "scalrctl" in meta
             info = meta["scalrctl"]
-
             for key in (
                 "METHOD",
                 "ROUTE",
@@ -88,3 +116,17 @@ class Import(commands.Action):
                 click.echo(descr)
 
             raise click.ClickException("Invalid object description")
+
+
+class ImportImage(commands.Action):
+
+    def pre(self, *args, **kwargs):
+        if 'imageId' not in kwargs:
+            kwargs["image"] = click.termui.prompt("Image object JSON")
+
+        return super(commands.Action, self).pre(args, kwargs)
+
+
+class UpdateImage(commands.Action):
+    mutable_body_parts = ["name"]
+    prompt_for = ["imageId"]

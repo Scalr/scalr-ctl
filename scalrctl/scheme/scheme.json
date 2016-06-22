@@ -549,6 +549,7 @@
         },
         "export": {
             "farm-global-variable": {
+                "hidden": true,
                 "api_level": "user",
                 "class": "scalrctl.commands.export.Export",
                 "http-method": "get",
@@ -570,6 +571,7 @@
                 }
             },
             "farm-role-global-variable": {
+                "hidden": true,
                 "api_level": "user",
                 "class": "scalrctl.commands.export.ExportFarmRoleGlobalVariable",
                 "http-method": "get",
@@ -596,17 +598,17 @@
                 "class": "scalrctl.commands.export.ExportImage",
                 "http-method": "get",
                 "route": "/{envId}/images/{imageId}/",
-                "cmd_descr" : "Export Image object to a file",
+                "cmd_descr" : "Export your Image objects to a file",
                 "patch-params": {
                     "api_level": "user",
-                    "class": "scalrctl.commands.image.ChangeImageAttrs",
+                    "class": "scalrctl.commands.Action",
                     "hidden": true,
                     "http-method": "patch",
                     "route": "/{envId}/images/{imageId}/"
                 },
                 "post-params": {
                     "api_level": "user",
-                    "class": "scalrctl.commands.image.RegisterImage",
+                    "class": "scalrctl.commands.Action",
                     "hidden": true,
                     "http-method": "post",
                     "route": "/{envId}/images/"
@@ -617,7 +619,7 @@
                 "class": "scalrctl.commands.export.Export",
                 "http-method": "get",
                 "route": "/{envId}/roles/{roleId}/",
-                "cmd_descr" : "Export Role object to a file",
+                "cmd_descr" : "Export your Role objects to a file",
                 "patch-params": {
                     "api_level": "user",
                     "class": "scalrctl.commands.role.ChangeRoleAttrs",
@@ -634,6 +636,7 @@
                 }
             },
             "role-global-variable": {
+                "hidden": true,
                 "api_level": "user",
                 "class": "scalrctl.commands.export.Export",
                 "http-method": "get",
@@ -656,10 +659,10 @@
             },
             "script": {
                 "api_level": "user",
-                "class": "scalrctl.commands.export.Export",
+                "class": "scalrctl.commands.export.ExportScript",
                 "http-method": "get",
                 "route": "/{envId}/scripts/{scriptId}/",
-                "cmd_descr" : "Export Script object to a file",
+                "cmd_descr" : "Export your Script objects to a file",
                 "patch-params": {
                     "api_level": "user",
                     "class": "scalrctl.commands.Action",
@@ -673,6 +676,25 @@
                     "hidden": true,
                     "http-method": "post",
                     "route": "/{envId}/scripts/"
+                }
+            },
+            "script-version": {
+                "api_level": "user",
+                "class": "scalrctl.commands.export.Export",
+                "http-method": "get",
+                "route": "/{envId}/scripts/{scriptId}/script-versions/{scriptVersionNumber}/",
+                "patch-params": {
+                    "api_level": "user",
+                    "class": "scalrctl.commands.Action",
+                    "hidden": true,
+                    "http-method": "patch",
+                    "route": "/{envId}/scripts/{scriptId}/script-versions/{scriptVersionNumber}/"
+                },
+                "post-params": {
+                    "api_level": "user",
+                    "class": "scalrctl.commands.Action",
+                    "http-method": "post",
+                    "route": "/{envId}/scripts/{scriptId}/script-versions/"
                 }
             }
         },
