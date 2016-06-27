@@ -714,7 +714,7 @@
             },
             "clone": {
                 "api_level": "user",
-                "class": "scalrctl.commands.Action",
+                "class": "scalrctl.commands.farm.FarmClone",
                 "http-method": "post",
                 "route": "/{envId}/farms/{farmId}/actions/clone/"
             },
@@ -739,7 +739,7 @@
             "group_descr": "Farm management",
             "launch": {
                 "api_level": "user",
-                "class": "scalrctl.commands.Action",
+                "class": "scalrctl.commands.farm.FarmLaunch",
                 "http-method": "post",
                 "route": "/{envId}/farms/{farmId}/actions/launch/"
             },
@@ -758,7 +758,7 @@
             },
             "terminate": {
                 "api_level": "user",
-                "class": "scalrctl.commands.Action",
+                "class": "scalrctl.commands.farm.FarmTerminate",
                 "http-method": "post",
                 "route": "/{envId}/farms/{farmId}/actions/terminate/"
             },
@@ -1504,25 +1504,25 @@
             "group_descr": "Server management",
             "suspend": {
                 "api_level": "user",
-                "class": "scalrctl.commands.Action",
+                "class": "scalrctl.commands.server.SuspendServer",
                 "http-method": "post",
                 "route": "/{envId}/servers/{serverId}/actions/suspend/"
             },
             "terminate": {
                 "api_level": "user",
-                "class": "scalrctl.commands.Action",
+                "class": "scalrctl.commands.server.TerminateServer",
                 "http-method": "post",
                 "route": "/{envId}/servers/{serverId}/actions/terminate/"
             },
             "resume": {
                 "api_level": "user",
-                "class": "scalrctl.commands.Action",
+                "class": "scalrctl.commands.server.ResumeServer",
                 "http-method": "post",
                 "route": "/{envId}/servers/{serverId}/actions/resume/"
             },
             "reboot": {
                 "api_level": "user",
-                "class": "scalrctl.commands.Action",
+                "class": "scalrctl.commands.server.RebootServer",
                 "http-method": "post",
                 "route": "/{envId}/servers/{serverId}/actions/reboot/"
             }

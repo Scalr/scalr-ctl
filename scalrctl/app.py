@@ -125,7 +125,8 @@ class ScalrCLI(click.Group):
 @click.pass_context
 @click.option('--key_id', help="API key ID")
 @click.option('--secret_key', help="API secret key")
-def cli(ctx, key_id, secret_key, *args, **kvargs):
+@click.option('--config', help="Path to a custom scalr-ctl configuration file")
+def cli(ctx, key_id, secret_key, config, *args, **kvargs):
     """Scalr-ctl is a command-line interface to your Scalr account"""
 
     if key_id:
@@ -138,6 +139,16 @@ def cli(ctx, key_id, secret_key, *args, **kvargs):
         if ctx.invoked_subcommand not in ("configure", "update"):
             raw = click.prompt(text="API SECRET KEY", hide_input=True)
             settings.API_SECRET_KEY = str(raw)
+
+    if config:
+
+        if not os.path.exists(config):
+            raise click.ClickException("Configuration file not found: %s" % config)
+        data = yaml.load(open(config, "r"))
+        for setting, value in data.items():
+            if hasattr(settings, setting):
+                setattr(settings, setting, value)
+
 
 
 if __name__ == '__main__':
