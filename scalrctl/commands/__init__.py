@@ -219,6 +219,7 @@ class Action(BaseAction):
                 response_json = json.loads(response)
             except ValueError as e:
                 if settings.debug_mode:
+                    click.echo("Server response: %s" % str(response))
                     raise
                 raise click.ClickException(str(e))
 

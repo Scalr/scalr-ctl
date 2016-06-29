@@ -2,7 +2,6 @@ scalr-ctl Changelog
 ===============
 
 Version 1.0.35
------------
 
 New feature
 
@@ -13,6 +12,7 @@ New feature
     [ST-42] - Better validation of command line parameters
     [ST-131] - Implement command line options for farm actions
     [ST-132] - Global option for custom scalr-ctl configuration
+    [ST-133] - providing --debug flag should print complete response from API server
 
 Fixed
 
