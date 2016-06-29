@@ -29,7 +29,7 @@ class Import(commands.Action):
         debug = click.Option(('--debug/--no-debug', 'debug'), default=False, help="Print debug messages")
         envid = click.Option(('--envId', 'env_id'), help="Environment ID")
         upd_helpmsg = "Update existing object instead of creating new."
-        update = click.Option(('--update', 'update'), is_flag=True, default=False, help=upd_helpmsg)
+        update = click.Option(('--update', 'update'), is_flag=True, default=False, help=upd_helpmsg, hidden=True)
         dry_run = click.Option(('--dryrun', 'dryrun'), is_flag=True, default=False, help=upd_helpmsg, hidden=True)
         return [debug, update, envid, dry_run]
 
@@ -38,8 +38,8 @@ class Import(commands.Action):
             settings.debug_mode = kwargs.pop("debug")
         if "dryrun" in kwargs:
             dry_run_mode = kwargs.pop("dryrun")
-        env_id = kwargs.pop("env_id", None)
 
+        env_id = kwargs.pop("env_id", None) or settings.envId
         raw = kwargs.pop("raw", None) or click.get_text_stream("stdin")
         obj_data = self._validate_object(raw)
 
@@ -61,6 +61,7 @@ class Import(commands.Action):
         action = cls(name=self.name, route=action_scheme['route'], http_method=http_method, api_level=self.api_level)
 
         arguments, kv = obj_data["meta"]["scalrctl"]['ARGUMENTS']
+
         obj_type = action.get_body_type_params()[0]["name"]
         kv["import-data"] = {obj_type: obj_data["data"]}
         if env_id:
@@ -68,16 +69,24 @@ class Import(commands.Action):
         if dry_run_mode:
             kv["dryrun"] = dry_run_mode
 
-        click.echo("%s object %s %s" % (
+        click.echo("\x1b[1m%s object %s %s\x1b[0m" % (
             "Updating" if update_mode else "Creating",
             obj_type,
             "ID" if update_mode else ""  # TBD: ID
         ))
+        click.echo()
+
         rezult = action.run(*arguments, **kv)
+        rezult_json = json.loads(rezult)
 
         if "include" in obj_data:
             included_objects = obj_data["include"]
+
             for obj in included_objects:
+
+                if obj["meta"]["scalrctl"]["ACTION"] == "script-version":  # XXX
+                    obj["meta"]["scalrctl"]['ARGUMENTS'][1]['scriptId'] = rezult_json["data"]["id"]
+
                 inc_raw = yaml.dump(obj)
                 inc_kv = {
                     "debug": settings.debug_mode,
@@ -86,8 +95,10 @@ class Import(commands.Action):
                     "update": update_mode,
                     "raw": inc_raw,
                 }
-                self.run(**inc_kv)
 
+                self.run(**inc_kv)
+        click.echo("%s created." % obj_type)
+        click.echo()
         return rezult
 
     def _validate_object(self, yml):

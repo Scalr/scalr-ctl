@@ -31,7 +31,7 @@ if __name__ == '__main__':
         author="Scalr Inc.",
         author_email="dmitry@scalr.com",
         url="https://scalr.net",
-        license="GPL",
+        license="Apache-2",
         platforms="any",
         long_description=read('README'),
         classifiers=[

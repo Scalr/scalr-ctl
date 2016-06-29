@@ -149,7 +149,5 @@ def cli(ctx, key_id, secret_key, config, *args, **kvargs):
             if hasattr(settings, setting):
                 setattr(settings, setting, value)
 
-
-
 if __name__ == '__main__':
     cli()
