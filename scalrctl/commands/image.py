@@ -17,7 +17,7 @@ class RegisterImage(commands.Action):
         if 'imageId' not in kwargs:
             kwargs["image"] = click.termui.prompt("Image object JSON")
 
-        return super(RegisterImage, self).pre(args, kwargs)
+        return super(RegisterImage, self).pre(*args, **kwargs)
 
 
 class RetrieveImage(commands.Action):

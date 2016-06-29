@@ -76,8 +76,8 @@ class Import(commands.Action):
         ))
         click.echo()
 
-        rezult = action.run(*arguments, **kv)
-        rezult_json = json.loads(rezult)
+        result = action.run(*arguments, **kv)
+        result_json = json.loads(result)
 
         if "include" in obj_data:
             included_objects = obj_data["include"]
@@ -85,7 +85,7 @@ class Import(commands.Action):
             for obj in included_objects:
 
                 if obj["meta"]["scalrctl"]["ACTION"] == "script-version":  # XXX
-                    obj["meta"]["scalrctl"]['ARGUMENTS'][1]['scriptId'] = rezult_json["data"]["id"]
+                    obj["meta"]["scalrctl"]['ARGUMENTS'][1]['scriptId'] = result_json["data"]["id"]
 
                 inc_raw = yaml.dump(obj)
                 inc_kv = {
@@ -99,7 +99,7 @@ class Import(commands.Action):
                 self.run(**inc_kv)
         click.echo("%s created." % obj_type)
         click.echo()
-        return rezult
+        return result
 
     def _validate_object(self, yml):
         try:
@@ -135,7 +135,7 @@ class ImportImage(commands.Action):
         if 'imageId' not in kwargs:
             kwargs["image"] = click.termui.prompt("Image object JSON")
 
-        return super(commands.Action, self).pre(args, kwargs)
+        return super(commands.Action, self).pre(*args, **kwargs)
 
 
 class UpdateImage(commands.Action):
