@@ -109,7 +109,7 @@ class ScalrCLI(click.Group):
                 dummy_cmd = click.Command(name, params=[], callback=dummy_run, short_help=dummy_help, hidden=hidden)
                 return dummy_cmd
 
-            hlp = action.get_description()
+            hlp = self.scheme[name]["cmd_descr"] if "cmd_descr" in self.scheme[name] else action.get_description()
             options = action.modify_options(action.get_options())
 
             cmd = click.Command(name, params=options, callback=action.run, short_help=hlp, hidden=hidden)
@@ -148,8 +148,6 @@ def cli(ctx, key_id, secret_key, config, *args, **kvargs):
         for setting, value in data.items():
             if hasattr(settings, setting):
                 setattr(settings, setting, value)
-
-
 
 if __name__ == '__main__':
     cli()

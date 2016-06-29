@@ -59,7 +59,8 @@ class Action(BaseAction):
         self.raw_spec = json.load(open(path, "r"))
 
         if not self.epilog and self.http_method.upper() == "POST":
-            self.epilog = "Example: scalr-ctl %s < %s.json" % (self.name, self.name)
+            level = self.api_level if self.api_level != "user" else ""
+            self.epilog = "Example: scalr-ctl %s %s < %s.json" % (level, self.name, self.name)
 
     def validate(self):
         if self.route and self.api_level and os.path.exists(defaults.ROUTES_PATH):
@@ -67,7 +68,7 @@ class Action(BaseAction):
             assert self.api_level in available_api_routes and self.route in available_api_routes[self.api_level], \
                 self.name
 
-    def check_argumets(self, **kwargs):
+    def check_arguments(self, **kwargs):
         if "parameters" in self.raw_spec["paths"][self.route]:
             for param_data in self.raw_spec["paths"][self.route]["parameters"]:
                 if "pattern" in param_data and "name" in param_data:
@@ -105,10 +106,11 @@ class Action(BaseAction):
             settings.colored_output = not kwargs.pop("nocolor")
         import_data = kwargs.pop("import-data", None)
 
-        self.check_argumets(**kwargs)
+        self.check_arguments(**kwargs)
 
         if self.http_method.upper() in ("PATCH", "POST"):
             # prompting for body and then validating it
+
             for param in self.get_body_type_params():
                 name = param["name"]
                 text = ''
@@ -152,6 +154,7 @@ class Action(BaseAction):
                         raise click.ClickException(str(e))
 
                 valid_object = self._filter_json_object(user_object)
+
                 valid_object_str = json.dumps(valid_object)
                 kwargs[name] = valid_object_str
 
@@ -167,8 +170,10 @@ class Action(BaseAction):
         """
         callback for click subcommand
         """
+
         # print "run %s @ %s with arguments:" % (self.http_method, self.route), args, kwargs
-        hide_output = kwargs.pop("hide_output", False) # [ST-88]
+        hide_output = kwargs.pop("hide_output", False)  # [ST-88]
+        dry_run = kwargs.pop("dryrun", False)
 
         args, kwargs = self.pre(*args, **kwargs)
 
@@ -181,15 +186,19 @@ class Action(BaseAction):
 
         if kwargs:
             uri = self._request_template.format(**kwargs)
-
             for key, value in kwargs.items():
                 t = "{%s}" % key
                 # filtering in-body and empty params
                 if value and t not in self._request_template:
+                    body_params = self.get_body_type_params()
                     if self.http_method.upper() in ("GET", "DELETE"):
                         payload[key] = value
-                    elif self.http_method.upper() in ("POST", "PATCH"):
+                    elif body_params and key == body_params[0]["name"]:
                         data = value  # XXX
+
+        if dry_run:
+            click.echo("%s %s %s %s" % (self.http_method, uri, payload, data))
+            return
 
         raw_response = request.request(self.http_method, uri, payload, data)
         response = self.post(raw_response)
@@ -296,7 +305,7 @@ class Action(BaseAction):
         debug = click.Option(('--debug/--no-debug', 'debug'), default=False, help="Print debug messages")
         options.append(debug)
 
-        if self.http_method.upper() == 'GET' and self.name != "export":  # [ST-88]
+        if self.http_method.upper() == 'GET':
             raw = click.Option(
                 ('--raw', 'transformation'),
                 is_flag=True,

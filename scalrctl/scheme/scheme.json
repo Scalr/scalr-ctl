@@ -548,51 +548,13 @@
             }
         },
         "export": {
-            "event": {
-                "api_level": "user",
-                "class": "scalrctl.commands.export.Export",
-                "http-method": "get",
-                "route": "/{envId}/events/{eventId}/",
-                "post-params": {
-                    "api_level": "user",
-                    "class": "scalrctl.commands.Action",
-                    "hidden": true,
-                    "http-method": "post",
-                    "route": "/{envId}/events/"
-                },
-                "patch-params": {
-                    "api_level": "user",
-                    "class": "scalrctl.commands.Action",
-                    "hidden": true,
-                    "http-method": "patch",
-                    "route": "/{envId}/events/{eventId}/"
-                }
-            },
-            "farm": {
-                "api_level": "user",
-                "class": "scalrctl.commands.export.Export",
-                "http-method": "get",
-                "route": "/{envId}/farms/{farmId}/",
-                "patch-params": {
-                    "api_level": "user",
-                    "class": "scalrctl.commands.Action",
-                    "hidden": true,
-                    "http-method": "patch",
-                    "route": "/{envId}/farms/{farmId}/"
-                },
-                "post-params": {
-                    "api_level": "user",
-                    "class": "scalrctl.commands.Action",
-                    "hidden": true,
-                    "http-method": "post",
-                    "route": "/{envId}/farms/"
-                }
-            },
             "farm-global-variable": {
+                "hidden": true,
                 "api_level": "user",
                 "class": "scalrctl.commands.export.Export",
                 "http-method": "get",
                 "route": "/{envId}/farms/{farmId}/global-variables/{globalVariableName}/",
+                "cmd_descr" : "Export Farm Global Variable object to a file",
                 "post-params": {
                     "api_level": "user",
                     "class": "scalrctl.commands.Action",
@@ -608,31 +570,13 @@
                     "route": "/{envId}/farms/{farmId}/global-variables/{globalVariableName}/"
                 }
             },
-            "farm-role": {
-                "api_level": "user",
-                "class": "scalrctl.commands.export.Export",
-                "http-method": "get",
-                "route": "/{envId}/farm-roles/{farmRoleId}/",
-                "patch-params": {
-                    "api_level": "user",
-                    "class": "scalrctl.commands.Action",
-                    "hidden": true,
-                    "http-method": "patch",
-                    "route": "/{envId}/farm-roles/{farmRoleId}/"
-                },
-                "post-params": {
-                    "api_level": "user",
-                    "class": "scalrctl.commands.Action",
-                    "hidden": true,
-                    "http-method": "post",
-                    "route": "/{envId}/farms/{farmId}/farm-roles/"
-                }
-            },
             "farm-role-global-variable": {
+                "hidden": true,
                 "api_level": "user",
                 "class": "scalrctl.commands.export.ExportFarmRoleGlobalVariable",
                 "http-method": "get",
                 "route": "/{envId}/farm-roles/{farmRoleId}/global-variables/{globalVariableName}/",
+                "cmd_descr" : "Export FarmRole Global Variable object to a file",
                 "post-params": {
                     "api_level": "user",
                     "class": "scalrctl.commands.Action",
@@ -648,117 +592,26 @@
                     "route": "/{envId}/farm-roles/{farmRoleId}/global-variables/{globalVariableName}/"
                 }
             },
-            "farm-role-instance-configuration": {
-                "api_level": "user",
-                "class": "scalrctl.commands.export.Export",
-                "http-method": "get",
-                "route": "/{envId}/farm-roles/{farmRoleId}/instance/",
-                "patch-params": {
-                    "api_level": "user",
-                    "class": "scalrctl.commands.Action",
-                    "hidden": true,
-                    "http-method": "patch",
-                    "route": "/{envId}/farm-roles/{farmRoleId}/instance/"
-                }
-            },
-            "farm-role-placement-configuration": {
-                "api_level": "user",
-                "class": "scalrctl.commands.export.Export",
-                "http-method": "get",
-                "route": "/{envId}/farm-roles/{farmRoleId}/placement/",
-                "patch-params": {
-                    "api_level": "user",
-                    "class": "scalrctl.commands.Action",
-                    "hidden": true,
-                    "http-method": "patch",
-                    "route": "/{envId}/farm-roles/{farmRoleId}/placement/"
-                }
-            },
-            "farm-role-scaling-configuration": {
-                "api_level": "user",
-                "class": "scalrctl.commands.export.Export",
-                "http-method": "get",
-                "route": "/{envId}/farm-roles/{farmRoleId}/scaling/",
-                "patch-params": {
-                    "api_level": "user",
-                    "class": "scalrctl.commands.Action",
-                    "hidden": true,
-                    "http-method": "patch",
-                    "route": "/{envId}/farm-roles/{farmRoleId}/scaling/"
-                }
-            },
-            "farm-role-scaling-metric": {
-                "api_level": "user",
-                "class": "scalrctl.commands.export.Export",
-                "http-method": "get",
-                "route": "/{envId}/farm-roles/{farmRoleId}/scaling/{metricName}/",
-                "post-params": {
-                    "api_level": "user",
-                    "class": "scalrctl.commands.Action",
-                    "hidden": true,
-                    "http-method": "post",
-                    "route": "/{envId}/farm-roles/{farmRoleId}/scaling/"
-                },
-                "patch-params": {
-                    "api_level": "user",
-                    "class": "scalrctl.commands.Action",
-                    "hidden": true,
-                    "http-method": "patch",
-                    "route": "/{envId}/farm-roles/{farmRoleId}/scaling/{metricName}/"
-                }
-            },
             "group_descr": "Export Scalr Objects",
             "image": {
                 "api_level": "user",
                 "class": "scalrctl.commands.export.ExportImage",
                 "http-method": "get",
                 "route": "/{envId}/images/{imageId}/",
+                "cmd_descr" : "Export your Image objects to a file",
                 "patch-params": {
                     "api_level": "user",
-                    "class": "scalrctl.commands.image.ChangeImageAttrs",
+                    "class": "scalrctl.commands.Action",
                     "hidden": true,
                     "http-method": "patch",
                     "route": "/{envId}/images/{imageId}/"
                 },
                 "post-params": {
                     "api_level": "user",
-                    "class": "scalrctl.commands.image.RegisterImage",
+                    "class": "scalrctl.commands.Action",
                     "hidden": true,
                     "http-method": "post",
                     "route": "/{envId}/images/"
-                }
-            },
-            "orchestration-rule": {
-                "api_level": "user",
-                "class": "scalrctl.commands.export.Export",
-                "http-method": "get",
-                "route": "/{envId}/roles/{roleId}/orchestration-rules/{orchestrationRuleId}/",
-                "patch-params": {
-                    "api_level": "user",
-                    "class": "scalrctl.commands.Action",
-                    "hidden": true,
-                    "http-method": "patch",
-                    "route": "/{envId}/roles/{roleId}/orchestration-rules/{orchestrationRuleId}/"
-                },
-                "post-params": {
-                    "api_level": "user",
-                    "class": "scalrctl.commands.Action",
-                    "hidden": true,
-                    "http-method": "post",
-                    "route": "/{envId}/roles/{roleId}/orchestration-rules/"
-                }
-            },
-            "project": {
-                "api_level": "user",
-                "class": "scalrctl.commands.export.Export",
-                "http-method": "get",
-                "route": "/{envId}/projects/{projectId}/",
-                "post-params": {
-                    "api_level": "user",
-                    "class": "scalrctl.commands.Action",
-                    "hidden": true,
-                    "http-method": "post",
-                    "route": "/{envId}/projects/"
                 }
             },
             "role": {
@@ -766,6 +619,7 @@
                 "class": "scalrctl.commands.export.Export",
                 "http-method": "get",
                 "route": "/{envId}/roles/{roleId}/",
+                "cmd_descr" : "Export your Role objects to a file",
                 "patch-params": {
                     "api_level": "user",
                     "class": "scalrctl.commands.role.ChangeRoleAttrs",
@@ -781,31 +635,13 @@
                     "route": "/{envId}/roles/"
                 }
             },
-            "role-category": {
-                "api_level": "user",
-                "class": "scalrctl.commands.export.Export",
-                "http-method": "get",
-                "route": "/{envId}/role-categories/{roleCategoryId}/",
-                "post-params": {
-                    "api_level": "user",
-                    "class": "scalrctl.commands.Action",
-                    "hidden": true,
-                    "http-method": "post",
-                    "route": "/{envId}/role-categories/"
-                },
-                "patch-params": {
-                    "api_level": "user",
-                    "class": "scalrctl.commands.Action",
-                    "hidden": true,
-                    "http-method": "patch",
-                    "route": "/{envId}/role-categories/{roleCategoryId}/"
-                }
-            },
             "role-global-variable": {
+                "hidden": true,
                 "api_level": "user",
                 "class": "scalrctl.commands.export.Export",
                 "http-method": "get",
                 "route": "/{envId}/roles/{roleId}/global-variables/{globalVariableName}/",
+                "cmd_descr" : "Export Role Global Variable object to a file",
                 "post-params": {
                     "api_level": "user",
                     "class": "scalrctl.commands.Action",
@@ -821,44 +657,12 @@
                     "route": "/{envId}/roles/{roleId}/global-variables/{globalVariableName}/"
                 }
             },
-            "role-image": {
-                "api_level": "user",
-                "class": "scalrctl.commands.export.Export",
-                "http-method": "get",
-                "route": "/{envId}/roles/{roleId}/images/{imageId}/",
-                "patch-params": {
-                    "api_level": "user",
-                    "class": "scalrctl.commands.Action",
-                    "hidden": true,
-                    "http-method": "post",
-                    "route": "/{envId}/roles/{roleId}/images/"
-                }
-            },
-            "scaling-metric": {
-                "api_level": "user",
-                "class": "scalrctl.commands.export.Export",
-                "http-method": "get",
-                "route": "/{envId}/scaling-metrics/{metricName}/",
-                "post-params": {
-                    "api_level": "user",
-                    "class": "scalrctl.commands.Action",
-                    "hidden": true,
-                    "http-method": "post",
-                    "route": "/{envId}/scaling-metrics/"
-                },
-                "patch-params": {
-                    "api_level": "user",
-                    "class": "scalrctl.commands.Action",
-                    "hidden": true,
-                    "http-method": "patch",
-                    "route": "/{envId}/scaling-metrics/{metricName}/"
-                }
-            },
             "script": {
                 "api_level": "user",
-                "class": "scalrctl.commands.export.Export",
+                "class": "scalrctl.commands.export.ExportScript",
                 "http-method": "get",
                 "route": "/{envId}/scripts/{scriptId}/",
+                "cmd_descr" : "Export your Script objects to a file",
                 "patch-params": {
                     "api_level": "user",
                     "class": "scalrctl.commands.Action",
