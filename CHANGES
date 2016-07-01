@@ -1,7 +1,7 @@
 scalr-ctl Changelog
 ===============
 
-Version 1.0.35
+Version 1.0.36
 
 New feature
 
@@ -13,6 +13,7 @@ New feature
     [ST-131] - Implement command line options for farm actions
     [ST-132] - Global option for custom scalr-ctl configuration
     [ST-133] - providing --debug flag should print complete response from API server
+    [ST-137] - Script Execute support
 
 Fixed
 
