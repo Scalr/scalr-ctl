@@ -1,6 +1,8 @@
 __author__ = 'Dmitriy Korsakov'
 __doc__ = 'Server management'
 import copy
+import json
+import time
 
 from scalrctl import commands
 from scalrctl import click
@@ -23,8 +25,11 @@ class ExecuteScript(commands.Action):
         timeout_hlp = "How many secconds should Scalr Agent wait before aborting the execution of this Script."
         timeout = click.Option(('--timeout', 'timeout'), required=False, help=timeout_hlp)
 
+        nowait_hlp = "Do not wait for script execution to finish"
+        nowait = click.Option(('--nowait', 'nowait'), required=False, help=nowait_hlp)
+
         options = super(ExecuteScript, self).get_options()
-        options += [blocking, server_id, timeout]
+        options += [blocking, server_id, timeout, nowait]
         return options
 
 
@@ -39,10 +44,31 @@ class ExecuteScript(commands.Action):
         post_data["scriptExecutionRequestObject"]["blocking"] = blocking
         post_data["scriptExecutionRequestObject"]["server"] = server_id
         post_data["scriptExecutionRequestObject"]["timeout"] = timeout
-        kv = {"import-data": post_data}
+        kv = {"import-data": post_data, "nowait": kwargs.pop("nowait", False)}
         kv.update(kwargs)
         arguments, kw = super(ExecuteScript, self).pre(*args, **kv)
         return arguments, kw
+
+    def run(self, *args, **kwargs):
+        nowait = kwargs.pop("nowait", False)
+        result = super(ExecuteScript, self).run(*args, **kwargs)
+        if not nowait:
+            result_json = json.loads(result)
+            execution_status_id = result_json["data"]["id"]
+            cls = commands.Action
+            action = cls(name=self.name,
+                         route="/{envId}/script-executions/{scriptExecutionId}/",
+                         http_method="get",
+                         api_level=self.api_level)
+            status = "running"
+            click.echo("Checking script execution status..")
+            while status == "running":
+                data = action.run(**{"scriptExecutionId": execution_status_id})
+                data_json = json.loads(data)
+                status = data_json["data"]["status"]
+                time.sleep(1)
+
+        return result
 
 
 class ExecuteScriptVersion(ExecuteScript):
