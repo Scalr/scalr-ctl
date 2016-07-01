@@ -28,7 +28,6 @@ class ExecuteScript(commands.Action):
         return options
 
 
-
     def pre(self, *args, **kwargs):
         """
         before request is made
