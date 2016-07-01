@@ -1445,6 +1445,18 @@
                 "class": "scalrctl.commands.script.ExecuteScript",
                 "http-method": "post",
                 "route": "/{envId}/scripts/{scriptId}/actions/execute/"
+            },
+            "status": {
+                "api_level": "user",
+                "class": "scalrctl.commands.Action",
+                "http-method": "get",
+                "route": "/{envId}/script-executions/{scriptExecutionId}/"
+            },
+            "get-orchestration-log": {
+                "api_level": "user",
+                "class": "scalrctl.commands.Action",
+                "http-method": "get",
+                "route": "/{envId}/orchestration-logs/{logEntryId}/"
             }
         },
         "script-version": {
@@ -1498,6 +1510,18 @@
                 "class": "scalrctl.commands.script.ExecuteScriptVersion",
                 "http-method": "post",
                 "route": "/{envId}/scripts/{scriptId}/script-versions/{scriptVersionNumber}/actions/execute/"
+            },
+            "status": {
+                "api_level": "user",
+                "class": "scalrctl.commands.Action",
+                "http-method": "get",
+                "route": "/{envId}/script-executions/{scriptExecutionId}/"
+            },
+            "get-orchestration-log": {
+                "api_level": "user",
+                "class": "scalrctl.commands.Action",
+                "http-method": "get",
+                "route": "/{envId}/orchestration-logs/{logEntryId}/"
             }
         },
         "server": {
