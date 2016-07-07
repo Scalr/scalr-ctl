@@ -69,9 +69,9 @@ class Import(commands.Action):
         if dry_run_mode:
             kv["dryrun"] = dry_run_mode
 
-        click.echo("\x1b[1m%s object %s %s\x1b[0m" % (
+        click.echo("\x1b[1m%s %s %s\x1b[0m" % (
             "Updating" if update_mode else "Creating",
-            obj_type,
+            self._get_object_alias(obj_type),
             "ID" if update_mode else ""  # TBD: ID
         ))
         click.echo()
@@ -97,9 +97,17 @@ class Import(commands.Action):
                 }
 
                 self.run(**inc_kv)
-        click.echo("%s created." % obj_type)
+        click.echo("\x1b[1m %s created. \x1b[0m" % self._get_object_alias(obj_type))
         click.echo()
         return result
+
+    def _get_object_alias(self, obj_type):
+        """
+        :return: "role" for "roleObject", "script" for "scriptObject"
+        """
+        return obj_type[:-6] if obj_type and obj_type.endswith("Object") else obj_type
+
+
 
     def _validate_object(self, yml):
         try:
