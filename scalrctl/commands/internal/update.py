@@ -108,7 +108,7 @@ def update():
                 struct = yaml.load(text or open(user_dst).read())
                 user_paths = struct["paths"].keys()
             except KeyError as e:
-                raise click.ClickException("Swagger specification %s is not a valid ." % user_url)
+                raise click.ClickException("Swagger specification %s is not valid." % user_url)
             json.dump(struct, open(SWAGGER_USER_JSONSPEC_PATH, "w"))
 
 
