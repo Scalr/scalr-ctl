@@ -1,8 +1,16 @@
 scalr-ctl Changelog
 ===============
 
-Version 1.0.38
 
+Version 1.0.39
+--------------
+Fixed
+
+    [ST-144] - Click fails on Windows
+
+
+Version 1.0.38
+--------------
 New feature
 
     [ST-117] - Added support for /teams/ and /acl-roles/
@@ -14,6 +22,7 @@ New feature
     [ST-132] - Global option for custom scalr-ctl configuration
     [ST-133] - providing --debug flag should print complete response from API server
     [ST-137] - Script Execute support
+    [ST-144] - Click fails on Windows
 
 Fixed
 
