@@ -104,8 +104,11 @@ def update():
                 successfull = True
 
         if text or os.path.exists(user_dst):
-            struct = yaml.load(text or open(user_dst).read())
-            user_paths = struct["paths"].keys()
+            try:
+                struct = yaml.load(text or open(user_dst).read())
+                user_paths = struct["paths"].keys()
+            except KeyError as e:
+                raise click.ClickException("Swagger specification %s is not a valid ." % user_url)
             json.dump(struct, open(SWAGGER_USER_JSONSPEC_PATH, "w"))
 
 
@@ -137,8 +140,11 @@ def update():
                 successfull = True
 
         if text or os.path.exists(account_dst):
-            struct = yaml.load(text or open(account_dst).read())
-            account_paths = struct["paths"].keys()
+            try:
+                struct = yaml.load(text or open(account_dst).read())
+                account_paths = struct["paths"].keys()
+            except KeyError as e:
+                raise click.ClickException("Swagger specification %s is not valid." % account_url)
             json.dump(struct, open(SWAGGER_ACCOUNT_JSONSPEC_PATH, "w"))
 
         available_routes = {"user": user_paths, "account": account_paths}
