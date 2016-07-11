@@ -2,11 +2,12 @@ scalr-ctl Changelog
 ===============
 
 
-Version 1.0.39
+Version 1.0.40
 --------------
 Fixed
 
     [ST-144] - Click fails on Windows
+    [ST-145] - Update fails when swagger spec is not valid
 
 
 Version 1.0.38
