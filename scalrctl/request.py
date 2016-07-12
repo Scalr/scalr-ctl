@@ -75,7 +75,13 @@ def request(method, request_uri, payload=None, data=None):
             click.echo("Headers: %s " % json.dumps(headers, indent=2))
             click.echo()
 
-        r = requests.request(method.lower(), url, data=body, params=payload, headers=headers)
+        r = requests.request(
+            method.lower(),
+            url,
+            data=body,
+            params=payload,
+            headers=headers,
+            verify=settings.VERIFY_SSL_CERTIFICATES)
         result = r.text
 
     except (Exception, BaseException) as e:
