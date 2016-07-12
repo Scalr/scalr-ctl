@@ -58,6 +58,7 @@ def update():
     user_trigger_file = os.path.join(defaults.CONFIG_DIRECTORY, SWAGGER_USER_NOUPDATE_TRIGGER)
 
     user_url = get_spec_url(api_level="user")
+    print user_url
     user_dst = os.path.join(defaults.CONFIG_DIRECTORY, SWAGGER_USER_FILE)
 
     def spinning_cursor():
@@ -84,7 +85,10 @@ def update():
     try:
         if user_url and not os.path.exists(user_trigger_file):
             # click.echo("Trying to get new UserAPI Spec from %s" % user_url)
-            r = requests.get(user_url)
+            try:
+                r = requests.get(user_url, verify=settings.VERIFY_SSL_CERTIFICATES)
+            except requests.exceptions.SSLError, err:
+                raise click.ClickException(str(err))
 
             old = None
 
@@ -108,7 +112,7 @@ def update():
                 struct = yaml.load(text or open(user_dst).read())
                 user_paths = struct["paths"].keys()
             except KeyError as e:
-                raise click.ClickException("Swagger specification %s is not valid." % user_url)
+                raise click.ClickException("Cannot update: Invalid swagger specification %s" % user_url)
             json.dump(struct, open(SWAGGER_USER_JSONSPEC_PATH, "w"))
 
 
@@ -120,7 +124,10 @@ def update():
 
         if account_url and not os.path.exists(account_trigger_file):
             # click.echo("Trying to get new AccountAPI Spec from %s" % account_url)
-            r = requests.get(account_url)
+            try:
+                r = requests.get(account_url, verify=settings.VERIFY_SSL_CERTIFICATES)
+            except requests.exceptions.SSLError, err:
+                raise click.ClickException(str(err))
 
             old = None
 
