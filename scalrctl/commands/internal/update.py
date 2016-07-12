@@ -58,7 +58,6 @@ def update():
     user_trigger_file = os.path.join(defaults.CONFIG_DIRECTORY, SWAGGER_USER_NOUPDATE_TRIGGER)
 
     user_url = get_spec_url(api_level="user")
-
     user_dst = os.path.join(defaults.CONFIG_DIRECTORY, SWAGGER_USER_FILE)
 
     def spinning_cursor():
@@ -86,7 +85,7 @@ def update():
         if user_url and not os.path.exists(user_trigger_file):
             # click.echo("Trying to get new UserAPI Spec from %s" % user_url)
             try:
-                r = requests.get(user_url, verify=settings.VERIFY_SSL_CERTIFICATES)
+                r = requests.get(user_url, verify=settings.SSL_VERIFY_PEER)
             except requests.exceptions.SSLError, err:
                 raise click.ClickException(str(err))
 
@@ -125,7 +124,7 @@ def update():
         if account_url and not os.path.exists(account_trigger_file):
             # click.echo("Trying to get new AccountAPI Spec from %s" % account_url)
             try:
-                r = requests.get(account_url, verify=settings.VERIFY_SSL_CERTIFICATES)
+                r = requests.get(account_url, verify=settings.SSL_VERIFY_PEER)
             except requests.exceptions.SSLError, err:
                 raise click.ClickException(str(err))
 
