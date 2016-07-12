@@ -81,7 +81,7 @@ def request(method, request_uri, payload=None, data=None):
             data=body,
             params=payload,
             headers=headers,
-            verify=settings.VERIFY_SSL_CERTIFICATES)
+            verify=settings.SSL_VERIFY_PEER)
         result = r.text
 
     except (Exception, BaseException) as e:

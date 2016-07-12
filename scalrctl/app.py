@@ -11,23 +11,17 @@ from scalrctl import settings
 from scalrctl import defaults
 from scalrctl import commands
 
-from scalrctl.commands.internal import update
+from scalrctl.commands.internal import update, configure
 
 
 CMD_FOLDER = os.path.abspath(os.path.join(os.path.dirname(__file__), 'commands'))
-
-
-def apply_settings(data):
-    for key, value in data.items():
-        if hasattr(settings, key):
-            setattr(settings, key, value)
 
 
 if not os.path.exists(defaults.CONFIG_DIRECTORY):
     os.makedirs(defaults.CONFIG_DIRECTORY)
 
 if os.path.exists(defaults.CONFIG_PATH):
-    apply_settings(yaml.load(open(defaults.CONFIG_PATH, "r")))
+    configure.apply_settings(yaml.load(open(defaults.CONFIG_PATH, "r")))
 
 if update.is_update_required():
     update.update()  # [ST-53]
@@ -145,9 +139,8 @@ def cli(ctx, key_id, secret_key, config, *args, **kvargs):
         if not os.path.exists(config):
             raise click.ClickException("Configuration file not found: %s" % config)
         data = yaml.load(open(config, "r"))
-        for setting, value in data.items():
-            if hasattr(settings, setting):
-                setattr(settings, setting, value)
+        configure.apply_settings(data)
+
 
 if __name__ == '__main__':
     cli()

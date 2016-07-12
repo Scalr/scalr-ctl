@@ -41,12 +41,14 @@ def configure(profile=None):
     click.echo("Configuring %s:" % confpath)
 
     for obj in dir(settings):
-        if not obj.startswith("__"):
+        if not obj.startswith("__") and obj != "SSL_VERIFY_PEER":
             default_value = getattr(settings, obj)
             if isinstance(default_value, bool):
                 data[obj] = click.confirm(obj, default=getattr(settings, obj))
             elif not default_value or type(default_value) in (int, str):
                 data[obj] = str(click.prompt(obj, default=getattr(settings, obj))).strip()
+            if obj == "API_SCHEME" and data[obj] == "https":
+                data["SSL_VERIFY_PEER"] = click.confirm("SSL_VERIFY_PEER", default=True)
 
     if not os.path.exists(defaults.CONFIG_DIRECTORY):
         os.makedirs(defaults.CONFIG_DIRECTORY)
@@ -60,8 +62,13 @@ def configure(profile=None):
     click.echo()
     click.echo(open(confpath, "r").read())
 
-    for setting, value in data.items():
-        setattr(settings, setting, value)
+    apply_settings(data)
 
     update.update()
     bash_complete.setup_bash_complete()
+
+
+def apply_settings(data):
+    for key, value in data.items():
+        if hasattr(settings, key):
+            setattr(settings, key, value)
