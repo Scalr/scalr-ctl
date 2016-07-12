@@ -58,7 +58,7 @@ def update():
     user_trigger_file = os.path.join(defaults.CONFIG_DIRECTORY, SWAGGER_USER_NOUPDATE_TRIGGER)
 
     user_url = get_spec_url(api_level="user")
-    print user_url
+
     user_dst = os.path.join(defaults.CONFIG_DIRECTORY, SWAGGER_USER_FILE)
 
     def spinning_cursor():

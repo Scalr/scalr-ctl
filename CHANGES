@@ -2,13 +2,14 @@ scalr-ctl Changelog
 ===============
 
 
-Version 1.0.41
+Version 1.0.42
 --------------
 Fixed
 
     [ST-144] - Click fails on Windows
     [ST-145] - Update fails when swagger spec is not valid
     [ST-146] - scalr-ctl must handle self signed certificates correctly
+    [ST-148] - Add SSL_VERIFY_PEER option
 
 
 Version 1.0.38
