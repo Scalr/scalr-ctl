@@ -1289,7 +1289,7 @@
             },
             "replace": {
                 "api_level": "user",
-                "class": "scalrctl.commands.Action",
+                "class": "scalrctl.commands.roleimage.ReplaceRoleImage",
                 "http-method": "post",
                 "route": "/{envId}/roles/{roleId}/images/{imageId}/actions/replace/"
             },

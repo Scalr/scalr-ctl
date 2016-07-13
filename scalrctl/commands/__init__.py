@@ -110,11 +110,11 @@ class Action(BaseAction):
 
         if self.http_method.upper() in ("PATCH", "POST"):
             # prompting for body and then validating it
-
             for param in self.get_body_type_params():
                 name = param["name"]
                 text = ''
                 if self.http_method.upper() == "PATCH":
+                    print 1
                     if import_data and name in import_data:
                         import_data[name] = self._filter_json_object(import_data[name], filter_createonly=True)
                     else:
