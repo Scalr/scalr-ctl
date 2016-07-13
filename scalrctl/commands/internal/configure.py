@@ -39,11 +39,13 @@ def configure(profile=None):
         data.update(old_data)
 
     click.echo("Configuring %s:" % confpath)
-
+    excludes = ("SSL_VERIFY_PEER", "SIGNATURE_VERSION", "API_VERSION", "debug_mode")
     for obj in dir(settings):
-        if not obj.startswith("__") and obj != "SSL_VERIFY_PEER":
+        if not obj.startswith("__") and obj not in excludes:
             default_value = getattr(settings, obj)
-            if isinstance(default_value, bool):
+            if obj == "view":
+                data["view"] = str(click.prompt("view", default="choose from tree, table, json"))
+            elif isinstance(default_value, bool):
                 data[obj] = click.confirm(obj, default=getattr(settings, obj))
             elif not default_value or type(default_value) in (int, str):
                 data[obj] = str(click.prompt(obj, default=getattr(settings, obj))).strip()

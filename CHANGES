@@ -2,7 +2,7 @@ scalr-ctl Changelog
 ===============
 
 
-Version 1.0.43
+Version 1.0.44
 --------------
 Fixed
 
@@ -10,6 +10,9 @@ Fixed
     [ST-145] - Update fails when swagger spec is not valid
     [ST-146] - scalr-ctl must handle self signed certificates correctly
     [ST-148] - Add SSL_VERIFY_PEER option
+    [ST-149] - Remove api_version и signature_version from interactive configurator
+    [ST-151] - make scalr-ctl configure safer
+    [ST-152] - "scalr-ctl role-image replace" should take command line parameters instead of pipe
 
 
 
