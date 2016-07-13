@@ -100,7 +100,7 @@ class Action(BaseAction):
 
         if "debug" in kwargs:
             settings.debug_mode = kwargs.pop("debug")
-        if "transformation" in kwargs:
+        if "transformation" in kwargs and kwargs["transformation"]:
             settings.view = kwargs.pop("transformation")
         if "nocolor" in kwargs:
             settings.colored_output = not kwargs.pop("nocolor")
@@ -310,17 +310,25 @@ class Action(BaseAction):
                 is_flag=True,
                 flag_value='raw',
                 default=False,
+                hidden=True,
+                help="Print raw response"
+            )
+            json = click.Option(
+                ('--json', 'transformation'),
+                is_flag=True,
+                flag_value='json',
+                default=False,
                 help="Print raw response"
             )
             tree = click.Option(
                 ('--tree', 'transformation'),
                 is_flag=True,
                 flag_value='tree',
-                default=True,
+                default=False,
                 help="Print response as a colored tree"
             )
             nocolor = click.Option(('--nocolor', 'nocolor'), is_flag=True, default=False, help="Use colors")
-            options += [raw, tree, nocolor]
+            options += [raw, tree, nocolor, json]
 
             if self.name not in ("get", "retrieve"):  # [ST-54] [ST-102]
                 table = click.Option(
