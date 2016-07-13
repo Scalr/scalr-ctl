@@ -1,6 +1,8 @@
 __author__ = 'Dmitriy Korsakov'
 __doc__ = 'Farm management'
+
 import copy
+
 from scalrctl import commands
 from scalrctl import click
 

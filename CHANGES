@@ -2,7 +2,7 @@ scalr-ctl Changelog
 ===============
 
 
-Version 1.0.42
+Version 1.0.43
 --------------
 Fixed
 
@@ -10,6 +10,7 @@ Fixed
     [ST-145] - Update fails when swagger spec is not valid
     [ST-146] - scalr-ctl must handle self signed certificates correctly
     [ST-148] - Add SSL_VERIFY_PEER option
+
 
 
 Version 1.0.38

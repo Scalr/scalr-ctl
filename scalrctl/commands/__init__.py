@@ -110,7 +110,6 @@ class Action(BaseAction):
 
         if self.http_method.upper() in ("PATCH", "POST"):
             # prompting for body and then validating it
-
             for param in self.get_body_type_params():
                 name = param["name"]
                 text = ''
