@@ -316,7 +316,7 @@ class Action(BaseAction):
             json = click.Option(
                 ('--json', 'transformation'),
                 is_flag=True,
-                flag_value='tree',
+                flag_value='raw',
                 default=False,
                 help="Print raw response"
             )
