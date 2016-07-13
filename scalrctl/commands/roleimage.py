@@ -9,7 +9,7 @@ from scalrctl import click
 
 class ReplaceRoleImage(commands.Action):
 
-    epilog = "Example: scalr-ctl role-image replace --roleID <roleID> --imageID <ID>"
+    epilog = "Example: scalr-ctl role-image replace --roleID <roleID> --imageID <ID> --newImageID <newID>"
 
     post_template = {
         "roleImageObject": {"image": {"id": None}, "role": {"id": None}}
