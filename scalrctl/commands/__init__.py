@@ -169,7 +169,6 @@ class Action(BaseAction):
         """
         callback for click subcommand
         """
-
         # print "run %s @ %s with arguments:" % (self.http_method, self.route), args, kwargs
         hide_output = kwargs.pop("hide_output", False)  # [ST-88]
         dry_run = kwargs.pop("dryrun", False)
