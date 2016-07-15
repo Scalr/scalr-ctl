@@ -244,7 +244,7 @@ class Action(BaseAction):
                                 row.append(block[item])
                                 break
                         else:
-                            raise click.ClickException("Cannot apply filter. No such column: %s" % name)
+                            row.append("")
                     if row:
                         rows.append(row)
 
