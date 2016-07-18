@@ -2,7 +2,7 @@ scalr-ctl Changelog
 ===============
 
 
-Version 1.0.47
+Version 1.0.48
 --------------
 Fixed
 
@@ -16,6 +16,7 @@ Fixed
     [ST-155] - scalr-ctl hides output when default view is set to None
     [ST-154] - table view is broken
     [ST-157] - CentOS 7 support
+    [ST-158] - role-image replace fails when view is set to "table"
 
 
 Version 1.0.38

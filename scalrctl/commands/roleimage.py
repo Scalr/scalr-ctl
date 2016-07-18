@@ -2,7 +2,7 @@ __author__ = 'Dmitriy Korsakov'
 __doc__ = 'RoleImage management'
 
 import copy
-
+import json
 from scalrctl import commands
 from scalrctl import click
 
@@ -34,3 +34,17 @@ class ReplaceRoleImage(commands.Action):
         kv.update(kwargs)
         arguments, kw = super(ReplaceRoleImage, self).pre(*args, **kv)
         return arguments, kw
+
+    def post(self, response):
+        """
+        after request is made
+        """
+        try:
+            obj = json.loads(response)
+            if "errors" not in obj:
+                roleid = obj["data"]["role"]["id"]
+                imageid = obj["data"]["image"]["id"]
+                click.echo("Role %s now contains new image %s." % (roleid, imageid))
+        except:
+            pass
+        return response
