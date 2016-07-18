@@ -15,6 +15,7 @@ Fixed
     [ST-152] - "scalr-ctl role-image replace" should take command line parameters instead of pipe
     [ST-155] - scalr-ctl hides output when default view is set to None
     [ST-154] - table view is broken
+    [ST-157] - CentOS 7 support
 
 
 Version 1.0.38
