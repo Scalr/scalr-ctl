@@ -56,10 +56,10 @@ if __name__ == '__main__':
         },
         data_files=[('', ['scalrctl/scheme/scheme.json', ]), ],
         install_requires=[
-            'prettytable',
-            'pyyaml',
-            'requests',
-            "six"
+            'prettytable>=0.7.2',
+            'pyyaml>=3.11',
+            'requests>=2.10.0',
+            "six>=1.10.0"
         ],
         entry_points='''
             [console_scripts]
