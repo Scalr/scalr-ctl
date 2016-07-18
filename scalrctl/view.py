@@ -21,9 +21,9 @@ def build_table(field_names, rows, pre=None, post=None):
 
     body = table.get_string()
 
-    if pre:
+    if body and pre:
         body = "%s\n\n%s" % (pre, body)
-    if post:
+    if body and post:
         body = "%s\n\n%s" % (body, post)
 
     return "\n%s\n" % body

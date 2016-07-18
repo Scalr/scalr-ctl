@@ -249,8 +249,8 @@ class Action(BaseAction):
                         rows.append(row)
 
                 pagination = response_json.get("pagination", None)
+                pagenum_last, current_pagenum = 1, 1
                 if pagination:
-                    pagenum_last, current_pagenum = 1, 1
                     url_last = pagination.get('last', None)
                     if url_last:
                         number = re.search("pageNum=(\d*)", url_last)
@@ -425,7 +425,8 @@ class Action(BaseAction):
     def _get_column_names(self):
         fields = []
         data = self._result_descr["properties"]["data"]
-        response_ref = data["items"]["$ref"]
+        # XXX: Inconsistency in swagger spec. See RoleDetailsResponse vs RoleCategoryListResponse
+        response_ref = data["items"]["$ref"] if "items" in data else data["$ref"]
         response_descr = self._lookup(response_ref)
         for k, v in response_descr["properties"].items():
             if "$ref" not in v:
