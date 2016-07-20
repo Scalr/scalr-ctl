@@ -2,7 +2,7 @@ scalr-ctl Changelog
 ===============
 
 
-Version 1.0.48
+Version 1.0.49
 --------------
 Fixed
 
@@ -17,6 +17,7 @@ Fixed
     [ST-154] - table view is broken
     [ST-157] - CentOS 7 support
     [ST-158] - role-image replace fails when view is set to "table"
+    [ST-159] - JSON view does not work for action-type commands
 
 
 Version 1.0.38
