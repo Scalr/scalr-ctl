@@ -201,7 +201,7 @@ class Action(BaseAction):
         raw_response = request.request(self.http_method, uri, payload, data)
         response = self.post(raw_response)
 
-        if settings.view == "raw" and not hide_output:
+        if settings.view in ("raw", "json") and not hide_output:
             click.echo(raw_response)
 
         if not response and self.http_method.upper() == "DELETE":
