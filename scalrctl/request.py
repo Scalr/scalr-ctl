@@ -47,8 +47,12 @@ def request(method, request_uri, payload=None, data=None):
         query_string = urlencode(sorted(payload.items())) if payload else ''
         body = json.dumps(yaml.safe_load(data)) if data else '' #XXX
 
-        assert settings.API_KEY_ID, "No Key ID"
-        assert settings.API_SECRET_KEY, "No Secret key"
+        nokeyid = "API Key ID is not configured. Please specify option --key_id \
+or run 'scalr-ctl configure' to change default authentication settings."
+        nosecret =  "API Secret Key is not configured. Please specify option --secret_key \
+or run 'scalr-ctl configure' to change default authentication settings."
+        assert settings.API_KEY_ID, nokeyid
+        assert settings.API_SECRET_KEY, nosecret
 
         string_to_sign = "%s\n%s\n%s\n%s\n%s" % (method.upper(), time_iso8601, request_uri, query_string, body)
 
