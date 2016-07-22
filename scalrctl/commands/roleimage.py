@@ -52,7 +52,7 @@ class ReplaceRoleImage(commands.Action):
 
 class CreateRoleImage(commands.Action):
 
-    epilog = "Example: scalr-ctl role-image create --roleID <roleID> < create.json"
+    epilog = "Example: scalr-ctl role-image create --roleID <roleID> --imageID <ID>"
 
     post_template = {
         "roleImageObject": {"image": {"id": None}, "role": {"id": None}}
