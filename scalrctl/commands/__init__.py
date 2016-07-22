@@ -145,6 +145,7 @@ class Action(BaseAction):
                         raw = click.edit(text)
                     else:
                         raw = click.get_text_stream("stdin").read()
+
                     try:
                         user_object = json.loads(raw)
                     except (Exception, BaseException) as e:
