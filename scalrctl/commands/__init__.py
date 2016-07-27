@@ -301,7 +301,7 @@ class Action(BaseAction):
 
     def _get_custom_options(self):
         options = []
-        debug = click.Option(('--debug/--no-debug', 'debug'), default=False, help="Print debug messages")
+        debug = click.Option(('--debug', 'debug'), default=False, help="Print debug messages")
         options.append(debug)
 
         if self.http_method.upper() == 'GET':
