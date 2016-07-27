@@ -2,7 +2,7 @@ scalr-ctl Changelog
 ===============
 
 
-Version 1.0.50
+Version 1.0.51
 --------------
 Fixed
 
@@ -19,6 +19,7 @@ Fixed
     [ST-158] - role-image replace fails when view is set to "table"
     [ST-159] - JSON view does not work for action-type commands
     [ST-153] - "scalr-ctl role-image create" should take command line parameters instead of stdin
+    [ST-141] - Improve --help command for account scope
 
 
 Version 1.0.38

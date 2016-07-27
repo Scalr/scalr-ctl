@@ -17,6 +17,7 @@
                 "route": ""
             },
     "account": {
+        "group_descr": "Scalr Account management",
         "acl-roles": {
             "list": {
                 "api_level": "account",
