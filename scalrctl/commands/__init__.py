@@ -342,18 +342,18 @@ class Action(BaseAction):
 
             if self._returns_iterable():
                 maxrez = click.Option(
-                    ("--maxresults", "maxResults"),
+                    ("--max-results", "maxResults"),
                     type=int,
                     required=False,
-                    help="Maximum number of records. Example: --maxresults=2"
+                    help="Maximum number of records. Example: --max-results=2"
                 )
                 options.append(maxrez)
 
                 pagenum = click.Option(
-                    ("--pagenumber", "pageNum"),
+                    ("--page-number", "pageNum"),
                     type=int,
                     required=False,
-                    help="Current page number. Example: --pagenumber=3"
+                    help="Current page number. Example: --page-number=3"
                 )
                 options.append(pagenum)
 
