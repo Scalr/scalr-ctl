@@ -77,17 +77,3 @@ class CreateRoleImage(commands.Action):
         kv.update(kwargs)
         arguments, kw = super(CreateRoleImage, self).pre(*args, **kv)
         return arguments, kw
-
-    """
-    def post(self, response):
-
-        try:
-            obj = json.loads(response)
-            if "errors" not in obj:
-                roleid = obj["data"]["role"]["id"]
-                imageid = obj["data"]["image"]["id"]
-                click.echo("Role %s now contains new image %s." % (roleid, imageid))
-        except:
-            pass
-        return response
-    """
