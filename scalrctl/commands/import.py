@@ -26,7 +26,7 @@ class Import(commands.Action):
         return "Import Scalr Objects."
 
     def get_options(self):
-        debug = click.Option(('--debug', 'debug'), default=False, help="Print debug messages")
+        debug = click.Option(('--debug', 'debug'), is_flag=True, default=False, help="Print debug messages")
         envid = click.Option(('--envId', 'env_id'), help="Environment ID")
         upd_helpmsg = "Update existing object instead of creating new."
         update = click.Option(('--update', 'update'), is_flag=True, default=False, help=upd_helpmsg, hidden=True)

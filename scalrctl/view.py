@@ -41,7 +41,7 @@ def build_tree(data):
     pairs = []
     in_key = False
 
-    for token in yaml.scan(yaml_text, Loader=yaml.Loader):
+    for token in yaml.scan(yaml_text):
 
         if token.__class__ == yaml.tokens.KeyToken:
             in_key = True
