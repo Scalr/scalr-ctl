@@ -40,7 +40,7 @@
                 "http-method": "get", 
                 "route": "/environments/{envId}/clouds/{cloud}/"
             }, 
-            "group_descr": "Manage cloud providers", 
+            "group_descr": "Manage Cloud Providers",
             "list": {
                 "api_level": "account", 
                 "class": "scalrctl.commands.Action", 
@@ -123,7 +123,7 @@
                 "http-method": "get", 
                 "route": "/environments/{envId}/"
             }, 
-            "group_descr": "Manage environments", 
+            "group_descr": "Manage Environments",
             "list": {
                 "api_level": "account", 
                 "class": "scalrctl.commands.Action", 
@@ -164,7 +164,7 @@
                 "http-method": "get", 
                 "route": "/events/{eventId}/"
             }, 
-            "group_descr": "Manage events available in the Scalr Account", 
+            "group_descr": "Manage Events available in the Scalr Account",
             "list": {
                 "api_level": "account", 
                 "class": "scalrctl.commands.Action", 
@@ -205,7 +205,7 @@
                 "http-method": "get", 
                 "route": "/images/{imageId}/"
             }, 
-            "group_descr": "Manage images",
+            "group_descr": "Manage Images",
             "list": {
                 "api_level": "account", 
                 "class": "scalrctl.commands.Action", 
@@ -240,7 +240,7 @@
                 "http-method": "get", 
                 "route": "/os/{osId}/"
             }, 
-            "group_descr": "Manage supported operating systems",
+            "group_descr": "Manage supported Operating Systems",
             "list": {
                 "api_level": "account", 
                 "class": "scalrctl.commands.Action", 
@@ -282,7 +282,7 @@
                 "http-method": "get", 
                 "route": "/roles/{roleId}/"
             }, 
-            "group_descr": "Manage roles",
+            "group_descr": "Manage Roles",
             "list": {
                 "api_level": "account", 
                 "class": "scalrctl.commands.Action", 
@@ -323,7 +323,7 @@
                 "http-method": "get", 
                 "route": "/role-categories/{roleCategoryId}/"
             }, 
-            "group_descr": "Manage current Role categories", 
+            "group_descr": "Manage current Role Categories",
             "list": {
                 "api_level": "account", 
                 "class": "scalrctl.commands.Action", 
@@ -364,7 +364,7 @@
                 "http-method": "get", 
                 "route": "/roles/{roleId}/global-variables/{globalVariableName}/"
             }, 
-            "group_descr": "Manage global variables for roles", 
+            "group_descr": "Manage Global Variables for Roles",
             "list": {
                 "api_level": "account", 
                 "class": "scalrctl.commands.Action", 
@@ -398,7 +398,7 @@
                 "http-method": "get", 
                 "route": "/roles/{roleId}/images/{imageId}/"
             }, 
-            "group_descr": "Manage images in roles", 
+            "group_descr": "Manage Images in Roles",
             "list": {
                 "api_level": "account", 
                 "class": "scalrctl.commands.Action", 
@@ -476,7 +476,7 @@
                 "http-method": "delete",
                 "route": "/environments/{envId}/teams/{teamId}/"
             },
-            "group_descr": "Manage teams",
+            "group_descr": "Manage Teams",
             "list": {
                 "api_level": "account",
                 "class": "scalrctl.commands.Action",
@@ -541,7 +541,7 @@
                 "http-method": "get",
                 "route": "/{envId}/events/{eventId}/"
             },
-            "group_descr": "Manage events available in the Scalr Environment",
+            "group_descr": "Manage Events available in the Scalr Environment",
             "list": {
                 "api_level": "user",
                 "class": "scalrctl.commands.Action",
@@ -808,7 +808,7 @@
                 "http-method": "get",
                 "route": "/{envId}/farms/{farmId}/global-variables/{globalVariableName}/"
             },
-            "group_descr": "Manage global variables for farms",
+            "group_descr": "Manage Global Variables for Farms",
             "list": {
                 "api_level": "user",
                 "class": "scalrctl.commands.Action",
@@ -946,7 +946,7 @@
                 "http-method": "get",
                 "route": "/{envId}/farm-roles/{farmRoleId}/global-variables/{globalVariableName}/"
             },
-            "group_descr": "Manage global variables for farm roles",
+            "group_descr": "Manage Global Variables for FarmRoles",
             "list": {
                 "api_level": "user",
                 "class": "scalrctl.commands.Action",
@@ -1041,7 +1041,7 @@
                 "http-method": "get",
                 "route": "/{envId}/farm-roles/{farmRoleId}/scaling/{metricName}/"
             },
-            "group_descr": "Manage farmrole scaling",
+            "group_descr": "Manage FarmRole Scaling",
             "list": {
                 "api_level": "user",
                 "class": "scalrctl.commands.Action",
@@ -1124,7 +1124,7 @@
                 "http-method": "get",
                 "route": "/{envId}/os/{osId}/"
             },
-            "group_descr": "Manage supported operating systems",
+            "group_descr": "Manage supported Operating Systems",
             "list": {
                 "api_level": "user",
                 "class": "scalrctl.commands.Action",
@@ -1153,7 +1153,7 @@
                 "http-method": "get",
                 "route": "/{envId}/projects/{projectId}/"
             },
-            "group_descr": "Manage projects",
+            "group_descr": "Manage Projects",
             "list": {
                 "api_level": "user",
                 "class": "scalrctl.commands.Action",
@@ -1236,7 +1236,7 @@
                 "http-method": "get",
                 "route": "/{envId}/role-categories/{roleCategoryId}/"
             },
-            "group_descr": "Manage current Role categories",
+            "group_descr": "Manage current Role Categories",
             "list": {
                 "api_level": "user",
                 "class": "scalrctl.commands.Action",
@@ -1277,7 +1277,7 @@
                 "http-method": "get",
                 "route": "/{envId}/roles/{roleId}/global-variables/{globalVariableName}/"
             },
-            "group_descr": "Manage global variables for roles",
+            "group_descr": "Manage Global Variables for Roles",
             "list": {
                 "api_level": "user",
                 "class": "scalrctl.commands.Action",
@@ -1311,7 +1311,7 @@
                 "http-method": "get",
                 "route": "/{envId}/roles/{roleId}/images/{imageId}/"
             },
-            "group_descr": "Manage images in roles",
+            "group_descr": "Manage Images in Roles",
             "list": {
                 "api_level": "user",
                 "class": "scalrctl.commands.Action",
@@ -1408,7 +1408,7 @@
                 "http-method": "get",
                 "route": "/{envId}/scaling-metrics/{metricName}/"
             },
-            "group_descr": "Manage scaling metrics",
+            "group_descr": "Manage Scaling Metrics",
             "list": {
                 "api_level": "user",
                 "class": "scalrctl.commands.Action",
