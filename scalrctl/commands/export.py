@@ -21,7 +21,6 @@ class Export(commands.Action):
             ('--debug', 'debug'),
             is_flag=True,
             default=False,
-            default=False,
             help="Print debug messages")
         options.append(debug)
         return options
