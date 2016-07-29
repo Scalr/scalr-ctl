@@ -301,10 +301,39 @@ class Action(BaseAction):
 
     def _get_custom_options(self):
         options = []
-        debug = click.Option(('--debug', 'debug'), is_flag=True, default=False, help="Print debug messages")
-        options.append(debug)
 
         if self.http_method.upper() == 'GET':
+            if self._returns_iterable():
+                maxrez = click.Option(
+                    ("--max-results", "maxResults"),
+                    type=int,
+                    required=False,
+                    help="Maximum number of records. Example: --max-results=2"
+                )
+                options.append(maxrez)
+
+                pagenum = click.Option(
+                    ("--page-number", "pageNum"),
+                    type=int,
+                    required=False,
+                    help="Current page number. Example: --page-number=3"
+                )
+                options.append(pagenum)
+
+                filter_help = "Apply filters. Example: type=ebs,size=8. "
+                filters = self._get_available_filters()
+                if filters:
+                    filters = sorted(filters)
+                    filter_help += "Available filters: %s." % ", ".join(filters)
+                    filters = click.Option(("--filters", "filters"), required=False, help=filter_help)
+                    options.append(filters)
+
+                columns_help = "Filter columns in table view [--table required]. Example: NAME,SIZE,SCOPE. "
+                available_columns = self._get_column_names()
+                columns_help += "Available columns: %s." % ", ".join(available_columns)
+                columns = click.Option(("--columns", "columns"), required=False, help=columns_help)
+                options.append(columns)
+
             raw = click.Option(
                 ('--raw', 'transformation'),
                 is_flag=True,
@@ -340,36 +369,8 @@ class Action(BaseAction):
                 )
                 options.append(table)
 
-            if self._returns_iterable():
-                maxrez = click.Option(
-                    ("--max-results", "maxResults"),
-                    type=int,
-                    required=False,
-                    help="Maximum number of records. Example: --max-results=2"
-                )
-                options.append(maxrez)
-
-                pagenum = click.Option(
-                    ("--page-number", "pageNum"),
-                    type=int,
-                    required=False,
-                    help="Current page number. Example: --page-number=3"
-                )
-                options.append(pagenum)
-
-                filter_help = "Apply filters. Example: type=ebs,size=8. "
-                filters = self._get_available_filters()
-                if filters:
-                    filters = sorted(filters)
-                    filter_help += "Available filters: %s." % ", ".join(filters)
-                    filters = click.Option(("--filters", "filters"), required=False, help=filter_help)
-                    options.append(filters)
-
-                columns_help = "Filter columns in table view [--table required]. Example: NAME,SIZE,SCOPE. "
-                available_columns = self._get_column_names()
-                columns_help += "Available columns: %s." % ", ".join(available_columns)
-                columns = click.Option(("--columns", "columns"), required=False, help=columns_help)
-                options.append(columns)
+        debug = click.Option(('--debug', 'debug'), is_flag=True, default=False, help="Print debug messages")
+        options.append(debug)
 
         return options
 
