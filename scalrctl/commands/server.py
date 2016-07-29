@@ -18,8 +18,8 @@ class RebootServer(commands.Action):
         option is set to true. Beware that some types of the instances do \
         not support soft reboot."
         hard_reboot = click.Option(('--hard', 'hard'), is_flag=True, default=False, help=hlp)
-        options = super(RebootServer, self).get_options()
-        options.append(hard_reboot)
+        options = [hard_reboot, ]
+        options.extend(super(RebootServer, self).get_options())
         return options
 
 
@@ -76,8 +76,8 @@ class TerminateServer(commands.Action):
     def get_options(self):
         hlp = "It is used to terminate the Server immediately ignoring scalr.system.server_terminate_timeout."
         force_terminate = click.Option(('--force', 'force'), is_flag=True, default=False, help=hlp)
-        options = super(TerminateServer, self).get_options()
-        options.append(force_terminate)
+        options = [force_terminate, ]
+        options.extend(super(TerminateServer, self).get_options())
         return options
 
 

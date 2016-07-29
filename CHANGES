@@ -26,6 +26,7 @@ Fixed
     [ST-158] - role-image replace fails when view is set to "table"
     [ST-159] - JSON view does not work for action-type commands
     [ST-163] - Deprecate --no-debug global option
+    [ST-164] - Change options order for all commands
 
 
 Version 1.0.38

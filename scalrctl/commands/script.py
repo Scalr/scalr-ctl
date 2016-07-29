@@ -28,8 +28,8 @@ class ExecuteScript(commands.Action):
         nowait_hlp = "Do not wait for script execution to finish"
         nowait = click.Option(('--nowait', 'nowait'), required=False, help=nowait_hlp)
 
-        options = super(ExecuteScript, self).get_options()
-        options += [blocking, server_id, timeout, nowait]
+        options = [blocking, server_id, timeout, nowait]
+        options.extend(super(ExecuteScript, self).get_options())
         return options
 
 

@@ -18,8 +18,8 @@ class ReplaceRoleImage(commands.Action):
     def get_options(self):
         hlp = "The ID of a new image"
         newimageid = click.Option(('--newImageId', 'newimageid'), required=True, help=hlp)
-        options = super(ReplaceRoleImage, self).get_options()
-        options.append(newimageid)
+        options = [newimageid, ]
+        options.extend(super(ReplaceRoleImage, self).get_options())
         return options
 
     def pre(self, *args, **kwargs):
@@ -61,8 +61,8 @@ class CreateRoleImage(commands.Action):
     def get_options(self):
         hlp = "The ID of a new image"
         imageid = click.Option(('--imageId', 'imageId'), required=True, help=hlp)
-        options = super(CreateRoleImage, self).get_options()
-        options.append(imageid)
+        options = [imageid, ]
+        options.extend(super(CreateRoleImage, self).get_options())
         return options
 
     def pre(self, *args, **kwargs):
