@@ -33,10 +33,7 @@ def build_tree(data):
     if isinstance(data, str):
         data = json.loads(data)
 
-    yaml_text = yaml.safe_dump(data, encoding='utf-8', allow_unicode=True, default_flow_style=False)
-
-    # yaml_text = yaml_text.decode('unicode_escape').encode('ascii','ignore')  # [ST-63]
-    yaml_text = yaml_text.decode("ascii", "ignore").encode("ascii")  # [ST-63]
+    yaml_text = yaml.safe_dump(data, allow_unicode=True, default_flow_style=False).decode("utf-8")
 
     if not settings.colored_output:
         return yaml_text
@@ -44,7 +41,8 @@ def build_tree(data):
     pairs = []
     in_key = False
 
-    for token in yaml.scan(yaml_text):
+    for token in yaml.scan(yaml_text, Loader=yaml.Loader):
+
         if token.__class__ == yaml.tokens.KeyToken:
             in_key = True
             continue
@@ -59,7 +57,8 @@ def build_tree(data):
     result = yaml_text[:last_pos]
 
     for start, end in pairs:
-        result += yaml_text[last_pos:start] + "\x1b[31;1m" + yaml_text[start:end] + "\x1b[0m"
+
+        result += yaml_text[last_pos:start] + "\x1b[31;1m" + yaml_text[start:end] + "\x1b[39m"
         last_pos = end
 
     result += yaml_text[last_pos:]

@@ -49,8 +49,7 @@ class ScalrCLI(click.Group):
         if "route" in commands and "http-method" in commands:
             return []
 
-        commands.sort()
-        return commands
+        return sorted(commands)
 
     def get_command(self, ctx, name):
         args = dict(
