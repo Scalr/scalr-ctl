@@ -17,7 +17,12 @@ class Export(commands.Action):
     def _get_custom_options(self):
         # Disable output modifiers
         options = []
-        debug = click.Option(('--debug', 'debug'), default=False, help="Print debug messages")
+        debug = click.Option(
+            ('--debug', 'debug'),
+            is_flag=True,
+            default=False,
+            default=False,
+            help="Print debug messages")
         options.append(debug)
         return options
 
