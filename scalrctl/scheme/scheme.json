@@ -17,6 +17,7 @@
                 "route": ""
             },
     "account": {
+        "group_descr": "All Scalr Account scope commands",
         "acl-roles": {
             "list": {
                 "api_level": "account",
@@ -204,7 +205,7 @@
                 "http-method": "get", 
                 "route": "/images/{imageId}/"
             }, 
-            "group_descr": "Image management", 
+            "group_descr": "Manage images",
             "list": {
                 "api_level": "account", 
                 "class": "scalrctl.commands.Action", 
@@ -239,7 +240,7 @@
                 "http-method": "get", 
                 "route": "/os/{osId}/"
             }, 
-            "group_descr": "Supported operating systems", 
+            "group_descr": "Manage supported operating systems",
             "list": {
                 "api_level": "account", 
                 "class": "scalrctl.commands.Action", 
@@ -281,7 +282,7 @@
                 "http-method": "get", 
                 "route": "/roles/{roleId}/"
             }, 
-            "group_descr": "Role management", 
+            "group_descr": "Manage roles",
             "list": {
                 "api_level": "account", 
                 "class": "scalrctl.commands.Action", 
@@ -446,7 +447,7 @@
                 "http-method": "get", 
                 "route": "/roles/{roleId}/orchestration-rules/{orchestrationRuleId}/"
             }, 
-            "group_descr": "Orchestration Rule management", 
+            "group_descr": "Manage Orchestration Rules",
             "list": {
                 "api_level": "account", 
                 "class": "scalrctl.commands.Action", 
@@ -498,7 +499,7 @@
                 "http-method": "get",
                 "route": "/{envId}/cost-centers/{costCenterId}/"
             },
-            "group_descr": "Cost Centrer management",
+            "group_descr": "Manage Cost Centres",
             "list": {
                 "api_level": "user",
                 "class": "scalrctl.commands.Action",
@@ -752,7 +753,7 @@
                 "http-method": "get",
                 "route": "/{envId}/farms/{farmId}/"
             },
-            "group_descr": "Farm management",
+            "group_descr": "Manage Farms",
             "launch": {
                 "api_level": "user",
                 "class": "scalrctl.commands.farm.FarmLaunch",
@@ -879,7 +880,7 @@
                 "http-method": "get",
                 "route": "/{envId}/farm-roles/{farmRoleId}/"
             },
-            "group_descr": "FarmRole management",
+            "group_descr": "Manage FarmRoles",
             "import-server": {
                 "api_level": "user",
                 "class": "scalrctl.commands.Action",
@@ -993,7 +994,7 @@
                 "http-method": "get",
                 "route": "/{envId}/farm-roles/{farmRoleId}/orchestration-rules/{orchestrationRuleId}/"
             },
-            "group_descr": "Orchestration Rule management",
+            "group_descr": "Manage Orchestration Rules",
             "list": {
                 "api_level": "user",
                 "class": "scalrctl.commands.Action",
@@ -1088,7 +1089,7 @@
                 "http-method": "get",
                 "route": "/{envId}/images/{imageId}/"
             },
-            "group_descr": "Image management",
+            "group_descr": "Manage Images",
             "list": {
                 "api_level": "user",
                 "class": "scalrctl.commands.Action",
@@ -1123,7 +1124,7 @@
                 "http-method": "get",
                 "route": "/{envId}/os/{osId}/"
             },
-            "group_descr": "Supported operating systems",
+            "group_descr": "Manage supported operating systems",
             "list": {
                 "api_level": "user",
                 "class": "scalrctl.commands.Action",
@@ -1152,7 +1153,7 @@
                 "http-method": "get",
                 "route": "/{envId}/projects/{projectId}/"
             },
-            "group_descr": "View projects",
+            "group_descr": "Manage projects",
             "list": {
                 "api_level": "user",
                 "class": "scalrctl.commands.Action",
@@ -1194,7 +1195,7 @@
                 "http-method": "get",
                 "route": "/{envId}/roles/{roleId}/"
             },
-            "group_descr": "Role management",
+            "group_descr": "Manage Roles",
             "list": {
                 "api_level": "user",
                 "class": "scalrctl.commands.Action",
@@ -1235,7 +1236,7 @@
                 "http-method": "get",
                 "route": "/{envId}/role-categories/{roleCategoryId}/"
             },
-            "group_descr": "Current Role categories",
+            "group_descr": "Manage current Role categories",
             "list": {
                 "api_level": "user",
                 "class": "scalrctl.commands.Action",
@@ -1366,7 +1367,7 @@
                 "http-method": "get",
                 "route": "/{envId}/roles/{roleId}/orchestration-rules/{orchestrationRuleId}/"
             },
-            "group_descr": "Orchestration Rule management",
+            "group_descr": "Manage Orchestration Rules",
             "list": {
                 "api_level": "user",
                 "class": "scalrctl.commands.Action",
@@ -1455,7 +1456,7 @@
                 "http-method": "get",
                 "route": "/{envId}/scripts/{scriptId}/"
             },
-            "group_descr": "Script management",
+            "group_descr": "Manage Scripts",
             "list": {
                 "api_level": "user",
                 "class": "scalrctl.commands.Action",
@@ -1522,7 +1523,7 @@
                 "http-method": "get",
                 "route": "/{envId}/scripts/{scriptId}/script-versions/{scriptVersionNumber}/"
             },
-            "group_descr": "Script Version management",
+            "group_descr": "Manage Script Versions",
             "list": {
                 "api_level": "user",
                 "class": "scalrctl.commands.Action",
@@ -1575,7 +1576,7 @@
                 "http-method": "get",
                 "route": "/{envId}/servers/{serverId}/"
             },
-            "group_descr": "Server management",
+            "group_descr": "Manage Servers",
             "suspend": {
                 "api_level": "user",
                 "class": "scalrctl.commands.server.SuspendServer",
