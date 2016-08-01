@@ -58,7 +58,7 @@ def build_tree(data):
 
     for start, end in pairs:
 
-        result += yaml_text[last_pos:start] + "\x1b[31;1m" + yaml_text[start:end] + "\x1b[39m"
+        result += yaml_text[last_pos:start] + "\x1b[31m" + yaml_text[start:end] + "\x1b[39m"
         last_pos = end
 
     result += yaml_text[last_pos:]
