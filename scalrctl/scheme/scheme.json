@@ -2,13 +2,15 @@
                 "api_level": "",
                 "class": "scalrctl.commands.internal.update.UpdateScalrCTL",
                 "http-method": "",
-                "route": ""
+                "route": "",
+                "cmd-group" : "Service commands"
             },
     "configure": {
                 "api_level": "",
                 "class": "scalrctl.commands.internal.configure.ConfigureScalrCTL",
                 "http-method": "",
-                "route": ""
+                "route": "",
+                "cmd-group" : "Service commands"
             },
     "import": {
                 "api_level": "user",
@@ -18,7 +20,9 @@
             },
     "account": {
         "group_descr": "All Scalr Account scope commands",
+        "cmd-group": "Available scopes",
         "acl-roles": {
+            "api_level": "account",
             "list": {
                 "api_level": "account",
                 "class": "scalrctl.commands.Action",
@@ -28,6 +32,7 @@
             "group_descr": "Manage ACL Roles"
         },
         "cloud": {
+            "api_level": "account",
             "delete": {
                 "api_level": "account", 
                 "class": "scalrctl.commands.Action", 
@@ -62,6 +67,7 @@
             }
         }, 
         "cloud-credentials": {
+            "api_level": "account",
             "create": {
                 "api_level": "account", 
                 "class": "scalrctl.commands.Action", 
@@ -102,6 +108,7 @@
             }
         }, 
         "environment": {
+            "api_level": "account",
             "create": {
                 "api_level": "account", 
                 "class": "scalrctl.commands.Action", 
@@ -142,6 +149,7 @@
             }
         }, 
         "event": {
+            "api_level": "account",
             "create": {
                 "api_level": "account", 
                 "class": "scalrctl.commands.Action", 
@@ -176,6 +184,7 @@
             }
         }, 
         "image": {
+            "api_level": "account",
             "change-attributes": {
                 "api_level": "account", 
                 "class": "scalrctl.commands.Action", 
@@ -229,6 +238,7 @@
             }
         }, 
         "os": {
+            "api_level": "account",
             "get": {
                 "api_level": "account", 
                 "class": "scalrctl.commands.Action", 
@@ -251,6 +261,7 @@
             }
         }, 
         "role": {
+            "api_level": "account",
             "change-attributes": {
                 "api_level": "account", 
                 "class": "scalrctl.commands.Action", 
@@ -298,6 +309,7 @@
             }
         }, 
         "role-category": {
+            "api_level": "account",
             "create": {
                 "api_level": "account", 
                 "class": "scalrctl.commands.Action", 
@@ -338,6 +350,7 @@
             }
         }, 
         "role-global-variables": {
+            "api_level": "account",
             "create": {
                 "api_level": "account", 
                 "class": "scalrctl.commands.Action", 
@@ -378,6 +391,7 @@
             }
         }, 
         "role-image": {
+            "api_level": "account",
             "delete": {
                 "api_level": "account", 
                 "class": "scalrctl.commands.Action", 
@@ -418,6 +432,7 @@
             }
         }, 
         "role-orchestration-rule": {
+            "api_level": "account",
             "create": {
                 "api_level": "account", 
                 "class": "scalrctl.commands.Action", 
@@ -452,6 +467,7 @@
             }
         },
         "team": {
+            "api_level": "account",
             "add-to-environment": {
                 "api_level": "account",
                 "class": "scalrctl.commands.Action",
@@ -480,6 +496,7 @@
         }
     },
         "cost-center": {
+            "api_level": "user",
             "get": {
                 "api_level": "user",
                 "class": "scalrctl.commands.Action",
@@ -502,6 +519,7 @@
             }
         },
         "event": {
+            "api_level": "user",
             "change-attributes": {
                 "api_level": "user",
                 "class": "scalrctl.commands.Action",
@@ -527,7 +545,7 @@
                 "http-method": "get",
                 "route": "/{envId}/events/{eventId}/"
             },
-            "group_descr": "Manage events available in the Scalr Environment",
+            "group_descr": "Manage custom event definitions",
             "list": {
                 "api_level": "user",
                 "class": "scalrctl.commands.Action",
@@ -549,6 +567,7 @@
             }
         },
         "export": {
+            "api_level": "user",
             "farm-global-variable": {
                 "hidden": true,
                 "api_level": "user",
@@ -700,6 +719,7 @@
             }
         },
         "farm": {
+            "api_level": "user",
             "list-servers": {
                 "api_level": "user",
                 "class": "scalrctl.commands.Action",
@@ -771,6 +791,7 @@
             }
         },
         "farm-global-variables": {
+            "api_level": "user",
             "create": {
                 "api_level": "user",
                 "class": "scalrctl.commands.Action",
@@ -811,6 +832,7 @@
             }
         },
         "farm-role": {
+            "api_level": "user",
             "list-servers": {
                 "api_level": "user",
                 "class": "scalrctl.commands.Action",
@@ -906,6 +928,7 @@
             }
         },
         "farm-role-global-variables": {
+            "api_level": "user",
             "create": {
                 "api_level": "user",
                 "class": "scalrctl.commands.Action",
@@ -946,6 +969,7 @@
             }
         },
         "farm-role-orchestration-rule": {
+            "api_level": "user",
             "change-attributes": {
                 "api_level": "user",
                 "class": "scalrctl.commands.Action",
@@ -993,6 +1017,7 @@
             }
         },
         "farm-role-scaling": {
+            "api_level": "user",
             "change-defaults": {
                 "api_level": "user",
                 "class": "scalrctl.commands.Action",
@@ -1039,6 +1064,7 @@
             }
         },
         "image": {
+            "api_level": "user",
             "change-attributes": {
                 "api_level": "user",
                 "class": "scalrctl.commands.image.ChangeImageAttrs",
@@ -1092,6 +1118,7 @@
             }
         },
         "os": {
+            "api_level": "user",
             "get": {
                 "api_level": "user",
                 "class": "scalrctl.commands.Action",
@@ -1114,6 +1141,7 @@
             }
         },
         "project": {
+            "api_level": "user",
             "create": {
                 "api_level": "user",
                 "class": "scalrctl.commands.Action",
@@ -1142,6 +1170,7 @@
             }
         },
         "role": {
+            "api_level": "user",
             "change-attributes": {
                 "api_level": "user",
                 "class": "scalrctl.commands.role.ChangeRoleAttrs",
@@ -1189,6 +1218,7 @@
             }
         },
         "role-category": {
+            "api_level": "user",
             "create": {
                 "api_level": "user",
                 "class": "scalrctl.commands.Action",
@@ -1229,6 +1259,7 @@
             }
         },
         "role-global-variables": {
+            "api_level": "user",
             "create": {
                 "api_level": "user",
                 "class": "scalrctl.commands.Action",
@@ -1269,6 +1300,7 @@
             }
         },
         "role-image": {
+            "api_level": "user",
             "delete": {
                 "api_level": "user",
                 "class": "scalrctl.commands.Action",
@@ -1309,6 +1341,7 @@
             }
         },
         "role-orchestration-rule": {
+            "api_level": "user",
             "change-attributes": {
                 "api_level": "user",
                 "class": "scalrctl.commands.Action",
@@ -1356,6 +1389,7 @@
             }
         },
         "scaling-metric": {
+            "api_level": "user",
             "create": {
                 "api_level": "user",
                 "class": "scalrctl.commands.Action",
@@ -1396,6 +1430,7 @@
             }
         },
         "script": {
+            "api_level": "user",
             "change-attributes": {
                 "api_level": "user",
                 "class": "scalrctl.commands.Action",
@@ -1461,6 +1496,7 @@
             }
         },
         "script-version": {
+            "api_level": "user",
             "change-attributes": {
                 "api_level": "user",
                 "class": "scalrctl.commands.Action",
@@ -1526,6 +1562,7 @@
             }
         },
         "server": {
+            "api_level": "user",
             "list": {
                 "api_level": "user",
                 "class": "scalrctl.commands.Action",

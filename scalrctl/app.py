@@ -50,7 +50,63 @@ class ScalrCLI(click.Group):
             return []
 
         commands.sort()
+
+        if "configure" in commands and "update" in commands:  # [ST-141]
+            commands = [commands.pop(commands.index("configure")), commands.pop(commands.index("update"))] + commands
+
         return commands
+
+    def get_cmd_groups(self):
+        """
+        list_commands devided into groups
+        Returns: dict
+        """
+        groups = {}
+        for cmd_name in self.scheme.keys():
+
+            if cmd_name in ("cmd-group", "group_descr"):
+                continue
+
+            if "cmd-group" in self.scheme[cmd_name]:
+                group_name = self.scheme[cmd_name]["cmd-group"]
+            elif "api_level" in self.scheme[cmd_name]:
+                group_name = "%s Scope operations" % self.scheme[cmd_name]["api_level"].capitalize()
+            else:
+                group_name = "Other API commands"
+
+            if not group_name in groups:
+                groups[group_name] = []
+
+            groups[group_name].append(cmd_name)
+        return groups
+
+    def format_commands(self, ctx, formatter):
+        sections = {}
+        rows = []
+
+        for section_name, section_items in self.get_cmd_groups().items():
+            for subcommand in section_items:
+                cmd = self.get_command(ctx, subcommand)
+
+                if cmd is None:
+                    continue
+                if cmd.hidden:
+                    continue
+
+                help = cmd.short_help or ''
+                rows.append((subcommand, help))
+
+            sections[section_name] = rows
+            rows = []
+
+        if sections:
+
+            for section_name in sections:
+                section_rows = sections[section_name]
+                section_rows.sort()
+
+                with formatter.section(section_name):
+                    formatter.write_dl(section_rows)
 
     def get_command(self, ctx, name):
         args = dict(
