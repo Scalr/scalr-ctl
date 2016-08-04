@@ -161,9 +161,10 @@ class ScalrCLI(click.Group):
 
             hlp = self.scheme[name]["cmd_descr"] if "cmd_descr" in self.scheme[name] else action.get_description()
             options = action.modify_options(action.get_options())
-
             cmd = click.Command(name, params=options, callback=action.run, short_help=hlp, help=hlp, hidden=hidden)
-            if action.epilog:
+            if "epilog" in self.scheme[name]:
+                cmd.epilog = self.scheme[name]["epilog"]
+            elif action.epilog:
                 cmd.epilog = action.epilog
             return cmd
 

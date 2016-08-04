@@ -18,8 +18,8 @@ class FarmTerminate(commands.Action):
     def get_options(self):
         hlp = "It is used to terminate the Server immediately ignoring scalr.system.server_terminate_timeout."
         force_terminate = click.Option(('--force', 'force'), is_flag=True, default=False, help=hlp)
-        options = super(FarmTerminate, self).get_options()
-        options.append(force_terminate)
+        options = [force_terminate, ]
+        options.extend(super(FarmTerminate, self).get_options())
         return options
 
 
@@ -61,8 +61,8 @@ class FarmClone(commands.Action):
     def get_options(self):
         hlp = "The name of a new Farm."
         hard_terminate = click.Option(('--name', 'name'), required=True, help=hlp)
-        options = super(FarmClone, self).get_options()
-        options.append(hard_terminate)
+        options = [hard_terminate, ]
+        options.extend(super(FarmClone, self).get_options())
         return options
 
 

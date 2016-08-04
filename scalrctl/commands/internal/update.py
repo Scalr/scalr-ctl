@@ -69,7 +69,7 @@ def update():
     def draw_spinner(event):
         spinner = spinning_cursor()
         while not event.isSet():
-            sys.stdout.write(spinner.next())
+            sys.stdout.write(next(spinner))
             sys.stdout.flush()
             time.sleep(0.1)
             sys.stdout.write('\b')
@@ -87,7 +87,7 @@ def update():
             # click.echo("Trying to get new UserAPI Spec from %s" % user_url)
             try:
                 r = requests.get(user_url, verify=settings.SSL_VERIFY_PEER)
-            except requests.exceptions.SSLError, err:
+            except requests.exceptions.SSLError as err:
                 raise click.ClickException(str(err))
 
             old = None
@@ -110,7 +110,7 @@ def update():
         if text or os.path.exists(user_dst):
             try:
                 struct = yaml.load(text or open(user_dst).read())
-                user_paths = struct["paths"].keys()
+                user_paths = list(struct["paths"].keys())
             except KeyError as e:
                 raise click.ClickException("Cannot update: Invalid swagger specification %s" % user_url)
             json.dump(struct, open(SWAGGER_USER_JSONSPEC_PATH, "w"))
@@ -126,7 +126,7 @@ def update():
             # click.echo("Trying to get new AccountAPI Spec from %s" % account_url)
             try:
                 r = requests.get(account_url, verify=settings.SSL_VERIFY_PEER)
-            except requests.exceptions.SSLError, err:
+            except requests.exceptions.SSLError as err:
                 raise click.ClickException(str(err))
 
             old = None
@@ -149,7 +149,7 @@ def update():
         if text or os.path.exists(account_dst):
             try:
                 struct = yaml.load(text or open(account_dst).read())
-                account_paths = struct["paths"].keys()
+                account_paths = list(struct["paths"].keys())
             except KeyError as e:
                 raise click.ClickException("Swagger specification %s is not valid." % account_url)
             json.dump(struct, open(SWAGGER_ACCOUNT_JSONSPEC_PATH, "w"))
