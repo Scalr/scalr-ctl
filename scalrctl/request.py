@@ -12,7 +12,6 @@ from scalrctl import settings
 
 from six.moves.urllib.parse import urlparse, urlunsplit, quote
 
-#if PY3: from urllib import urlencode
 from scalrctl.compat import urlencode
 
 """
