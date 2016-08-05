@@ -10,8 +10,9 @@ import requests
 from scalrctl import click
 from scalrctl import settings
 
-from six.moves.urllib.parse import urlparse, urlencode, urlunsplit
+from six.moves.urllib.parse import urlparse, urlunsplit, quote
 
+from scalrctl.compat import urlencode
 
 """
 import logging
@@ -44,7 +45,7 @@ def request(method, request_uri, payload=None, data=None):
     time_iso8601 = time.strftime("%Y-%m-%dT%H:%M:%S.000Z", time.gmtime())
     try:
         r = None
-        query_string = urlencode(sorted(payload.items())) if payload else ''
+        query_string = urlencode(sorted(payload.items()), quote_via=quote) if payload else ''
         body = json.dumps(yaml.safe_load(data)) if data else '' #XXX
 
         nokeyid = "API Key ID is not configured. Please specify option --key_id \
@@ -87,6 +88,7 @@ or run 'scalr-ctl configure' to change default authentication settings."
             headers=headers,
             verify=settings.SSL_VERIFY_PEER)
         result = r.text
+
 
     except (Exception, BaseException) as e:
         if settings.debug_mode:

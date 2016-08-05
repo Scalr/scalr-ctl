@@ -2,7 +2,7 @@ scalr-ctl Changelog
 ===============
 
 
-Version 1.0.51
+Version 1.0.53
 --------------
 
 New feature
@@ -14,10 +14,12 @@ New feature
     [ST-141] - Improve --help command for account scope
     [ST-165] - support python3.5 for scalr-ctl
     [ST-161] - Improve help: Add examples to all post-type commands
+    [ST-162] - Divide regular commands and service commands in groups
+    [ST-138] - Improve error messages
+    [ST-139] - Pagination improvments
 
 Fixed
 
-    [ST-144] - Click fails on Windows
     [ST-145] - Update fails when swagger spec is not valid
     [ST-149] - Remove api_version и signature_version from interactive configurator
     [ST-151] - make scalr-ctl configure safer
@@ -27,6 +29,9 @@ Fixed
     [ST-159] - JSON view does not work for action-type commands
     [ST-163] - Deprecate --no-debug global option
     [ST-164] - Change options order for all commands
+    [ST-156] - image register fails on valid json
+    [ST-140] - scalr-ctl doesn't support unicode characters that are returned by API
+    [ST-167] - Filtering by name that contains spaces
 
 
 Version 1.0.38
