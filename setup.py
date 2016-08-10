@@ -44,7 +44,7 @@ if __name__ == '__main__':
             'Intended Audience :: System Administrators',
             'Topic :: Utilities'
             ],
-        packages = [
+        packages=[
             "scalrctl",
             "scalrctl.click",
             "scalrctl.commands",
@@ -59,7 +59,8 @@ if __name__ == '__main__':
             'prettytable>=0.7.2',
             'pyyaml>=3.11',
             'requests>=2.10.0',
-            "six>=1.10.0"
+            'six>=1.10.0',
+            'colorama>=0.3.7'
         ],
         entry_points='''
             [console_scripts]

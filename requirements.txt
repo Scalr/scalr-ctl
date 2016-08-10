@@ -3,3 +3,4 @@ prettytable
 pyyaml
 requests
 six
+colorama
