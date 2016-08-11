@@ -133,7 +133,7 @@ def is_update_required():
     """
 
     # prevent from running 'update' more than once
-    if len(sys.argv) > 1 and sys.argv[1] == 'update':
+    if 'update' in sys.argv:
         return False
     else:
         exists = [_is_spec_exists(api, 'yaml') and
