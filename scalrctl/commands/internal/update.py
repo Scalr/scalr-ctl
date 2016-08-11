@@ -1,5 +1,4 @@
-__author__ = 'Dmitriy Korsakov'
-
+# -*- coding: utf-8 -*-
 import os
 import sys
 import time
@@ -9,22 +8,114 @@ import threading
 import yaml
 import requests
 
-from scalrctl import click
-from scalrctl import defaults
-from scalrctl import settings
-from scalrctl import commands
+from scalrctl import click, defaults, settings, commands
 
-SWAGGER_USER_NOUPDATE_TRIGGER = ".noupdate.user"
-SWAGGER_USER_FILE = "user.yaml"
-SWAGGER_USER_PATH = os.path.join(defaults.CONFIG_DIRECTORY, SWAGGER_USER_FILE)
-SWAGGER_USER_JSONSPEC_FILE = SWAGGER_USER_FILE.split(".")[0] + ".json"
-SWAGGER_USER_JSONSPEC_PATH = os.path.join(defaults.CONFIG_DIRECTORY, SWAGGER_USER_JSONSPEC_FILE)
+__author__ = 'Dmitriy Korsakov, Sergey Babak'
 
-SWAGGER_ACCOUNT_NOUPDATE_TRIGGER = ".noupdate.account"
-SWAGGER_ACCOUNT_FILE = "account.yaml"
-SWAGGER_ACCOUNT_PATH = os.path.join(defaults.CONFIG_DIRECTORY, SWAGGER_ACCOUNT_FILE)
-SWAGGER_ACCOUNT_JSONSPEC_FILE = SWAGGER_ACCOUNT_FILE.split(".")[0] + ".json"
-SWAGGER_ACCOUNT_JSONSPEC_PATH = os.path.join(defaults.CONFIG_DIRECTORY, SWAGGER_ACCOUNT_JSONSPEC_FILE)
+
+class _spinner(object):
+
+    @staticmethod
+    def cursor():
+        while True:
+            for cursor in '|/-\\':
+                yield cursor
+
+    @staticmethod
+    def draw(event):
+        spinner = _spinner.cursor()
+        while not event.isSet():
+            sys.stdout.write(next(spinner))
+            sys.stdout.flush()
+            time.sleep(0.1)
+            sys.stdout.write('\b')
+        sys.stdout.write(' ')
+        sys.stdout.flush()
+
+    def __init__(self):
+        self.event = threading.Event()
+        self.thread = threading.Thread(target=_spinner.draw,
+                                       args=(self.event,))
+
+    def __enter__(self):
+        self.thread.start()
+
+    def __exit__(self, type, value, traceback):
+        self.event.set()
+        self.thread.join()
+
+
+def _get_spec_path(api_level, extension):
+    return os.path.join(defaults.CONFIG_DIRECTORY,
+                        '{}.{}'.format(api_level, extension))
+
+
+def _is_spec_exists(api_level, extension):
+    return os.path.exists(_get_spec_path(api_level, extension))
+
+
+def _load_yaml_spec(api_level):
+    spec_url = "{0}://{1}/api/{2}.{3}.yml".format(settings.API_SCHEME,
+                                                  settings.API_HOST,
+                                                  api_level,
+                                                  settings.API_VERSION)
+    return requests.get(spec_url, verify=settings.SSL_VERIFY_PEER).text
+
+
+def _read_spec(spec_path):
+    text = None
+    if os.path.exists(spec_path):
+        with open(spec_path, "r") as fp:
+            text = fp.read()
+    return text
+
+
+def _write_spec(spec_path, text):
+    with open(spec_path, "w") as fp:
+        fp.write(text)
+
+
+def _write_routes(api_level, paths):
+    routes_text = _read_spec(defaults.ROUTES_PATH) or '{}'
+    routes = json.loads(routes_text)
+    routes[api_level] = paths
+    json.dump(routes, open(defaults.ROUTES_PATH, "w"))
+
+
+def _update_spec(api_level):
+    """
+    Downloads yaml spec and converts it to JSON
+    Both files are stored in configuration directory.
+    """
+
+    try:
+        yaml_spec_text = _load_yaml_spec(api_level)
+        if not yaml_spec_text:
+            raise Exception('Can\'t load spec file')
+
+        try:
+            struct = yaml.load(yaml_spec_text)
+            json_spec_text = json.dumps(struct)
+            paths = list(struct['paths'].keys())
+        except (KeyError, TypeError, yaml.YAMLError):
+            raise Exception('Swagger specification is not valid')
+
+        yaml_spec_path = _get_spec_path(api_level, 'yaml')
+        json_spec_path = _get_spec_path(api_level, 'json')
+
+        old_yaml_spec_text = _read_spec(yaml_spec_path)
+
+        # update yaml spec
+        if yaml_spec_text != old_yaml_spec_text:
+            _write_spec(yaml_spec_path, yaml_spec_text)
+
+        # update json spec and routes
+        _write_spec(json_spec_path, json_spec_text)
+        _write_routes(api_level, paths)
+
+        return True, None
+    except Exception as e:
+        return False, str(e) or 'Unknown reason'
 
 
 class UpdateScalrCTL(commands.BaseAction):
@@ -37,130 +128,36 @@ class UpdateScalrCTL(commands.BaseAction):
 
 
 def is_update_required():
-    return not os.path.exists(SWAGGER_USER_PATH) or not os.path.exists(SWAGGER_USER_JSONSPEC_PATH)
+    """
+    Determine if spec update is needed.
+    """
 
-
-def get_spec_url(api_level="user"):
-    api_level = api_level or "user"  #XXX: Ugly,  SubCommand class needs to be changed first
-    return "{0}://{1}/api/{2}.{3}.yml".format(settings.API_SCHEME, settings.API_HOST, api_level, settings.API_VERSION)
+    # prevent from running 'update' more than once
+    if len(sys.argv) > 1 and sys.argv[1] == 'update':
+        return False
+    else:
+        exists = [_is_spec_exists(api, 'yaml') and
+                  _is_spec_exists(api, 'json') for api in settings.API_LEVELS]
+        exists.append(os.path.exists(defaults.ROUTES_PATH))
+        return not all(exists)
 
 
 def update():
     """
-    Downloads yaml spec and converts it to JSON
-    Both files are stored in configuration directory.
+    Update spec for all available APIs.
     """
-    account_paths = []
-    user_paths = []
 
-    successfull = False
-    text = None
-    user_trigger_file = os.path.join(defaults.CONFIG_DIRECTORY, SWAGGER_USER_NOUPDATE_TRIGGER)
+    amount = len(settings.API_LEVELS)
 
-    user_url = get_spec_url(api_level="user")
+    for index, api_level in enumerate(settings.API_LEVELS, 1):
 
-    user_dst = os.path.join(defaults.CONFIG_DIRECTORY, SWAGGER_USER_FILE)
+        click.echo('[{}/{}] Updating specifications for {} API ... '
+                   .format(index, amount, api_level), nl=False)
 
-    def spinning_cursor():
-        while True:
-            for cursor in '|/-\\':
-                yield cursor
+        with _spinner():
+            success, fail_reason = _update_spec(api_level)
 
-    def draw_spinner(event):
-        spinner = spinning_cursor()
-        while not event.isSet():
-            sys.stdout.write(next(spinner))
-            sys.stdout.flush()
-            time.sleep(0.1)
-            sys.stdout.write('\b')
-        sys.stdout.write(' ')
-        sys.stdout.flush()
-
-    click.echo("Updating API specifications... ", nl=False)
-
-    e = threading.Event()
-    t = threading.Thread(target=draw_spinner, args=(e,))
-    t.start()
-
-    try:
-        if user_url and not os.path.exists(user_trigger_file):
-            # click.echo("Trying to get new UserAPI Spec from %s" % user_url)
-            try:
-                r = requests.get(user_url, verify=settings.SSL_VERIFY_PEER)
-            except requests.exceptions.SSLError as err:
-                raise click.ClickException(str(err))
-
-            old = None
-
-            if os.path.exists(user_dst):
-                with open(user_dst, "r") as fp:
-                    old = fp.read()
-
-            text = r.text
-
-            if text == old:
-                # click.echo("UserAPI Spec is already up-to-date.")
-                successfull = True
-            elif text:
-                with open(user_dst, "w") as fp:
-                    fp.write(text)
-                # click.echo("UserAPI UserSpec successfully updated.")
-                successfull = True
-
-        if text or os.path.exists(user_dst):
-            try:
-                struct = yaml.load(text or open(user_dst).read())
-                user_paths = list(struct["paths"].keys())
-            except KeyError as e:
-                raise click.ClickException("Cannot update: Invalid swagger specification %s" % user_url)
-            json.dump(struct, open(SWAGGER_USER_JSONSPEC_PATH, "w"))
-
-
-        # Fetch AccountAPI spec and convert to JSON
-        text = None
-        account_trigger_file = os.path.join(defaults.CONFIG_DIRECTORY, SWAGGER_ACCOUNT_NOUPDATE_TRIGGER)
-        account_url = get_spec_url(api_level="account")
-        account_dst = os.path.join(defaults.CONFIG_DIRECTORY, SWAGGER_ACCOUNT_FILE)
-
-        if account_url and not os.path.exists(account_trigger_file):
-            # click.echo("Trying to get new AccountAPI Spec from %s" % account_url)
-            try:
-                r = requests.get(account_url, verify=settings.SSL_VERIFY_PEER)
-            except requests.exceptions.SSLError as err:
-                raise click.ClickException(str(err))
-
-            old = None
-
-            if os.path.exists(account_dst):
-                with open(account_dst, "r") as fp:
-                    old = fp.read()
-
-            text = r.text
-
-            if text == old:
-                # click.echo("AccountAPI Spec is already up-to-date.")
-                successfull = True
-            elif text:
-                with open(account_dst, "w") as fp:
-                    fp.write(text)
-                # click.echo("AccountAPI Spec successfully updated.")
-                successfull = True
-
-        if text or os.path.exists(account_dst):
-            try:
-                struct = yaml.load(text or open(account_dst).read())
-                account_paths = list(struct["paths"].keys())
-            except KeyError as e:
-                raise click.ClickException("Swagger specification %s is not valid." % account_url)
-            json.dump(struct, open(SWAGGER_ACCOUNT_JSONSPEC_PATH, "w"))
-
-        available_routes = {"user": user_paths, "account": account_paths}
-        json.dump(available_routes, open(defaults.ROUTES_PATH, "w"))
-
-    finally:
-        e.set()
-        t.join()
-        if successfull:
-            click.echo("Done")
+        if success:
+            click.secho('Done', fg='green')
         else:
-            click.echo("Failed")
+            click.secho('Failed: {}'.format(fail_reason), fg='red')

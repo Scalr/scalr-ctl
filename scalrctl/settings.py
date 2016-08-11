@@ -6,6 +6,12 @@ API_SECRET_KEY = None
 
 API_VERSION = "v1beta0"
 
+API_LEVELS = [
+    'user',
+    'account',
+    'global',
+]
+
 envId = None
 
 view = "tree"
