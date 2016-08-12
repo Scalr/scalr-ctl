@@ -3,6 +3,7 @@ import os
 import sys
 import time
 import json
+import itertools
 import threading
 
 import yaml
@@ -16,14 +17,8 @@ __author__ = 'Dmitriy Korsakov, Sergey Babak'
 class _spinner(object):
 
     @staticmethod
-    def cursor():
-        while True:
-            for item in '|/-\\':
-                yield item
-
-    @staticmethod
     def draw(event):
-        cursor = _spinner.cursor()
+        cursor = itertools.cycle('|/-\\')
         while not event.isSet():
             sys.stdout.write(next(cursor))
             sys.stdout.flush()

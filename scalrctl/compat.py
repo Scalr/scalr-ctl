@@ -46,9 +46,9 @@ if six.PY2:
                 # allowed empty dicts that type of behavior probably should be
                 # preserved for consistency
             except TypeError:
-                ty,va,tb = sys.exc_info()
-                raise TypeError, "not a valid non-string sequence or mapping object", tb
-
+                ty, va, tb = sys.exc_info()
+                six.reraise(TypeError, "not a valid non-string sequence"
+                                       "or mapping object", tb)
         l = []
         if not doseq:
             # preserve old behavior
