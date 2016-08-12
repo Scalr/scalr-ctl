@@ -59,7 +59,8 @@ def _load_yaml_spec(api_level):
                                                   settings.API_HOST,
                                                   api_level,
                                                   settings.API_VERSION)
-    return requests.get(spec_url, verify=settings.SSL_VERIFY_PEER).text
+    resp = requests.get(spec_url, verify=settings.SSL_VERIFY_PEER)
+    return resp.text if resp.status_code == 200 else None
 
 
 def _read_spec(spec_path):
