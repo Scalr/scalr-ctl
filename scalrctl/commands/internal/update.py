@@ -5,7 +5,9 @@ import time
 import json
 import itertools
 import threading
+import traceback
 
+import six
 import yaml
 import requests
 
@@ -31,6 +33,7 @@ class _spinner(object):
         self.event = threading.Event()
         self.thread = threading.Thread(target=_spinner.draw,
                                        args=(self.event,))
+        self.thread.daemon = True
 
     def __enter__(self):
         self.thread.start()
@@ -93,8 +96,9 @@ def _update_spec(api_level):
             struct = yaml.load(yaml_spec_text)
             json_spec_text = json.dumps(struct)
             paths = list(struct['paths'].keys())
-        except (KeyError, TypeError, yaml.YAMLError):
-            raise Exception('Swagger specification is not valid')
+        except (KeyError, TypeError, yaml.YAMLError) as e:
+            six.reraise(type(e), "Swagger specification is not valid:\n{}"
+                        .format(traceback.format_exc()))
 
         yaml_spec_path = _get_spec_path(api_level, 'yaml')
         json_spec_path = _get_spec_path(api_level, 'json')
@@ -111,7 +115,7 @@ def _update_spec(api_level):
 
         return True, None
     except Exception as e:
-        return False, str(e) or 'Unknown reason'
+        return False, e.message or 'Unknown reason'
 
 
 class UpdateScalrCTL(commands.BaseAction):
@@ -133,7 +137,7 @@ def is_update_required():
         return False
     else:
         exists = [_is_spec_exists(api, 'yaml') and
-                  _is_spec_exists(api, 'json') for api in settings.API_LEVELS]
+                  _is_spec_exists(api, 'json') for api in defaults.API_LEVELS]
         exists.append(os.path.exists(defaults.ROUTES_PATH))
         return not all(exists)
 
@@ -143,9 +147,9 @@ def update():
     Update spec for all available APIs.
     """
 
-    amount = len(settings.API_LEVELS)
+    amount = len(defaults.API_LEVELS)
 
-    for index, api_level in enumerate(settings.API_LEVELS, 1):
+    for index, api_level in enumerate(defaults.API_LEVELS, 1):
 
         click.echo('[{}/{}] Updating specifications for {} API ... '
                    .format(index, amount, api_level), nl=False)
