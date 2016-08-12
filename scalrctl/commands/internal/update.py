@@ -18,14 +18,14 @@ class _spinner(object):
     @staticmethod
     def cursor():
         while True:
-            for cursor in '|/-\\':
-                yield cursor
+            for item in '|/-\\':
+                yield item
 
     @staticmethod
     def draw(event):
-        spinner = _spinner.cursor()
+        cursor = _spinner.cursor()
         while not event.isSet():
-            sys.stdout.write(next(spinner))
+            sys.stdout.write(next(cursor))
             sys.stdout.flush()
             time.sleep(0.1)
             sys.stdout.write('\b')
