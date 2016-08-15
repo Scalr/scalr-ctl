@@ -31,7 +31,7 @@ if __name__ == '__main__':
         author="Scalr Inc.",
         author_email="dmitry@scalr.com",
         url="https://scalr.net",
-        license="GPL",
+        license="Apache-2",
         platforms="any",
         long_description=read('README'),
         classifiers=[
@@ -44,7 +44,7 @@ if __name__ == '__main__':
             'Intended Audience :: System Administrators',
             'Topic :: Utilities'
             ],
-        packages = [
+        packages=[
             "scalrctl",
             "scalrctl.click",
             "scalrctl.commands",
@@ -56,10 +56,11 @@ if __name__ == '__main__':
         },
         data_files=[('', ['scalrctl/scheme/scheme.json', ]), ],
         install_requires=[
-            'prettytable',
-            'pyyaml',
-            'requests',
-            "six"
+            'prettytable>=0.7.2',
+            'pyyaml>=3.11',
+            'requests>=2.10.0',
+            'six>=1.10.0',
+            'colorama>=0.3.7'
         ],
         entry_points='''
             [console_scripts]

@@ -11,23 +11,17 @@ from scalrctl import settings
 from scalrctl import defaults
 from scalrctl import commands
 
-from scalrctl.commands.internal import update
+from scalrctl.commands.internal import update, configure
 
 
 CMD_FOLDER = os.path.abspath(os.path.join(os.path.dirname(__file__), 'commands'))
-
-
-def apply_settings(data):
-    for key, value in data.items():
-        if hasattr(settings, key):
-            setattr(settings, key, value)
 
 
 if not os.path.exists(defaults.CONFIG_DIRECTORY):
     os.makedirs(defaults.CONFIG_DIRECTORY)
 
 if os.path.exists(defaults.CONFIG_PATH):
-    apply_settings(yaml.load(open(defaults.CONFIG_PATH, "r")))
+    configure.apply_settings(yaml.load(open(defaults.CONFIG_PATH, "r")))
 
 if update.is_update_required():
     update.update()  # [ST-53]
@@ -56,7 +50,63 @@ class ScalrCLI(click.Group):
             return []
 
         commands.sort()
+
+        if "configure" in commands and "update" in commands:  # [ST-141]
+            commands = [commands.pop(commands.index("configure")), commands.pop(commands.index("update"))] + commands
+
         return commands
+
+    def get_cmd_groups(self):
+        """
+        list_commands devided into groups
+        Returns: dict
+        """
+        groups = {}
+        for cmd_name in self.scheme.keys():
+
+            if cmd_name in ("cmd-group", "group_descr"):
+                continue
+
+            if "cmd-group" in self.scheme[cmd_name]:
+                group_name = self.scheme[cmd_name]["cmd-group"]
+            elif "api_level" in self.scheme[cmd_name]:
+                group_name = "%s Scope operations" % self.scheme[cmd_name]["api_level"].capitalize()
+            else:
+                group_name = "Other API commands"
+
+            if not group_name in groups:
+                groups[group_name] = []
+
+            groups[group_name].append(cmd_name)
+        return groups
+
+    def format_commands(self, ctx, formatter):
+        sections = {}
+        rows = []
+
+        for section_name, section_items in self.get_cmd_groups().items():
+            for subcommand in section_items:
+                cmd = self.get_command(ctx, subcommand)
+
+                if cmd is None:
+                    continue
+                if cmd.hidden:
+                    continue
+
+                help = cmd.short_help or ''
+                rows.append((subcommand, help))
+
+            sections[section_name] = rows
+            rows = []
+
+        if sections:
+
+            for section_name in sections:
+                section_rows = sections[section_name]
+                section_rows.sort()
+
+                with formatter.section(section_name):
+                    formatter.write_dl(section_rows)
 
     def get_command(self, ctx, name):
         args = dict(
@@ -109,11 +159,12 @@ class ScalrCLI(click.Group):
                 dummy_cmd = click.Command(name, params=[], callback=dummy_run, short_help=dummy_help, hidden=hidden)
                 return dummy_cmd
 
-            hlp = action.get_description()
+            hlp = self.scheme[name]["cmd_descr"] if "cmd_descr" in self.scheme[name] else action.get_description()
             options = action.modify_options(action.get_options())
-
-            cmd = click.Command(name, params=options, callback=action.run, short_help=hlp, hidden=hidden)
-            if action.epilog:
+            cmd = click.Command(name, params=options, callback=action.run, short_help=hlp, help=hlp, hidden=hidden)
+            if "epilog" in self.scheme[name]:
+                cmd.epilog = self.scheme[name]["epilog"]
+            elif action.epilog:
                 cmd.epilog = action.epilog
             return cmd
 
@@ -125,7 +176,8 @@ class ScalrCLI(click.Group):
 @click.pass_context
 @click.option('--key_id', help="API key ID")
 @click.option('--secret_key', help="API secret key")
-def cli(ctx, key_id, secret_key, *args, **kvargs):
+@click.option('--config', help="Path to a custom scalr-ctl configuration file")
+def cli(ctx, key_id, secret_key, config, *args, **kvargs):
     """Scalr-ctl is a command-line interface to your Scalr account"""
 
     if key_id:
@@ -138,6 +190,13 @@ def cli(ctx, key_id, secret_key, *args, **kvargs):
         if ctx.invoked_subcommand not in ("configure", "update"):
             raw = click.prompt(text="API SECRET KEY", hide_input=True)
             settings.API_SECRET_KEY = str(raw)
+
+    if config:
+
+        if not os.path.exists(config):
+            raise click.ClickException("Configuration file not found: %s" % config)
+        data = yaml.load(open(config, "r"))
+        configure.apply_settings(data)
 
 
 if __name__ == '__main__':

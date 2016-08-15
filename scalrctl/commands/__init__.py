@@ -42,7 +42,7 @@ class Action(BaseAction):
     prompt_for = None  # Optional. Some values like GCE imageId cannot be passed through command lines
     mutable_body_parts = None  # Temporary. Object definitions in YAML spec are not always correct
     object_reference = None # optional, e.g. '#/definitions/GlobalVariable'
-
+    post_template = None
     _table_columns = None
 
     def __init__(self, name, route, http_method, api_level, *args, **kwargs):
@@ -50,7 +50,6 @@ class Action(BaseAction):
         self.route = route
         self.http_method = http_method
         self.api_level = api_level
-
         self._table_columns = []
 
         self._init()
@@ -60,7 +59,8 @@ class Action(BaseAction):
         self.raw_spec = json.load(open(path, "r"))
 
         if not self.epilog and self.http_method.upper() == "POST":
-            self.epilog = "Example: scalr-ctl %s < %s.json" % (self.name, self.name)
+            level = self.api_level if self.api_level != "user" else ""
+            self.epilog = "Example: scalr-ctl %s %s < %s.json" % (level, self.name, self.name)
 
     def validate(self):
         if self.route and self.api_level and os.path.exists(defaults.ROUTES_PATH):
@@ -68,7 +68,7 @@ class Action(BaseAction):
             assert self.api_level in available_api_routes and self.route in available_api_routes[self.api_level], \
                 self.name
 
-    def check_argumets(self, **kwargs):
+    def check_arguments(self, **kwargs):
         if "parameters" in self.raw_spec["paths"][self.route]:
             for param_data in self.raw_spec["paths"][self.route]["parameters"]:
                 if "pattern" in param_data and "name" in param_data:
@@ -100,13 +100,13 @@ class Action(BaseAction):
 
         if "debug" in kwargs:
             settings.debug_mode = kwargs.pop("debug")
-        if "transformation" in kwargs:
+        if "transformation" in kwargs and kwargs["transformation"]:
             settings.view = kwargs.pop("transformation")
         if "nocolor" in kwargs:
             settings.colored_output = not kwargs.pop("nocolor")
         import_data = kwargs.pop("import-data", None)
 
-        self.check_argumets(**kwargs)
+        self.check_arguments(**kwargs)
 
         if self.http_method.upper() in ("PATCH", "POST"):
             # prompting for body and then validating it
@@ -145,6 +145,7 @@ class Action(BaseAction):
                         raw = click.edit(text)
                     else:
                         raw = click.get_text_stream("stdin").read()
+
                     try:
                         user_object = json.loads(raw)
                     except (Exception, BaseException) as e:
@@ -153,6 +154,7 @@ class Action(BaseAction):
                         raise click.ClickException(str(e))
 
                 valid_object = self._filter_json_object(user_object)
+
                 valid_object_str = json.dumps(valid_object)
                 kwargs[name] = valid_object_str
 
@@ -169,7 +171,8 @@ class Action(BaseAction):
         callback for click subcommand
         """
         # print "run %s @ %s with arguments:" % (self.http_method, self.route), args, kwargs
-        hide_output = kwargs.pop("hide_output", False) # [ST-88]
+        hide_output = kwargs.pop("hide_output", False)  # [ST-88]
+        dry_run = kwargs.pop("dryrun", False)
 
         args, kwargs = self.pre(*args, **kwargs)
 
@@ -182,20 +185,24 @@ class Action(BaseAction):
 
         if kwargs:
             uri = self._request_template.format(**kwargs)
-
             for key, value in kwargs.items():
                 t = "{%s}" % key
                 # filtering in-body and empty params
                 if value and t not in self._request_template:
+                    body_params = self.get_body_type_params()
                     if self.http_method.upper() in ("GET", "DELETE"):
                         payload[key] = value
-                    elif self.http_method.upper() in ("POST", "PATCH"):
+                    elif body_params and key == body_params[0]["name"]:
                         data = value  # XXX
+
+        if dry_run:
+            click.echo("%s %s %s %s" % (self.http_method, uri, payload, data))
+            return
 
         raw_response = request.request(self.http_method, uri, payload, data)
         response = self.post(raw_response)
 
-        if settings.view == "raw" and not hide_output:
+        if settings.view in ("raw", "json") and not hide_output:
             click.echo(raw_response)
 
         if not response and self.http_method.upper() == "DELETE":
@@ -211,6 +218,7 @@ class Action(BaseAction):
                 response_json = json.loads(response)
             except ValueError as e:
                 if settings.debug_mode:
+                    click.echo("Server response: %s" % str(response))
                     raise
                 raise click.ClickException(str(e))
 
@@ -237,13 +245,13 @@ class Action(BaseAction):
                                 row.append(block[item])
                                 break
                         else:
-                            raise click.ClickException("Cannot apply filter. No such column: %s" % name)
+                            row.append("")
                     if row:
                         rows.append(row)
 
                 pagination = response_json.get("pagination", None)
+                pagenum_last, current_pagenum = 1, 1
                 if pagination:
-                    pagenum_last, current_pagenum = 1, 1
                     url_last = pagination.get('last', None)
                     if url_last:
                         number = re.search("pageNum=(\d*)", url_last)
@@ -293,51 +301,22 @@ class Action(BaseAction):
 
     def _get_custom_options(self):
         options = []
-        debug = click.Option(('--debug/--no-debug', 'debug'), default=False, help="Print debug messages")
-        options.append(debug)
 
-        if self.http_method.upper() == 'GET' and self.name != "export":  # [ST-88]
-            raw = click.Option(
-                ('--raw', 'transformation'),
-                is_flag=True,
-                flag_value='raw',
-                default=False,
-                help="Print raw response"
-            )
-            tree = click.Option(
-                ('--tree', 'transformation'),
-                is_flag=True,
-                flag_value='tree',
-                default=True,
-                help="Print response as a colored tree"
-            )
-            nocolor = click.Option(('--nocolor', 'nocolor'), is_flag=True, default=False, help="Use colors")
-            options += [raw, tree, nocolor]
-
-            if self.name not in ("get", "retrieve"):  # [ST-54] [ST-102]
-                table = click.Option(
-                    ('--table', 'transformation'),
-                    is_flag=True,
-                    flag_value='table',
-                    default=False,
-                    help="Print response as a colored table"
-                )
-                options.append(table)
-
+        if self.http_method.upper() == 'GET':
             if self._returns_iterable():
                 maxrez = click.Option(
-                    ("--maxresults", "maxResults"),
+                    ("--max-results", "maxResults"),
                     type=int,
                     required=False,
-                    help="Maximum number of records. Example: --maxresults=2"
+                    help="Maximum number of records. Example: --max-results=2"
                 )
                 options.append(maxrez)
 
                 pagenum = click.Option(
-                    ("--pagenumber", "pageNum"),
+                    ("--page-number", "pageNum"),
                     type=int,
                     required=False,
-                    help="Current page number. Example: --pagenumber=3"
+                    help="Current page number. Example: --page-number=3"
                 )
                 options.append(pagenum)
 
@@ -354,6 +333,44 @@ class Action(BaseAction):
                 columns_help += "Available columns: %s." % ", ".join(available_columns)
                 columns = click.Option(("--columns", "columns"), required=False, help=columns_help)
                 options.append(columns)
+
+            raw = click.Option(
+                ('--raw', 'transformation'),
+                is_flag=True,
+                flag_value='raw',
+                default=False,
+                hidden=True,
+                help="Print raw response"
+            )
+            json = click.Option(
+                ('--json', 'transformation'),
+                is_flag=True,
+                flag_value='raw',
+                default=False,
+                help="Print raw response"
+            )
+            tree = click.Option(
+                ('--tree', 'transformation'),
+                is_flag=True,
+                flag_value='tree',
+                default=False,
+                help="Print response as a colored tree"
+            )
+            nocolor = click.Option(('--nocolor', 'nocolor'), is_flag=True, default=False, help="Use colors")
+            options += [raw, tree, nocolor, json]
+
+            if self.name not in ("get", "retrieve"):  # [ST-54] [ST-102]
+                table = click.Option(
+                    ('--table', 'transformation'),
+                    is_flag=True,
+                    flag_value='table',
+                    default=False,
+                    help="Print response as a colored table"
+                )
+                options.append(table)
+
+        debug = click.Option(('--debug', 'debug'), is_flag=True, default=False, help="Print debug messages")
+        options.append(debug)
 
         return options
 
@@ -410,7 +427,8 @@ class Action(BaseAction):
     def _get_column_names(self):
         fields = []
         data = self._result_descr["properties"]["data"]
-        response_ref = data["items"]["$ref"]
+        # XXX: Inconsistency in swagger spec. See RoleDetailsResponse vs RoleCategoryListResponse
+        response_ref = data["items"]["$ref"] if "items" in data else data["$ref"]
         response_descr = self._lookup(response_ref)
         for k, v in response_descr["properties"].items():
             if "$ref" not in v:

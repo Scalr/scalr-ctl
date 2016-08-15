@@ -10,8 +10,9 @@ import requests
 from scalrctl import click
 from scalrctl import settings
 
-from six.moves.urllib.parse import urlparse, urlencode, urlunsplit
+from six.moves.urllib.parse import urlparse, urlunsplit, quote
 
+from scalrctl.compat import urlencode
 
 """
 import logging
@@ -44,11 +45,15 @@ def request(method, request_uri, payload=None, data=None):
     time_iso8601 = time.strftime("%Y-%m-%dT%H:%M:%S.000Z", time.gmtime())
     try:
         r = None
-        query_string = urlencode(sorted(payload.items())) if payload else ''
+        query_string = urlencode(sorted(payload.items()), quote_via=quote) if payload else ''
         body = json.dumps(yaml.safe_load(data)) if data else '' #XXX
 
-        assert settings.API_KEY_ID, "No Key ID"
-        assert settings.API_SECRET_KEY, "No Secret key"
+        nokeyid = "API Key ID is not configured. Please specify option --key_id \
+or run 'scalr-ctl configure' to change default authentication settings."
+        nosecret =  "API Secret Key is not configured. Please specify option --secret_key \
+or run 'scalr-ctl configure' to change default authentication settings."
+        assert settings.API_KEY_ID, nokeyid
+        assert settings.API_SECRET_KEY, nosecret
 
         string_to_sign = "%s\n%s\n%s\n%s\n%s" % (method.upper(), time_iso8601, request_uri, query_string, body)
 
@@ -58,14 +63,14 @@ def request(method, request_uri, payload=None, data=None):
             click.echo("stringToSign:")
             click.echo(string_to_sign)
 
-        digest = hmac.new(settings.API_SECRET_KEY.encode(encoding='UTF-8'), string_to_sign.encode(encoding='UTF-8'), hashlib.sha256).digest()
+        digest = hmac.new(settings.API_SECRET_KEY.encode('UTF-8'), string_to_sign.encode('UTF-8'), hashlib.sha256).digest()
         signature = binascii.b2a_base64(digest).strip()
 
         headers = dict()
         headers['Content-Type'] = 'application/json; charset=utf-8'
         headers['X-Scalr-Key-Id'] = settings.API_KEY_ID
         headers['X-Scalr-Date'] = time_iso8601
-        headers['X-Scalr-Signature'] = "%s %s" % (settings.SIGNATURE_VERSION, signature.decode(encoding='UTF-8'))
+        headers['X-Scalr-Signature'] = "%s %s" % (settings.SIGNATURE_VERSION, signature.decode('UTF-8'))
         # if hasattr(settings, "API_DEBUG") and settings.API_DEBUG:
         #    headers['X-Scalr-Debug'] = 1
 
@@ -75,8 +80,15 @@ def request(method, request_uri, payload=None, data=None):
             click.echo("Headers: %s " % json.dumps(headers, indent=2))
             click.echo()
 
-        r = requests.request(method.lower(), url, data=body, params=payload, headers=headers)
+        r = requests.request(
+            method.lower(),
+            url,
+            data=body,
+            params=payload,
+            headers=headers,
+            verify=settings.SSL_VERIFY_PEER)
         result = r.text
+
 
     except (Exception, BaseException) as e:
         if settings.debug_mode:
