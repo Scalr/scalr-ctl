@@ -910,6 +910,13 @@
                 "route": "/{envId}/farm-roles/{farmRoleId}/actions/import-server/",
                 "epilog": "Example: scalr-ctl farm-role create --farmRoleId <ID> < myfarmrole.json"
             },
+            "launch-server": {
+                "api_level": "user",
+                "class": "scalrctl.commands.farmrole.LaunchServer",
+                "http-method": "post",
+                "route": "/{envId}/farm-roles/{farmRoleId}/servers/",
+                "epilog": "Example: scalr-ctl farm-role launch-server --farmRoleId <ID>"
+            },
             "list": {
                 "api_level": "user",
                 "class": "scalrctl.commands.Action",
@@ -1641,6 +1648,13 @@
                 "http-method": "post",
                 "route": "/{envId}/servers/{serverId}/actions/reboot/",
                 "epilog": "Example: scalr-ctl server reboot --serverId <ID> --hard"
+            },
+            "launch": {
+                "api_level": "user",
+                "class": "scalrctl.commands.server.LaunchServerAlias",
+                "http-method": "post",
+                "route": "/{envId}/servers/",
+                "epilog": "Example: scalr-ctl server launch --farmRoleId <ID>"
             }
         }
 }
