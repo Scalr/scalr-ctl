@@ -92,3 +92,31 @@ class TerminateServer(commands.Action):
         kv.update(kwargs)
         arguments, kw = super(TerminateServer, self).pre(*args, **kv)
         return arguments, kw
+
+
+class LaunchServerAlias(commands.Action):
+
+    epilog = "Example: scalr-ctl server launch --farmRoleId <ID>"
+    post_template = {
+        "serverLaunchRequest": {"farmRole": None}
+    }
+
+    def get_options(self):
+        hlp = "Launch a new Server for the specified Farm Role."
+        farm_role_id = click.Option(('--farmRoleId', 'farm_role_id'), required=True, help=hlp)
+        options = [farm_role_id, ]
+        options.extend(super(LaunchServerAlias, self).get_options())
+        return options
+
+
+    def pre(self, *args, **kwargs):
+        """
+        before request is made
+        """
+        farm_role_id = kwargs.pop("farm_role_id", None)
+        post_data = copy.deepcopy(self.post_template)
+        post_data["serverLaunchRequest"]["farmRole"] = farm_role_id
+        kv = {"import-data": post_data}
+        kv.update(kwargs)
+        arguments, kw = super(LaunchServerAlias, self).pre(*args, **kv)
+        return arguments, kw

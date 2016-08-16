@@ -1,6 +1,12 @@
 scalr-ctl Changelog
 ===============
 
+Version 1.0.54
+--------------
+
+New feature
+    [ST-160] - add server launch and farm-role launch-server commands
+
 
 Version 1.0.53
 --------------
