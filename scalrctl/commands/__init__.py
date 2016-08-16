@@ -358,7 +358,7 @@ class Action(BaseAction):
                 is_flag=True,
                 flag_value='xml',
                 default=False,
-                help="Print raw response"
+                help="Print response as a XML"
             )
             tree = click.Option(
                 ('--tree', 'transformation'),
