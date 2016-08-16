@@ -18,6 +18,20 @@
                 "http-method": "",
                 "route": ""
             },
+    "global": {
+        "group_descr": "All Scalr Global scope commands",
+        "cmd-group": "Available scopes",
+         "image": {
+            "api_level": "global",
+            "group_descr": "Manage Images",
+            "list": {
+                "api_level": "global",
+                "class": "scalrctl.commands.Action",
+                "http-method": "get",
+                "route": "/images/"
+            }
+        }
+    },
     "account": {
         "group_descr": "All Scalr Account scope commands",
         "cmd-group": "Available scopes",
