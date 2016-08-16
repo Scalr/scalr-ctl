@@ -199,7 +199,7 @@ class Action(BaseAction):
             click.echo("%s %s %s %s" % (self.http_method, uri, payload, data))
             return
 
-        raw_response = request.request(self.http_method, uri, payload, data)
+        raw_response = request.request(self.http_method, self.api_level, uri, payload, data)
         response = self.post(raw_response)
 
         if settings.view in ("raw", "json") and not hide_output:
