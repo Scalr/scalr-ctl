@@ -7,7 +7,7 @@ import time
 
 import requests
 import yaml
-from six.moves.urllib.parse import quote, urlparse, urlunsplit
+from six.moves.urllib.parse import quote, urlunsplit
 
 from scalrctl import click, settings
 from scalrctl.compat import urlencode
@@ -42,6 +42,9 @@ except:
 
 
 def _key_pair(api_level='user'):
+    """
+    Returns key pair(key id and secret key) for specified API scope.
+    """
 
     if api_level in ('global', ):
         api_key_id = settings.GLOBAL_SCOPE_API_KEY_ID
@@ -66,6 +69,9 @@ def _key_pair(api_level='user'):
 
 
 def request(method, api_level, request_uri, payload=None, data=None):
+    """
+    Makes request to Scalr API.
+    """
 
     time_iso8601 = time.strftime('%Y-%m-%dT%H:%M:%S.000Z', time.gmtime())
 
