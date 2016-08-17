@@ -39,26 +39,31 @@ def setup_bash_complete():
             click.echo("Backing up [%s] to [%s]." % (startup_path, backup_path))
             shutil.copy(startup_path, backup_path)
 
-            newline = "" if startupfile_content.endswith("\n") else "\n"
-            comment = "# The next lines enable bash completion for %s.\n" % PROGNAME
+            comment = "# The next lines enable bash completion for %s." % PROGNAME
             local_bindir = os.path.expanduser(os.path.join(site.USER_BASE, "bin"))
             local_binpath = os.path.join(local_bindir, PROGNAME)
-            source_line = 'eval "$(%s)"\n' % AUTOCOMPLETE_CONTENT
+            source_line = 'eval "$(%s)"' % AUTOCOMPLETE_CONTENT
 
             if os.path.exists(local_binpath):
                 msg = "Do you want to add %s to your $PATH?" % local_bindir
                 export_confirmed = click.confirm(msg, default=True, err=True)
                 if export_confirmed:
-                    export_line = "export PATH=$PATH:%s\n" % local_bindir  # [ST-112]
+                    export_line = "export PATH=$PATH:%s" % local_bindir  # [ST-112]
                 else:
                     source_line = ''
             else:
                 export_line = ''
 
-            add = "%s%s%s%s" % (newline, comment, export_line, source_line)
+            scalr_configs = filter(None, (comment, export_line, source_line))
 
-            if export_line or source_line:
-                with open(startup_path, "a") as afp:
-                    afp.write(add)
+            # removes old scalr configs
+            is_not_scalr_line = lambda line: not any(sc == line for sc in scalr_configs)
+            startupfile_content = startupfile_content.rstrip('\n').split('\n')
+            startupfile_content = filter(is_not_scalr_line, startupfile_content)
+
+            if len(scalr_configs) > 1:
+                with open(startup_path, "w") as fp:
+                    fp.write('\n'.join(startupfile_content).rstrip('\n') + '\n\n')
+                    fp.write('\n'.join(scalr_configs) + '\n')
 
             click.echo("Start a new shell for the changes to take effect.")
