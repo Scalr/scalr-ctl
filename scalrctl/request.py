@@ -41,47 +41,59 @@ except:
     pass
 
 
+def _key_pair(api_level='user'):
+
+    if api_level in ('global', ):
+        api_key_id = settings.GLOBAL_SCOPE_API_KEY_ID
+        secret_key = settings.GLOBAL_SCOPE_API_SECRET_KEY
+        no_key_msg = "API {} for global scope is not configured. " \
+            "Please run 'scalr-ctl configure --admin' to change default " \
+            "authentication settings."
+        assert api_key_id, no_key_msg.format("Key ID")
+        assert secret_key, no_key_msg.format("Secret Key")
+    elif api_level in ('user', 'account'):
+        api_key_id = settings.API_KEY_ID
+        secret_key = settings.API_SECRET_KEY
+        no_key_msg = "API {} is not configured. Please specify option " \
+            "{} or run 'scalr-ctl configure' to change default " \
+            "authentication settings."
+        assert api_key_id, no_key_msg.format("Key ID", "--key_id")
+        assert secret_key, no_key_msg.format("Secret Key", "--secret_key")
+    else:
+        raise Exception('Invalid Scalr API level')
+
+    return api_key_id, secret_key
+
+
 def request(method, api_level, request_uri, payload=None, data=None):
 
-    time_iso8601 = time.strftime("%Y-%m-%dT%H:%M:%S.000Z", time.gmtime())
+    time_iso8601 = time.strftime('%Y-%m-%dT%H:%M:%S.000Z', time.gmtime())
 
     try:
-        query_string = urlencode(sorted(payload.items()), quote_via=quote) \
-            if payload else ''
+        api_key_id, secret_key = _key_pair(api_level=api_level)
+
+        query_string = urlencode(
+            sorted(payload.items()),
+            quote_via=quote
+        ) if payload else ''
+
         body = json.dumps(yaml.safe_load(data)) if data else ''  # XXX
 
-        if api_level == 'global':
-            api_key_id = settings.GLOBAL_SCOPE_API_KEY_ID
-            secret_key = settings.GLOBAL_SCOPE_API_SECRET_KEY
-            no_key_msg = "API {} for global scope is not configured. " \
-                "Please run 'scalr-ctl configure --admin' to change default " \
-                "authentication settings."
-            assert api_key_id, no_key_msg.format("Key ID")
-            assert secret_key, no_key_msg.format("Secret Key")
-        else:
-            api_key_id = settings.API_KEY_ID
-            secret_key = settings.API_SECRET_KEY
-            no_key_msg = "API {} is not configured. Please specify option " \
-                "{} or run 'scalr-ctl configure' to change default " \
-                "authentication settings."
-            assert api_key_id, no_key_msg.format("Key ID", "--key_id")
-            assert secret_key, no_key_msg.format("Secret Key", "--secret_key")
-
-        string_to_sign = "%s\n%s\n%s\n%s\n%s" % (method.upper(),
-                                                 time_iso8601,
-                                                 request_uri,
-                                                 query_string,
-                                                 body)
-        if settings.debug_mode:
-            click.echo("API HOST: {}\nstringToSign: {}\n"
-                       .format(settings.API_HOST, string_to_sign))
+        string_to_sign = '\n'.join((
+            method.upper(),
+            time_iso8601,
+            request_uri,
+            query_string,
+            body
+        ))
 
         digest = hmac.new(
             secret_key.encode('UTF-8'),
             string_to_sign.encode('UTF-8'),
             hashlib.sha256
         ).digest()
-        signature = "{} {}".format(
+
+        signature = '{} {}'.format(
             settings.SIGNATURE_VERSION,
             binascii.b2a_base64(digest).strip().decode('UTF-8')
         )
@@ -94,12 +106,22 @@ def request(method, api_level, request_uri, payload=None, data=None):
         # if hasattr(settings, "API_DEBUG") and settings.API_DEBUG:
         #    headers['X-Scalr-Debug'] = 1
 
-        url = urlunsplit(
-            (settings.API_SCHEME, settings.API_HOST, request_uri, '', '')
-        )
+        url = urlunsplit((
+            settings.API_SCHEME,
+            settings.API_HOST,
+            request_uri,
+            '',
+            ''
+        ))
 
         if settings.debug_mode:
-            click.echo("Headers: {}\n".format(json.dumps(headers, indent=2)))
+            click.echo('API HOST: {}\n'
+                       'stringToSign: {}\n'
+                       'Headers: {}\n'.format(
+                           settings.API_HOST,
+                           string_to_sign,
+                           json.dumps(headers, indent=2))
+                       )
 
         resp = requests.request(
             method.lower(),
