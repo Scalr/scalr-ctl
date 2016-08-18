@@ -93,8 +93,7 @@ def get_definition(spec_data, endpoint):
 
     params = endpoint_spec['post'].get('parameters', '')
     params = filter(lambda p: '$ref' in p.get('schema', ''), params)
-    names = map(lambda p: p.get('schema')['$ref'].split('/')[-1], params)
-    names = list(names)
+    names = list(map(lambda p: p.get('schema')['$ref'].split('/')[-1], params))
     return names[0] if names else None
 
 
