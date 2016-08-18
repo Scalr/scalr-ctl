@@ -91,10 +91,9 @@ def get_definition(spec_data, endpoint):
     else:
         raise Exception('API endpoint {} does not found'.format(endpoint))
 
-    params = endpoint_spec['post'].get('parameters', '')
-    params = filter(lambda p: '$ref' in p.get('schema', ''), params)
-    names = list(map(lambda p: p.get('schema')['$ref'].split('/')[-1], params))
-    return names[0] if names else None
+    for param in endpoint_spec['post'].get('parameters', ''):
+        if '$ref' in param.get('schema', ''):
+            return param.get('schema')['$ref'].split('/')[-1]
 
 
 def get_doc_url(api_level, endpoint):
@@ -105,7 +104,7 @@ def get_doc_url(api_level, endpoint):
     endpoint = endpoint.strip('/')
 
     # finds all path parameters
-    params = re.findall('[{\[].*?}', endpoint)
+    params = re.findall(r'[{\[].*?}', endpoint)
 
     # creates postfix from last parameter
     last_param = params[-1] if params and endpoint.endswith(params[-1]) else ''
