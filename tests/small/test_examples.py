@@ -43,7 +43,7 @@ def test_create_post_example(post_endpoints):
 def test_get_object_name(specs, post_endpoints):
     for api_level, endpoint in post_endpoints:
         if _is_valid_endpoint(endpoint):
-            object_name = examples.get_object_name(specs[api_level], endpoint)
+            object_name = examples.get_definition(specs[api_level], endpoint)
             doc_url = examples.get_doc_url(api_level, endpoint)
             resp = requests.get(doc_url)
             assert resp.status_code == 200

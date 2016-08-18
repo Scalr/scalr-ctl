@@ -5,7 +5,7 @@ import re
 
 from scalrctl import defaults
 
-__author__ = 'SergeyBabak'
+__author__ = 'Sergey Babak'
 
 
 DOCS_HOST = 'http://api-explorer.scalr.com.s3-website-us-east-1.amazonaws.com'
@@ -81,9 +81,9 @@ def generate_post_data(spec_data, endpoint):
     return post_data
 
 
-def get_object_name(spec_data, endpoint):
+def get_definition(spec_data, endpoint):
     """
-    Returns API Object name by endpoint.
+    Returns object name by endpoint.
     """
 
     if endpoint in spec_data['paths']:
@@ -105,7 +105,7 @@ def get_object_name(spec_data, endpoint):
 
 def get_doc_url(api_level, endpoint):
     """
-    Returns documentation url by endpoint.
+    Returns URL to documentation by API endpoint.
     """
 
     endpoint = endpoint.strip('/')
@@ -134,7 +134,7 @@ def create_post_example(api_level, endpoint):
     spec_data = json.loads(_read_spec(api_level))
 
     post_data = generate_post_data(spec_data, endpoint)
-    object_name = get_object_name(spec_data, endpoint)
+    object_name = get_definition(spec_data, endpoint)
     doc_url = get_doc_url(api_level, endpoint)
 
     example = ("The body must be a valid {name} object. "
