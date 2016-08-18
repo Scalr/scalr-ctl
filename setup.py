@@ -60,7 +60,8 @@ if __name__ == '__main__':
             'pyyaml>=3.11',
             'requests>=2.10.0',
             'six>=1.10.0',
-            'colorama>=0.3.7'
+            'colorama>=0.3.7',
+            'dicttoxml>=1.7.4',
         ],
         entry_points='''
             [console_scripts]

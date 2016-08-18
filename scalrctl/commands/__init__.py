@@ -11,6 +11,7 @@ from scalrctl import settings
 from scalrctl import request
 from scalrctl.view import build_table, build_tree
 
+import dicttoxml
 
 
 class BaseAction(object):
@@ -231,7 +232,10 @@ class Action(BaseAction):
             if settings.debug_mode and not hide_output:
                 click.echo(response_json["meta"])
 
-            if settings.view == "tree" and not hide_output:
+            if settings.view == "xml":
+                click.echo(dicttoxml.dicttoxml(response_json))
+
+            elif settings.view == "tree" and not hide_output:
                 click.echo(build_tree(text))
 
             elif settings.view == "table":
@@ -349,6 +353,13 @@ class Action(BaseAction):
                 default=False,
                 help="Print raw response"
             )
+            xml = click.Option(
+                ('--xml', 'transformation'),
+                is_flag=True,
+                flag_value='xml',
+                default=False,
+                help="Print response as a XML"
+            )
             tree = click.Option(
                 ('--tree', 'transformation'),
                 is_flag=True,
@@ -357,7 +368,7 @@ class Action(BaseAction):
                 help="Print response as a colored tree"
             )
             nocolor = click.Option(('--nocolor', 'nocolor'), is_flag=True, default=False, help="Use colors")
-            options += [raw, tree, nocolor, json]
+            options += [raw, tree, nocolor, json, xml]
 
             if self.name not in ("get", "retrieve"):  # [ST-54] [ST-102]
                 table = click.Option(
