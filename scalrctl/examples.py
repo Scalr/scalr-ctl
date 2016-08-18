@@ -5,7 +5,7 @@ import re
 
 from scalrctl import defaults
 
-__author__ = 'SergeyBabak'
+__author__ = 'Sergey Babak'
 
 
 DOCS_HOST = 'http://api-explorer.scalr.com.s3-website-us-east-1.amazonaws.com'
@@ -81,9 +81,9 @@ def generate_post_data(spec_data, endpoint):
     return post_data
 
 
-def get_object_name(spec_data, endpoint):
+def get_definition(spec_data, endpoint):
     """
-    Returns API Object name by endpoint.
+    Returns object name by endpoint.
     """
 
     if endpoint in spec_data['paths']:
@@ -91,27 +91,20 @@ def get_object_name(spec_data, endpoint):
     else:
         raise Exception('API endpoint {} does not found'.format(endpoint))
 
-    def _find(params, field):
-        params = filter(lambda p: '$ref' in p.get(field, ''), params)
-        names = map(lambda p: p.get(field)['$ref'].split('/')[-1], params)
-        if names:
-            return names[0]
-
-    main_params = endpoint_spec.get('parameters', '')
-    post_params = endpoint_spec['post'].get('parameters', '')
-
-    return _find(post_params, 'schema') or _find(main_params, 'x-references')
+    for param in endpoint_spec['post'].get('parameters', ''):
+        if '$ref' in param.get('schema', ''):
+            return param.get('schema')['$ref'].split('/')[-1]
 
 
 def get_doc_url(api_level, endpoint):
     """
-    Returns documentation url by endpoint.
+    Returns URL to documentation by API endpoint.
     """
 
     endpoint = endpoint.strip('/')
 
     # finds all path parameters
-    params = re.findall('[{\[].*?}', endpoint)
+    params = re.findall(r'[{\[].*?}', endpoint)
 
     # creates postfix from last parameter
     last_param = params[-1] if params and endpoint.endswith(params[-1]) else ''
@@ -134,7 +127,7 @@ def create_post_example(api_level, endpoint):
     spec_data = json.loads(_read_spec(api_level))
 
     post_data = generate_post_data(spec_data, endpoint)
-    object_name = get_object_name(spec_data, endpoint)
+    object_name = get_definition(spec_data, endpoint)
     doc_url = get_doc_url(api_level, endpoint)
 
     example = ("The body must be a valid {name} object. "
