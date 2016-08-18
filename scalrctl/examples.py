@@ -91,16 +91,11 @@ def get_definition(spec_data, endpoint):
     else:
         raise Exception('API endpoint {} does not found'.format(endpoint))
 
-    def _find(params, field):
-        params = filter(lambda p: '$ref' in p.get(field, ''), params)
-        names = map(lambda p: p.get(field)['$ref'].split('/')[-1], params)
-        if names:
-            return names[0]
-
-    main_params = endpoint_spec.get('parameters', '')
-    post_params = endpoint_spec['post'].get('parameters', '')
-
-    return _find(post_params, 'schema') or _find(main_params, 'x-references')
+    params = endpoint_spec['post'].get('parameters', '')
+    params = filter(lambda p: '$ref' in p.get('schema', ''), params)
+    names = map(lambda p: p.get('schema')['$ref'].split('/')[-1], params)
+    names = list(names)
+    return names[0] if names else None
 
 
 def get_doc_url(api_level, endpoint):

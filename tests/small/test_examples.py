@@ -35,7 +35,7 @@ def test_create_post_example(post_endpoints):
             examples.create_post_example(api_level, endpoint)
         except Exception as e:
             assert not _is_valid_endpoint(endpoint) \
-                   and e.message == 'Invalid API endpoint'
+                   and str(e) == 'Invalid API endpoint'
         else:
             assert _is_valid_endpoint(endpoint)
 
