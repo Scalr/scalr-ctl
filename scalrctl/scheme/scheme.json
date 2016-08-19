@@ -21,14 +21,209 @@
     "global": {
         "group_descr": "All Scalr Global scope commands",
         "cmd-group": "Available scopes",
-         "image": {
+        "image": {
             "api_level": "global",
+            "change-attributes": {
+                "api_level": "global",
+                "class": "scalrctl.commands.Action",
+                "hidden": true,
+                "http-method": "patch",
+                "route": "/images/{imageId}/"
+            },
+            "copy": {
+                "api_level": "global",
+                "class": "scalrctl.commands.Action",
+                "http-method": "post",
+                "route": "/images/{imageId}/actions/copy/"
+            },
+            "delete": {
+                "api_level": "global",
+                "class": "scalrctl.commands.Action",
+                "http-method": "delete",
+                "route": "/images/{imageId}/"
+            },
+            "get": {
+                "api_level": "global",
+                "class": "scalrctl.commands.image.RetrieveImage",
+                "http-method": "get",
+                "route": "/images/{imageId}/"
+            },
             "group_descr": "Manage Images",
             "list": {
                 "api_level": "global",
                 "class": "scalrctl.commands.Action",
                 "http-method": "get",
                 "route": "/images/"
+            },
+            "register": {
+                "api_level": "global",
+                "class": "scalrctl.commands.Action",
+                "http-method": "post",
+                "route": "/images/",
+                "epilog": "Example: scalr-ctl global image register < myimage.json"
+            },
+            "retrieve": {
+                "api_level": "global",
+                "class": "scalrctl.commands.image.RetrieveImage",
+                "hidden": true,
+                "http-method": "get",
+                "route": "/images/{imageId}/"
+            },
+            "update": {
+                "api_level": "global",
+                "class": "scalrctl.commands.Action",
+                "http-method": "patch",
+                "route": "/images/{imageId}/"
+            }
+        },
+        "os": {
+            "api_level": "global",
+            "get": {
+                "api_level": "global",
+                "class": "scalrctl.commands.Action",
+                "http-method": "get",
+                "route": "/os/{osId}/"
+            },
+            "group_descr": "Manage supported Operating Systems",
+            "list": {
+                "api_level": "global",
+                "class": "scalrctl.commands.Action",
+                "http-method": "get",
+                "route": "/os/"
+            },
+            "retrieve": {
+                "api_level": "global",
+                "class": "scalrctl.commands.Action",
+                "hidden": true,
+                "http-method": "get",
+                "route": "/os/{osId}/"
+            }
+        },
+        "role": {
+            "api_level": "global",
+            "change-attributes": {
+                "api_level": "global",
+                "class": "scalrctl.commands.Action",
+                "hidden": true,
+                "http-method": "patch",
+                "route": "/roles/{roleId}/"
+            },
+            "create": {
+                "api_level": "global",
+                "class": "scalrctl.commands.Action",
+                "http-method": "post",
+                "route": "/roles/",
+                "epilog": "Example: scalr-ctl global role create < myrole.json"
+            },
+            "delete": {
+                "api_level": "global",
+                "class": "scalrctl.commands.Action",
+                "http-method": "delete",
+                "route": "/roles/{roleId}/"
+            },
+            "get": {
+                "api_level": "global",
+                "class": "scalrctl.commands.Action",
+                "http-method": "get",
+                "route": "/roles/{roleId}/"
+            },
+            "group_descr": "Manage Roles",
+            "list": {
+                "api_level": "global",
+                "class": "scalrctl.commands.Action",
+                "http-method": "get",
+                "route": "/roles/"
+            },
+            "retrieve": {
+                "api_level": "global",
+                "class": "scalrctl.commands.Action",
+                "hidden": true,
+                "http-method": "get",
+                "route": "/roles/{roleId}/"
+            },
+            "update": {
+                "api_level": "global",
+                "class": "scalrctl.commands.Action",
+                "http-method": "patch",
+                "route": "/roles/{roleId}/"
+            }
+        },
+        "role-category": {
+            "api_level": "global",
+            "create": {
+                "api_level": "global",
+                "class": "scalrctl.commands.Action",
+                "http-method": "post",
+                "route": "/role-categories/",
+                "epilog": "Example: scalr-ctl global role-category create < myrolecategory.json"
+            },
+            "delete": {
+                "api_level": "global",
+                "class": "scalrctl.commands.Action",
+                "http-method": "delete",
+                "route": "/role-categories/{roleCategoryId}/"
+            },
+            "get": {
+                "api_level": "global",
+                "class": "scalrctl.commands.Action",
+                "http-method": "get",
+                "route": "/role-categories/{roleCategoryId}/"
+            },
+            "group_descr": "Manage current Role Categories",
+            "list": {
+                "api_level": "global",
+                "class": "scalrctl.commands.Action",
+                "http-method": "get",
+                "route": "/role-categories/"
+            },
+            "retrieve": {
+                "api_level": "global",
+                "class": "scalrctl.commands.Action",
+                "hidden": true,
+                "http-method": "get",
+                "route": "/role-categories/{roleCategoryId}/"
+            },
+            "update": {
+                "api_level": "global",
+                "class": "scalrctl.commands.Action",
+                "http-method": "patch",
+                "route": "/role-categories/{roleCategoryId}/"
+            }
+        },
+        "role-orchestration-rule": {
+            "api_level": "global",
+            "create": {
+                "api_level": "global",
+                "class": "scalrctl.commands.Action",
+                "http-method": "post",
+                "route": "/roles/{roleId}/orchestration-rules/",
+                "epilog": "Example: scalr-ctl global role-orchestration-rule create --roleId <ID> < myroleorule.json"
+            },
+            "delete": {
+                "api_level": "global",
+                "class": "scalrctl.commands.Action",
+                "http-method": "delete",
+                "route": "/roles/{roleId}/orchestration-rules/{orchestrationRuleId}/"
+            },
+            "get": {
+                "api_level": "global",
+                "class": "scalrctl.commands.Action",
+                "http-method": "get",
+                "route": "/roles/{roleId}/orchestration-rules/{orchestrationRuleId}/"
+            },
+            "group_descr": "Manage Orchestration Rules",
+            "list": {
+                "api_level": "global",
+                "class": "scalrctl.commands.Action",
+                "http-method": "get",
+                "route": "/roles/{roleId}/orchestration-rules/"
+            },
+            "retrieve": {
+                "api_level": "global",
+                "class": "scalrctl.commands.Action",
+                "hidden": true,
+                "http-method": "get",
+                "route": "/roles/{roleId}/orchestration-rules/{orchestrationRuleId}/"
             }
         }
     },
