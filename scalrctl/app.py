@@ -141,6 +141,8 @@ class ScalrCLI(click.MultiCommand):
 def cli(ctx, key_id, secret_key, config, *args, **kvargs):
     """Scalr-ctl is a command-line interface to your Scalr account"""
 
+    service_cmd = any(arg in ('configure', 'update') for arg in sys.argv)
+
     if key_id:
         settings.API_KEY_ID = str(key_id)
 
@@ -148,10 +150,9 @@ def cli(ctx, key_id, secret_key, config, *args, **kvargs):
         settings.API_SECRET_KEY = str(secret_key)
     elif (settings.API_KEY_ID and settings.API_KEY_ID.strip()
           and not settings.API_SECRET_KEY
-          and sys.argv[-1] not in ('configure', 'update')):  # [ST-21]
+          and not service_cmd):  # [ST-21]
         settings.API_SECRET_KEY = str(click.prompt(text='API SECRET KEY',
                                                    hide_input=True))
-
     if config:
         if os.path.exists(config):
             config_data = yaml.load(open(config, 'r'))
