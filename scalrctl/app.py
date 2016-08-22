@@ -31,7 +31,7 @@ def dummy_run():
     raise click.ClickException("Not implemented in current API version")
 
 
-class ScalrCLI(click.MultiCommand):
+class ScalrCLI(click.Group):
 
     def __init__(self, name=None, commands=None, **attrs):
         if 'scheme' in attrs:
@@ -39,7 +39,7 @@ class ScalrCLI(click.MultiCommand):
         else:
             with open(SCHEME_PATH) as fp:
                 self.scheme = json.load(fp)
-        super(ScalrCLI, self).__init__(name, commands, chain=False, **attrs)
+        super(ScalrCLI, self).__init__(name, commands, chain=True, **attrs)
 
     def list_commands(self, ctx):
         """
