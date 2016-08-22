@@ -2,6 +2,7 @@
 import json
 import os
 import pydoc
+import sys
 
 import yaml
 
@@ -19,7 +20,8 @@ if not os.path.exists(defaults.CONFIG_DIRECTORY):
     os.makedirs(defaults.CONFIG_DIRECTORY)
 
 if os.path.exists(defaults.CONFIG_PATH):
-    configure.apply_settings(yaml.load(open(defaults.CONFIG_PATH, 'r')))
+    config_data = yaml.load(open(defaults.CONFIG_PATH, 'r'))
+    configure.apply_settings(config_data)
 
 if update.is_update_required():
     update.update()  # [ST-53]
@@ -37,7 +39,7 @@ class ScalrCLI(click.MultiCommand):
         else:
             with open(SCHEME_PATH) as fp:
                 self.scheme = json.load(fp)
-        super(ScalrCLI, self).__init__(name, commands, chain=True, **attrs)
+        super(ScalrCLI, self).__init__(name, commands, chain=False, **attrs)
 
     def list_commands(self, ctx):
         """
@@ -98,6 +100,7 @@ class ScalrCLI(click.MultiCommand):
             click.echo('No such command: {}.'.format(name))
             ctx.exit()
 
+        # action level
         if 'route' in subscheme and 'http-method' in subscheme:
             hidden = subscheme.get('hidden', False)
             cls = pydoc.locate(
@@ -143,11 +146,11 @@ def cli(ctx, key_id, secret_key, config, *args, **kvargs):
 
     if secret_key:
         settings.API_SECRET_KEY = str(secret_key)
-    elif settings.API_KEY_ID and settings.API_KEY_ID.strip() and \
-            not settings.API_SECRET_KEY:  # [ST-21]
-        if ctx.invoked_subcommand not in ('configure', 'update'):
-            raw = click.prompt(text='API SECRET KEY', hide_input=True)
-            settings.API_SECRET_KEY = str(raw)
+    elif (settings.API_KEY_ID and settings.API_KEY_ID.strip()
+          and not settings.API_SECRET_KEY
+          and sys.argv[-1] not in ('configure', 'update')):  # [ST-21]
+        settings.API_SECRET_KEY = str(click.prompt(text='API SECRET KEY',
+                                                   hide_input=True))
 
     if config:
         if os.path.exists(config):
