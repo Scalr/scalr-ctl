@@ -1,27 +1,27 @@
-__author__ = 'Dmitriy Korsakov'
-
-import os
+# -*- coding: utf-8 -*-
 import json
+import os
 import pydoc
+import sys
 
 import yaml
 
-from scalrctl import click
-from scalrctl import settings
-from scalrctl import defaults
-from scalrctl import commands
+from scalrctl import click, defaults, settings
+from scalrctl.commands import Action
+from scalrctl.commands.internal import configure, update
 
-from scalrctl.commands.internal import update, configure
+__author__ = 'Dmitriy Korsakov, Sergey Babak'
 
 
-CMD_FOLDER = os.path.abspath(os.path.join(os.path.dirname(__file__), 'commands'))
+SCHEME_PATH = os.path.join(os.path.dirname(__file__), 'scheme/scheme.json')
 
 
 if not os.path.exists(defaults.CONFIG_DIRECTORY):
     os.makedirs(defaults.CONFIG_DIRECTORY)
 
 if os.path.exists(defaults.CONFIG_PATH):
-    configure.apply_settings(yaml.load(open(defaults.CONFIG_PATH, "r")))
+    config_data = yaml.load(open(defaults.CONFIG_PATH, 'r'))
+    configure.apply_settings(config_data)
 
 if update.is_update_required():
     update.update()  # [ST-53]
@@ -30,145 +30,106 @@ if update.is_update_required():
 def dummy_run():
     raise click.ClickException("Not implemented in current API version")
 
+
 class ScalrCLI(click.Group):
 
     def __init__(self, name=None, commands=None, **attrs):
-        if not "scheme" in attrs:
-            with open(os.path.join(os.path.dirname(__file__), 'scheme/scheme.json')) as fp:
-                self.scheme = json.load(fp)
+        if 'scheme' in attrs:
+            self.scheme = attrs.pop('scheme')
         else:
-            self.scheme = attrs.pop("scheme")
-        super(ScalrCLI, self).__init__(name, commands, **attrs)
+            with open(SCHEME_PATH) as fp:
+                self.scheme = json.load(fp)
+        super(ScalrCLI, self).__init__(name, commands, chain=True, **attrs)
 
     def list_commands(self, ctx):
-        commands = self.scheme.keys()
+        """
+        Returns a list of subcommand names.
+        """
 
-        if "group_descr" in commands:
-            commands.remove("group_descr")
-
-        if "route" in commands and "http-method" in commands:
-            return []
-
-        commands.sort()
-
-        if "configure" in commands and "update" in commands:  # [ST-141]
-            commands = [commands.pop(commands.index("configure")), commands.pop(commands.index("update"))] + commands
-
-        return commands
+        return [k for k, v in self.scheme.items() if type(v) == dict]
 
     def get_cmd_groups(self):
         """
-        list_commands devided into groups
-        Returns: dict
+        List commands divided into groups.
         """
+
         groups = {}
         for cmd_name in self.scheme.keys():
 
-            if cmd_name in ("cmd-group", "group_descr", "api_level"):
+            if cmd_name in ('cmd-group', 'group_descr', 'api_level'):
                 continue
 
-            if "cmd-group" in self.scheme[cmd_name]:
-                group_name = self.scheme[cmd_name]["cmd-group"]
-            elif "api_level" in self.scheme[cmd_name]:
-                group_name = "%s Scope operations" % self.scheme[cmd_name]["api_level"].capitalize()
+            if 'cmd-group' in self.scheme[cmd_name]:
+                group_name = self.scheme[cmd_name]['cmd-group']
+            elif 'api_level' in self.scheme[cmd_name]:
+                scope_name = self.scheme[cmd_name]['api_level'].capitalize()
+                group_name = '{} Scope operations'.format(scope_name)
             else:
-                group_name = "Other API commands"
+                group_name = 'Other API commands'
 
-            if not group_name in groups:
-                groups[group_name] = []
+            if group_name not in groups:
+                groups[group_name] = [cmd_name, ]
+            else:
+                groups[group_name].append(cmd_name)
 
-            groups[group_name].append(cmd_name)
         return groups
 
     def format_commands(self, ctx, formatter):
         sections = {}
-        rows = []
-
         for section_name, section_items in self.get_cmd_groups().items():
+            rows = []
             for subcommand in section_items:
                 cmd = self.get_command(ctx, subcommand)
-
-                if cmd is None:
-                    continue
-                if cmd.hidden:
-                    continue
-
-                help = cmd.short_help or ''
-                rows.append((subcommand, help))
-
+                if cmd and not cmd.hidden:
+                    rows.append((subcommand, cmd.short_help or ''))
             sections[section_name] = rows
-            rows = []
-
-        if sections:
-
-            for section_name in sections:
-                section_rows = sections[section_name]
-                section_rows.sort()
-
-                with formatter.section(section_name):
-                    formatter.write_dl(section_rows)
+        for name, rows in sections.items():
+            rows.sort()
+            with formatter.section(name):
+                formatter.write_dl(rows)
 
     def get_command(self, ctx, name):
-        args = dict(
-            callback=lambda: None,
-        )
+        """
+        Given a context and a command name, this returns
+        a `Command` object if it exists or returns `ScalrCLI`.
+        """
 
-        if name not in self.scheme:
-
-            if ctx.protected_args:
-                for level in ctx.protected_args:
-                    if level in self.scheme:
-                        self.scheme = self.scheme[level]
-                    else:
-                        ctx.exit()
-
-        if name not in self.scheme:
-            click.echo("No such command: %s." % name)
+        if name in self.scheme:
+            subscheme = self.scheme[name]
+        else:
+            click.echo('No such command: {}.'.format(name))
             ctx.exit()
 
-        args["scheme"] = self.scheme[name]
-
-        if "group_descr" in self.scheme[name]:
-            args["short_help"] = self.scheme[name]["group_descr"]
-
-        action_level = "route" in self.scheme[name] and "http-method" in self.scheme[name]
-        is_service_type_action = action_level and not self.scheme[name]["api_level"]
-
-        if action_level:
-            if is_service_type_action:
-                route = None
-                http_method = None
-                api_level = None
-            else:
-                route = self.scheme[name]["route"]
-                http_method = self.scheme[name]["http-method"]
-                api_level = self.scheme[name]["api_level"]
-
-            if 'class' in self.scheme[name]:
-                cls = pydoc.locate(self.scheme[name]['class'])
-            else:
-                cls = commands.Action
-
-            action = cls(name=name, route=route, http_method=http_method, api_level=api_level)
-            hidden = "hidden" in self.scheme[name] and self.scheme[name]['hidden']
+        # action level
+        if 'route' in subscheme and 'http-method' in subscheme:
+            hidden = subscheme.get('hidden', False)
+            cls = pydoc.locate(
+                subscheme['class']
+            ) if 'class' in subscheme else Action
+            action = cls(name=name,
+                         route=subscheme.get('route'),
+                         http_method=subscheme.get('http-method'),
+                         api_level=subscheme.get('api_level'))
 
             try:
                 action.validate()
-            except AssertionError as e:
-                dummy_help = "Not implemented in current API version"
-                dummy_cmd = click.Command(name, params=[], callback=dummy_run, short_help=dummy_help, hidden=hidden)
-                return dummy_cmd
+            except AssertionError:
+                dummy_help = 'Not implemented in current API version'
+                return click.Command(name, params=[], callback=dummy_run,
+                                     short_help=dummy_help, hidden=hidden)
 
-            hlp = self.scheme[name]["cmd_descr"] if "cmd_descr" in self.scheme[name] else action.get_description()
+            msg = subscheme.get('cmd_descr') or action.get_description()
             options = action.modify_options(action.get_options())
-            cmd = click.Command(name, params=options, callback=action.run, short_help=hlp, help=hlp, hidden=hidden)
-            if "epilog" in self.scheme[name]:
-                cmd.epilog = self.scheme[name]["epilog"]
+            cmd = click.Command(name, params=options, callback=action.run,
+                                short_help=msg, help=msg, hidden=hidden)
+            if 'epilog' in subscheme:
+                cmd.epilog = subscheme['epilog']
             elif action.epilog:
                 cmd.epilog = action.epilog
             return cmd
-
-        return ScalrCLI(**args)
+        else:
+            return ScalrCLI(scheme=subscheme,
+                            short_help=subscheme.get('group_descr', ''))
 
 
 @click.command(cls=ScalrCLI)
@@ -180,23 +141,25 @@ class ScalrCLI(click.Group):
 def cli(ctx, key_id, secret_key, config, *args, **kvargs):
     """Scalr-ctl is a command-line interface to your Scalr account"""
 
+    service_cmd = any(arg in ('configure', 'update') for arg in sys.argv)
+
     if key_id:
         settings.API_KEY_ID = str(key_id)
 
     if secret_key:
         settings.API_SECRET_KEY = str(secret_key)
-
-    elif settings.API_KEY_ID and settings.API_KEY_ID.strip() and not settings.API_SECRET_KEY:  # [ST-21]
-        if ctx.invoked_subcommand not in ("configure", "update"):
-            raw = click.prompt(text="API SECRET KEY", hide_input=True)
-            settings.API_SECRET_KEY = str(raw)
-
+    elif (settings.API_KEY_ID and settings.API_KEY_ID.strip()
+          and not settings.API_SECRET_KEY
+          and not service_cmd):  # [ST-21]
+        settings.API_SECRET_KEY = str(click.prompt(text='API SECRET KEY',
+                                                   hide_input=True))
     if config:
-
-        if not os.path.exists(config):
-            raise click.ClickException("Configuration file not found: %s" % config)
-        data = yaml.load(open(config, "r"))
-        configure.apply_settings(data)
+        if os.path.exists(config):
+            config_data = yaml.load(open(config, 'r'))
+            configure.apply_settings(config_data)
+        else:
+            msg = 'Configuration file not found: {}'.format(config)
+            raise click.ClickException(msg)
 
 
 if __name__ == '__main__':
