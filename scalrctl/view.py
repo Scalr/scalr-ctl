@@ -2,8 +2,10 @@ __author__ = 'Dmitriy Korsakov'
 
 import json
 import yaml
+import six
 import prettytable
-import settings
+import traceback
+from scalrctl import click, settings
 
 
 def build_table(field_names, rows, pre=None, post=None):
@@ -33,7 +35,9 @@ def build_tree(data):
     if isinstance(data, str):
         data = json.loads(data)
 
-    yaml_text = yaml.safe_dump(data, allow_unicode=True, default_flow_style=False).decode("utf-8")
+    yaml_text = yaml.safe_dump(data, allow_unicode=True, default_flow_style=False)
+    if six.PY2:
+        yaml_text = yaml_text.decode("utf-8")
 
     if not settings.colored_output:
         return yaml_text
@@ -64,3 +68,15 @@ def build_tree(data):
     result += yaml_text[last_pos:]
 
     return result
+
+
+def debug(msg):
+    if settings.debug_mode:
+        click.secho('DEBUG: {}'.format(msg),
+                    fg='green' if settings.colored_output else None)
+
+
+def reraise(e, message=None):
+    debug(traceback.format_exc())
+    message = message or e.__class__.__name__
+    raise click.ClickException('{}, {}'.format(message, str(e)))

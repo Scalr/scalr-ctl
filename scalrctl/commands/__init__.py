@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
-from __future__ import print_function
 import json
 import re
-import traceback
 
-from scalrctl import click, request, settings, utils
+from scalrctl import click, request, settings, utils, view
 from scalrctl.view import build_table, build_tree
+
 
 __author__ = 'Dmitriy Korsakov'
 
@@ -112,70 +111,69 @@ class Action(BaseAction):
 
         return kwargs
 
+    def _get_object(self, *args, **kwargs):
+        try:
+            obj = self.__class__(name='get', route=self.route,
+                                 http_method='get', api_level=self.api_level)
+
+            raw_text = obj.run(*args, **kwargs)
+            view.debug(raw_text)
+
+            json_text = json.loads(raw_text)
+            filtered = self._filter_json_object(json_text['data'],
+                                                filter_createonly=True)
+            return json.dumps(filtered)
+        except Exception as e:
+            view.reraise(e)
+
+    def _edit_object(self, *args, **kwargs):
+        raw_object = self._get_object(*args, **kwargs)
+        raw_object = click.edit(raw_object)
+        if raw_object is None:
+            raise ValueError('No changes in JSON')
+        return json.loads(raw_object)
+
+    @staticmethod
+    def _read_object():
+        """
+        Reads JSON object from stdin.
+        """
+        raw_object = click.get_text_stream('stdin').read()
+        return json.loads(raw_object)
+
     def pre(self, *args, **kwargs):
         """
         Before request is made.
         """
-
         kwargs = self.apply_arguments(**kwargs)
         self.check_arguments(**kwargs)
 
+        import_data = kwargs.pop('import-data', {})
         http_method = self.http_method.upper()
 
         if http_method not in ('PATCH', 'POST'):
             return args, kwargs
 
-        import_data = kwargs.pop('import-data', {})
-
         # prompting for body and then validating it
-        for param in self.get_body_type_params():
-            name = param['name']
-            text = ''
-            if http_method == 'PATCH':
-                if import_data and name in import_data:
-                    import_data[name] = self._filter_json_object(
-                        import_data[name],
+        for param_name in (p['name'] for p in self.get_body_type_params()):
+            try:
+                if param_name in import_data:
+                    json_object = self._filter_json_object(
+                        import_data[param_name],
                         filter_createonly=True
-                    )
+                    ) if http_method == 'PATCH' else import_data[param_name]
                 else:
-                    try:
-                        get_object = Action(
-                            name='get',
-                            route=self.route,
-                            http_method='get',
-                            api_level=self.api_level
-                        )  # XXX: can be custom class
-                        raw_text = get_object.run(*args, **kwargs)
-                        if settings.debug_mode:
-                            click.echo(raw_text)
+                    if http_method == 'PATCH':
+                        json_object = self._edit_object(*args, **kwargs)
+                    else:
+                        json_object = self._read_object()
 
-                        json_text = json.loads(raw_text)
-                        filtered = self._filter_json_object(
-                            json_text['data'],
-                            filter_createonly=True
-                        )
-                        text = json.dumps(filtered)
-                    except (Exception, BaseException) as e:
-                        if settings.debug_mode:
-                            click.echo(traceback.format_exc())
-                        else:
-                            click.echo(e)
-
-            if import_data and name in import_data:
-                user_object = import_data[name]
-            else:
-                raw = click.edit(text) if http_method == 'PATCH' else \
-                    click.get_text_stream('stdin').read()
-                try:
-                    user_object = json.loads(raw)
-                except Exception as e:
-                    if settings.debug_mode:
-                        raise
-                    raise click.ClickException(str(e))
-
-            valid_object = self._filter_json_object(user_object)
-            valid_object_str = json.dumps(valid_object)
-            kwargs[name] = valid_object_str
+                json_object = self._filter_json_object(json_object)
+                kwargs[param_name] = json.dumps(json_object)
+            except json.decoder.JSONDecodeError as e:
+                view.reraise(e, message='Invalid JSON object')
+            except ValueError as e:
+                view.reraise(e)
 
         return args, kwargs
 
@@ -189,10 +187,8 @@ class Action(BaseAction):
         """
         Callback for click subcommand.
         """
-        # print "run %s @ %s with arguments:" %
-        # (self.http_method, self.route), args, kwargs
-        hide_output = kwargs.pop("hide_output", False)  # [ST-88]
-        dry_run = kwargs.pop("dryrun", False)
+        hide_output = kwargs.pop('hide_output', False)  # [ST-88]
+        dry_run = kwargs.pop('dryrun', True)
 
         args, kwargs = self.pre(*args, **kwargs)
 
@@ -200,23 +196,24 @@ class Action(BaseAction):
         payload = {}
         data = None
 
-        if settings.envId and '{envId}' in uri and ('envId' not in kwargs or not kwargs['envId']):
-            kwargs['envId'] = settings.envId  # XXX
+        if '{envId}' in uri and not kwargs.get('envId') and settings.envId:
+            kwargs['envId'] = settings.envId
 
+        # filtering in-body and empty params
         if kwargs:
             uri = self._request_template.format(**kwargs)
             for key, value in kwargs.items():
-                t = "{%s}" % key
-                # filtering in-body and empty params
-                if value and t not in self._request_template:
+                param = '{%s}' % (key,)
+                if value and (param not in self._request_template):
                     body_params = self.get_body_type_params()
-                    if self.http_method.upper() in ("GET", "DELETE"):
+                    if self.http_method.upper() in ('GET', 'DELETE'):
                         payload[key] = value
-                    elif body_params and key == body_params[0]["name"]:
+                    elif body_params and key == body_params[0]['name']:
                         data = value  # XXX
 
         if dry_run:
-            click.echo("%s %s %s %s" % (self.http_method, uri, payload, data))
+            click.echo('{} {} {} {}'.format(self.http_method, uri,
+                                            payload, data))
             return
 
         raw_response = request.request(self.http_method, uri, payload, data)
@@ -462,11 +459,13 @@ class Action(BaseAction):
         result = {}
         mutable_parts = self.mutable_body_parts or \
             self._list_mutable_body_parts()
+
         for name, value in obj.items():
             if filter_createonly and name in self._list_createonly_properties():
                 continue
             elif name in mutable_parts:
                 result[name] = obj[name]
+
         return result
 
     def _list_mutable_body_parts(self):
