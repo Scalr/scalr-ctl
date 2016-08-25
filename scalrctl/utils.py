@@ -22,7 +22,7 @@ def read_spec(api_level, ext='json'):
         if ext == 'json':
             return json.loads(spec_data)
         elif ext == 'yaml':
-            return yaml.loads(spec_data)
+            return yaml.safe_load(spec_data)
     else:
         msg = "Scalr specification file '{}' does  not exist, " \
               "try to run 'scalr-ctl update'.".format(spec_path)
@@ -34,6 +34,23 @@ def read_routes():
         with open(defaults.ROUTES_PATH, 'r') as fp:
             api_routes = fp.read()
         return json.loads(api_routes)
+
+
+def read_scheme():
+    with open(os.path.join(os.path.dirname(__file__),
+                           'scheme/scheme.json')) as fp:
+        return json.load(fp)
+
+
+def read_config(profile=None):
+    confpath = os.path.join(
+        defaults.CONFIG_DIRECTORY,
+        '{}.yaml'.format(profile)
+    ) if profile else defaults.CONFIG_PATH
+
+    if os.path.exists(confpath):
+        with open(confpath, 'r') as fp:
+            return yaml.load(fp)
 
 
 def debug(msg):
