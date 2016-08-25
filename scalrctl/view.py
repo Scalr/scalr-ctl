@@ -4,8 +4,38 @@ import json
 import yaml
 import six
 import prettytable
-import traceback
-from scalrctl import click, settings
+import re
+from scalrctl import settings
+
+
+def calc_table(response_json, columns):
+    rows = []
+    for block in response_json.get('data', ''):
+        row = []
+        for name in columns:
+            for item in block:
+                if name.lower() == item.lower():
+                    row.append(block[item])
+                    break
+            else:
+                row.append('')
+        if row:
+            rows.append(row)
+
+    pagination = response_json.get("pagination", None)
+    pagenum_last, current_pagenum = 1, 1
+    if pagination:
+        url_last = pagination.get('last', None)
+        if url_last:
+            number = re.search("pageNum=(\d*)", url_last)
+            pagenum_last = number.group(1) if number else 1
+
+        url_next = pagination.get('next', None)
+        if url_next:
+            num = re.search("pageNum=(\d*)", url_next)
+            pagenum_next = num.group(1) if num else 1
+            current_pagenum = int(pagenum_next) - 1
+    return rows, current_pagenum, pagenum_last
 
 
 def build_table(field_names, rows, pre=None, post=None):
@@ -68,15 +98,3 @@ def build_tree(data):
     result += yaml_text[last_pos:]
 
     return result
-
-
-def debug(msg):
-    if settings.debug_mode:
-        click.secho('DEBUG: {}'.format(msg),
-                    fg='green' if settings.colored_output else None)
-
-
-def reraise(e, message=None):
-    debug(traceback.format_exc())
-    message = message or e.__class__.__name__
-    raise click.ClickException('{}, {}'.format(message, str(e)))

@@ -2,8 +2,9 @@
 import os
 import json
 import yaml
+import traceback
 
-from scalrctl import click, defaults
+from scalrctl import click, defaults, settings
 
 
 def read_spec(api_level, ext='json'):
@@ -33,3 +34,17 @@ def read_routes():
         with open(defaults.ROUTES_PATH, 'r') as fp:
             api_routes = fp.read()
         return json.loads(api_routes)
+
+
+def debug(msg):
+    if settings.debug_mode:
+        click.secho("DEBUG: {}".format(msg),
+                    fg='green' if settings.colored_output else None)
+
+
+def reraise(message):
+    debug(traceback.format_exc())
+    message = str(message)
+    if not settings.debug_mode:
+        message = "{}, use '--debug' option for details.".format(message)
+    raise click.ClickException(message)

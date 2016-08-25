@@ -2,9 +2,9 @@
 import json
 import re
 
-from scalrctl import click, request, settings, utils, view
-from scalrctl.view import build_table, build_tree
+import dicttoxml
 
+from scalrctl import click, request, settings, utils, view
 
 __author__ = 'Dmitriy Korsakov'
 
@@ -69,13 +69,7 @@ class Action(BaseAction):
                 name=self.name
             )
 
-    def validate(self):
-        api_routes = utils.read_routes()
-        if self.route and self.api_level and api_routes:
-            assert self.api_level in api_routes and \
-                   self.route in api_routes[self.api_level], self.name
-
-    def check_arguments(self, **kwargs):
+    def _check_arguments(self, **kwargs):
         route_data = self.raw_spec['paths'][self.route]
         if 'parameters' not in route_data:
             return
@@ -90,7 +84,7 @@ class Action(BaseAction):
                     raise click.ClickException("Invalid value for {}"
                                                .format(param_name))
 
-    def apply_arguments(self, **kwargs):
+    def _apply_arguments(self, **kwargs):
         if kwargs.get('filters'):
             for pair in kwargs.pop('filters').split(','):
                 kv = pair.split('=')
@@ -117,20 +111,20 @@ class Action(BaseAction):
                                  http_method='get', api_level=self.api_level)
 
             raw_text = obj.run(*args, **kwargs)
-            view.debug(raw_text)
+            utils.debug(raw_text)
 
             json_text = json.loads(raw_text)
             filtered = self._filter_json_object(json_text['data'],
                                                 filter_createonly=True)
             return json.dumps(filtered)
         except Exception as e:
-            view.reraise(e)
+            utils.reraise(e)
 
     def _edit_object(self, *args, **kwargs):
         raw_object = self._get_object(*args, **kwargs)
         raw_object = click.edit(raw_object)
         if raw_object is None:
-            raise ValueError('No changes in JSON')
+            raise ValueError("No changes in JSON")
         return json.loads(raw_object)
 
     @staticmethod
@@ -141,12 +135,12 @@ class Action(BaseAction):
         raw_object = click.get_text_stream('stdin').read()
         return json.loads(raw_object)
 
-    def pre(self, *args, **kwargs):
+    def _pre(self, *args, **kwargs):
         """
         Before request is made.
         """
-        kwargs = self.apply_arguments(**kwargs)
-        self.check_arguments(**kwargs)
+        kwargs = self._apply_arguments(**kwargs)
+        self._check_arguments(**kwargs)
 
         import_data = kwargs.pop('import-data', {})
         http_method = self.http_method.upper()
@@ -155,7 +149,7 @@ class Action(BaseAction):
             return args, kwargs
 
         # prompting for body and then validating it
-        for param_name in (p['name'] for p in self.get_body_type_params()):
+        for param_name in (p['name'] for p in self._get_body_type_params()):
             try:
                 if param_name in import_data:
                     json_object = self._filter_json_object(
@@ -169,148 +163,66 @@ class Action(BaseAction):
                         json_object = self._read_object()
 
                 json_object = self._filter_json_object(json_object)
-                kwargs[param_name] = json.dumps(json_object)
-            except json.decoder.JSONDecodeError as e:
-                view.reraise(e, message='Invalid JSON object')
+                kwargs[param_name] = json_object
+            except json.decoder.JSONDecodeError:
+                utils.reraise("Invalid JSON object")
             except ValueError as e:
-                view.reraise(e)
+                utils.reraise(e)
 
         return args, kwargs
 
-    def post(self, response):
+    def _post(self, response):
         """
         After request is made.
         """
         return response
 
-    def run(self, *args, **kwargs):
-        """
-        Callback for click subcommand.
-        """
-        hide_output = kwargs.pop('hide_output', False)  # [ST-88]
-        dry_run = kwargs.pop('dryrun', True)
+    def _format_response(self, response, hidden=False, **kwargs):
+        text = None
 
-        args, kwargs = self.pre(*args, **kwargs)
-
-        uri = self._request_template
-        payload = {}
-        data = None
-
-        if '{envId}' in uri and not kwargs.get('envId') and settings.envId:
-            kwargs['envId'] = settings.envId
-
-        # filtering in-body and empty params
-        if kwargs:
-            uri = self._request_template.format(**kwargs)
-            for key, value in kwargs.items():
-                param = '{%s}' % (key,)
-                if value and (param not in self._request_template):
-                    body_params = self.get_body_type_params()
-                    if self.http_method.upper() in ('GET', 'DELETE'):
-                        payload[key] = value
-                    elif body_params and key == body_params[0]['name']:
-                        data = value  # XXX
-
-        if dry_run:
-            click.echo('{} {} {} {}'.format(self.http_method, uri,
-                                            payload, data))
-            return
-
-        raw_response = request.request(self.http_method, uri, payload, data)
-        response = self.post(raw_response)
-
-        if settings.view in ("raw", "json") and not hide_output:
-            click.echo(raw_response)
-
-        if not response and self.http_method.upper() == "DELETE":
-            obj_id = ""
-            ids = [param for param in kwargs if "Id" in param and param != "envId"]
-            if ids:
-                obj_id = kwargs[ids[0]]
-            click.echo("Deleted %s" % obj_id)
-
-        elif raw_response:
-
+        if response:
             try:
                 response_json = json.loads(response)
-            except ValueError as e:
-                if settings.debug_mode:
-                    click.echo("Server response: %s" % str(response))
-                    raise
-                raise click.ClickException(str(e))
+            except (ValueError, json.decoder.JSONDecodeError):
+                utils.debug("Server response: {}".format(str(response)))
+                utils.reraise("Invalid server response")
 
-            if "errors" in response_json and response_json["errors"]:
-                raise click.ClickException(response_json["errors"][0]['message'])
+            if response_json.get('errors'):
+                utils.reraise(response_json['errors'][0]['message'])
 
-            data = response_json["data"]
-            text = json.dumps(data)
+            if not hidden:
+                utils.debug(response_json.get('meta'))
 
-            if settings.debug_mode and not hide_output:
-                click.echo(response_json["meta"])
-
-            if settings.view == "tree" and not hide_output:
-                click.echo(build_tree(text))
-
-            elif settings.view == "table":
+            if hidden:
+                pass
+            elif settings.view in ('raw', 'json'):
+                click.echo(response)
+            elif settings.view == 'xml':
+                click.echo(dicttoxml.dicttoxml(response_json))
+            elif settings.view == 'tree':
+                data = json.dumps(response_json.get('data'))
+                click.echo(view.build_tree(data))
+            elif settings.view == 'table':
                 columns = self._table_columns or self._get_column_names()
-                rows = []
-                for block in data:
-                    row = []
-                    for name in columns:
-                        for item in block:
-                            if name.lower() == item.lower():
-                                row.append(block[item])
-                                break
-                        else:
-                            row.append("")
-                    if row:
-                        rows.append(row)
-
-                pagination = response_json.get("pagination", None)
-                pagenum_last, current_pagenum = 1, 1
-                if pagination:
-                    url_last = pagination.get('last', None)
-                    if url_last:
-                        number = re.search("pageNum=(\d*)", url_last)
-                        pagenum_last = number.group(1) if number else 1
-
-                    url_next = pagination.get('next', None)
-                    if url_next:
-                        num = re.search("pageNum=(\d*)", url_next)
-                        pagenum_next = num.group(1) if num else 1
-                        current_pagenum = int(pagenum_next) - 1
-
-                if not hide_output:
-                    click.echo(build_table(columns, rows, "Page: %s of %s" % (current_pagenum, pagenum_last)))  # XXX
-
-        return response
-
-    def get_description(self):
-        return self.raw_spec["paths"][self.route][self.http_method]["description"]
-
-    def get_options(self):
-        return self._get_default_options() + self._get_custom_options()
-
-    def modify_options(self, options):
-        """
-        this is the place where command line options can be fixed
-        after they are loaded from yaml spec
-        """
-        for option in options:
-            if self.prompt_for and option.name in self.prompt_for:
-                option.prompt = option.name
-
-            if option.name == "envId" and settings.envId:
-                option.required = False
-
-        return options
+                rows, current_page, last_page = view.calc_table(response_json,
+                                                                columns)
+                pre = "Page: {} of {}".format(current_page, last_page)
+                click.echo(view.build_table(columns, rows, pre=pre))  # XXX
+        elif self.http_method.upper() == 'DELETE':
+            deleted_id = ''
+            for param, value in kwargs.items():
+                if 'Id' in param and param != 'envId':
+                    deleted_id = value
+                    break
+            text = "Deleted {}".format(deleted_id)
+        return text
 
     def _get_default_options(self):
         options = []
         for param in self._get_raw_params():
-            option = click.Option(("--{}".format(param['name']),
+            option = click.Option(('--{}'.format(param['name']),
                                   param['name']), required=param['required'],
-                                  help=param["description"])
+                                  help=param['description'])
             options.append(option)
         return options
 
@@ -319,31 +231,33 @@ class Action(BaseAction):
 
         if self.http_method.upper() == 'GET':
             if self._returns_iterable():
-                maxres = click.Option(("--max-results", "maxResults"),
+                maxres = click.Option(('--max-results', 'maxResults'),
                                       type=int, required=False,
                                       help="Maximum number of records. "
                                       "Example: --max-results=2")
                 options.append(maxres)
 
-                pagenum = click.Option(("--page-number", "pageNum"), type=int,
+                pagenum = click.Option(('--page-number', 'pageNum'), type=int,
                                        required=False, help="Current page "
                                        "number. Example: --page-number=3")
                 options.append(pagenum)
 
-                filter_help = "Apply filters. Example: type=ebs,size=8. "
                 filters = self._get_available_filters()
                 if filters:
                     filters = sorted(filters)
-                    filter_help += "Available filters: %s." % ", ".join(filters)
-                    filters = click.Option(("--filters", "filters"),
+                    filter_help = ("Apply filters. Example: type=ebs,size=8."
+                                   "Available filters: {}."
+                                   ).format(', '.join(filters))
+                    filters = click.Option(('--filters', 'filters'),
                                            required=False, help=filter_help)
                     options.append(filters)
 
-                columns_help = "Filter columns in table view "\
-                               "[--table required]. Example: NAME,SIZE,SCOPE."
-                available_columns = self._get_column_names()
-                columns_help += "Available columns: %s." % ", ".join(available_columns)
-                columns = click.Option(("--columns", "columns"), required=False, help=columns_help)
+                columns_help = ("Filter columns in table view "
+                                "[--table required]. Example: NAME,SIZE,"
+                                "SCOPE. Available columns: {}."
+                                ).format(', '.join(self._get_column_names()))
+                columns = click.Option(('--columns', 'columns'),
+                                       required=False, help=columns_help)
                 options.append(columns)
 
             raw = click.Option(('--raw', 'transformation'), is_flag=True,
@@ -352,12 +266,15 @@ class Action(BaseAction):
             json_ = click.Option(('--json', 'transformation'), is_flag=True,
                                  flag_value='raw', default=False,
                                  help="Print raw response")
+            xml = click.Option(('--xml', 'transformation'), is_flag=True,
+                               flag_value='xml', default=False,
+                               help="Print response as a XML")
             tree = click.Option(('--tree', 'transformation'), is_flag=True,
                                 flag_value='tree', default=False,
                                 help="Print response as a colored tree")
             nocolor = click.Option(('--nocolor', 'nocolor'), is_flag=True,
                                    default=False, help="Use colors")
-            options += [raw, tree, nocolor, json_]
+            options += [raw, tree, nocolor, json_, xml]
 
             if self.name not in ('get', 'retrieve'):  # [ST-54] [ST-102]
                 table = click.Option(('--table', 'transformation'),
@@ -372,7 +289,7 @@ class Action(BaseAction):
 
         return options
 
-    def get_body_type_params(self):
+    def _get_body_type_params(self):
         route_data = self.raw_spec['paths'][self.route][self.http_method]
         return [param for param in route_data.get('parameters', '')]
 
@@ -383,55 +300,50 @@ class Action(BaseAction):
     def _get_raw_params(self):
         result = self._get_path_type_params()
         if self.http_method.upper() in ('GET', 'DELETE'):
-            body_params = self.get_body_type_params()
+            body_params = self._get_body_type_params()
             result.extend(body_params)
         return result
 
     def _returns_iterable(self):
-        responses = self.raw_spec["paths"][self.route]["get"]['responses']
+        responses = self.raw_spec['paths'][self.route]['get']['responses']
         if '200' in responses:
-            ok200 = responses['200']
-            if 'schema' in ok200:
-                schema = ok200['schema']
+            response_200 = responses['200']
+            if 'schema' in response_200:
+                schema = response_200['schema']
                 if '$ref' in schema:
-                    reference = schema['$ref']
-                    object_key = reference.split("/")[-1]
-                    object_descr = self.raw_spec["definitions"][object_key]
-                    object_properties = object_descr["properties"]
-                    data_structure = object_properties["data"]
-                    if "type" in data_structure:
-                        response_type = data_structure["type"]
-                        if "array" == response_type:
-                            return True
+                    object_key = schema['$ref'].split('/')[-1]
+                    object_descr = self.raw_spec['definitions'][object_key]
+                    object_properties = object_descr['properties']
+                    data_structure = object_properties['data']
+                    return 'array' == data_structure.get('type')
         return False
 
     def _get_available_filters(self):
         if self._returns_iterable():
-            response_ref = self._result_descr["properties"]["data"]["items"]["$ref"]
+            data = self._result_descr['properties']['data']
+            response_ref = data['items']['$ref']
             response_descr = self._lookup(response_ref)
-            if "x-filterable" in response_descr:
-                filters = response_descr["x-filterable"]
-                return filters
+            if 'x-filterable' in response_descr:
+                return response_descr['x-filterable']
         return []
 
     def _get_column_names(self):
-        fields = []
-        data = self._result_descr["properties"]["data"]
-        # XXX: Inconsistency in swagger spec. See RoleDetailsResponse vs RoleCategoryListResponse
-        response_ref = data["items"]["$ref"] if "items" in data else data["$ref"]
+        data = self._result_descr['properties']['data']
+        # XXX: Inconsistency in swagger spec.
+        # See RoleDetailsResponse vs RoleCategoryListResponse
+        response_ref = data['items']['$ref'] \
+            if 'items' in data else data['$ref']
         response_descr = self._lookup(response_ref)
-        for k, v in response_descr["properties"].items():
-            if "$ref" not in v:
-                fields.append(k)
-        return sorted(fields)
+        properties = response_descr['properties']
+        return sorted(k for k, v in properties.items() if '$ref' not in v)
 
-    def _lookup(self, refstr):
+    def _lookup(self, response_ref):
         """
         Returns document section
-        Example: #/definitions/Image returns Image defenition section
+        Example: #/definitions/Image returns Image defenition section.
         """
-        if refstr.startswith("#"):
-            paths = refstr.split("/")[1:]
+        if response_ref.startswith('#'):
+            paths = response_ref.split('/')[1:]
             result = self.raw_spec
             for path in paths:
                 if path not in result:
@@ -441,14 +353,15 @@ class Action(BaseAction):
 
     @property
     def _result_descr(self):
-        responses = self.raw_spec["paths"][self.route][self.http_method]['responses']
+        route_data = self.raw_spec['paths'][self.route]
+        responses = route_data[self.http_method]['responses']
         if '200' in responses:
-            ok200 = responses['200']
-            if 'schema' in ok200:
-                schema = ok200['schema']
+            response_200 = responses['200']
+            if 'schema' in response_200:
+                schema = response_200['schema']
                 if '$ref' in schema:
-                    reference = schema['$ref']
-                    return self._lookup(reference)
+                    response_ref = schema['$ref']
+                    return self._lookup(response_ref)
 
     def _filter_json_object(self, obj, filter_createonly=False):
         """
@@ -457,11 +370,12 @@ class Action(BaseAction):
         """
         # XXX: make it recursive
         result = {}
+        createonly_properties = self._list_createonly_properties()
         mutable_parts = self.mutable_body_parts or \
             self._list_mutable_body_parts()
 
         for name, value in obj.items():
-            if filter_createonly and name in self._list_createonly_properties():
+            if filter_createonly and name in createonly_properties:
                 continue
             elif name in mutable_parts:
                 result[name] = obj[name]
@@ -477,32 +391,30 @@ class Action(BaseAction):
         reference_path = None
 
         if not self.object_reference:
-            for param in self.get_body_type_params():
-                name = param["name"]  # e.g. image
-                if "schema" in param:
-                    if '$ref' in param["schema"]:
-                        reference_path = param["schema"]['$ref']  # e.g. #/definitions/Image
-                    elif "properties" in param["schema"]:  # ST-98, got object instead of $ref
-                        for _property, description in param["schema"]["properties"].items():
-                            if 'readOnly' not in description or not description['readOnly']:
-                                mutable.append(_property)
-
+            for param in self._get_body_type_params():
+                if 'schema' in param:
+                    if '$ref' in param['schema']:
+                        reference_path = param['schema']['$ref']
+                    elif 'properties' in param['schema']:
+                        # ST-98, got object instead of $ref
+                        subparams = param['schema']['properties']
+                        for subparam, description in subparams.items():
+                            if not description.get('readOnly'):
+                                mutable.append(subparam)
                 elif 'readOnly' not in param:
                     # e.g. POST /{envId}/farms/{farmId}/actions/terminate/
-                    mutable.append(name)
-
+                    mutable.append(param['name'])
         else:
             # XXX: Temporary code, see GlobalVariableDetailEnvelope
             # or "role-global-variables update"
             reference_path = self.object_reference
 
         if reference_path:
-            parts = reference_path.split('/')
-            obj = self.raw_spec[parts[1]][parts[2]]
-            object_properties = obj['properties']
-            for _property, description in object_properties.items():
-                if 'readOnly' not in description or not description['readOnly']:
-                        mutable.append(_property)
+            parts = reference_path.strip('#/').split('/')
+            params = self.raw_spec[parts[0]][parts[1]]['properties']
+            for param, description in params.items():
+                if not description.get('readOnly'):
+                    mutable.append(param)
         return mutable
 
     def _list_createonly_properties(self):
@@ -527,3 +439,83 @@ class Action(BaseAction):
     def _request_template(self):
         basepath_uri = self.raw_spec['basePath']
         return '{}{}'.format(basepath_uri, self.route)
+
+    #
+    # PUBLIC METHODS
+    #
+
+    def run(self, *args, **kwargs):
+        """
+        Callback for click subcommand.
+        """
+        dry_run = kwargs.pop('dryrun', False)
+        hide_output = kwargs.get('hide_output', False)  # [ST-88]
+        args, kwargs = self._pre(*args, **kwargs)
+
+        uri = self._request_template
+        payload = {}
+        data = {}
+
+        if '{envId}' in uri and not kwargs.get('envId') and settings.envId:
+            kwargs['envId'] = settings.envId
+
+        if kwargs:
+            # filtering in-body and empty params
+            uri = self._request_template.format(**kwargs)
+            for key, value in kwargs.items():
+                param = '{{{}}}'.format(key)
+                if value and (param not in self._request_template):
+                    body_params = self._get_body_type_params()
+                    if self.http_method.upper() in ('GET', 'DELETE'):
+                        payload[key] = value
+                    elif body_params and key == body_params[0]['name']:
+                        data.update(value)
+
+        if dry_run:
+            click.echo('{} {} {} {}'.format(self.http_method, uri,
+                                            payload, data))
+            return
+
+        data = json.dumps(data)
+        raw_response = request.request(self.http_method, uri, payload, data)
+        response = self._post(raw_response)
+
+        text = self._format_response(response, hidden=hide_output, **kwargs)
+        if text is not None:
+            click.echo(text)
+
+        return response
+
+    def get_description(self):
+        """
+        Returns action description.
+        """
+        route_data = self.raw_spec['paths'][self.route]
+        return route_data[self.http_method]['description']
+
+    def modify_options(self, options):
+        """
+        This is the place where command line options can be fixed
+        after they are loaded from yaml spec.
+        """
+        for option in options:
+            if self.prompt_for and option.name in self.prompt_for:
+                option.prompt = option.name
+            if option.name == 'envId' and settings.envId:
+                option.required = False
+        return options
+
+    def get_options(self):
+        """
+        Returns action options.
+        """
+        return self._get_default_options() + self._get_custom_options()
+
+    def validate(self):
+        """
+        Validate routes for current API scope.
+        """
+        api_routes = utils.read_routes()
+        if self.route and self.api_level and api_routes:
+            assert self.api_level in api_routes and \
+                   self.route in api_routes[self.api_level], self.name

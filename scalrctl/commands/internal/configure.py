@@ -44,9 +44,9 @@ def configure(profile=None):
         if not obj.startswith("__") and obj not in excludes:
             default_value = getattr(settings, obj)
             if obj == "view":
-                click.echo("Set your default view mode. Choose from tree, table, json")
+                click.echo("Set your default view mode. Choose from tree, table, json or xml")
                 view = str(click.prompt("view", default="tree"))
-                if view not in ("tree", "table", "json"):
+                if view not in ("tree", "table", "json", "xml"):
                     view = "tree"
                 data["view"] = view
             elif isinstance(default_value, bool):
