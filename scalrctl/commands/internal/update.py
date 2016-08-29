@@ -95,10 +95,11 @@ def _update_spec(api_level):
         try:
             struct = yaml.load(yaml_spec_text)
             json_spec_text = json.dumps(struct)
-            paths = list(struct['paths'].keys())
+            paths = list(struct['paths3'].keys())
         except (KeyError, TypeError, yaml.YAMLError) as e:
-            six.reraise(type(e), "Swagger specification is not valid:\n{}"
-                        .format(traceback.format_exc()))
+            e.args = ("Swagger specification is not valid:\n{}"
+                      .format(traceback.format_exc()),)
+            six.reraise(type(e), e)
 
         yaml_spec_path = _get_spec_path(api_level, 'yaml')
         json_spec_path = _get_spec_path(api_level, 'json')
@@ -115,7 +116,7 @@ def _update_spec(api_level):
 
         return True, None
     except Exception as e:
-        return False, e.message or 'Unknown reason'
+        return False, str(e).replace('\\n', '\n') or "Unknown reason"
 
 
 class UpdateScalrCTL(commands.BaseAction):
