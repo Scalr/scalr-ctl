@@ -79,7 +79,7 @@ def _write_routes(api_level, paths):
     routes = json.loads(routes_text)
     routes[api_level] = paths
     json.dump(routes, open(defaults.ROUTES_PATH, "w"))
-import sys
+
 
 def _update_spec(api_level):
     """
