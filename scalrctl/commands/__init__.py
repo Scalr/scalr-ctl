@@ -206,7 +206,7 @@ class Action(BaseAction):
             interactive = click.Option(('--interactive', 'interactive'),
                                        is_flag=True, required=False,
                                        help="Edit JSON data in the default "
-                                            "console text editor  before "
+                                            "console text editor before "
                                             "sending POST request to server.")
             options.append(interactive)
 
