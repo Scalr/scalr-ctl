@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 import os
 
-import six
 import pytest
-from pretenders.client.http import HTTPMock
-from pretenders.common.constants import FOREVER
+import webob
+from wsgi_intercept import add_wsgi_intercept, remove_wsgi_intercept,\
+    requests_intercept
 
 from scalrctl import defaults, settings
 from scalrctl.app import cli
@@ -12,35 +12,17 @@ from scalrctl.click.testing import CliRunner
 from scalrctl.commands.internal import update
 
 
-class HTTPMockServer(HTTPMock):
+class HTTPMockServer(object):
 
-    def __init__(self, status=200, validity=True):
+    def __init__(self, status=200, validity=True, host='localhost', port=80):
+        self.status = status
+        self.validity = validity
+        self.host = host
+        self.port = port
+
         self._api_host = settings.API_HOST
         self._api_scheme = settings.API_SCHEME
-
-        self.__status = status
-        self.__validity = validity
-
         self._routes = HTTPMockServer._routes()
-        super(HTTPMock, self).__init__('localhost', 8000, name='test')
-
-    def setup(self):
-        self.teardown()
-        self._setup_routes()
-        settings.API_HOST = self.pretend_url.replace('http://', '')
-        settings.API_SCHEME = 'http'
-
-    def teardown(self):
-        settings.API_HOST = self._api_host
-        settings.API_SCHEME = self._api_scheme
-
-    def _setup_routes(self):
-        self.reset()
-        for route, data in self._routes:
-            text = data.get(self.status, '') if self.validity else "not valid"
-            if six.PY3:
-                text = bytes(text, encoding='utf-8')
-            self.when(route).reply(text, status=self.status, times=FOREVER)
 
     @staticmethod
     def _routes():
@@ -48,38 +30,38 @@ class HTTPMockServer(HTTPMock):
 
         # routes for internal commands
         for api_level in defaults.API_LEVELS:
-            path = '/api/{}.{}.yml'.format(api_level, settings.API_VERSION)
-            route = 'GET {}'.format(path)
+            route = '/api/{}.{}.yml'.format(api_level, settings.API_VERSION)
             if route not in data:
                 data[route] = {}
             data[route][200] = update._load_yaml_spec(api_level)
-        return data.items()
 
-    @property
-    def status(self):
-        return self.__status
+        return data
 
-    @status.setter
-    def status(self, value):
-        if value not in (200, 201, 204, 400, 401, 403,
-                         404, 409, 422, 500, 501, 503):
-            raise TypeError("Invalid status")
-        self.__status = value
-        self.setup()
+    def _app(self, environ, start_response):
+        if self.validity:
+            data = self._routes.get(environ['PATH_INFO'])
+            body = data.get(self.status, '') if data else ''
+        else:
+            body = "not valid"
+        resp = webob.Response(status=self.status, body=body)
+        return resp(environ, start_response)
 
-    @property
-    def validity(self):
-        return self.__validity
+    def setup(self):
+        settings.API_HOST = '{}:{}'.format(self.host, self.port)
+        settings.API_SCHEME = 'http'
+        requests_intercept.install()
+        add_wsgi_intercept(self.host, self.port, lambda: self._app)
 
-    @validity.setter
-    def validity(self, value):
-        self.__validity = value
-        self.setup()
+    def teardown(self):
+        settings.API_HOST = self._api_host
+        settings.API_SCHEME = self._api_scheme
+        requests_intercept.uninstall()
+        remove_wsgi_intercept(self.host, self.port)
 
 
 @pytest.fixture(scope='function')
 def server():
-    mock_server = HTTPMockServer(status=200, validity=True)
+    mock_server = HTTPMockServer()
     mock_server.setup()
     yield mock_server
     mock_server.teardown()
