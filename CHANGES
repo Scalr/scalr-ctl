@@ -1,10 +1,19 @@
 scalr-ctl Changelog
 ===============
 
+Version 1.0.55
+--------------
+
+Fixed
+
+    [ST-172] - setting up bash complition creates dublicate entries in bash_profile
+
+
 Version 1.0.54
 --------------
 
 New feature
+
     [ST-160] - add server launch and farm-role launch-server commands
     [ST-94]  - colored output is not available on Windows
 

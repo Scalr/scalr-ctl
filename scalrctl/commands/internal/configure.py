@@ -96,7 +96,6 @@ def configure(profile=None, admin=False):
     Configure command-line client.
     Creates new profile in configuration directory
     and downloads spec files.
-
     :param profile: profile name
     :param admin: configure admin(global scope) values
     """
