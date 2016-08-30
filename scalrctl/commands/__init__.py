@@ -4,7 +4,7 @@ import re
 
 import dicttoxml
 
-from scalrctl import click, request, settings, utils, view
+from scalrctl import click, request, settings, utils, view, examples
 
 __author__ = 'Dmitriy Korsakov'
 
@@ -120,7 +120,7 @@ class Action(BaseAction):
             json_text = json.loads(raw_text)
             filtered = self._filter_json_object(json_text['data'],
                                                 filter_createonly=True)
-            return json.dumps(filtered)
+            return json.dumps(filtered, indent=2)
         except Exception as e:
             utils.reraise(e)
 
@@ -129,6 +129,16 @@ class Action(BaseAction):
         raw_object = click.edit(raw_object)
         if raw_object is None:
             raise ValueError("No changes in JSON")
+        return json.loads(raw_object)
+
+    def _edit_example(self):
+        commentary = examples.create_post_example(self.api_level, self.route)
+        text = click.edit(commentary)
+        if text:
+            raw_object = "".join([line for line in text.splitlines()
+                                  if not line.startswith("#")]).strip()
+        else:
+            raw_object = ""
         return json.loads(raw_object)
 
     @staticmethod
@@ -191,6 +201,14 @@ class Action(BaseAction):
 
     def _get_custom_options(self):
         options = []
+
+        if self.http_method.upper() == 'POST':
+            interactive = click.Option(('--interactive', 'interactive'),
+                                       is_flag=True, required=False,
+                                       help="Edit JSON data in the default "
+                                            "console text editor  before "
+                                            "sending POST request to server.")
+            options.append(interactive)
 
         if self.http_method.upper() == 'GET':
             if self._returns_iterable():
@@ -409,6 +427,7 @@ class Action(BaseAction):
         self._check_arguments(**kwargs)
 
         import_data = kwargs.pop('import-data', {})
+        interactive = kwargs.pop('interactive', None)
         http_method = self.http_method.upper()
 
         if http_method not in ('PATCH', 'POST'):
@@ -425,6 +444,8 @@ class Action(BaseAction):
                 else:
                     if http_method == 'PATCH':
                         json_object = self._edit_object(*args, **kwargs)
+                    elif http_method == 'POST' and interactive:
+                        json_object = self._edit_example()
                     else:
                         json_object = self._read_object()
 
@@ -478,7 +499,8 @@ class Action(BaseAction):
             return json.dumps({'data': {}, 'meta': {}})
 
         data = json.dumps(data)
-        raw_response = request.request(self.http_method, uri, payload, data)
+        raw_response = request.request(self.http_method, self.api_level,
+                                       uri, payload, data)
         response = self.post(raw_response)
 
         text = self._format_response(response, hidden=hide_output, **kwargs)
