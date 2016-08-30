@@ -6,6 +6,7 @@ Version 1.0.54
 
 New feature
     [ST-160] - add server launch and farm-role launch-server commands
+    [ST-94]  - colored output is not available on Windows
 
 
 Version 1.0.53
