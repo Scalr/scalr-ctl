@@ -161,3 +161,4 @@ def update():
             click.secho('Done', fg='green')
         else:
             click.secho('Failed: {}'.format(fail_reason), fg='red')
+
