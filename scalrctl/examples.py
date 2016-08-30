@@ -8,7 +8,7 @@ from scalrctl import defaults
 __author__ = 'Sergey Babak'
 
 
-DOCS_HOST = 'http://api-explorer.scalr.com.s3-website-us-east-1.amazonaws.com'
+DOCS_HOST = 'https://api-explorer.scalr.com'
 
 EXCLUDES = [
     '/{envId}/farm-roles/{farmRoleId}/servers/',
