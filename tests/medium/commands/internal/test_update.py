@@ -48,8 +48,8 @@ class HTTPMockServer(HTTPMock):
 
         # routes for internal commands
         for api_level in defaults.API_LEVELS:
-            path = "/api/{}.{}.yml".format(api_level, settings.API_VERSION)
-            route = "GET {}".format(path)
+            path = '/api/{}.{}.yml'.format(api_level, settings.API_VERSION)
+            route = 'GET {}'.format(path)
             if route not in data:
                 data[route] = {}
             data[route][200] = update._load_yaml_spec(api_level)
@@ -63,7 +63,7 @@ class HTTPMockServer(HTTPMock):
     def status(self, value):
         if value not in (200, 201, 204, 400, 401, 403,
                          404, 409, 422, 500, 501, 503):
-            raise TypeError('Invalid status')
+            raise TypeError("Invalid status")
         self.__status = value
         self.setup()
 
@@ -77,7 +77,7 @@ class HTTPMockServer(HTTPMock):
         self.setup()
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture(scope='function')
 def server():
     mock_server = HTTPMockServer(status=200, validity=True)
     mock_server.setup()

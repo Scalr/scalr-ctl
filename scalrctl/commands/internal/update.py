@@ -79,7 +79,7 @@ def _write_routes(api_level, paths):
     routes = json.loads(routes_text)
     routes[api_level] = paths
     json.dump(routes, open(defaults.ROUTES_PATH, "w"))
-
+import sys
 
 def _update_spec(api_level):
     """
@@ -95,11 +95,11 @@ def _update_spec(api_level):
         try:
             struct = yaml.load(yaml_spec_text)
             json_spec_text = json.dumps(struct)
-            paths = list(struct['paths3'].keys())
-        except (KeyError, TypeError, yaml.YAMLError) as e:
-            e.args = ("Swagger specification is not valid:\n{}"
-                      .format(traceback.format_exc()),)
-            six.reraise(type(e), e)
+            paths = list(struct['paths'].keys())
+        except (KeyError, TypeError, yaml.YAMLError):
+            ty, va, tb = sys.exc_info()
+            va.args = ("Swagger specification is not valid",)
+            six.reraise(ty, va, tb)
 
         yaml_spec_path = _get_spec_path(api_level, 'yaml')
         json_spec_path = _get_spec_path(api_level, 'json')
@@ -116,7 +116,9 @@ def _update_spec(api_level):
 
         return True, None
     except Exception as e:
-        return False, str(e).replace('\\n', '\n') or "Unknown reason"
+        if settings.debug_mode:
+            click.echo(traceback.format_exc())
+        return False, str(e) or "Unknown reason"
 
 
 class UpdateScalrCTL(commands.BaseAction):
