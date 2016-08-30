@@ -9,9 +9,11 @@ from scalrctl import click
 from scalrctl import defaults
 from scalrctl import settings
 from scalrctl import request
+from scalrctl import examples
 from scalrctl.view import build_table, build_tree
 
 import dicttoxml
+
 
 
 class BaseAction(object):
@@ -106,6 +108,7 @@ class Action(BaseAction):
         if "nocolor" in kwargs:
             settings.colored_output = not kwargs.pop("nocolor")
         import_data = kwargs.pop("import-data", None)
+        interactive = kwargs.pop("interactive", None)
 
         self.check_arguments(**kwargs)
 
@@ -144,6 +147,12 @@ class Action(BaseAction):
                 else:
                     if self.http_method.upper() == "PATCH":
                         raw = click.edit(text)
+                    elif self.http_method.upper() == "POST" and interactive:
+                        commentary = examples.create_post_example(self.api_level, self.route)
+                        text = click.edit(commentary)
+                        raw = ""
+                        if text:
+                            raw = "".join([line for line in text.splitlines() if not line.startswith("#")]).strip()
                     else:
                         raw = click.get_text_stream("stdin").read()
 
@@ -155,7 +164,6 @@ class Action(BaseAction):
                         raise click.ClickException(str(e))
 
                 valid_object = self._filter_json_object(user_object)
-
                 valid_object_str = json.dumps(valid_object)
                 kwargs[name] = valid_object_str
 
@@ -305,6 +313,15 @@ class Action(BaseAction):
 
     def _get_custom_options(self):
         options = []
+
+        if self.http_method.upper() == 'POST':
+            interactive = click.Option(
+                ("--interactive", "interactive"),
+                is_flag=True,
+                required=False,
+                help="Edit JSON data in the default console text editor before sending POST request to server."
+            )
+            options.append(interactive)
 
         if self.http_method.upper() == 'GET':
             if self._returns_iterable():
