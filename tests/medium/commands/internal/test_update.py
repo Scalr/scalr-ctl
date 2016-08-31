@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 import os
+import tempfile
 
-import pytest
 import webob
-from wsgi_intercept import add_wsgi_intercept, remove_wsgi_intercept,\
-    requests_intercept
+import pytest
+from wsgi_intercept import (add_wsgi_intercept, remove_wsgi_intercept,
+                            requests_intercept)
 
 from scalrctl import defaults, settings
 from scalrctl.app import cli
@@ -81,9 +82,9 @@ def test_update(server):
             return result.output
 
         def remove_configs(ext):
-            for f in os.listdir(defaults.CONFIG_DIRECTORY):
-                if os.path.isfile(f) and f.endswith('.{}'.format(ext)):
-                    os.remove(f)
+            for file_ in os.listdir(defaults.CONFIG_DIRECTORY):
+                if os.path.isfile(file_) and file_.endswith('.{}'.format(ext)):
+                    os.remove(file_)
 
         try:
             # empty config directory
@@ -111,7 +112,8 @@ def test_update(server):
 
             # config directory does not exists
             server.status = 200
-            defaults.CONFIG_DIRECTORY = '/tmp/i7Lzcdm5uOcfqVkDTKRQ/'
+            defaults.CONFIG_DIRECTORY = os.path.join(tempfile.gettempdir(),
+                                                     'i7Lzcdm5uOcfqVkDTKRQ')
             expected_msg = "Failed: [Errno 2] No such file or directory"
             assert call_update().count(expected_msg) == api_len
         finally:
