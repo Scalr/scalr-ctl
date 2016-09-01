@@ -55,7 +55,7 @@ def _random_input_genertor(admin=False, invalid_values_quantity=3):
         input_data.append(valid_input)
 
         if default_type == bool:
-            valid_data[key] = True if valid_input.lower() == 'y' else False
+            valid_data[key] = valid_input.lower() == 'y'
         else:
             valid_data[key] = str(valid_input)
 
@@ -81,8 +81,7 @@ def test_configure():
             assert result.exit_code == 0
 
             config_data = configure._read_config(defaults.CONFIG_PATH)
-            assert len(set(config_data.items()) ^
-                       set(valid_data.items())) == 0
+            assert set(config_data.items()) == set(valid_data.items())
 
             # test "--with-global-scope" option
             os.remove(defaults.CONFIG_PATH)
@@ -92,7 +91,6 @@ def test_configure():
             assert result.exit_code == 0
 
             config_data = configure._read_config(defaults.CONFIG_PATH)
-            assert len(set(config_data.items()) ^
-                       set(valid_data.items())) == 0
+            assert set(config_data.items()) == set(valid_data.items())
         finally:
             defaults.CONFIG_PATH = config_path
