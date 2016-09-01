@@ -66,10 +66,16 @@ class Action(BaseAction):
             self.epilog = "Example: scalr-ctl %s %s < %s.json" % (level, self.name, self.name)
 
     def validate(self):
-        if self.route and self.api_level and os.path.exists(defaults.ROUTES_PATH):
-            available_api_routes = json.load(open(defaults.ROUTES_PATH))
-            assert self.api_level in available_api_routes and self.route in available_api_routes[self.api_level], \
-                self.name
+        """
+        Validate routes for current API scope.
+        """
+        spec_path = os.path.join(defaults.CONFIG_DIRECTORY,
+                                 '{}.json'.format(self.api_level))
+        api_routes = json.load(open(spec_path, 'r'))['paths'].keys()
+
+        if self.route and self.api_level and api_routes:
+            assert self.api_level in api_routes and \
+                   self.route in api_routes[self.api_level], self.name
 
     def check_arguments(self, **kwargs):
         if "parameters" in self.raw_spec["paths"][self.route]:
