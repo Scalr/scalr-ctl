@@ -46,6 +46,8 @@ def _generate_params(spec_data, schema):
 
     if 'properties' in schema:
         for p_key, p_value in schema['properties'].items():
+            if p_value.get('readOnly'):
+                continue
             if '$ref' in p_value:
                 sub_item = _item_by_ref(spec_data, p_value['$ref'])
                 params[p_key] = _generate_params(spec_data, sub_item)
