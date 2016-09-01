@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import os
+import re
 
 import yaml
 
@@ -24,8 +25,9 @@ CONFIGURATIONS = {
             'description': 'SSL verification',
         },
         'API_HOST': {
+            'pattern': r'^(?!http://|https://).*',
             'order': 2,
-            'description': 'Scalr API host'
+            'description': 'Scalr API host (without protocol)'
         },
         'API_KEY_ID': {
             'order': 3,
@@ -36,6 +38,7 @@ CONFIGURATIONS = {
             'description': 'Scalr API sectet key ID'
         },
         'envId': {
+            'pattern': r'^\d+$',
             'order': 5,
             'description': 'Scalr environment ID'
         },
@@ -83,25 +86,23 @@ class ConfigureScalrCTL(commands.BaseAction):
         configure(**kwargs)
 
     def get_description(self):
-        return "Set user configuration options in interactive mode"
+        return "Set configuration options in interactive mode"
 
     def get_options(self):
-        profile_arg = click.Argument(('profile',), required=False)   # [ST-30]
-        admin_opt = click.Option(('--with-global-scope', 'admin'), required=False, is_flag=True)
-        return [profile_arg, admin_opt]
+        admin_opt = click.Option(('--with-global-scope', 'admin'),
+                                 required=False, is_flag=True)
+        return [admin_opt, ]
 
 
-def configure(profile=None, admin=False):
+def configure(admin=False):
     """
     Configure command-line client.
     Creates new profile in configuration directory
     and downloads spec files.
-    :param profile: profile name
-    :param admin: configure admin(global scope) values
+    :param admin: configure admin (global scope) values
     """
 
-    conf_path = defaults.CONFIG_PATH if not profile else \
-        os.path.join(defaults.CONFIG_DIRECTORY, '{}.yaml'.format(profile))
+    conf_path = defaults.CONFIG_PATH
 
     conf_data = _read_config(conf_path) or {}
 
@@ -109,7 +110,7 @@ def configure(profile=None, admin=False):
     if admin:
         values.update(CONFIGURATIONS['ADMIN'])
 
-    click.echo('Configuring profile "{}":\n'.format(profile or 'default'))
+    click.echo('Configuring...')
 
     for key, value in sorted(values.items(), key=lambda kv: kv[1]['order']):
 
@@ -132,10 +133,21 @@ def configure(profile=None, admin=False):
                 conf_data[key] = click.prompt(desc, default=default_value)
                 conf_data[key] = str(conf_data[key]).strip()
 
+            # check spaces
+            if type(conf_data.get(key)) == str and ' ' in conf_data.get(key):
+                return False
+
+            # check pattern
+            if value.get('pattern'):
+                pattern = re.compile(value['pattern'])
+                if not pattern.match(conf_data[key]):
+                    return False
+
+            # check enum
             return conf_data.get(key) in enum if enum else True
 
         while not _input():
-            continue
+            click.echo('Error: invalid input')
 
     _write_config(conf_path, conf_data)
     click.echo('\nNew config saved to {}\n'.format(conf_path))
