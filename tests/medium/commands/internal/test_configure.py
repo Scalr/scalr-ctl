@@ -9,7 +9,7 @@ from scalrctl.click.testing import CliRunner
 from scalrctl.commands.internal import configure
 
 
-VALID_API_HOST = 'my.scalr.net'
+VALID_API_HOST = settings.API_HOST
 
 
 def _valid_input(key, value, default_type):
@@ -60,7 +60,7 @@ def _random_input_genertor(admin=False, invalid_values_quantity=3):
             valid_data[key] = str(valid_input)
 
     input_data = [str(item) for item in input_data]
-    input_data = io.BytesIO(bytes('\n'.join(input_data)))
+    input_data = io.BytesIO('\n'.join(input_data).encode('utf-8'))
 
     return input_data, valid_data
 
