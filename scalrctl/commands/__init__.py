@@ -69,13 +69,11 @@ class Action(BaseAction):
         """
         Validate routes for current API scope.
         """
-        spec_path = os.path.join(defaults.CONFIG_DIRECTORY,
-                                 '{}.json'.format(self.api_level))
-        api_routes = json.load(open(spec_path, 'r'))['paths'].keys()
-
-        if self.route and self.api_level and api_routes:
-            assert self.api_level in api_routes and \
-                   self.route in api_routes[self.api_level], self.name
+        if self.route and self.api_level:
+            spec_path = os.path.join(defaults.CONFIG_DIRECTORY,
+                                     '{}.json'.format(self.api_level))
+            api_routes = json.load(open(spec_path, 'r'))['paths'].keys()
+            assert api_routes and self.route in api_routes, self.name
 
     def check_arguments(self, **kwargs):
         if "parameters" in self.raw_spec["paths"][self.route]:
