@@ -516,7 +516,8 @@ class Action(BaseAction):
                         schema=self._lookup(p_value['$ref']),
                     )
                 else:
-                    if p_key not in schema.get('x-createOnly', ''):
+                    if not (filter_createonly and
+                            p_key in schema.get('x-createOnly', '')):
                         filtered[p_key] = data[p_key]
 
         return filtered
