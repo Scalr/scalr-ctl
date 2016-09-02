@@ -488,50 +488,40 @@ class Action(BaseAction):
                     reference = schema['$ref']
                     return self._lookup(reference)
 
-    def _filter_json_object(self, data, filter_createonly=False,
-                            properties=None):
+    def _filter_json_object(self, data, filter_createonly=False, schema=None):
         """
         Removes immutable parts from JSON object
         before sending it in POST or PATCH.
         """
         filtered = {}
 
-        if not isinstance(data, dict):
-            return filtered
+        if schema is None:
+            schema = {}
+            for param in self.get_body_type_params():
+                if 'schema' in param:
+                    schema = param['schema']
+                    if '$ref' in schema:
+                        schema = self._lookup(schema['$ref'])
+                    break
 
-        if properties is None:
-            properties = self._get_body_type_properties()
-
-        for p_key, p_value in properties.items():
+        for p_key, p_value in schema.get('properties').items():
             if p_key not in data:
                 continue
             if p_value.get('readOnly'):
                 continue
-            if filter_createonly and p_value.get('createOnly'):
-                continue
-            if '$ref' in p_value:
-                reference = self._lookup(p_value['$ref'])
-                if reference and 'properties' in reference:
+            if '$ref' in p_value and isinstance(data[p_key], dict):
+                schema = self._lookup(p_value['$ref'])
+                if schema and 'properties' in schema:
                     filtered[p_key] = self._filter_json_object(
                         data[p_key],
                         filter_createonly=filter_createonly,
-                        properties=reference['properties']
+                        schema=schema,
                     )
             else:
-                filtered[p_key] = data[p_key]
+                if p_key not in schema.get('x-createOnly', ''):
+                    filtered[p_key] = data[p_key]
 
         return filtered
-
-    def _get_body_type_properties(self):
-        properties = {}
-        for param in self.get_body_type_params():
-            if 'schema' in param:
-                schema = param['schema']
-                if '$ref' in schema:
-                    schema = self._lookup(schema['$ref'])
-                if 'properties' in schema:
-                    properties.update(schema['properties'])
-        return properties
 
     def _list_mutable_body_parts(self):
         """
