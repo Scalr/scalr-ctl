@@ -496,7 +496,6 @@ class Action(BaseAction):
         filtered = {}
 
         if schema is None:
-            schema = {}
             for param in self.get_body_type_params():
                 if 'schema' in param:
                     schema = param['schema']
@@ -504,22 +503,21 @@ class Action(BaseAction):
                         schema = self._lookup(schema['$ref'])
                     break
 
-        for p_key, p_value in schema.get('properties').items():
-            if p_key not in data:
-                continue
-            if p_value.get('readOnly'):
-                continue
-            if '$ref' in p_value and isinstance(data[p_key], dict):
-                schema = self._lookup(p_value['$ref'])
-                if schema and 'properties' in schema:
+        if schema and 'properties' in schema:
+            for p_key, p_value in schema['properties'].items():
+                if p_key not in data:
+                    continue
+                if p_value.get('readOnly'):
+                    continue
+                if '$ref' in p_value and isinstance(data[p_key], dict):
                     filtered[p_key] = self._filter_json_object(
                         data[p_key],
                         filter_createonly=filter_createonly,
-                        schema=schema,
+                        schema=self._lookup(p_value['$ref']),
                     )
-            else:
-                if p_key not in schema.get('x-createOnly', ''):
-                    filtered[p_key] = data[p_key]
+                else:
+                    if p_key not in schema.get('x-createOnly', ''):
+                        filtered[p_key] = data[p_key]
 
         return filtered
 
