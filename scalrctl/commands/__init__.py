@@ -494,7 +494,10 @@ class Action(BaseAction):
         Removes immutable parts from JSON object
         before sending it in POST or PATCH.
         """
-        params = {}
+        filtered = {}
+
+        if not isinstance(data, dict):
+            return filtered
 
         if properties is None:
             properties = self._get_body_type_properties()
@@ -508,16 +511,16 @@ class Action(BaseAction):
                 continue
             if '$ref' in p_value:
                 reference = self._lookup(p_value['$ref'])
-                if 'properties' in reference:
-                    params[p_key] = self._filter_json_object(
+                if reference and 'properties' in reference:
+                    filtered[p_key] = self._filter_json_object(
                         data[p_key],
                         filter_createonly=filter_createonly,
                         properties=reference['properties']
                     )
             else:
-                params[p_key] = data[p_key]
+                filtered[p_key] = data[p_key]
 
-        return params
+        return filtered
 
     def _get_body_type_properties(self):
         properties = {}
