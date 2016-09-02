@@ -504,6 +504,7 @@ class Action(BaseAction):
                     break
 
         if schema and 'properties' in schema:
+            create_only_props = schema.get('x-createOnly', '')
             for p_key, p_value in schema['properties'].items():
                 if p_key not in data:
                     continue
@@ -516,8 +517,7 @@ class Action(BaseAction):
                         schema=self._lookup(p_value['$ref']),
                     )
                 else:
-                    if not (filter_createonly and
-                            p_key in schema.get('x-createOnly', '')):
+                    if not (filter_createonly and p_key in create_only_props):
                         filtered[p_key] = data[p_key]
 
         return filtered
