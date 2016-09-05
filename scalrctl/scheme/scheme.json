@@ -859,7 +859,7 @@
             },
             "role": {
                 "api_level": "user",
-                "class": "scalrctl.commands.export.Export",
+                "class": "scalrctl.commands.export.ExportRole",
                 "http-method": "get",
                 "route": "/{envId}/roles/{roleId}/",
                 "cmd_descr" : "Export your Role objects to a file",

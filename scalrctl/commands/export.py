@@ -11,10 +11,33 @@ import yaml
 from scalrctl import click, commands, defaults, settings
 
 
-__author__ = 'Dmitriy Korsakov'
+__author__ = 'Dmitriy Korsakov, Sergey Babak'
+
+
+def _recursive_get(d, key):
+    if type(d) != dict:
+        return
+    head, _, tail = key.partition('.')
+    h_value = d.get(head, '')
+    if tail and type(h_value) == dict:
+        return _recursive_get(h_value, tail)
+    if not tail:
+        return h_value
+
+
+def parse_kwargs(parent, child, key):
+    head, _, tail = key.partition('.')
+    if head == 'child':
+        return _recursive_get(child, tail)
+    elif head == 'parent':
+        return _recursive_get(parent, tail)
+    else:
+        raise Exception("Invalid relations key: \"{}\"".format(key))
 
 
 class Export(commands.Action):
+
+    relations = []
 
     def _get_custom_options(self):
         # Disable output modifiers
@@ -23,6 +46,46 @@ class Export(commands.Action):
                              default=False, help="Print debug messages")
         options.append(debug)
         return options
+
+    def _get_relations(self, parent):
+
+        with open(os.path.join(os.path.dirname(__file__),
+                               '../scheme/scheme.json')) as fp:
+            scheme = json.load(fp)
+
+        data = []
+        for relation, relation_values in self.relations.items():
+            list_data = scheme[relation]['list']
+            list_action = commands.Action(
+                name=relation,
+                route=list_data['route'],
+                http_method=list_data['http-method'],
+                api_level=list_data['api_level'],
+            )
+
+            get_data = scheme[relation]['get']
+            get_action = Export(
+                name=relation,
+                route=get_data['route'],
+                http_method=get_data['http-method'],
+                api_level=get_data['api_level'],
+            )
+
+            list_kwargs = {'hide_output': True}
+            for key, value in relation_values['list'].items():
+                list_kwargs[key] = parse_kwargs(parent, None, value)
+
+            list_action_resp = list_action.run(**list_kwargs)
+            resp_json = json.loads(list_action_resp)
+
+            for obj_data in resp_json['data']:
+                get_kwargs = {'hide_output': True}
+                for key, value in relation_values['get'].items():
+                    get_kwargs[key] = parse_kwargs(parent, obj_data, value)
+                resp = get_action.run(**get_kwargs)
+                data.extend(resp)
+
+        return data
 
     def run(self, *args, **kwargs):
         hide_output = kwargs.pop('hide_output', False)
@@ -61,14 +124,20 @@ class Export(commands.Action):
 
         response_json['meta']['scalrctl'] = scalrctl_meta
 
+        result = [response_json, ]
+        if self.relations:
+            relations = self._get_relations(response_json['data'])
+            result.extend(relations)
+
         if not hide_output:
             dump = yaml.safe_dump(
-                response_json, encoding='utf-8',
+                result, encoding='utf-8',
                 allow_unicode=True,
                 default_flow_style=False
             )
             click.echo(dump)
-        return [response_json, ]
+
+        return result
 
 
 class ExportFarmRoleGlobalVariable(Export):
@@ -81,50 +150,55 @@ class ExportImage(Export):
 
 class ExportScript(Export):
 
-    def run(self, *args, **kwargs):
-        # TODO: help for update! (some script-versions may be deleted)
-        # interactive update by default (prompt for deletes and updates),
-        # with optional force
-        kwargs['hide_output'] = True
-        response = super(ExportScript, self).run(*args, **kwargs)
+    relations = {
+        'script-version': {
+            'get': {
+                'scriptId': 'parent.id',
+                'scriptVersionNumber': 'child.version',
+            },
+            'list': {
+                'scriptId': 'parent.id'
+            }
+        },
+    }
 
-        sv_list_action = commands.Action(
-            'script-version',
-            '/{envId}/scripts/{scriptId}/script-versions/',
-            'get',
-            'user'
-        )
-        sv_list_resp = sv_list_action.run(
-            envId=kwargs['envId'],
-            scriptId=kwargs['scriptId'],
-            hide_output=True
-        )
-        sv_list_json = json.loads(sv_list_resp)
 
-        sv_get_action = Export(
-            'script-version',
-            '/{envId}/scripts/{scriptId}/'
-            'script-versions/{scriptVersionNumber}/',
-            'get',
-            'user',
-        )
+class ExportRole(Export):
 
-        for script in sv_list_json['data']:
-            if script.get('body'):
-                resp = sv_get_action.run(
-                    envId=kwargs['envId'],
-                    scriptId=kwargs['scriptId'],
-                    scriptVersionNumber=script['version'],
-                    hide_output=True
-                )
-                response.extend(resp)
-
-        dump = yaml.safe_dump(
-            response,
-            encoding='utf-8',
-            allow_unicode=True,
-            default_flow_style=False
-        )
-        click.echo(dump)
-
-        return response
+    relations = {
+        'role-image': {
+            'get': {
+                'roleId': 'child.role.id',
+                'imageId': 'child.image.id',
+            },
+            'list': {
+                'roleId': 'parent.id'
+            }
+        },
+        'role-category': {
+            'get': {
+                'roleCategoryId': 'child.id',
+            },
+            'list': {
+                'scope': 'parent.scope'
+            }
+        },
+        'role-global-variables': {
+            'get': {
+                'globalVariableName': 'child.name',
+                'roleId': 'parent.id'
+            },
+            'list': {
+                'roleId': 'parent.id'
+            }
+        },
+        'role-orchestration-rule': {
+            'get': {
+                'roleId': 'parent.id',
+                'orchestrationRuleId': 'child.id',
+            },
+            'list': {
+                'roleId': 'parent.id'
+            }
+        },
+    }

@@ -42,26 +42,23 @@ class Import(commands.Action):
     def run(self, *args, **kwargs):
         if 'debug' in kwargs:
             settings.debug_mode = kwargs.pop('debug')
-        if 'env_id' in kwargs:
-            settings.envId = kwargs.pop('env_id')
+        env_id = kwargs.pop("env_id", None) or settings.envId
+
         dry_run = kwargs.pop('dryrun', False)
         update_mode = kwargs.pop('update', False)
 
         raw_objects = kwargs.pop('raw', None) or click.get_text_stream('stdin')
-        import_objects = yaml.safe_load(raw_objects)
+        import_objects = self._validate_object(raw_objects)
 
         updated_args = {}
         for obj_data in import_objects:
-
-            self._validate_object(obj_data)
             obj_data['meta']['scalrctl']['ARGUMENTS'][1].update(updated_args)
-
-            result, alias = self._import_object(obj_data, update_mode, dry_run)
+            result, alias = self._import_object(obj_data, env_id, update_mode, dry_run)
 
             if 'id' in result['data']:
                 updated_args['{}Id'.format(alias)] = result['data']['id']
 
-    def _import_object(self, obj_data, update_mode, dry_run=False):
+    def _import_object(self, obj_data, env_id, update_mode, dry_run=False):
         args, kwargs = obj_data['meta']['scalrctl']['ARGUMENTS']
         route = obj_data['meta']['scalrctl']['ROUTE']
         http_method = 'patch' if update_mode else 'post'
@@ -87,6 +84,8 @@ class Import(commands.Action):
         obj_type = action.get_body_type_params()[0]['name']
         kwargs['import-data'] = {obj_type: obj_data['data']}
         kwargs['dryrun'] = dry_run
+        if env_id:
+            kwargs['envId'] = env_id
 
         click.secho("{} {} {}".format(
             "Updating" if update_mode else "Creating",
@@ -113,8 +112,9 @@ class Import(commands.Action):
             return obj_type
 
     @staticmethod
-    def _validate_object(obj_data):
-        try:
+    def _validate_object(raw_objects):
+        import_objects = yaml.safe_load(raw_objects)
+        for obj_data in import_objects:
             assert 'data' in obj_data
             assert 'meta' in obj_data
             assert 'scalrctl' in obj_data['meta']
@@ -125,11 +125,7 @@ class Import(commands.Action):
                         'ARGUMENTS',
                         'API_LEVEL'):
                 assert key in meta_info
-        except (Exception, BaseException) as e:
-            if settings.debug_mode:
-                click.echo(e)
-                click.echo(obj_data)
-            raise click.ClickException("Invalid object description")
+        return import_objects
 
 
 class ImportImage(commands.Action):
