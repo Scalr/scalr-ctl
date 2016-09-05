@@ -42,27 +42,40 @@ class Import(commands.Action):
     def run(self, *args, **kwargs):
         if 'debug' in kwargs:
             settings.debug_mode = kwargs.pop('debug')
-        if 'dryrun' in kwargs:
-            dry_run_mode = kwargs.pop('dryrun')
-
-        env_id = kwargs.pop('debug', None) or settings.envId
-        raw = kwargs.pop('raw', None) or click.get_text_stream('stdin')
-        obj_data = self._validate_object(raw)
-
-        get_type_route = obj_data['meta']['scalrctl']['ROUTE']
+        if 'env_id' in kwargs:
+            settings.envId = kwargs.pop('env_id')
+        dry_run = kwargs.pop('dryrun', False)
         update_mode = kwargs.pop('update', False)
+
+        raw_objects = kwargs.pop('raw', None) or click.get_text_stream('stdin')
+        import_objects = yaml.safe_load(raw_objects)
+
+        updated_args = {}
+        for obj_data in import_objects:
+
+            self._validate_object(obj_data)
+            obj_data['meta']['scalrctl']['ARGUMENTS'][1].update(updated_args)
+
+            result, alias = self._import_object(obj_data, update_mode, dry_run)
+
+            if 'id' in result['data']:
+                updated_args['{}Id'.format(alias)] = result['data']['id']
+
+    def _import_object(self, obj_data, update_mode, dry_run=False):
+        args, kwargs = obj_data['meta']['scalrctl']['ARGUMENTS']
+        route = obj_data['meta']['scalrctl']['ROUTE']
         http_method = 'patch' if update_mode else 'post'
 
         action_scheme = None
         for obj_name, section in self.scheme['export'].items():
             if 'http-method' in section and 'route' in section and \
-               section['http-method'] == 'get' and \
-               section['route'] == get_type_route:
-                action_scheme = section["%s-params" % http_method]
+                            section['http-method'] == 'get' and \
+                            section['route'] == route:
+                action_scheme = section["{}-params".format(http_method)]
 
         if not action_scheme:
             msg = "Cannot import Scalr object: API method '{}: {}' not found" \
-                .format('get'.upper(), get_type_route)
+                .format('GET', route)
             raise click.ClickException(msg)
 
         cls = pydoc.locate(
@@ -71,14 +84,9 @@ class Import(commands.Action):
         action = cls(name=self.name, route=action_scheme['route'],
                      http_method=http_method, api_level=self.api_level)
 
-        arguments, kv = obj_data['meta']['scalrctl']['ARGUMENTS']
-
         obj_type = action.get_body_type_params()[0]['name']
-        kv['import-data'] = {obj_type: obj_data['data']}
-        if env_id:
-            kv['envId'] = env_id
-        if dry_run_mode:
-            kv['dryrun'] = dry_run_mode
+        kwargs['import-data'] = {obj_type: obj_data['data']}
+        kwargs['dryrun'] = dry_run
 
         click.secho("{} {} {}".format(
             "Updating" if update_mode else "Creating",
@@ -86,58 +94,41 @@ class Import(commands.Action):
             "ID" if update_mode else ""
         ), bold=True)
 
-        result = action.run(*arguments, **kv)
+        result = action.run(*args, **kwargs)
         result_json = json.loads(result)
 
-        if 'include' in obj_data:
-            for obj in obj_data['include']:
+        alias = self._get_object_alias(obj_type)
+        click.secho("{} created.\n".format(alias), bold=True)
 
-                if obj['meta']['scalrctl']['ACTION'] == 'script-version':  # XXX
-                    obj['meta']['scalrctl']['ARGUMENTS'][1]['scriptId'] = result_json['data']['id']
+        return result_json, alias
 
-                inc_raw = yaml.dump(obj)
-                inc_kv = {
-                    'debug': settings.debug_mode,
-                    'env_id': env_id,
-                    'dryrun': dry_run_mode,
-                    'update': update_mode,
-                    'raw': inc_raw,
-                }
-
-                self.run(**inc_kv)
-        click.echo("\x1b[1m %s created. \x1b[0m" % self._get_object_alias(obj_type))
-        click.echo()
-        return result
-
-    def _get_object_alias(self, obj_type):
+    @staticmethod
+    def _get_object_alias(obj_type):
         """
         :return: "role" for "roleObject", "script" for "scriptObject"
         """
-        return obj_type[:-6] if obj_type and obj_type.endswith("Object") else obj_type
+        if obj_type and obj_type.endswith("Object"):
+            return obj_type[:-6]
+        else:
+            return obj_type
 
-    def _validate_object(self, yml):
+    @staticmethod
+    def _validate_object(obj_data):
         try:
-            descr = yaml.safe_load(yml)
-            assert "data" in descr
-            assert "meta" in descr
-            meta = descr["meta"]
-            assert "scalrctl" in meta
-            info = meta["scalrctl"]
-            for key in (
-                "METHOD",
-                "ROUTE",
-                "envId",
-                "ARGUMENTS",
-                "API_LEVEL"
-            ):
-                assert key in info
-
-            return descr
-
+            assert 'data' in obj_data
+            assert 'meta' in obj_data
+            assert 'scalrctl' in obj_data['meta']
+            meta_info = obj_data['meta']['scalrctl']
+            for key in ('METHOD',
+                        'ROUTE',
+                        'envId',
+                        'ARGUMENTS',
+                        'API_LEVEL'):
+                assert key in meta_info
         except (Exception, BaseException) as e:
             if settings.debug_mode:
                 click.echo(e)
-                click.echo(descr)
+                click.echo(obj_data)
             raise click.ClickException("Invalid object description")
 
 
@@ -145,7 +136,7 @@ class ImportImage(commands.Action):
 
     def pre(self, *args, **kwargs):
         if 'imageId' not in kwargs:
-            kwargs["image"] = click.termui.prompt("Image object JSON")
+            kwargs['image'] = click.termui.prompt("Image object JSON")
 
         return super(commands.Action, self).pre(*args, **kwargs)
 

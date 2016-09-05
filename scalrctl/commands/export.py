@@ -1,6 +1,7 @@
 """
 Export Scalr objects.
 """
+import os
 import copy
 import datetime
 import json
@@ -58,23 +59,16 @@ class Export(commands.Action):
                 raise
             raise click.ClickException(str(e))
 
-        data = {
-            'meta': {
-                'scalrctl': scalrctl_meta
-            },
-            'include': [
-                response_json,
-            ]
-        }
+        response_json['meta']['scalrctl'] = scalrctl_meta
 
         if not hide_output:
             dump = yaml.safe_dump(
-                data, encoding='utf-8',
+                response_json, encoding='utf-8',
                 allow_unicode=True,
                 default_flow_style=False
             )
             click.echo(dump)
-        return data
+        return [response_json, ]
 
 
 class ExportFarmRoleGlobalVariable(Export):
@@ -123,8 +117,7 @@ class ExportScript(Export):
                     scriptVersionNumber=script['version'],
                     hide_output=True
                 )
-                for item in resp['include']:
-                    response['include'].append(item)
+                response.extend(resp)
 
         dump = yaml.safe_dump(
             response,
@@ -134,5 +127,4 @@ class ExportScript(Export):
         )
         click.echo(dump)
 
-        #click.echo(json.dumps(response, indent=2))
         return response
