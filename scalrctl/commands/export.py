@@ -14,30 +14,21 @@ from scalrctl import click, commands, defaults, settings
 __author__ = 'Dmitriy Korsakov, Sergey Babak'
 
 
-def _recursive_get(d, key):
-    if type(d) != dict:
-        return
-    head, _, tail = key.partition('.')
-    h_value = d.get(head, '')
-    if tail and type(h_value) == dict:
-        return _recursive_get(h_value, tail)
-    if not tail:
-        return h_value
-
-
-def parse_kwargs(parent, child, key):
-    head, _, tail = key.partition('.')
-    if head == 'child':
-        return _recursive_get(child, tail)
-    elif head == 'parent':
-        return _recursive_get(parent, tail)
-    else:
-        raise Exception("Invalid relations key: \"{}\"".format(key))
-
-
 class Export(commands.Action):
 
-    relations = []
+    relations = {}
+    # e.g.:
+    # relations = {
+    #    'action-name-1': {
+    #        'get': {
+    #            'request-param': 'child.path.to.body.value',
+    #        },
+    #        'list': {
+    #            'request-param': 'parent.path.to.body.value',
+    #        },
+    #    },
+    #    'action-name-2': {
+    # ...
 
     def _get_custom_options(self):
         # Disable output modifiers
@@ -46,6 +37,16 @@ class Export(commands.Action):
                              default=False, help="Print debug messages")
         options.append(debug)
         return options
+
+    @staticmethod
+    def _parse_kw(parent, child, key):
+        head, _, tail = key.partition('.')
+        if head == 'child':
+            return reduce(dict.__getitem__, tail.split('.'), child)
+        elif head == 'parent':
+            return reduce(dict.__getitem__, tail.split('.'), parent)
+        else:
+            raise Exception("Invalid key: \"{}\"".format(key))
 
     def _get_relations(self, parent):
 
@@ -73,7 +74,7 @@ class Export(commands.Action):
 
             list_kwargs = {'hide_output': True}
             for key, value in relation_values['list'].items():
-                list_kwargs[key] = parse_kwargs(parent, None, value)
+                list_kwargs[key] = self._parse_kw(parent, None, value)
 
             list_action_resp = list_action.run(**list_kwargs)
             resp_json = json.loads(list_action_resp)
@@ -81,7 +82,7 @@ class Export(commands.Action):
             for obj_data in resp_json['data']:
                 get_kwargs = {'hide_output': True}
                 for key, value in relation_values['get'].items():
-                    get_kwargs[key] = parse_kwargs(parent, obj_data, value)
+                    get_kwargs[key] = self._parse_kw(parent, obj_data, value)
                 resp = get_action.run(**get_kwargs)
                 data.extend(resp)
 
@@ -129,6 +130,12 @@ class Export(commands.Action):
             relations = self._get_relations(response_json['data'])
             result.extend(relations)
 
+        def _order(arg):
+            action_name = arg['meta']['scalrctl']['ACTION']
+            return self.relations.get(action_name, {}).get('order', 0)
+
+        result = sorted(result, key=_order)
+
         if not hide_output:
             dump = yaml.safe_dump(
                 result, encoding='utf-8',
@@ -173,15 +180,16 @@ class ExportRole(Export):
             },
             'list': {
                 'roleId': 'parent.id'
-            }
+            },
         },
         'role-category': {
+            'order': -1,
             'get': {
                 'roleCategoryId': 'child.id',
             },
             'list': {
                 'scope': 'parent.scope'
-            }
+            },
         },
         'role-global-variables': {
             'get': {

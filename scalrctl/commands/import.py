@@ -18,6 +18,20 @@ class Import(commands.Action):
     action = None
     epilog = "Example: scalr-ctl import < object.yml"
 
+    relations = {
+        'script': {
+            'script-version.scriptId': '{id}',
+        },
+        'role-category': {
+            'role.category.id': '{id}',
+        },
+        'role': {
+            'role-global-variables.roleId': '{id}',
+            'role-orchestration-rule.roleId': '{id}',
+            'role-image.roleId': '{id}',
+        },
+    }
+
     def _init(self):
         super(Import, self)._init()
 
@@ -39,10 +53,35 @@ class Import(commands.Action):
                                default=False, help=upd_helpmsg, hidden=True)
         return [debug, update, envid, dry_run]
 
+    def _modify_object(self, obj):
+        kwargs = {}
+        action_name = obj['meta']['scalrctl']['ACTION']
+
+        for params in self.relations.values():
+            for key, value in params.items():
+                head, _, tail = key.partition('.')
+                if head == action_name:
+                    if '.' not in tail and tail.endswith('Id'):
+                        kwargs = {tail: value}
+                    else:
+                        data = value
+                        for item in reversed(tail.split('.')):
+                            data = {item: data}
+                        obj['data'].update(data)
+
+        obj['meta']['scalrctl']['ARGUMENTS'][1].update(kwargs)
+
+        return obj
+
+    def _save_import_data(self, obj, data):
+        action_name = obj['meta']['scalrctl']['ACTION']
+        for key, value in self.relations.get(action_name, {}).items():
+            self.relations[action_name][key] = value.format(**data)
+
     def run(self, *args, **kwargs):
         if 'debug' in kwargs:
             settings.debug_mode = kwargs.pop('debug')
-        env_id = kwargs.pop("env_id", None) or settings.envId
+        env_id = kwargs.pop('env_id', None) or settings.envId
 
         dry_run = kwargs.pop('dryrun', False)
         update_mode = kwargs.pop('update', False)
@@ -50,39 +89,38 @@ class Import(commands.Action):
         raw_objects = kwargs.pop('raw', None) or click.get_text_stream('stdin')
         import_objects = self._validate_object(raw_objects)
 
-        updated_args = {}
-        for obj_data in import_objects:
-            obj_data['meta']['scalrctl']['ARGUMENTS'][1].update(updated_args)
-            result, alias = self._import_object(obj_data, env_id, update_mode, dry_run)
-
-            if 'id' in result['data']:
-                updated_args['{}Id'.format(alias)] = result['data']['id']
+        for obj in import_objects:
+            obj = self._modify_object(obj)
+            result = self._import_object(obj, env_id, update_mode, dry_run)
+            self._save_import_data(obj, result['data'])
 
     def _import_object(self, obj_data, env_id, update_mode, dry_run=False):
         args, kwargs = obj_data['meta']['scalrctl']['ARGUMENTS']
         route = obj_data['meta']['scalrctl']['ROUTE']
         http_method = 'patch' if update_mode else 'post'
 
-        action_scheme = None
+        action = None
         for obj_name, section in self.scheme['export'].items():
             if 'http-method' in section and 'route' in section and \
                             section['http-method'] == 'get' and \
                             section['route'] == route:
-                action_scheme = section["{}-params".format(http_method)]
+                scheme = section['{}-params'.format(http_method)]
+                cls = pydoc.locate(
+                    scheme['class']
+                ) if 'class' in scheme else commands.Action
+                action = cls(name=obj_name, route=scheme['route'],
+                             http_method=http_method, api_level=self.api_level)
+                break
 
-        if not action_scheme:
+        if not action:
             msg = "Cannot import Scalr object: API method '{}: {}' not found" \
                 .format('GET', route)
             raise click.ClickException(msg)
 
-        cls = pydoc.locate(
-            action_scheme['class']
-        ) if 'class' in action_scheme else commands.Action
-        action = cls(name=self.name, route=action_scheme['route'],
-                     http_method=http_method, api_level=self.api_level)
-
         obj_type = action.get_body_type_params()[0]['name']
-        kwargs['import-data'] = {obj_type: obj_data['data']}
+        if action.name not in ('role-image',):
+            kwargs['import-data'] = {obj_type: obj_data['data']}
+
         kwargs['dryrun'] = dry_run
         if env_id:
             kwargs['envId'] = env_id
@@ -99,7 +137,7 @@ class Import(commands.Action):
         alias = self._get_object_alias(obj_type)
         click.secho("{} created.\n".format(alias), bold=True)
 
-        return result_json, alias
+        return result_json
 
     @staticmethod
     def _get_object_alias(obj_type):
@@ -113,19 +151,20 @@ class Import(commands.Action):
 
     @staticmethod
     def _validate_object(raw_objects):
-        import_objects = yaml.safe_load(raw_objects)
-        for obj_data in import_objects:
-            assert 'data' in obj_data
-            assert 'meta' in obj_data
-            assert 'scalrctl' in obj_data['meta']
-            meta_info = obj_data['meta']['scalrctl']
+        objects = yaml.safe_load(raw_objects)
+
+        for obj in objects:
+            assert 'data' in obj
+            assert 'meta' in obj
+            assert 'scalrctl' in obj['meta']
+            meta_info = obj['meta']['scalrctl']
             for key in ('METHOD',
                         'ROUTE',
                         'envId',
                         'ARGUMENTS',
                         'API_LEVEL'):
                 assert key in meta_info
-        return import_objects
+        return objects
 
 
 class ImportImage(commands.Action):
