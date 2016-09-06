@@ -17,18 +17,6 @@ __author__ = 'Dmitriy Korsakov, Sergey Babak'
 class Export(commands.Action):
 
     relations = {}
-    # e.g.:
-    # relations = {
-    #    'action-name-1': {
-    #        'get': {
-    #            'request-param': 'child.path.to.body.value',
-    #        },
-    #        'list': {
-    #            'request-param': 'parent.path.to.body.value',
-    #        },
-    #    },
-    #    'action-name-2': {
-    # ...
 
     def _get_custom_options(self):
         # Disable output modifiers
@@ -138,7 +126,8 @@ class Export(commands.Action):
 
         if not hide_output:
             dump = yaml.safe_dump(
-                result, encoding='utf-8',
+                result,
+                encoding='utf-8',
                 allow_unicode=True,
                 default_flow_style=False
             )
@@ -173,15 +162,6 @@ class ExportScript(Export):
 class ExportRole(Export):
 
     relations = {
-        'role-image': {
-            'get': {
-                'roleId': 'child.role.id',
-                'imageId': 'child.image.id',
-            },
-            'list': {
-                'roleId': 'parent.id'
-            },
-        },
         'role-category': {
             'order': -1,
             'get': {
@@ -191,7 +171,18 @@ class ExportRole(Export):
                 'scope': 'parent.scope'
             },
         },
+        'role-orchestration-rule': {
+            'order': 1,
+            'get': {
+                'roleId': 'parent.id',
+                'orchestrationRuleId': 'child.id',
+            },
+            'list': {
+                'roleId': 'parent.id'
+            }
+        },
         'role-global-variables': {
+            'order': 2,
             'get': {
                 'globalVariableName': 'child.name',
                 'roleId': 'parent.id'
@@ -200,13 +191,14 @@ class ExportRole(Export):
                 'roleId': 'parent.id'
             }
         },
-        'role-orchestration-rule': {
+        'role-image': {
+            'order': 3,
             'get': {
-                'roleId': 'parent.id',
-                'orchestrationRuleId': 'child.id',
+                'roleId': 'child.role.id',
+                'imageId': 'child.image.id',
             },
             'list': {
                 'roleId': 'parent.id'
-            }
+            },
         },
     }
