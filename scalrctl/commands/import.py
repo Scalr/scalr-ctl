@@ -62,6 +62,8 @@ class Import(commands.Action):
 
         for params in self.relations.values():
             for key, value in params.items():
+                if not value:
+                    continue
                 head, _, tail = key.partition('.')
                 if head == action_name:
                     if '.' not in tail and tail.endswith('Id'):
