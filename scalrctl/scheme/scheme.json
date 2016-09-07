@@ -878,7 +878,7 @@
                     "route": "/{envId}/roles/"
                 }
             },
-            "role-global-variable": {
+            "role-global-variables": {
                 "hidden": true,
                 "api_level": "user",
                 "class": "scalrctl.commands.export.Export",
@@ -940,7 +940,7 @@
             },
             "role-image": {
                 "api_level": "user",
-                "class": "scalrctl.commands.export.Export",
+                "class": "scalrctl.commands.export.ExportRoleImage",
                 "http-method": "get",
                 "route": "/{envId}/roles/{roleId}/images/{imageId}/",
                 "cmd_descr" : "Export Role Image object to a file",

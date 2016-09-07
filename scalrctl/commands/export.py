@@ -5,6 +5,7 @@ import os
 import copy
 import datetime
 import json
+import pydoc
 
 import yaml
 
@@ -27,7 +28,7 @@ class Export(commands.Action):
         return options
 
     @staticmethod
-    def _parse_kw(parent, child, key):
+    def _get_param(parent, child, key):
         head, _, tail = key.partition('.')
         if head == 'child':
             return reduce(dict.__getitem__, tail.split('.'), child)
@@ -53,6 +54,10 @@ class Export(commands.Action):
             )
 
             get_data = scheme[relation]['get']
+            # TODO: recursive export
+            # export_cls = pydoc.locate(
+            #   scheme['export'][relation]['class']
+            # ) if 'class' in scheme['export'][relation] else Export
             get_action = Export(
                 name=relation,
                 route=get_data['route'],
@@ -62,7 +67,7 @@ class Export(commands.Action):
 
             list_kwargs = {'hide_output': True}
             for key, value in relation_values['list'].items():
-                list_kwargs[key] = self._parse_kw(parent, None, value)
+                list_kwargs[key] = self._get_param(parent, None, value)
 
             list_action_resp = list_action.run(**list_kwargs)
             resp_json = json.loads(list_action_resp)
@@ -70,7 +75,7 @@ class Export(commands.Action):
             for obj_data in resp_json['data']:
                 get_kwargs = {'hide_output': True}
                 for key, value in relation_values['get'].items():
-                    get_kwargs[key] = self._parse_kw(parent, obj_data, value)
+                    get_kwargs[key] = self._get_param(parent, obj_data, value)
                 resp = get_action.run(**get_kwargs)
                 data.extend(resp)
 
@@ -199,6 +204,21 @@ class ExportRole(Export):
             },
             'list': {
                 'roleId': 'parent.id'
+            },
+        },
+    }
+
+
+class ExportRoleImage(Export):
+
+    relations = {
+        'image': {
+            'order': -1,
+            'get': {
+                'imageId': 'parent.id',
+            },
+            'list': {
+                'id': 'parent.id',
             },
         },
     }

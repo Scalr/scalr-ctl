@@ -20,16 +20,19 @@ class Import(commands.Action):
 
     relations = {
         'script': {
-            'script-version.scriptId': '{id}',
+            'script-version.scriptId': 0,
         },
         'role-category': {
-            'role.category.id': '{id}',
+            'role.category.id': 0,
         },
         'role': {
-            'role-global-variables.roleId': '{id}',
-            'role-orchestration-rule.roleId': '{id}',
-            'role-image.roleId': '{id}',
+            'role-global-variables.roleId': 0,
+            'role-orchestration-rule.roleId': 0,
+            'role-image.roleId': 0,
         },
+        'image': {
+            'role-image.imageId': 0,
+        }
     }
 
     def _init(self):
@@ -62,7 +65,7 @@ class Import(commands.Action):
                 head, _, tail = key.partition('.')
                 if head == action_name:
                     if '.' not in tail and tail.endswith('Id'):
-                        kwargs = {tail: value}
+                        kwargs.update({tail: value})
                     else:
                         data = value
                         for item in reversed(tail.split('.')):
@@ -73,10 +76,10 @@ class Import(commands.Action):
 
         return obj
 
-    def _save_import_data(self, obj, data):
+    def _add_imported(self, obj, data):
         action_name = obj['meta']['scalrctl']['ACTION']
         for key, value in self.relations.get(action_name, {}).items():
-            self.relations[action_name][key] = value.format(**data)
+            self.relations[action_name][key] = data['id']
 
     def run(self, *args, **kwargs):
         if 'debug' in kwargs:
@@ -89,10 +92,14 @@ class Import(commands.Action):
         raw_objects = kwargs.pop('raw', None) or click.get_text_stream('stdin')
         import_objects = self._validate_object(raw_objects)
 
-        for obj in import_objects:
-            obj = self._modify_object(obj)
-            result = self._import_object(obj, env_id, update_mode, dry_run)
-            self._save_import_data(obj, result['data'])
+        try:
+            for obj in import_objects:
+                obj = self._modify_object(obj)
+                result = self._import_object(obj, env_id, update_mode, dry_run)
+                self._add_imported(obj, result['data'])
+        except Exception as e:
+            # TODO: delete imported objects
+            raise click.ClickException(str(e))
 
     def _import_object(self, obj_data, env_id, update_mode, dry_run=False):
         args, kwargs = obj_data['meta']['scalrctl']['ARGUMENTS']
