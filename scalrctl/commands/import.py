@@ -76,7 +76,7 @@ class Import(commands.Action):
 
         return obj
 
-    def _add_imported(self, obj, data):
+    def _save_imported(self, obj, data):
         action_name = obj['meta']['scalrctl']['ACTION']
         for key, value in self.relations.get(action_name, {}).items():
             self.relations[action_name][key] = data['id']
@@ -96,7 +96,7 @@ class Import(commands.Action):
             for obj in import_objects:
                 obj = self._modify_object(obj)
                 result = self._import_object(obj, env_id, update_mode, dry_run)
-                self._add_imported(obj, result['data'])
+                self._save_imported(obj, result['data'])
         except Exception as e:
             # TODO: delete imported objects
             raise click.ClickException(str(e))
