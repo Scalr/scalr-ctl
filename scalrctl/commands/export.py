@@ -177,7 +177,6 @@ class ExportRole(Export):
             },
         },
         'role-orchestration-rule': {
-            'order': 1,
             'get': {
                 'roleId': 'parent.id',
                 'orchestrationRuleId': 'child.id',
@@ -187,17 +186,16 @@ class ExportRole(Export):
             }
         },
         'role-global-variables': {
-            'order': 2,
             'get': {
                 'globalVariableName': 'child.name',
                 'roleId': 'parent.id'
             },
             'list': {
-                'roleId': 'parent.id'
+                'roleId': 'parent.id',
+                'declaredIn': 'parent.scope'
             }
         },
         'role-image': {
-            'order': 3,
             'get': {
                 'roleId': 'child.role.id',
                 'imageId': 'child.image.id',

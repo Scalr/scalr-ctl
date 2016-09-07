@@ -57,7 +57,7 @@ class Import(commands.Action):
         return [debug, update, envid, dry_run]
 
     def _modify_object(self, obj):
-        params = {}
+        arguments = {}
         action_name = obj['meta']['scalrctl']['ACTION']
 
         for params in self.relations.values():
@@ -65,14 +65,14 @@ class Import(commands.Action):
                 head, _, tail = key.partition('.')
                 if head == action_name:
                     if '.' not in tail and tail.endswith('Id'):
-                        params.update({tail: value})
+                        arguments.update({tail: value})
                     else:
                         data = value
                         for item in reversed(tail.split('.')):
                             data = {item: data}
                         obj['data'].update(data)
 
-        obj['meta']['scalrctl']['ARGUMENTS'][1].update(params)
+        obj['meta']['scalrctl']['ARGUMENTS'][1].update(arguments)
 
         return obj
 
