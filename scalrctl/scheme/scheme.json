@@ -1015,6 +1015,18 @@
                 "class": "scalrctl.commands.Action",
                 "http-method": "patch",
                 "route": "/{envId}/farms/{farmId}/"
+            },
+            "lock": {
+                "api_level": "user",
+                "class": "scalrctl.commands.farm.FarmLock",
+                "http-method": "post",
+                "route": "/{envId}/farms/{farmId}/actions/lock/"
+            },
+            "unlock": {
+                "api_level": "user",
+                "class": "scalrctl.commands.Action",
+                "http-method": "post",
+                "route": "/{envId}/farms/{farmId}/actions/unlock/"
             }
         },
         "farm-global-variables": {

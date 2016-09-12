@@ -77,3 +77,37 @@ class FarmClone(commands.Action):
         kv.update(kwargs)
         arguments, kw = super(FarmClone, self).pre(*args, **kv)
         return arguments, kw
+
+
+class FarmLock(commands.Action):
+
+    epilog = "Example: scalr-ctl farm lock --farmId <ID> --comment <COMMENT> --unlock-permission <ANYONE|OWNER|TEAM>"
+
+    post_template = {
+        "lockFarmRequest": {"lockComment": "", "unlockPermission": "anyone"}
+    }
+
+    def get_options(self):
+        comment = click.Option(('--lockComment', 'comment'), default="", help="Comment to lock a Farm.")
+        hlp = "If you would like to prevent other users unlocking the Farm you should set 'owner' options.\
+                  With 'team' options only members of the Farm's Teams can unlock this Farm.\
+                  Default value 'anyone' means that anyone with access can unlock this Farm."
+        unlock_permission = click.Option(('--unlockPermission', 'unlock_permission'), default="anyone", help=hlp)
+        options = [comment, unlock_permission]
+        options.extend(super(FarmLock, self).get_options())
+        return options
+
+
+    def pre(self, *args, **kwargs):
+        """
+        before request is made
+        """
+        comment = kwargs.pop("comment", None)
+        unlock_permission = kwargs.pop("unlock_permission", "anyone")
+        post_data = copy.deepcopy(self.post_template)
+        post_data["lockFarmRequest"]["lockComment"] = comment
+        post_data["lockFarmRequest"]["unlockPermission"] = unlock_permission
+        kv = {"import-data": post_data}
+        kv.update(kwargs)
+        arguments, kw = super(FarmLock, self).pre(*args, **kv)
+        return arguments, kw
