@@ -134,7 +134,7 @@ class Action(BaseAction):
 
                             json_text = json.loads(raw_text)
                             filtered = self._filter_json_object(json_text['data'], filter_createonly=True)
-                            text = json.dumps(filtered)
+                            text = json.dumps(filtered, indent=2)
                         except (Exception, BaseException) as e:
                             if settings.debug_mode:
                                 click.echo(traceback.format_exc())
@@ -488,25 +488,46 @@ class Action(BaseAction):
                     reference = schema['$ref']
                     return self._lookup(reference)
 
-    def _filter_json_object(self, obj, filter_createonly=False):
+    def _filter_json_object(self, data, filter_createonly=False, schema=None):
         """
-        removes immutable parts from JSON object before sending it in POST or PATCH
+        Removes immutable parts from JSON object
+        before sending it in POST or PATCH.
         """
-        # XXX: make it recursive
-        result = {}
-        mutable_parts = self.mutable_body_parts or self._list_mutable_body_parts()
-        for name, value in obj.items():
-            if filter_createonly and name in self._list_createonly_properties():
-                continue
-            elif name in mutable_parts:
-                result[name] = obj[name]
-        return result
+        filtered = {}
+
+        if schema is None:
+            for param in self.get_body_type_params():
+                if 'schema' in param:
+                    schema = param['schema']
+                    if '$ref' in schema:
+                        schema = self._lookup(schema['$ref'])
+                    break
+
+        if schema and 'properties' in schema:
+            create_only_props = schema.get('x-createOnly', '')
+            for p_key, p_value in schema['properties'].items():
+                if p_key not in data:
+                    continue
+                if p_value.get('readOnly'):
+                    continue
+                if '$ref' in p_value and isinstance(data[p_key], dict):
+                    filtered[p_key] = self._filter_json_object(
+                        data[p_key],
+                        filter_createonly=filter_createonly,
+                        schema=self._lookup(p_value['$ref']),
+                    )
+                else:
+                    if not (filter_createonly and p_key in create_only_props):
+                        filtered[p_key] = data[p_key]
+
+        return filtered
 
     def _list_mutable_body_parts(self):
         """
         finds object in yaml spec and determines it's mutable fields
         to filter user JSON
         """
+        # TODO: remove this method
         mutable = []
         reference_path = None
 
