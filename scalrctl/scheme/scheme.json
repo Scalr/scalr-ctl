@@ -1367,12 +1367,6 @@
                 "http-method": "get",
                 "route": "/{envId}/os/{osId}/"
             },
-            "create": {
-                "api_level": "user",
-                "class": "scalrctl.commands.Action",
-                "http-method": "post",
-                "route": "/{envId}/os/broken"
-            },
             "group_descr": "Manage supported Operating Systems",
             "list": {
                 "api_level": "user",
