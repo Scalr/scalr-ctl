@@ -701,6 +701,12 @@
                 "http-method": "delete",
                 "route": "/environments/{envId}/teams/{teamId}/"
             },
+            "update": {
+                "api_level": "account",
+                "class": "scalrctl.commands.Action",
+                "http-method": "patch",
+                "route": "/environments/{envId}/teams/{teamId}/"
+            },
             "group_descr": "Manage Teams",
             "list": {
                 "api_level": "account",
