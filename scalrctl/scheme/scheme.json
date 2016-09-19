@@ -606,7 +606,7 @@
                 "http-method": "patch", 
                 "route": "/roles/{roleId}/global-variables/{globalVariableName}/"
             }
-        }, 
+        },
         "role-image": {
             "api_level": "account",
             "delete": {
@@ -1065,6 +1065,48 @@
                 "route": "/{envId}/farms/{farmId}/global-variables/{globalVariableName}/"
             }
         },
+        "server-global-variables": {
+                "api_level": "user",
+                "create": {
+                    "api_level": "user",
+                    "class": "scalrctl.commands.Action",
+                    "http-method": "post",
+                    "route": "/{envId}/servers/{serverId}/global-variables/",
+                    "epilog": "Example: scalr-ctl farm-global-variables create --farmId <ID> < myfarmgv.json"
+                },
+                "delete": {
+                    "api_level": "user",
+                    "class": "scalrctl.commands.Action",
+                    "http-method": "delete",
+                    "route": "/{envId}/servers/{serverId}/global-variables/{globalVariableName}/"
+                },
+                "get": {
+                    "api_level": "user",
+                    "class": "scalrctl.commands.Action",
+                    "http-method": "get",
+                    "route": "/{envId}/servers/{serverId}/global-variables/{globalVariableName}/"
+                },
+                "group_descr": "Manage Global Variables for Farms",
+                "list": {
+                    "api_level": "user",
+                    "class": "scalrctl.commands.Action",
+                    "http-method": "get",
+                    "route": "/{envId}/servers/{serverId}/global-variables/"
+                },
+                "retrieve": {
+                    "api_level": "user",
+                    "class": "scalrctl.commands.Action",
+                    "hidden": true,
+                    "http-method": "get",
+                    "route": "/{envId}/servers/{serverId}/global-variables/{globalVariableName}/"
+                },
+                "update": {
+                    "api_level": "user",
+                    "class": "scalrctl.commands.farm_gv.UpdateFarmGlobalVariable",
+                    "http-method": "patch",
+                    "route": "/{envId}/servers/{serverId}/global-variables/{globalVariableName}/"
+                }
+            },
         "farm-role": {
             "api_level": "user",
             "list-servers": {
