@@ -686,40 +686,64 @@
                 "route": "/roles/{roleId}/orchestration-rules/{orchestrationRuleId}/"
             }
         },
-        "team": {
+        "environment": {
             "api_level": "account",
-            "add-to-environment": {
+            "add-team": {
                 "api_level": "account",
                 "class": "scalrctl.commands.Action",
                 "http-method": "post",
                 "route": "/environments/{envId}/teams/",
-                "epilog": "Example: scalr-ctl account team create --roleId <ID> < myteam.json"
+                "epilog": "Example: scalr-ctl account environment add-team --roleId <ID> < myteam.json"
             },
-            "delete-from-environment": {
+            "remove-team": {
                 "api_level": "account",
                 "class": "scalrctl.commands.Action",
                 "http-method": "delete",
                 "route": "/environments/{envId}/teams/{teamId}/"
             },
-            "update": {
+            "update-team": {
                 "api_level": "account",
                 "class": "scalrctl.commands.Action",
                 "http-method": "patch",
                 "route": "/environments/{envId}/teams/{teamId}/"
             },
             "group_descr": "Manage Teams",
-            "list": {
+            "list-teams": {
                 "api_level": "account",
                 "class": "scalrctl.commands.Action",
                 "http-method": "get",
                 "route": "/environments/{envId}/teams/"
             },
-            "create": {
+            "create-team": {
                 "api_level": "account",
                 "class": "scalrctl.commands.Action",
                 "http-method": "post",
                 "route": "/teams/",
-                "epilog": "Example: scalr-ctl account team create < myteam.json"
+                "epilog": "Example: scalr-ctl account environment create-team < myteam.json"
+            },
+            "list": {
+                "api_level": "account",
+                "class": "scalrctl.commands.Action",
+                "http-method": "get",
+                "route": "/teams/"
+            },
+            "delete": {
+                "api_level": "account",
+                "class": "scalrctl.commands.Action",
+                "http-method": "delete",
+                "route": "/teams/{teamId}/"
+            },
+            "update": {
+                "api_level": "account",
+                "class": "scalrctl.commands.Action",
+                "http-method": "patch",
+                "route": "/teams/{teamId}/"
+            },
+            "get": {
+                "api_level": "account",
+                "class": "scalrctl.commands.Action",
+                "http-method": "get",
+                "route": "/teams/{teamId}/"
             }
         }
     },
@@ -1122,19 +1146,19 @@
                 "http-method": "patch",
                 "route": "/{envId}/farm-roles/{farmRoleId}/"
             },
-            "change-instance-configuration": {
+            "update-instance-configuration": {
                 "api_level": "user",
                 "class": "scalrctl.commands.Action",
                 "http-method": "patch",
                 "route": "/{envId}/farm-roles/{farmRoleId}/instance/"
             },
-            "change-placement-configuration": {
+            "update-placement-configuration": {
                 "api_level": "user",
                 "class": "scalrctl.commands.Action",
                 "http-method": "patch",
                 "route": "/{envId}/farm-roles/{farmRoleId}/placement/"
             },
-            "change-scaling-configuration": {
+            "update-scaling-configuration": {
                 "api_level": "user",
                 "class": "scalrctl.commands.Action",
                 "http-method": "patch",
@@ -1187,19 +1211,19 @@
                 "http-method": "get",
                 "route": "/{envId}/farm-roles/{farmRoleId}/"
             },
-            "retrieve-instance-configuration": {
+            "get-instance-configuration": {
                 "api_level": "user",
                 "class": "scalrctl.commands.Action",
                 "http-method": "get",
                 "route": "/{envId}/farm-roles/{farmRoleId}/instance/"
             },
-            "retrieve-placement-configuration": {
+            "get-placement-configuration": {
                 "api_level": "user",
                 "class": "scalrctl.commands.Action",
                 "http-method": "get",
                 "route": "/{envId}/farm-roles/{farmRoleId}/placement/"
             },
-            "retrieve-scaling-configuration": {
+            "get-scaling-configuration": {
                 "api_level": "user",
                 "class": "scalrctl.commands.Action",
                 "http-method": "get",
