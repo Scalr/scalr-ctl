@@ -19,6 +19,7 @@ DEFAULTS = {
     'string': '',
     'boolean': True,
     'integer': 1,
+    'number': 1,
     'array': []
 }
 
