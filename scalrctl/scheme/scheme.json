@@ -678,12 +678,46 @@
                 "http-method": "get", 
                 "route": "/roles/{roleId}/orchestration-rules/"
             }, 
-            "retrieve": {
+            "update": {
                 "api_level": "account", 
-                "class": "scalrctl.commands.Action", 
-                "hidden": true, 
+                "class": "scalrctl.commands.Action",
                 "http-method": "get", 
                 "route": "/roles/{roleId}/orchestration-rules/{orchestrationRuleId}/"
+            }
+        },
+        "orchestration-rule": {
+            "api_level": "account",
+            "create": {
+                "api_level": "account",
+                "class": "scalrctl.commands.Action",
+                "http-method": "post",
+                "route": "/orchestration-rules/",
+                "epilog": "Example: scalr-ctl account orchestration-rule create < myroleorule.json"
+            },
+            "delete": {
+                "api_level": "account",
+                "class": "scalrctl.commands.Action",
+                "http-method": "delete",
+                "route": "/orchestration-rules/{orchestrationRuleId}/"
+            },
+            "get": {
+                "api_level": "account",
+                "class": "scalrctl.commands.Action",
+                "http-method": "get",
+                "route": "/orchestration-rules/{orchestrationRuleId}/"
+            },
+            "group_descr": "Manage Orchestration Rules",
+            "list": {
+                "api_level": "account",
+                "class": "scalrctl.commands.Action",
+                "http-method": "get",
+                "route": "/orchestration-rules/"
+            },
+            "update": {
+                "api_level": "account",
+                "class": "scalrctl.commands.Action",
+                "http-method": "get",
+                "route": "/orchestration-rules/{orchestrationRuleId}/"
             }
         },
         "environment": {
