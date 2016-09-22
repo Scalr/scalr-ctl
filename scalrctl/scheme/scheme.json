@@ -23,6 +23,13 @@
         "cmd-group": "Available scopes",
         "image": {
             "api_level": "global",
+            "replace": {
+                "api_level": "global",
+                "class": "scalrctl.commands.Action",
+                "http-method": "post",
+                "route": "/images/{imageId}/actions/replace/",
+                "epilog": "Example: scalr-ctl image replace --imageID <ID> --newImageID <newID>"
+            },
             "change-attributes": {
                 "api_level": "global",
                 "class": "scalrctl.commands.Action",
@@ -398,6 +405,13 @@
         }, 
         "image": {
             "api_level": "account",
+            "replace": {
+                "api_level": "account",
+                "class": "scalrctl.commands.image.ReplaceImage",
+                "http-method": "post",
+                "route": "/images/{imageId}/actions/replace/",
+                "epilog": "Example: scalr-ctl image replace --imageID <ID> --newImageID <newID> --deprecateOldImage --scope <SCOPE>"
+            },
             "change-attributes": {
                 "api_level": "account", 
                 "class": "scalrctl.commands.Action", 
