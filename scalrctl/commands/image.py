@@ -78,7 +78,7 @@ class ReplaceImage(commands.Action):
             if "errors" not in obj:
                 #roleid = obj["data"]["role"]["id"]
                 imageid = obj["data"]["newImage"]["id"]
-                click.echo("new image id %s." % imageid)
+                click.echo("New image set: %s." % imageid)
         except:
             pass
         return response
