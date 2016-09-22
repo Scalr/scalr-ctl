@@ -1,6 +1,8 @@
 __author__ = 'Dmitriy Korsakov'
 __doc__ = 'Image management'
 
+import copy
+import json
 from scalrctl import commands
 from scalrctl import click
 
@@ -22,14 +24,6 @@ class RegisterImage(commands.Action):
 
 class RetrieveImage(commands.Action):
     prompt_for = ["imageId"]
-
-__author__ = 'Dmitriy Korsakov'
-__doc__ = 'RoleImage management'
-
-import copy
-import json
-from scalrctl import commands
-from scalrctl import click
 
 
 class ReplaceImage(commands.Action):
