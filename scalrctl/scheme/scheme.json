@@ -25,7 +25,7 @@
             "api_level": "global",
             "replace": {
                 "api_level": "global",
-                "class": "scalrctl.commands.Action",
+                "class": "scalrctl.commands.image.ReplaceImageGlobal",
                 "http-method": "post",
                 "route": "/images/{imageId}/actions/replace/",
                 "epilog": "Example: scalr-ctl image replace --imageID <ID> --newImageID <newID>"

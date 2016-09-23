@@ -1,6 +1,8 @@
 __author__ = 'Dmitriy Korsakov'
 __doc__ = 'Image management'
 
+import copy
+import json
 from scalrctl import commands
 from scalrctl import click
 
@@ -23,22 +25,16 @@ class RegisterImage(commands.Action):
 class RetrieveImage(commands.Action):
     prompt_for = ["imageId"]
 
-__author__ = 'Dmitriy Korsakov'
-__doc__ = 'RoleImage management'
-
-import copy
-import json
-from scalrctl import commands
-from scalrctl import click
-
 
 class ReplaceImage(commands.Action):
 
     epilog = "Example: scalr-ctl image replace --imageID <ID> --newImageID <newID> --deprecateOldImage --scope <SCOPE>"
 
     post_template = {
-        "replaceImageRequest": {"newImage": {"id": None}}
+        "replaceImageRequest": {"scope": None, "newImage": {"id": None}},
     }
+
+    _default_scope = "account"
 
     def get_options(self):
         hlp = "The ID of a new image"
@@ -47,7 +43,7 @@ class ReplaceImage(commands.Action):
         deprecate = click.Option(('--deprecateOldImage', 'deprecate'), help=deprecation_help, is_flag=True)
         scope_help = "Make a replacement for all Roles from the selected scopes. "
         scope_help += "If you choose to make a replacement including lower scope higher scope values will be chosen too"
-        scope = click.Option(('--scope', 'deprecate'), help=scope_help)
+        scope = click.Option(('--scope', 'scope'), default=self._default_scope, help=scope_help)
 
         options = [newimageid, deprecate, scope]
         options.extend(super(ReplaceImage, self).get_options())
@@ -63,6 +59,8 @@ class ReplaceImage(commands.Action):
         newimageid = kwargs.pop("newimageid", None)
         post_data = copy.deepcopy(self.post_template)
         post_data["replaceImageRequest"]["newImage"]["id"] = newimageid
+        scope = kwargs.pop("scope")
+        post_data["replaceImageRequest"]["scope"] = scope,
         kv = {"import-data": post_data}
         kv.update(kwargs)
         arguments, kw = super(ReplaceImage, self).pre(*args, **kv)
@@ -82,3 +80,8 @@ class ReplaceImage(commands.Action):
         except:
             pass
         return response
+
+
+class ReplaceImageGlobal(ReplaceImage):
+
+    _default_scope = "scalr"
