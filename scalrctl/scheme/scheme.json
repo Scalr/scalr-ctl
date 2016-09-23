@@ -21,7 +21,7 @@
     "global": {
         "group_descr": "All Scalr Global scope commands",
         "cmd-group": "Available scopes",
-        "image": {
+        "images": {
             "api_level": "global",
             "replace": {
                 "api_level": "global",
@@ -106,7 +106,7 @@
                 "route": "/os/{osId}/"
             }
         },
-        "role": {
+        "roles": {
             "api_level": "global",
             "change-attributes": {
                 "api_level": "global",
@@ -155,7 +155,7 @@
                 "route": "/roles/{roleId}/"
             }
         },
-        "role-category": {
+        "role-categories": {
             "api_level": "global",
             "create": {
                 "api_level": "global",
@@ -197,7 +197,7 @@
                 "route": "/role-categories/{roleCategoryId}/"
             }
         },
-        "role-orchestration-rule": {
+        "role-orchestration-rules": {
             "api_level": "global",
             "create": {
                 "api_level": "global",
@@ -247,7 +247,7 @@
             },
             "group_descr": "Manage ACL Roles"
         },
-        "cloud": {
+        "clouds": {
             "api_level": "account",
             "delete": {
                 "api_level": "account", 
@@ -325,7 +325,7 @@
                 "route": "/cloud-credentials/{cloudCredentialsId}/"
             }
         }, 
-        "environment": {
+        "environments": {
             "api_level": "account",
             "create": {
                 "api_level": "account", 
@@ -367,7 +367,7 @@
                 "route": "/environments/{envId}/"
             }
         }, 
-        "event": {
+        "events": {
             "api_level": "account",
             "create": {
                 "api_level": "account", 
@@ -403,7 +403,7 @@
                 "route": "/events/{eventId}/"
             }
         }, 
-        "image": {
+        "images": {
             "api_level": "account",
             "replace": {
                 "api_level": "account",
@@ -488,7 +488,7 @@
                 "route": "/os/{osId}/"
             }
         }, 
-        "role": {
+        "roles": {
             "api_level": "account",
             "change-attributes": {
                 "api_level": "account", 
@@ -537,7 +537,7 @@
                 "route": "/roles/{roleId}/"
             }
         }, 
-        "role-category": {
+        "role-categories": {
             "api_level": "account",
             "create": {
                 "api_level": "account", 
@@ -621,7 +621,7 @@
                 "route": "/roles/{roleId}/global-variables/{globalVariableName}/"
             }
         },
-        "role-image": {
+        "role-images": {
             "api_level": "account",
             "delete": {
                 "api_level": "account", 
@@ -664,7 +664,7 @@
                 "epilog": "Example: scalr-ctl account role-image create --roleId <ID> < myroleimage.json"
             }
         }, 
-        "role-orchestration-rule": {
+        "role-orchestration-rules": {
             "api_level": "account",
             "create": {
                 "api_level": "account", 
@@ -699,7 +699,7 @@
                 "route": "/roles/{roleId}/orchestration-rules/{orchestrationRuleId}/"
             }
         },
-        "orchestration-rule": {
+        "orchestration-rules": {
             "api_level": "account",
             "create": {
                 "api_level": "account",
@@ -734,7 +734,7 @@
                 "route": "/orchestration-rules/{orchestrationRuleId}/"
             }
         },
-        "environment": {
+        "environments": {
             "api_level": "account",
             "add-team": {
                 "api_level": "account",
@@ -795,7 +795,7 @@
             }
         }
     },
-        "cost-center": {
+        "cost-centers": {
             "api_level": "user",
             "get": {
                 "api_level": "user",
@@ -818,7 +818,7 @@
                 "route": "/{envId}/cost-centers/{costCenterId}/"
             }
         },
-        "event": {
+        "events": {
             "api_level": "user",
             "change-attributes": {
                 "api_level": "user",
@@ -891,7 +891,7 @@
                     "route": "/{envId}/farms/{farmId}/global-variables/{globalVariableName}/"
                 }
             },
-            "farm-role-global-variable": {
+            "farm-role-global-variables": {
                 "hidden": true,
                 "api_level": "user",
                 "class": "scalrctl.commands.export.ExportFarmRoleGlobalVariable",
@@ -914,7 +914,7 @@
                 }
             },
             "group_descr": "Export Scalr Objects",
-            "image": {
+            "images": {
                 "api_level": "user",
                 "class": "scalrctl.commands.export.ExportImage",
                 "http-method": "get",
@@ -935,7 +935,7 @@
                     "route": "/{envId}/images/"
                 }
             },
-            "role": {
+            "roles": {
                 "api_level": "user",
                 "class": "scalrctl.commands.export.Export",
                 "http-method": "get",
@@ -956,7 +956,7 @@
                     "route": "/{envId}/roles/"
                 }
             },
-            "role-global-variable": {
+            "role-global-variables": {
                 "hidden": true,
                 "api_level": "user",
                 "class": "scalrctl.commands.export.Export",
@@ -978,7 +978,7 @@
                     "route": "/{envId}/roles/{roleId}/global-variables/{globalVariableName}/"
                 }
             },
-            "script": {
+            "scripts": {
                 "api_level": "user",
                 "class": "scalrctl.commands.export.ExportScript",
                 "http-method": "get",
@@ -999,7 +999,7 @@
                     "route": "/{envId}/scripts/"
                 }
             },
-            "script-version": {
+            "script-versions": {
                 "api_level": "user",
                 "class": "scalrctl.commands.export.Export",
                 "http-method": "get",
@@ -1019,7 +1019,7 @@
                 }
             }
         },
-        "farm": {
+        "farms": {
             "api_level": "user",
             "list-servers": {
                 "api_level": "user",
@@ -1179,7 +1179,7 @@
                     "route": "/{envId}/servers/{serverId}/global-variables/{globalVariableName}/"
                 }
             },
-        "farm-role": {
+        "farm-roles": {
             "api_level": "user",
             "list-servers": {
                 "api_level": "user",
@@ -1326,7 +1326,7 @@
                 "route": "/{envId}/farm-roles/{farmRoleId}/global-variables/{globalVariableName}/"
             }
         },
-        "farm-role-orchestration-rule": {
+        "farm-role-orchestration-rules": {
             "api_level": "user",
             "change-attributes": {
                 "api_level": "user",
@@ -1423,7 +1423,7 @@
                 "route": "/{envId}/farm-roles/{farmRoleId}/scaling/{metricName}/"
             }
         },
-        "image": {
+        "images": {
             "api_level": "user",
             "change-attributes": {
                 "api_level": "user",
@@ -1502,7 +1502,7 @@
                 "route": "/{envId}/os/{osId}/"
             }
         },
-        "project": {
+        "projects": {
             "api_level": "user",
             "create": {
                 "api_level": "user",
@@ -1532,7 +1532,7 @@
                 "route": "/{envId}/projects/{projectId}/"
             }
         },
-        "role": {
+        "roles": {
             "api_level": "user",
             "change-attributes": {
                 "api_level": "user",
@@ -1581,7 +1581,7 @@
                 "route": "/{envId}/roles/{roleId}/"
             }
         },
-        "role-category": {
+        "role-categories": {
             "api_level": "user",
             "create": {
                 "api_level": "user",
@@ -1665,7 +1665,7 @@
                 "route": "/{envId}/roles/{roleId}/global-variables/{globalVariableName}/"
             }
         },
-        "role-image": {
+        "role-images": {
             "api_level": "user",
             "delete": {
                 "api_level": "user",
@@ -1708,7 +1708,7 @@
                 "epilog": "Example: scalr-ctl role-image create --roleID <roleID> --imageID <ID>"
             }
         },
-        "role-orchestration-rule": {
+        "role-orchestration-rules": {
             "api_level": "user",
             "change-attributes": {
                 "api_level": "user",
@@ -1757,7 +1757,7 @@
                 "route": "/{envId}/roles/{roleId}/orchestration-rules/{orchestrationRuleId}/"
             }
         },
-        "scaling-metric": {
+        "scaling-metrics": {
             "api_level": "user",
             "create": {
                 "api_level": "user",
@@ -1799,7 +1799,7 @@
                 "route": "/{envId}/scaling-metrics/{metricName}/"
             }
         },
-        "script": {
+        "scripts": {
             "api_level": "user",
             "change-attributes": {
                 "api_level": "user",
@@ -1867,7 +1867,7 @@
                 "route": "/{envId}/orchestration-logs/{logEntryId}/"
             }
         },
-        "script-version": {
+        "script-versions": {
             "api_level": "user",
             "change-attributes": {
                 "api_level": "user",
@@ -1935,7 +1935,7 @@
                 "route": "/{envId}/orchestration-logs/{logEntryId}/"
             }
         },
-        "server": {
+        "servers": {
             "api_level": "user",
             "list": {
                 "api_level": "user",
