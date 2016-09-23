@@ -54,7 +54,8 @@ def setup_bash_complete():
             else:
                 export_line = ''
 
-            scalr_configs = filter(None, (comment, export_line, source_line))
+            scalr_configs = (comment, export_line, source_line)
+            scalr_configs = [item for item in scalr_configs if item]
 
             # removes old scalr configs
             is_not_scalr_line = lambda line: not any(sc == line for sc in scalr_configs)
