@@ -755,14 +755,18 @@
                 "http-method": "patch",
                 "route": "/environments/{envId}/teams/{teamId}/"
             },
-            "group_descr": "Manage Teams",
+            "group_descr": "Manage Teams in Environment",
             "list-teams": {
                 "api_level": "account",
                 "class": "scalrctl.commands.Action",
                 "http-method": "get",
                 "route": "/environments/{envId}/teams/"
-            },
-            "create-team": {
+            }
+        },
+        "teams": {
+            "api_level": "account",
+            "group_descr": "Manage Teams",
+            "create": {
                 "api_level": "account",
                 "class": "scalrctl.commands.Action",
                 "http-method": "post",
