@@ -941,7 +941,7 @@
             },
             "roles": {
                 "api_level": "user",
-                "class": "scalrctl.commands.export.Export",
+                "class": "scalrctl.commands.export.ExportRole",
                 "http-method": "get",
                 "route": "/{envId}/roles/{roleId}/",
                 "cmd_descr" : "Export your Role objects to a file",
@@ -982,7 +982,64 @@
                     "route": "/{envId}/roles/{roleId}/global-variables/{globalVariableName}/"
                 }
             },
-            "scripts": {
+            "role-orchestration-rule": {
+                "api_level": "user",
+                "class": "scalrctl.commands.export.Export",
+                "http-method": "get",
+                "route": "/{envId}/roles/{roleId}/orchestration-rules/{orchestrationRuleId}/",
+                "cmd_descr" : "Export Role Orchestration Rule object to a file",
+                "post-params": {
+                    "api_level": "user",
+                    "class": "scalrctl.commands.Action",
+                    "http-method": "post",
+                    "route": "/{envId}/roles/{roleId}/orchestration-rules/"
+                },
+                "patch-params": {
+                    "api_level": "user",
+                    "class": "scalrctl.commands.Action",
+                    "http-method": "patch",
+                    "route": "/{envId}/roles/{roleId}/orchestration-rules/{orchestrationRuleId}/"
+                }
+            },
+            "role-category": {
+                "api_level": "user",
+                "class": "scalrctl.commands.export.Export",
+                "http-method": "get",
+                "route": "/{envId}/role-categories/{roleCategoryId}/",
+                "cmd_descr" : "Export Role Category object to a file",
+                "post-params": {
+                    "api_level": "user",
+                    "class": "scalrctl.commands.Action",
+                    "http-method": "post",
+                    "route": "/{envId}/role-categories/"
+                },
+                "patch-params": {
+                    "api_level": "user",
+                    "class": "scalrctl.commands.Action",
+                    "http-method": "patch",
+                    "route": "/{envId}/role-categories/{roleCategoryId}/"
+                }
+            },
+            "role-image": {
+                "api_level": "user",
+                "class": "scalrctl.commands.export.ExportRoleImage",
+                "http-method": "get",
+                "route": "/{envId}/roles/{roleId}/images/{imageId}/",
+                "cmd_descr" : "Export Role Image object to a file",
+                "post-params": {
+                    "api_level": "user",
+                    "class": "scalrctl.commands.roleimage.CreateRoleImage",
+                    "http-method": "post",
+                    "route": "/{envId}/roles/{roleId}/images/"
+                },
+                "patch-params": {
+                    "api_level": "user",
+                    "class": "scalrctl.commands.roleimage.ReplaceRoleImage",
+                    "http-method": "post",
+                    "route": "/{envId}/roles/{roleId}/images/{imageId}/actions/replace/"
+                }
+            },
+            "script": {
                 "api_level": "user",
                 "class": "scalrctl.commands.export.ExportScript",
                 "http-method": "get",
