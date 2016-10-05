@@ -141,6 +141,14 @@ class Action(BaseAction):
             raw_object = ""
         return json.loads(raw_object)
 
+
+    def post(self, response):
+        """
+        after request is made
+        """
+        return response
+
+
     @staticmethod
     def _read_object():
         """
@@ -368,6 +376,7 @@ class Action(BaseAction):
         Finds object in yaml spec and determines it's mutable fields
         to filter user JSON.
         """
+        # TODO: remove this method
         mutable = []
         reference_path = None
 
