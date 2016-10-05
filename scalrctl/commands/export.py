@@ -1,57 +1,113 @@
-__author__ = 'Dmitriy Korsakov'
-
-import json
-import datetime
+"""
+Export Scalr objects.
+"""
+import os
 import copy
-
-from scalrctl import settings
-from scalrctl import commands
-from scalrctl import click
-from scalrctl import defaults
+import datetime
+import json
+import pydoc
 
 import yaml
+
+from scalrctl import click, commands, defaults, settings
+
+
+__author__ = 'Dmitriy Korsakov, Sergey Babak'
 
 
 class Export(commands.Action):
 
+    relations = {}
+
     def _get_custom_options(self):
         # Disable output modifiers
         options = []
-        debug = click.Option(
-            ('--debug', 'debug'),
-            is_flag=True,
-            default=False,
-            help="Print debug messages")
+        debug = click.Option(('--debug', 'debug'), is_flag=True,
+                             default=False, help="Print debug messages")
         options.append(debug)
         return options
 
+    @staticmethod
+    def _get_param(parent, child, key):
+        head, _, tail = key.partition('.')
+        if head == 'child':
+            return reduce(dict.__getitem__, tail.split('.'), child)
+        elif head == 'parent':
+            return reduce(dict.__getitem__, tail.split('.'), parent)
+        else:
+            raise Exception("Invalid key: \"{}\"".format(key))
+
+    def _get_relations(self, parent):
+
+        with open(os.path.join(os.path.dirname(__file__),
+                               '../scheme/scheme.json')) as fp:
+            scheme = json.load(fp)
+
+        data = []
+        for relation, relation_values in self.relations.items():
+            list_data = scheme[relation]['list']
+            list_action = commands.Action(
+                name=relation,
+                route=list_data['route'],
+                http_method=list_data['http-method'],
+                api_level=list_data['api_level'],
+            )
+
+            get_data = scheme[relation]['get']
+            # TODO: recursive export
+            # export_cls = pydoc.locate(
+            #   scheme['export'][relation]['class']
+            # ) if 'class' in scheme['export'][relation] else Export
+            get_action = Export(
+                name=relation,
+                route=get_data['route'],
+                http_method=get_data['http-method'],
+                api_level=get_data['api_level'],
+            )
+
+            list_kwargs = {'hide_output': True}
+            for key, value in relation_values['list'].items():
+                list_kwargs[key] = self._get_param(parent, None, value)
+
+            list_action_resp = list_action.run(**list_kwargs)
+            resp_json = json.loads(list_action_resp)
+
+            for obj_data in resp_json['data']:
+                get_kwargs = {'hide_output': True}
+                for key, value in relation_values['get'].items():
+                    get_kwargs[key] = self._get_param(parent, obj_data, value)
+                resp = get_action.run(**get_kwargs)
+                data.extend(resp)
+
+        return data
+
     def run(self, *args, **kwargs):
-        hide_output = kwargs.pop("hide_output", False)
+        hide_output = kwargs.pop('hide_output', False)
 
         kv = kwargs.copy()
         kv['hide_output'] = True
         response = super(Export, self).run(*args, **kv)
 
-        kwargs["envId"] = settings.envId
+        kwargs['envId'] = settings.envId
         kv = copy.deepcopy(kwargs)
-        for item in ("debug", "nocolor", "transformation"):
+        for item in ('debug', 'nocolor', 'transformation'):
             if item in kv:
                 del kv[item]
         uri = self._request_template.format(**kwargs)
 
-        d = {
-            "API_VERSION": settings.API_VERSION,
-            "envId": settings.envId,
-            "DATE": datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"),
-            "API_HOST": settings.API_HOST,
-            "API_LEVEL": self.api_level,
-            "METHOD": self.http_method,
-            "ROUTE": self.route,
-            "URI": uri,
-            "ACTION": self.name,
-            "ARGUMENTS": (args, kv),
-            "SCALRCTL_VERSION": defaults.VERSION,
-             }
+        scalrctl_meta = {
+            'API_VERSION': settings.API_VERSION,
+            'envId': settings.envId,
+            'DATE': datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S'),
+            'API_HOST': settings.API_HOST,
+            'API_LEVEL': self.api_level,
+            'METHOD': self.http_method,
+            'ROUTE': self.route,
+            'URI': uri,
+            'ACTION': self.name,
+            'ARGUMENTS': (args, kv),
+            'SCALRCTL_VERSION': defaults.VERSION,
+        }
 
         try:
             response_json = json.loads(response)
@@ -60,71 +116,107 @@ class Export(commands.Action):
                 raise
             raise click.ClickException(str(e))
 
-        response_json["meta"]["scalrctl"] = d
+        response_json['meta']['scalrctl'] = scalrctl_meta
 
-        dump = yaml.safe_dump(
-            response_json,
-            encoding='utf-8',
-            allow_unicode=True,
-            default_flow_style=False
-        )
+        result = [response_json, ]
+        if self.relations:
+            relations = self._get_relations(response_json['data'])
+            result.extend(relations)
+
+        def _order(arg):
+            action_name = arg['meta']['scalrctl']['ACTION']
+            return self.relations.get(action_name, {}).get('order', 0)
+
+        result = sorted(result, key=_order)
+
         if not hide_output:
+            dump = yaml.safe_dump(
+                result,
+                encoding='utf-8',
+                allow_unicode=True,
+                default_flow_style=False
+            )
             click.echo(dump)
-        return response_json
+
+        return result
 
 
 class ExportFarmRoleGlobalVariable(Export):
-    prompt_for = ["roleId", "globalVariableName"]
+    prompt_for = ['roleId', 'globalVariableName']
 
 
 class ExportImage(Export):
-    prompt_for = ["imageId"]
+    prompt_for = ['imageId']
 
 
 class ExportScript(Export):
 
-    def run(self, *args, **kwargs):
-        # TODO: help for update! (some script-versions may be deleted)
-        # interactive update by default (prompt for deletes and updates), with optional force
-        kwargs["hide_output"] = True
-        response = super(ExportScript, self).run(*args, **kwargs)
+    relations = {
+        'script-version': {
+            'get': {
+                'scriptId': 'parent.id',
+                'scriptVersionNumber': 'child.version',
+            },
+            'list': {
+                'scriptId': 'parent.id'
+            }
+        },
+    }
 
-        svlist_action = commands.Action(
-            "script-version",
-            "/{envId}/scripts/{scriptId}/script-versions/",
-            "get",
-            "user"
-        )
-        svlist_text = svlist_action.run(envId=kwargs["envId"], scriptId=kwargs["scriptId"], hide_output=True)
-        svlist_dict = json.loads(svlist_text)
-        svlist = svlist_dict["data"]
 
-        svget_action = Export(
-            "script-version",
-            "/{envId}/scripts/{scriptId}/script-versions/{scriptVersionNumber}/",
-            "get",
-            "user"
-        )
-        include = []
-        for sv in svlist:
-            script_version = sv["version"]
-            sctipt_body = sv["body"]
-            if sctipt_body:
-                out = svget_action.run(
-                    envId=kwargs["envId"],
-                    scriptId=kwargs["scriptId"],
-                    scriptVersionNumber=script_version,
-                    hide_output=True
-                )
-                include.append(out)
+class ExportRole(Export):
 
-        response["include"] = include
+    relations = {
+        'role-category': {
+            'order': -1,
+            'get': {
+                'roleCategoryId': 'child.id',
+            },
+            'list': {
+                'scope': 'parent.scope'
+            },
+        },
+        'role-orchestration-rule': {
+            'get': {
+                'roleId': 'parent.id',
+                'orchestrationRuleId': 'child.id',
+            },
+            'list': {
+                'roleId': 'parent.id'
+            }
+        },
+        'role-global-variables': {
+            'get': {
+                'globalVariableName': 'child.name',
+                'roleId': 'parent.id'
+            },
+            'list': {
+                'roleId': 'parent.id',
+                'declaredIn': 'parent.scope'
+            }
+        },
+        'role-image': {
+            'get': {
+                'roleId': 'child.role.id',
+                'imageId': 'child.image.id',
+            },
+            'list': {
+                'roleId': 'parent.id'
+            },
+        },
+    }
 
-        dump = yaml.safe_dump(
-            response,
-            encoding='utf-8',
-            allow_unicode=True,
-            default_flow_style=False
-        )
-        click.echo(dump)
-        return response
+
+class ExportRoleImage(Export):
+
+    relations = {
+        'image': {
+            'order': -1,
+            'get': {
+                'imageId': 'parent.id',
+            },
+            'list': {
+                'id': 'parent.id',
+            },
+        },
+    }
