@@ -52,11 +52,11 @@ CONFIGURATIONS = {
     'ADMIN': {
         'GLOBAL_SCOPE_API_KEY_ID': {
             'order': 6,
-            'description': 'Scalr admin(global scope) API key ID'
+            'description': 'Scalr admin (global scope) API key ID'
         },
         'GLOBAL_SCOPE_API_SECRET_KEY': {
             'order': 7,
-            'description': 'Scalr admin(global scope) API secret key'
+            'description': 'Scalr admin (global scope) API secret key'
         },
     }
 }
@@ -87,7 +87,7 @@ class ConfigureScalrCTL(commands.BaseAction):
 
     def get_options(self):
         profile_arg = click.Argument(('profile',), required=False)   # [ST-30]
-        admin_opt = click.Option(('--admin',), required=False, is_flag=True)
+        admin_opt = click.Option(('--with-global-scope', 'admin'), required=False, is_flag=True)
         return [profile_arg, admin_opt]
 
 

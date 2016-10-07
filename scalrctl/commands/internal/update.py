@@ -74,13 +74,6 @@ def _write_spec(spec_path, text):
         fp.write(text)
 
 
-def _write_routes(api_level, paths):
-    routes_text = _read_spec(defaults.ROUTES_PATH) or '{}'
-    routes = json.loads(routes_text)
-    routes[api_level] = paths
-    json.dump(routes, open(defaults.ROUTES_PATH, "w"))
-
-
 def _update_spec(api_level):
     """
     Downloads yaml spec and converts it to JSON
@@ -95,7 +88,6 @@ def _update_spec(api_level):
         try:
             struct = yaml.load(yaml_spec_text)
             json_spec_text = json.dumps(struct)
-            paths = list(struct['paths'].keys())
         except (KeyError, TypeError, yaml.YAMLError) as e:
             six.reraise(type(e), "Swagger specification is not valid:\n{}"
                         .format(traceback.format_exc()))
@@ -111,7 +103,6 @@ def _update_spec(api_level):
 
         # update json spec and routes
         _write_spec(json_spec_path, json_spec_text)
-        _write_routes(api_level, paths)
 
         return True, None
     except Exception as e:
@@ -138,7 +129,6 @@ def is_update_required():
     else:
         exists = [_is_spec_exists(api, 'yaml') and
                   _is_spec_exists(api, 'json') for api in defaults.API_LEVELS]
-        exists.append(os.path.exists(defaults.ROUTES_PATH))
         return not all(exists)
 
 

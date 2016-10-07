@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 import json
 import re
+import os
 
 import dicttoxml
 
-from scalrctl import click, request, settings, utils, view, examples
+from scalrctl import click, request, settings, utils, view, examples, defaults
 
 __author__ = 'Dmitriy Korsakov'
 
@@ -69,6 +70,16 @@ class Action(BaseAction):
                 level=self.api_level if self.api_level != 'user' else '',
                 name=self.name
             )
+
+    def validate(self):
+        """
+        Validate routes for current API scope.
+        """
+        if self.route and self.api_level:
+            spec_path = os.path.join(defaults.CONFIG_DIRECTORY,
+                                     '{}.json'.format(self.api_level))
+            api_routes = json.load(open(spec_path, 'r'))['paths'].keys()
+            assert api_routes and self.route in api_routes, self.name
 
     def _check_arguments(self, **kwargs):
         route_data = self.raw_spec['paths'][self.route]
@@ -368,6 +379,7 @@ class Action(BaseAction):
         Finds object in yaml spec and determines it's mutable fields
         to filter user JSON.
         """
+        # TODO: remove this method
         mutable = []
         reference_path = None
 
@@ -538,7 +550,8 @@ class Action(BaseAction):
         """
         Validate routes for current API scope.
         """
-        api_routes = utils.read_routes()
-        if self.route and self.api_level and api_routes:
-            assert self.api_level in api_routes and \
-                   self.route in api_routes[self.api_level], self.name
+        if self.route and self.api_level:
+            spec_path = os.path.join(defaults.CONFIG_DIRECTORY,
+                                     '{}.json'.format(self.api_level))
+            api_routes = json.load(open(spec_path, 'r'))['paths'].keys()
+            assert api_routes and self.route in api_routes, self.name
