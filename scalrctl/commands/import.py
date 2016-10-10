@@ -20,9 +20,9 @@ class Import(commands.Action):
 
     relations = {
         'script': {
-            'script-version.scriptId': 0,
+            'script-versions.scriptId': 0,
         },
-        'role-category': {
+        'role-categories': {
             'role.category.id': 0,
         },
         'role': {
