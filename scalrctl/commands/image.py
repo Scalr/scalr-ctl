@@ -48,7 +48,8 @@ class ReplaceImage(commands.Action):
         options = [newimageid, deprecate, scope]
         options.extend(super(ReplaceImage, self).get_options())
         for option in options:
-            if option.name == "interactive":
+            #if option.name == "interactive":
+            if option.name == "stdin":
                 options.remove(option)
         return options
 

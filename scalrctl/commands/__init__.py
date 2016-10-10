@@ -214,12 +214,20 @@ class Action(BaseAction):
         options = []
 
         if self.http_method.upper() == 'POST':
+            stdin = click.Option(('--stdin', 'stdin'),
+                                       is_flag=True, required=False,
+                                       help="Read JSON data from standart console input instead of "
+                                            "editing it in the default "
+                                            "console text editor.")
+            options.append(stdin)
+            """
             interactive = click.Option(('--interactive', 'interactive'),
                                        is_flag=True, required=False,
                                        help="Edit JSON data in the default "
                                             "console text editor before "
                                             "sending POST request to server.")
             options.append(interactive)
+            """
 
         if self.http_method.upper() == 'GET':
             if self._returns_iterable():
@@ -439,7 +447,8 @@ class Action(BaseAction):
         self._check_arguments(**kwargs)
 
         import_data = kwargs.pop('import-data', {})
-        interactive = kwargs.pop('interactive', None)
+        #interactive = kwargs.pop('interactive', None)
+        stdin = kwargs.pop('stdin', None)
         http_method = self.http_method.upper()
 
         if http_method not in ('PATCH', 'POST'):
@@ -456,7 +465,7 @@ class Action(BaseAction):
                 else:
                     if http_method == 'PATCH':
                         json_object = self._edit_object(*args, **kwargs)
-                    elif http_method == 'POST' and interactive:
+                    elif http_method == 'POST' and not stdin:
                         json_object = self._edit_example()
                     else:
                         json_object = self._read_object()

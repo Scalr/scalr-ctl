@@ -67,7 +67,7 @@
                 "class": "scalrctl.commands.Action",
                 "http-method": "post",
                 "route": "/images/",
-                "epilog": "Example: scalr-ctl global image register < myimage.json"
+                "epilog": "Example: scalr-ctl global image register --stdin < myimage.json"
             },
             "retrieve": {
                 "api_level": "global",
@@ -120,7 +120,7 @@
                 "class": "scalrctl.commands.Action",
                 "http-method": "post",
                 "route": "/roles/",
-                "epilog": "Example: scalr-ctl global role create < myrole.json"
+                "epilog": "Example: scalr-ctl global role create --stdin < myrole.json"
             },
             "delete": {
                 "api_level": "global",
@@ -162,7 +162,7 @@
                 "class": "scalrctl.commands.Action",
                 "http-method": "post",
                 "route": "/role-categories/",
-                "epilog": "Example: scalr-ctl global role-category create < myrolecategory.json"
+                "epilog": "Example: scalr-ctl global role-category create --stdin < myrolecategory.json"
             },
             "delete": {
                 "api_level": "global",
@@ -204,7 +204,7 @@
                 "class": "scalrctl.commands.Action",
                 "http-method": "post",
                 "route": "/roles/{roleId}/orchestration-rules/",
-                "epilog": "Example: scalr-ctl global role-orchestration-rule create --roleId <ID> < myroleorule.json"
+                "epilog": "Example: scalr-ctl global role-orchestration-rule create --roleId <ID> --stdin < myroleorule.json"
             },
             "delete": {
                 "api_level": "global",
@@ -280,7 +280,7 @@
                 "class": "scalrctl.commands.Action", 
                 "http-method": "post", 
                 "route": "/environments/{envId}/clouds/{cloud}/",
-                "epilog": "Example: scalr-ctl account cloud create --cloud <NAME> < mycloud.json"
+                "epilog": "Example: scalr-ctl account cloud create --cloud <NAME> --stdin < mycloud.json"
             }
         }, 
         "cloud-credentials": {
@@ -290,7 +290,7 @@
                 "class": "scalrctl.commands.Action", 
                 "http-method": "post", 
                 "route": "/cloud-credentials/",
-                "epilog": "Example: scalr-ctl account cloud-credentials create < mycredentials.json"
+                "epilog": "Example: scalr-ctl account cloud-credentials create --stdin < mycredentials.json"
             }, 
             "delete": {
                 "api_level": "account", 
@@ -332,7 +332,7 @@
                 "class": "scalrctl.commands.Action", 
                 "http-method": "post", 
                 "route": "/environments/",
-                "epilog": "Example: scalr-ctl account environment create < myenv.json"
+                "epilog": "Example: scalr-ctl account environment create --stdin < myenv.json"
             }, 
             "delete": {
                 "api_level": "account", 
@@ -374,7 +374,7 @@
                 "class": "scalrctl.commands.Action", 
                 "http-method": "post", 
                 "route": "/events/",
-                "epilog": "Example: scalr-ctl account event create < myevent.json"
+                "epilog": "Example: scalr-ctl account event create --stdin < myevent.json"
             }, 
             "delete": {
                 "api_level": "account", 
@@ -449,7 +449,7 @@
                 "class": "scalrctl.commands.Action", 
                 "http-method": "post", 
                 "route": "/images/",
-                "epilog": "Example: scalr-ctl account image register < myimage.json"
+                "epilog": "Example: scalr-ctl account image register --stdin < myimage.json"
             }, 
             "retrieve": {
                 "api_level": "account", 
@@ -502,7 +502,7 @@
                 "class": "scalrctl.commands.Action", 
                 "http-method": "post", 
                 "route": "/roles/",
-                "epilog": "Example: scalr-ctl account role create < myrole.json"
+                "epilog": "Example: scalr-ctl account role create --stdin < myrole.json"
             }, 
             "delete": {
                 "api_level": "account", 
@@ -544,7 +544,7 @@
                 "class": "scalrctl.commands.Action", 
                 "http-method": "post", 
                 "route": "/role-categories/",
-                "epilog": "Example: scalr-ctl account role-category create < myrolecategory.json"
+                "epilog": "Example: scalr-ctl account role-category create --stdin < myrolecategory.json"
             }, 
             "delete": {
                 "api_level": "account", 
@@ -586,7 +586,7 @@
                 "class": "scalrctl.commands.Action", 
                 "http-method": "post", 
                 "route": "/roles/{roleId}/global-variables/",
-                "epilog": "Example: scalr-ctl account role-global-variables create --roleId <ID> < myrolegv.json"
+                "epilog": "Example: scalr-ctl account role-global-variables create --roleId <ID> --stdin < myrolegv.json"
             }, 
             "delete": {
                 "api_level": "account", 
@@ -647,7 +647,7 @@
                 "class": "scalrctl.commands.Action", 
                 "http-method": "post", 
                 "route": "/roles/{roleId}/images/{imageId}/actions/replace/",
-                "epilog": "Example: scalr-ctl account role-image replace --roleId <ROLEID> --imageId <ID> < myrolegv.json"
+                "epilog": "Example: scalr-ctl account role-image replace --roleId <ROLEID> --imageId <ID> --stdin < myrolegv.json"
             }, 
             "retrieve": {
                 "api_level": "account", 
@@ -661,7 +661,7 @@
                 "class": "scalrctl.commands.Action",
                 "http-method": "post", 
                 "route": "/roles/{roleId}/images/",
-                "epilog": "Example: scalr-ctl account role-image create --roleId <ID> < myroleimage.json"
+                "epilog": "Example: scalr-ctl account role-image create --roleId <ID> --stdin < myroleimage.json"
             }
         }, 
         "role-orchestration-rules": {
@@ -671,7 +671,7 @@
                 "class": "scalrctl.commands.Action", 
                 "http-method": "post", 
                 "route": "/roles/{roleId}/orchestration-rules/",
-                "epilog": "Example: scalr-ctl account role-orchestration-rule create --roleId <ID> < myroleorule.json"
+                "epilog": "Example: scalr-ctl account role-orchestration-rule create --roleId <ID> --stdin < myroleorule.json"
             }, 
             "delete": {
                 "api_level": "account", 
@@ -706,7 +706,7 @@
                 "class": "scalrctl.commands.Action",
                 "http-method": "post",
                 "route": "/orchestration-rules/",
-                "epilog": "Example: scalr-ctl account orchestration-rule create < myroleorule.json"
+                "epilog": "Example: scalr-ctl account orchestration-rule create --stdin < myroleorule.json"
             },
             "delete": {
                 "api_level": "account",
@@ -741,7 +741,7 @@
                 "class": "scalrctl.commands.Action",
                 "http-method": "post",
                 "route": "/environments/{envId}/teams/",
-                "epilog": "Example: scalr-ctl account environment add-team --roleId <ID> < myteam.json"
+                "epilog": "Example: scalr-ctl account environment add-team --roleId <ID> --stdin < myteam.json"
             },
             "remove-team": {
                 "api_level": "account",
@@ -771,7 +771,7 @@
                 "class": "scalrctl.commands.Action",
                 "http-method": "post",
                 "route": "/teams/",
-                "epilog": "Example: scalr-ctl account environment create-team < myteam.json"
+                "epilog": "Example: scalr-ctl account environment create-team --stdin < myteam.json"
             },
             "list": {
                 "api_level": "account",
@@ -836,7 +836,7 @@
                 "class": "scalrctl.commands.Action",
                 "http-method": "post",
                 "route": "/{envId}/events/",
-                "epilog": "Example: scalr-ctl event create < myevent.json"
+                "epilog": "Example: scalr-ctl event create --stdin < myevent.json"
             },
             "delete": {
                 "api_level": "user",
@@ -1107,7 +1107,7 @@
                 "class": "scalrctl.commands.Action",
                 "http-method": "post",
                 "route": "/{envId}/farms/",
-                "epilog": "Example: scalr-ctl farm create < myfarm.json"
+                "epilog": "Example: scalr-ctl farm create --stdin < myfarm.json"
             },
             "delete": {
                 "api_level": "user",
@@ -1163,7 +1163,7 @@
                 "class": "scalrctl.commands.Action",
                 "http-method": "post",
                 "route": "/{envId}/farms/{farmId}/global-variables/",
-                "epilog": "Example: scalr-ctl farm-global-variables create --farmId <ID> < myfarmgv.json"
+                "epilog": "Example: scalr-ctl farm-global-variables create --farmId <ID> --stdin < myfarmgv.json"
             },
             "delete": {
                 "api_level": "user",
@@ -1205,7 +1205,7 @@
                     "class": "scalrctl.commands.Action",
                     "http-method": "post",
                     "route": "/{envId}/servers/{serverId}/global-variables/",
-                    "epilog": "Example: scalr-ctl farm-global-variables create --farmId <ID> < myfarmgv.json"
+                    "epilog": "Example: scalr-ctl farm-global-variables create --farmId <ID> --stdin < myfarmgv.json"
                 },
                 "delete": {
                     "api_level": "user",
@@ -1278,7 +1278,7 @@
                 "class": "scalrctl.commands.Action",
                 "http-method": "post",
                 "route": "/{envId}/farms/{farmId}/farm-roles/",
-                "epilog": "Example: scalr-ctl farm-role create --farmId <ID> < myfarmrole.json"
+                "epilog": "Example: scalr-ctl farm-role create --farmId <ID> --stdin < myfarmrole.json"
             },
             "delete": {
                 "api_level": "user",
@@ -1298,7 +1298,7 @@
                 "class": "scalrctl.commands.Action",
                 "http-method": "post",
                 "route": "/{envId}/farm-roles/{farmRoleId}/actions/import-server/",
-                "epilog": "Example: scalr-ctl farm-role create --farmRoleId <ID> < myfarmrole.json"
+                "epilog": "Example: scalr-ctl farm-role create --farmRoleId <ID> --stdin < myfarmrole.json"
             },
             "launch-server": {
                 "api_level": "user",
@@ -1352,7 +1352,7 @@
                 "class": "scalrctl.commands.Action",
                 "http-method": "post",
                 "route": "/{envId}/farm-roles/{farmRoleId}/global-variables/",
-                "epilog": "Example: scalr-ctl farm-role-global-variables create --farmRoleId <ID> < myfarmrolegv.json"
+                "epilog": "Example: scalr-ctl farm-role-global-variables create --farmRoleId <ID> --stdin < myfarmrolegv.json"
             },
             "delete": {
                 "api_level": "user",
@@ -1401,7 +1401,7 @@
                 "class": "scalrctl.commands.Action",
                 "http-method": "post",
                 "route": "/{envId}/farm-roles/{farmRoleId}/orchestration-rules/",
-                "epilog": "Example: scalr-ctl farm-role-orchestration-rule create --farmRoleId <ID> < myfarmroleor.json"
+                "epilog": "Example: scalr-ctl farm-role-orchestration-rule create --farmRoleId <ID> --stdin < myfarmroleor.json"
             },
             "delete": {
                 "api_level": "user",
@@ -1449,7 +1449,7 @@
                 "class": "scalrctl.commands.Action",
                 "http-method": "post",
                 "route": "/{envId}/farm-roles/{farmRoleId}/scaling/",
-                "epilog": "Example: scalr-ctl farm-role-scaling create --farmRoleId <ID> < myfarmrolescaling.json"
+                "epilog": "Example: scalr-ctl farm-role-scaling create --farmRoleId <ID> --stdin < myfarmrolescaling.json"
             },
             "delete": {
                 "api_level": "user",
@@ -1524,7 +1524,7 @@
                 "class": "scalrctl.commands.Action",
                 "http-method": "post",
                 "route": "/{envId}/images/",
-                "epilog": "Example: scalr-ctl image register < image.json"
+                "epilog": "Example: scalr-ctl image register --stdin < image.json"
             },
             "retrieve": {
                 "api_level": "user",
@@ -1570,7 +1570,7 @@
                 "class": "scalrctl.commands.Action",
                 "http-method": "post",
                 "route": "/{envId}/projects/",
-                "epilog": "Example: scalr-ctl project create < myproject.json"
+                "epilog": "Example: scalr-ctl project create --stdin < myproject.json"
             },
             "get": {
                 "api_level": "user",
@@ -1607,7 +1607,7 @@
                 "class": "scalrctl.commands.Action",
                 "http-method": "post",
                 "route": "/{envId}/roles/",
-                "epilog": "Example: scalr-ctl role create < myrole.json"
+                "epilog": "Example: scalr-ctl role create --stdin < myrole.json"
             },
             "delete": {
                 "api_level": "user",
@@ -1649,7 +1649,7 @@
                 "class": "scalrctl.commands.Action",
                 "http-method": "post",
                 "route": "/{envId}/role-categories/",
-                "epilog": "Example: scalr-ctl role-category create < myrolecategory.json"
+                "epilog": "Example: scalr-ctl role-category create --stdin < myrolecategory.json"
             },
             "delete": {
                 "api_level": "user",
@@ -1691,7 +1691,7 @@
                 "class": "scalrctl.commands.Action",
                 "http-method": "post",
                 "route": "/{envId}/roles/{roleId}/global-variables/",
-                "epilog": "Example: scalr-ctl role-global-variables create --roleId <ID> < myrolegv.json"
+                "epilog": "Example: scalr-ctl role-global-variables create --roleId <ID> --stdin < myrolegv.json"
             },
             "delete": {
                 "api_level": "user",
@@ -1783,7 +1783,7 @@
                 "class": "scalrctl.commands.Action",
                 "http-method": "post",
                 "route": "/{envId}/roles/{roleId}/orchestration-rules/",
-                "epilog": "Example: scalr-ctl role-orchestration-rule create --roleId <ID> < myroleor.json"
+                "epilog": "Example: scalr-ctl role-orchestration-rule create --roleId <ID> --stdin < myroleor.json"
             },
             "delete": {
                 "api_level": "user",
@@ -1825,7 +1825,7 @@
                 "class": "scalrctl.commands.Action",
                 "http-method": "post",
                 "route": "/{envId}/scaling-metrics/",
-                "epilog": "Example: scalr-ctl scaling-metric create < myscalingmetric.json"
+                "epilog": "Example: scalr-ctl scaling-metric create --stdin < myscalingmetric.json"
             },
             "delete": {
                 "api_level": "user",
@@ -1874,7 +1874,7 @@
                 "class": "scalrctl.commands.Action",
                 "http-method": "post",
                 "route": "/{envId}/scripts/",
-                "epilog": "Example: scalr-ctl script create < myscript.json"
+                "epilog": "Example: scalr-ctl script create --stdin < myscript.json"
             },
             "delete": {
                 "api_level": "user",
@@ -1942,7 +1942,7 @@
                 "class": "scalrctl.commands.Action",
                 "http-method": "post",
                 "route": "/{envId}/scripts/{scriptId}/script-versions/",
-                "epilog": "Example: scalr-ctl script-version create --scriptId <ID> < myscriptversion.json"
+                "epilog": "Example: scalr-ctl script-version create --scriptId <ID> --stdin < myscriptversion.json"
             },
             "delete": {
                 "api_level": "user",
