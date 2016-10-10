@@ -28,10 +28,10 @@ class Import(commands.Action):
         'role': {
             'role-global-variables.roleId': 0,
             'role-orchestration-rule.roleId': 0,
-            'role-image.roleId': 0,
+            'role-images.roleId': 0,
         },
         'image': {
-            'role-image.imageId': 0,
+            'role-images.imageId': 0,
         }
     }
 
@@ -94,14 +94,23 @@ class Import(commands.Action):
         raw_objects = kwargs.pop('raw', None) or click.get_text_stream('stdin')
         import_objects = self._validate_object(raw_objects)
 
-        try:
-            for obj in import_objects:
+        for obj in import_objects:
+            try:
                 obj = self._modify_object(obj)
                 result = self._import_object(obj, env_id, update_mode, dry_run)
                 self._save_imported(obj, result['data'])
-        except Exception as e:
-            # TODO: delete imported objects
-            raise click.ClickException(str(e))
+            except Exception as e:
+                error_msg = str(e)
+                name = obj['data'].get('name')
+                ignored_errors = (
+                    'Role Category with name "{}" already exists.'.format(name),
+                    'Variable with name {} already exists'.format(name),
+                )
+                if error_msg in ignored_errors:
+                    click.secho("Warning: {}\n".format(error_msg), bold=True, fg='yellow')
+                else:
+                    # TODO: delete imported objects
+                    raise click.ClickException(error_msg)
 
     def _import_object(self, obj_data, env_id, update_mode, dry_run=False):
         args, kwargs = obj_data['meta']['scalrctl']['ARGUMENTS']
@@ -141,6 +150,7 @@ class Import(commands.Action):
         ), bold=True)
 
         result = action.run(*args, **kwargs)
+
         result_json = json.loads(result)
 
         alias = self._get_object_alias(obj_type)
