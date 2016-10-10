@@ -152,7 +152,7 @@ class ExportImage(Export):
 class ExportScript(Export):
 
     relations = {
-        'script-version': {
+        'script-versions': {
             'get': {
                 'scriptId': 'parent.id',
                 'scriptVersionNumber': 'child.version',
@@ -167,7 +167,7 @@ class ExportScript(Export):
 class ExportRole(Export):
 
     relations = {
-        'role-category': {
+        'role-categories': {
             'order': -1,
             'get': {
                 'roleCategoryId': 'child.id',
@@ -176,7 +176,7 @@ class ExportRole(Export):
                 'scope': 'parent.scope'
             },
         },
-        'role-orchestration-rule': {
+        'role-orchestration-rules': {
             'get': {
                 'roleId': 'parent.id',
                 'orchestrationRuleId': 'child.id',
@@ -195,7 +195,7 @@ class ExportRole(Export):
                 'declaredIn': 'parent.scope'
             }
         },
-        'role-image': {
+        'role-images': {
             'get': {
                 'roleId': 'child.role.id',
                 'imageId': 'child.image.id',
@@ -210,7 +210,7 @@ class ExportRole(Export):
 class ExportRoleImage(Export):
 
     relations = {
-        'image': {
+        'images': {
             'order': -1,
             'get': {
                 'imageId': 'parent.id',

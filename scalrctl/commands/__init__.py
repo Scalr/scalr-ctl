@@ -491,7 +491,7 @@ class Action(BaseAction):
         """
         Callback for click subcommand.
         """
-        hide_output = kwargs.get('hide_output', False)  # [ST-88]
+        hide_output = kwargs.pop('hide_output', False)  # [ST-88]
         args, kwargs = self.pre(*args, **kwargs)
 
         uri = self._request_template
