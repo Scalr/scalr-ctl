@@ -173,7 +173,8 @@ class ExportRole(Export):
                 'roleCategoryId': 'child.id',
             },
             'list': {
-                'scope': 'parent.scope'
+                'scope': 'parent.scope',
+                'id': 'parent.category.id',
             },
         },
         'role-orchestration-rules': {
