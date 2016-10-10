@@ -895,7 +895,7 @@
                     "route": "/{envId}/farms/{farmId}/global-variables/{globalVariableName}/"
                 }
             },
-            "farm-role-global-variables": {
+            "farm-role-global-variable": {
                 "hidden": true,
                 "api_level": "user",
                 "class": "scalrctl.commands.export.ExportFarmRoleGlobalVariable",
@@ -918,7 +918,7 @@
                 }
             },
             "group_descr": "Export Scalr Objects",
-            "images": {
+            "image": {
                 "api_level": "user",
                 "class": "scalrctl.commands.export.ExportImage",
                 "http-method": "get",
@@ -939,7 +939,7 @@
                     "route": "/{envId}/images/"
                 }
             },
-            "roles": {
+            "role": {
                 "api_level": "user",
                 "class": "scalrctl.commands.export.ExportRole",
                 "http-method": "get",
@@ -960,7 +960,7 @@
                     "route": "/{envId}/roles/"
                 }
             },
-            "role-global-variables": {
+            "role-global-variable": {
                 "hidden": true,
                 "api_level": "user",
                 "class": "scalrctl.commands.export.Export",
@@ -983,6 +983,7 @@
                 }
             },
             "role-orchestration-rule": {
+                "hidden": true,
                 "api_level": "user",
                 "class": "scalrctl.commands.export.Export",
                 "http-method": "get",
@@ -1002,6 +1003,7 @@
                 }
             },
             "role-category": {
+                "hidden": true,
                 "api_level": "user",
                 "class": "scalrctl.commands.export.Export",
                 "http-method": "get",
@@ -1021,6 +1023,7 @@
                 }
             },
             "role-image": {
+                "hidden": true,
                 "api_level": "user",
                 "class": "scalrctl.commands.export.ExportRoleImage",
                 "http-method": "get",
@@ -1060,7 +1063,8 @@
                     "route": "/{envId}/scripts/"
                 }
             },
-            "script-versions": {
+            "script-version": {
+                "hidden": true,
                 "api_level": "user",
                 "class": "scalrctl.commands.export.Export",
                 "http-method": "get",
