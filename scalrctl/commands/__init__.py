@@ -171,8 +171,10 @@ class Action(BaseAction):
                 utils.reraise("Invalid server response")
 
             if response_json.get('errors'):
-                msg = response_json['errors'][0]['message']
-                raise click.ClickException(msg)
+                error_data = response_json['errors'][0]
+                error = click.ClickException(error_data['message'])
+                error.code = error_data.get('code')
+                raise error
 
             if not hidden:
                 utils.debug(response_json.get('meta'))

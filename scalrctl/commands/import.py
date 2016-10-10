@@ -100,17 +100,15 @@ class Import(commands.Action):
                 result = self._import_object(obj, env_id, update_mode, dry_run)
                 self._save_imported(obj, result['data'])
             except Exception as e:
-                error_msg = str(e)
-                name = obj['data'].get('name')
-                ignored_errors = (
-                    'Role Category with name "{}" already exists.'.format(name),
-                    'Variable with name {} already exists'.format(name),
-                )
-                if error_msg in ignored_errors:
-                    click.secho("Warning: {}\n".format(error_msg), bold=True, fg='yellow')
+                error_code = getattr(e, 'code', None)
+                action_name = obj['meta']['scalrctl']['ACTION']
+                ignored = ('role-categories', 'role-global-variables')
+
+                if error_code == 'UnicityViolation' and action_name in ignored:
+                    click.secho("Warning: {}\n".format(str(e)), bold=True, fg='yellow')
                 else:
                     # TODO: delete imported objects
-                    raise click.ClickException(error_msg)
+                    raise click.ClickException(str(e))
 
     def _import_object(self, obj_data, env_id, update_mode, dry_run=False):
         args, kwargs = obj_data['meta']['scalrctl']['ARGUMENTS']
