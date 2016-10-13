@@ -32,6 +32,7 @@ Fixed
 
 New feature
 
+    ST-126 Add support for "global" scope
     ST-181 Add server scope GV management
     ST-160 Add Server launch command
     ST-150 Add support for XML view
@@ -40,7 +41,8 @@ New feature
     ST-187 Add support for Account Orchestration Rule endpoint
     ST-189 Replace Image for all Roles of specified Scope
     ST-186 Use the same Team with different ACL per Environment
-
+    
+    
 Version 1.0.55
 --------------
 
