@@ -1,6 +1,48 @@
 scalr-ctl Changelog
 ===============
 
+Version 2.0.0
+--------------
+
+Improvements
+
+    ST-147 Refactor scalr-ctl configure & add --admin option
+    ST-170 Refactor update system
+    ST-171 Refactor request.py
+    ST-134 Refactor Import/export for Roles
+    ST-169 Generate examples for POST methods
+    ST-183 Example JSON objects should not contain read-only properties
+    ST-176 Add medium tests for scalr-ctl configure
+    ST-177 Add medium tests for update spec
+    ST-178 Add regression tests for every command's help
+    ST-174 Refactor commands.Action
+    ST-192 Make --interactive the default mode for POST commands
+    ST-173 Refactor app.py & fix autocomplete for Export
+    ST-174 Refactor commands.Action
+    ST-184 Get rid of available_api_routes.json
+    ST-190 Test Scaling Rules > scaleUp & scaleDown should be of number type
+    ST-188 Test Farm Owner email and Team name
+    ST-191 Pluralize all commands names
+
+Fixed
+
+    ST-94 Fix Colored output for Windows
+    ST-172 Fix Setting up bash complition creates dublicate entries in bash_profile
+    ST-185 Fix scalr-ctl account team list inconsistent response
+
+New feature
+
+    ST-126 Add support for "global" scope
+    ST-181 Add server scope GV management
+    ST-160 Add Server launch command
+    ST-150 Add support for XML view
+    ST-179 Add support for Farm Lock & Farm Unlock
+    ST-180 Add support for Scaling termination preferences
+    ST-187 Add support for Account Orchestration Rule endpoint
+    ST-189 Replace Image for all Roles of specified Scope
+    ST-186 Use the same Team with different ACL per Environment
+    
+    
 Version 1.0.55
 --------------
 
