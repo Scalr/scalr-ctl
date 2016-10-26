@@ -93,7 +93,6 @@ class ScalrCLI(click.Group):
         Given a context and a command name, this returns
         a `Command` object if it exists or returns `ScalrCLI`.
         """
-
         if name in self.scheme:
             subscheme = self.scheme[name]
         else:
