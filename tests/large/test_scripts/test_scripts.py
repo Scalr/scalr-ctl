@@ -110,20 +110,16 @@ def test_scripts_create_delete(runner):
 
     #POST
     create_output, err, retcode = runner.invoke_with_input(script_object, "scripts", "create", "--stdin")
-    print "create:", (create_output, err, retcode)
     new_script = yaml.load(create_output)
-    print "new_script:", new_script
 
     #UPDATE
     updated_script_json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "script_updated.json")
     updated_script_object = open(updated_script_json_path, "r").read()
 
     update_output, e, r = runner.invoke_with_input(updated_script_object, "scripts", "update", "--stdin", scriptId=new_script["id"])
-    print "update:", (update_output, e, r)
     updated_script = yaml.load(update_output)
-    print "updated_script:", updated_script
     assert updated_script["name"] == "pecha_scripting_test"
 
     #DELETE
     delete_output = runner.invoke(script_object, "scripts", "delete", scriptId="2")[0]
-    assert "deleted" in delete_output
+    assert delete_output and "id" in delete_output and delete_output["id" == new_script["id"]]

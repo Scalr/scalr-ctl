@@ -115,7 +115,6 @@ def _test_images_create_delete(runner):
 
     #POST
     out, err, retcode = runner.invoke_with_input(image_object, "images", "register", "--stdin")
-    print "register:", (out, err, retcode)
     register_output = out
     new_image = yaml.safe_load(register_output)["data"]
 
