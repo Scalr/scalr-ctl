@@ -215,12 +215,12 @@ class Action(BaseAction):
     def _get_custom_options(self):
         options = []
 
-        if self.http_method.upper() == 'POST':
+        if self.http_method.upper() in ('POST', 'PATCH'):
             stdin = click.Option(('--stdin', 'stdin'),
-                                       is_flag=True, required=False,
-                                       help="Read JSON data from standart console input instead of "
-                                            "editing it in the default "
-                                            "console text editor.")
+                                 is_flag=True, required=False,
+                                 help="Read JSON data from standart console "
+                                      "input instead of editing it in the "
+                                      "default console text editor.")
             options.append(stdin)
             """
             interactive = click.Option(('--interactive', 'interactive'),
@@ -465,12 +465,12 @@ class Action(BaseAction):
                         filter_createonly=True
                     ) if http_method == 'PATCH' else import_data[param_name]
                 else:
-                    if http_method == 'PATCH':
-                        json_object = self._edit_object(*args, **kwargs)
-                    elif http_method == 'POST' and not stdin:
-                        json_object = self._edit_example()
-                    else:
+                    if http_method in ('POST', 'PATCH') and stdin:
                         json_object = self._read_object()
+                    elif http_method == 'PATCH':
+                        json_object = self._edit_object(*args, **kwargs)
+                    elif http_method == 'POST':
+                        json_object = self._edit_example()
 
                 json_object = self._filter_json_object(json_object)
                 kwargs[param_name] = json_object
