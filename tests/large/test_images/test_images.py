@@ -106,11 +106,17 @@ def test_images_get_misformed(runner):
 
 
 def _test_images_create_delete(runner):
+    #
+    # Does not work due to SCALRCORE-4627
+    # ('', 'Error: Missed property cloudLocation.\n', 1)
+    #
     image_json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "image.json")
     image_object = open(image_json_path, "r").read()
 
     #POST
-    register_output = runner.invoke_with_input(image_object, "images", "register", "--stdin")[0]
+    out, err, retcode = runner.invoke_with_input(image_object, "images", "register", "--stdin")
+    print "register:", (out, err, retcode)
+    register_output = out
     new_image = yaml.safe_load(register_output)["data"]
 
     #UPDATE

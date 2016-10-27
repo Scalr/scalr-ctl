@@ -104,20 +104,24 @@ def test_scripts_get_misformed(runner):
     assert result[2] > 0
 
 
-def _test_scripts_create_delete(runner):
+def test_scripts_create_delete(runner):
     script_json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "script.json")
     script_object = open(script_json_path, "r").read()
 
     #POST
-    register_output = runner.invoke_with_input(script_object, "scripts", "create", "--stdin")[0]
-    new_script = yaml.safe_load(register_output)["data"]
+    create_output, err, retcode = runner.invoke_with_input(script_object, "scripts", "create", "--stdin")
+    print "create:", (create_output, err, retcode)
+    new_script = yaml.load(create_output)
+    print "new_script:", new_script
 
     #UPDATE
     updated_script_json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "script_updated.json")
     updated_script_object = open(updated_script_json_path, "r").read()
 
-    update_output = runner.invoke_with_input(updated_script_object, "scripts", "update", "--stdin")[0]
-    updated_script = yaml.safe_load(update_output)["data"]
+    update_output, e, r = runner.invoke_with_input(updated_script_object, "scripts", "update", "--stdin", scriptId=new_script["id"])
+    print "update:", (update_output, e, r)
+    updated_script = yaml.load(update_output)
+    print "updated_script:", updated_script
     assert updated_script["name"] == "pecha_scripting_test"
 
     #DELETE
