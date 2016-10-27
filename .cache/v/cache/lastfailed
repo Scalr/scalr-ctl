@@ -1,1 +1,3 @@
-{}
+{
+  "tests/large/test_images/test_images.py::test_images_create_delete": true
+}
