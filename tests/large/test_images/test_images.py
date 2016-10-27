@@ -1,7 +1,5 @@
-__author__ = 'shaitanich'
+__author__ = 'Dmitriy Korsakov'
 
-
-import pytest
 import yaml
 
 import os
@@ -39,18 +37,18 @@ def test_images_list_help_columns(runner):
 
 def test_images_get_help(runner):
     help_output = runner.invoke("images", "get", "--help")[0]
-    for item in ("--envId", "--tree", "--nocolor", "--json", "--xml", "--debug"):
+    for item in ("--envId", "--tree", "--nocolor", "--json", "--xml", "--debug", "--imageId"):
         assert item in help_output
     assert "--table" not in help_output
 
 
-def _test_images_list(runner):
+def test_images_list(runner):
     list_output = runner.invoke("images", "list")[0]
     for item in ("cloudImageId", "cloudLocation"):
         assert item in list_output
 
 
-def _test_images_list_json(runner):
+def test_images_list_json(runner):
     limited_json_output = runner.invoke("images", "list", "--json", max_results=1)[0]
     json_data = json.loads(limited_json_output)
     assert json_data
@@ -58,7 +56,7 @@ def _test_images_list_json(runner):
     assert len(json_data["data"]) == 1
 
 
-def _test_images_list_pagination(runner):
+def test_images_list_pagination(runner):
     paginated_json_output = runner.invoke("images", "list", "--json", max_results=1, page_number=2)[0]
     json_data = json.loads(paginated_json_output)
     assert json_data
@@ -67,19 +65,19 @@ def _test_images_list_pagination(runner):
     assert "next" in paginated_json_output and "?maxResults=1&pageNum=3" in paginated_json_output
 
 
-def _test_images_list_xml(runner):
+def test_images_list_xml(runner):
     xml_list_output = runner.invoke("images", "list", "--xml")[0]
     root = ET.fromstring(xml_list_output)
     assert "root" == root.tag
 
 
-def _test_images_get(runner):
+def test_images_get(runner):
     get_output = runner.invoke("images", "get", imageId="946ba629-a2f0-912f-59db-ba5506e230f4")[0]
     assert "946ba629-a2f0-912f-59db-ba5506e230f4" in get_output
     assert "base64-windows2008-18-07-2013" in get_output
 
 
-def _test_images_get_json(runner):
+def test_images_get_json(runner):
     limited_json_output = runner.invoke("images", "get", "--json", imageId="946ba629-a2f0-912f-59db-ba5506e230f4")[0]
     json_data = json.loads(limited_json_output)
     assert json_data
@@ -89,32 +87,31 @@ def _test_images_get_json(runner):
     assert "946ba629-a2f0-912f-59db-ba5506e230f4" == json_data["data"]["id"]
 
 
-def _test_images_get_xml(runner):
+def test_images_get_xml(runner):
     xml_list_output = runner.invoke("images", "get", "--xml", imageId="946ba629-a2f0-912f-59db-ba5506e230f4")[0]
     root = ET.fromstring(xml_list_output)
     assert "root" == root.tag
 
 
-def _test_images_get_notfound(runner):
+def test_images_get_notfound(runner):
     result = runner.invoke("images", "get", imageId="946ba629-a2f0-912f-59db-ba5506e230f5")
     assert "Requested Image either does not exist or is not owned by environment scope." in result[1]
     assert result[2] > 0
 
 
-def _test_images_get_misformed(runner):
+def test_images_get_misformed(runner):
     result = runner.invoke("images", "get", imageId="946ba629-a2f0-912f-59db-FAKE")
     assert "Invalid value for imageId" in result[1]
     assert result[2] > 0
 
 
-def test_images_create_delete(runner):
+def _test_images_create_delete(runner):
     image_json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "image.json")
     image_object = open(image_json_path, "r").read()
 
     #POST
     register_output = runner.invoke_with_input(image_object, "images", "register", "--stdin")[0]
     new_image = yaml.safe_load(register_output)["data"]
-    new_image["name"] = "pecha_image_test"
 
     #UPDATE
     updated_image_json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "image_updated.json")

@@ -1,7 +1,4 @@
-__author__ = 'shaitanich'
-
-
-import pytest
+__author__ = 'Dmitriy Korsakov'
 
 import json
 import xml.etree.ElementTree as ET
@@ -40,13 +37,13 @@ def test_os_get_help(runner):
     assert "--table" not in help_output
 
 
-def _test_os_list(runner):
+def test_os_list(runner):
     list_output = runner.invoke("os", "list")[0]
     for item in ("centos", "ubuntu"):
         assert item in list_output
 
 
-def _test_os_list_json(runner):
+def test_os_list_json(runner):
     limited_json_output = runner.invoke("os", "list", "--json", max_results=1)[0]
     json_data = json.loads(limited_json_output)
     assert json_data
@@ -54,7 +51,7 @@ def _test_os_list_json(runner):
     assert len(json_data["data"]) == 1
 
 
-def _test_os_list_pagination(runner):
+def test_os_list_pagination(runner):
     paginated_json_output = runner.invoke("os", "list", "--json", max_results=1, page_number=2)[0]
     json_data = json.loads(paginated_json_output)
     assert json_data
@@ -63,19 +60,19 @@ def _test_os_list_pagination(runner):
     assert "next" in paginated_json_output and "?maxResults=1&pageNum=3" in paginated_json_output
 
 
-def _test_os_list_xml(runner):
+def test_os_list_xml(runner):
     xml_list_output = runner.invoke("os", "list", "--xml")[0]
     root = ET.fromstring(xml_list_output)
     assert "root" == root.tag
 
 
-def _test_os_get(runner):
+def test_os_get(runner):
     get_output = runner.invoke("os", "get", osId="ubuntu-14-04")[0]
     assert "ubuntu-14-04" in get_output
     assert "Trusty" in get_output
 
 
-def _test_os_get_json(runner):
+def test_os_get_json(runner):
     limited_json_output = runner.invoke("os", "get", "--json", osId="ubuntu-14-04")[0]
     json_data = json.loads(limited_json_output)
     assert json_data
@@ -85,13 +82,13 @@ def _test_os_get_json(runner):
     assert "ubuntu-14-04" == json_data["data"]["id"]
 
 
-def _test_os_get_xml(runner):
+def test_os_get_xml(runner):
     xml_list_output = runner.invoke("os", "get", "--xml", osId="ubuntu-14-04")[0]
     root = ET.fromstring(xml_list_output)
     assert "root" == root.tag
 
 
-def _test_os_get_notfound(runner):
+def test_os_get_notfound(runner):
     result = runner.invoke("os", "get", osId="ubuntu-14-05")
     assert "Unable to find requested OS" in result[1]
     assert result[2] > 0
