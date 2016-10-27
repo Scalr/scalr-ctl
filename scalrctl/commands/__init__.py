@@ -472,7 +472,10 @@ class Action(BaseAction):
                     elif http_method == 'POST':
                         json_object = self._edit_example()
 
-                json_object = self._filter_json_object(json_object)
+                json_object = self._filter_json_object(
+                    json_object,
+                    filter_createonly=http_method == 'PATCH'
+                )
                 kwargs[param_name] = json_object
             except ValueError as e:
                 utils.reraise(e)
