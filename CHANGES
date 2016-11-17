@@ -1,7 +1,15 @@
 scalr-ctl Changelog
 ===============
 
-Version 2.0.0
+Version 2.0.2
+--------------
+
+New feature
+
+    ST-196 Implement endpoint for GV in user, account and global scopes.
+
+
+Version 2.0.1
 --------------
 
 Improvements
