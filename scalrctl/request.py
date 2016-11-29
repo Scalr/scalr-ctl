@@ -63,7 +63,7 @@ def _key_pair(api_level='user'):
         assert api_key_id, no_key_msg.format("Key ID", "--key_id")
         assert secret_key, no_key_msg.format("Secret Key", "--secret_key")
     else:
-        raise Exception('Invalid Scalr API level')
+        raise click.ClickException('Invalid Scalr API level')
 
     return api_key_id, secret_key
 

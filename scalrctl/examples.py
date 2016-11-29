@@ -3,7 +3,7 @@ import os
 import json
 import re
 
-from scalrctl import defaults
+from scalrctl import click, defaults
 
 __author__ = 'Sergey Babak'
 
@@ -12,7 +12,7 @@ DOCS_HOST = 'https://api-explorer.scalr.com'
 
 EXCLUDES = [
     '/{envId}/farm-roles/{farmRoleId}/servers/',
-    '/{envId}/servers/'
+    '/{envId}/servers/',
 ]
 
 DEFAULTS = {
@@ -69,7 +69,7 @@ def generate_post_data(spec_data, endpoint):
     if endpoint in spec_data['paths']:
         params_spec = spec_data['paths'].get(endpoint)
     else:
-        raise Exception('API endpoint {} does not found'.format(endpoint))
+        raise click.ClickException('API endpoint {} does not found'.format(endpoint))
 
     if 'post' in params_spec:
         if 'parameters' in params_spec['post']:
@@ -78,7 +78,7 @@ def generate_post_data(spec_data, endpoint):
         else:
             post_data = {}
     else:
-        raise Exception('POST method for endpoint {} does not exist'
+        raise click.ClickException('POST method for endpoint {} does not exist'
                         .format(endpoint))
 
     return post_data
@@ -92,7 +92,7 @@ def get_definition(spec_data, endpoint):
     if endpoint in spec_data['paths']:
         endpoint_spec = spec_data['paths'].get(endpoint)
     else:
-        raise Exception('API endpoint {} does not found'.format(endpoint))
+        raise click.ClickException('API endpoint {} does not found'.format(endpoint))
 
     for param in endpoint_spec['post'].get('parameters', ''):
         if '$ref' in param.get('schema', ''):
@@ -123,9 +123,8 @@ def create_post_example(api_level, endpoint):
     """
     Returns example for POST request.
     """
-
-    if '/actions/' in endpoint or endpoint in EXCLUDES:
-        raise Exception('Invalid API endpoint')
+    if endpoint in EXCLUDES:
+        raise click.ClickException('Invalid API endpoint')
 
     spec_data = json.loads(_read_spec(api_level))
 

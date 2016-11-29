@@ -23,6 +23,42 @@
     "global": {
         "group_descr": "All Scalr Global scope commands",
         "cmd-group": "Available scopes",
+        "role-images": {
+            "api_level": "global",
+            "delete": {
+                "api_level": "global",
+                "class": "scalrctl.commands.Action",
+                "http-method": "delete",
+                "route": "/roles/{roleId}/images/{imageId}/"
+            },
+            "get": {
+                "api_level": "global",
+                "class": "scalrctl.commands.Action",
+                "http-method": "get",
+                "route": "/roles/{roleId}/images/{imageId}/"
+            },
+            "group_descr": "Manage Images in Roles",
+            "list": {
+                "api_level": "global",
+                "class": "scalrctl.commands.Action",
+                "http-method": "get",
+                "route": "/roles/{roleId}/images/"
+            },
+            "replace": {
+                "api_level": "global",
+                "class": "scalrctl.commands.Action",
+                "http-method": "post",
+                "route": "/roles/{roleId}/images/{imageId}/actions/replace/",
+                "epilog": "Example: scalr-ctl global role-images replace --roleId <ROLEID> --imageId <ID> --stdin < myrolegv.json"
+            },
+            "create": {
+                "api_level": "global",
+                "class": "scalrctl.commands.Action",
+                "http-method": "post",
+                "route": "/roles/{roleId}/images/",
+                "epilog": "Example: scalr-ctl global role-image create --roleId <ID> --stdin < myroleimage.json"
+            }
+        },
         "images": {
             "api_level": "global",
             "replace": {

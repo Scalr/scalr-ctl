@@ -35,7 +35,7 @@ class Export(commands.Action):
         elif head == 'parent':
             return reduce(dict.__getitem__, tail.split('.'), parent)
         else:
-            raise Exception("Invalid key: \"{}\"".format(key))
+            raise click.ClickException("Invalid key: \"{}\"".format(key))
 
     def _get_relations(self, parent):
 
