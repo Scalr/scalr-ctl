@@ -4,7 +4,7 @@ scalr-ctl Changelog
 Version 2.0.3
 --------------
 
-New feature
+Fixed
 
     ST-197 Fix incorrect error messages
     ST-198 Add support for Role Images in Global scope.
