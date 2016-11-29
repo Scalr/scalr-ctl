@@ -50,7 +50,7 @@ def _key_pair(api_level='user'):
         api_key_id = settings.GLOBAL_SCOPE_API_KEY_ID
         secret_key = settings.GLOBAL_SCOPE_API_SECRET_KEY
         no_key_msg = "API {} for global scope is not configured. " \
-            "Please run 'scalr-ctl configure --admin' to change default " \
+            "Please run 'scalr-ctl configure --with-global-scope' to change default " \
             "authentication settings."
         assert api_key_id, no_key_msg.format("Key ID")
         assert secret_key, no_key_msg.format("Secret Key")
