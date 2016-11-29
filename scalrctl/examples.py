@@ -123,8 +123,8 @@ def create_post_example(api_level, endpoint):
     """
     Returns example for POST request.
     """
-    if ('/actions/' in endpoint) or (endpoint in EXCLUDES):
-        raise Exception('Invalid API endpoint')
+    if endpoint in EXCLUDES:
+        raise click.ClickException('Invalid API endpoint')
 
     spec_data = json.loads(_read_spec(api_level))
 
