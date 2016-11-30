@@ -8,7 +8,7 @@ from scalrctl import click
 
 
 class ChangeImageAttrs(commands.Action):
-    mutable_body_parts = ["name"]
+    #mutable_body_parts = ["name"]
     prompt_for = ["imageId"]
 
 
