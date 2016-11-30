@@ -1,6 +1,14 @@
 scalr-ctl Changelog
 ===============
 
+Version 2.0.4
+--------------
+
+Fixed
+
+    ST-199 Manage deprecated flag in Image
+
+
 Version 2.0.3
 --------------
 
