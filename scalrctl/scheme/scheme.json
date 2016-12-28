@@ -952,6 +952,13 @@
             "http-method": "patch",
             "route": "/{envId}/events/{eventId}/",
             "epilog": "Example: scalr-ctl events update --eventId <ID> --stdin < myupdatedevent.json"
+        },
+        "fire": {
+            "api_level": "user",
+            "class": "scalrctl.commands.event.Fire",
+            "http-method": "post",
+            "route": "/{envId}/events/{eventId}/actions/fire/",
+            "epilog": "Example: scalr-ctl events fire --eventId <ID> --serverId <SERVER_ID>"
         }
     },
     "export": {

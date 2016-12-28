@@ -52,6 +52,8 @@ class Action(BaseAction):
     post_template = None
     _table_columns = None
 
+    ignored_options = ()
+
     def __init__(self, name, route, http_method, api_level, *args, **kwargs):
         self.name = name
         self.route = route
@@ -555,7 +557,8 @@ class Action(BaseAction):
         """
         Returns action options.
         """
-        return self._get_default_options() + self._get_custom_options()
+        options = self._get_default_options() + self._get_custom_options()
+        return [opt for opt in options if opt.name not in self.ignored_options]
 
     def validate(self):
         """
