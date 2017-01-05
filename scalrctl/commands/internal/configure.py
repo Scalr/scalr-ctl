@@ -33,7 +33,7 @@ CONFIGURATIONS = {
         },
         'API_SECRET_KEY': {
             'order': 4,
-            'description': 'Scalr API sectet key ID'
+            'description': 'Scalr API secret key ID'
         },
         'envId': {
             'order': 5,
