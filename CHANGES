@@ -1,10 +1,18 @@
 scalr-ctl Changelog
 ===============
 
-Version 2.0.4
+Version 2.0.5
 --------------
 
 Fixed
+
+    Spelling fixed
+
+
+Version 2.0.4
+--------------
+
+New feature
 
     ST-199 Manage deprecated flag in Image
 
@@ -15,6 +23,9 @@ Version 2.0.3
 Fixed
 
     ST-197 Fix incorrect error messages
+
+New feature
+
     ST-198 Add support for Role Images in Global scope.
 
 
