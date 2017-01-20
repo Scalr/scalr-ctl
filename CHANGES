@@ -5,6 +5,14 @@ scalr-ctl Changelog
 Changelog on Scalr Wiki: https://scalr-labs.atlassian.net/wiki/display/PUBLIC/Scalr+CLI+Tools
 
 
+Version 2.0.6
+--------------
+
+New feature
+
+    ST-203 Add "scalr-ctl events get-log" command
+
+
 Version 2.0.5
 --------------
 
