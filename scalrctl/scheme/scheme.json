@@ -959,6 +959,12 @@
             "http-method": "post",
             "route": "/{envId}/events/{eventId}/actions/fire/",
             "epilog": "Example: scalr-ctl events fire --eventId <ID> --serverId <SERVER_ID>"
+        },
+        "get-log": {
+            "api_level": "user",
+            "class": "scalrctl.commands.Action",
+            "http-method": "get",
+            "route": "/{envId}/event-logs/{eventLogEntryId}/"
         }
     },
     "export": {
