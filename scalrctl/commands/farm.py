@@ -9,7 +9,7 @@ from scalrctl import click
 
 class FarmTerminate(commands.Action):
 
-    epilog = "Example: scalr-ctl farm terminate --farmId <ID> --force"
+    epilog = "Example: scalr-ctl farms terminate --farmId <ID> --force"
 
     post_template = {
         "terminateFarmRequest": {"force": True}
@@ -38,7 +38,7 @@ class FarmTerminate(commands.Action):
 
 class FarmLaunch(commands.Action):
 
-    epilog = "Example: scalr-ctl farm launch --farmId <ID>"
+    epilog = "Example: scalr-ctl farms launch --farmId <ID>"
     post_template = {}
 
     def pre(self, *args, **kwargs):
@@ -53,7 +53,7 @@ class FarmLaunch(commands.Action):
 
 class FarmClone(commands.Action):
 
-    epilog = "Example: scalr-ctl farm clone --farmId <ID> --name MyNewFarm"
+    epilog = "Example: scalr-ctl farms clone --farmId <ID> --name MyNewFarm"
     post_template = {
         "cloneFarmRequest": {"name": ""}
     }
@@ -77,3 +77,15 @@ class FarmClone(commands.Action):
         kv.update(kwargs)
         arguments, kw = super(FarmClone, self).pre(*args, **kv)
         return arguments, kw
+
+
+class FarmSuspend(FarmLaunch):
+
+    epilog = "Example: scalr-ctl farms suspend --farmId <ID>"
+    post_template = {}
+
+
+class FarmResume(FarmLaunch):
+
+    epilog = "Example: scalr-ctl farms resume --farmId <ID>"
+    post_template = {}

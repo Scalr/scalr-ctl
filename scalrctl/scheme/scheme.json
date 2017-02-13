@@ -1249,6 +1249,20 @@
             "route": "/{envId}/farms/{farmId}/actions/terminate/",
             "epilog": "Example: scalr-ctl farms terminate --farmId <ID> --force"
         },
+        "suspend": {
+            "api_level": "user",
+            "class": "scalrctl.commands.farm.FarmSuspend",
+            "http-method": "post",
+            "route": "/{envId}/farms/{farmId}/actions/suspend/",
+            "epilog": "Example: scalr-ctl farms suspend --farmId <ID>"
+        },
+        "resume": {
+            "api_level": "user",
+            "class": "scalrctl.commands.farm.FarmResume",
+            "http-method": "post",
+            "route": "/{envId}/farms/{farmId}/actions/resume/",
+            "epilog": "Example: scalr-ctl farms resume --farmId <ID>"
+        },
         "update": {
             "api_level": "user",
             "class": "scalrctl.commands.Action",
