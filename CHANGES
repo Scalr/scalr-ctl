@@ -5,6 +5,15 @@ scalr-ctl Changelog
 Changelog on Scalr Wiki: https://scalr-labs.atlassian.net/wiki/display/PUBLIC/Scalr+CLI+Tools
 
 
+
+Version 2.0.7
+--------------
+
+New feature
+
+    ST-205 Farm Suspend functionality
+
+
 Version 2.0.6
 --------------
 
