@@ -1321,7 +1321,7 @@
             "class": "scalrctl.commands.Action",
             "http-method": "post",
             "route": "/{envId}/servers/{serverId}/global-variables/",
-            "epilog": "Example: scalr-ctl farm-global-variables create --farmId <ID> --stdin < myservergv.json"
+            "epilog": "Example: scalr-ctl server-global-variables create --farmId <ID> --stdin < myservergv.json"
         },
         "delete": {
             "api_level": "user",
@@ -1335,7 +1335,7 @@
             "http-method": "get",
             "route": "/{envId}/servers/{serverId}/global-variables/{globalVariableName}/"
         },
-        "group_descr": "Manage Global Variables for Farms",
+        "group_descr": "Manage Global Variables for Servers",
         "list": {
             "api_level": "user",
             "class": "scalrctl.commands.Action",
