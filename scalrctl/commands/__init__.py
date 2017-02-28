@@ -367,7 +367,8 @@ class Action(BaseAction):
                     response_ref = schema['$ref']
                     return self._lookup(response_ref)
 
-    def _filter_json_object(self, data, filter_createonly=False, schema=None):
+    def _filter_json_object(self, data, filter_createonly=False,
+                            schema=None, reference=None):
         """
         Removes immutable parts from JSON object
         before sending it in POST or PATCH.
@@ -375,29 +376,43 @@ class Action(BaseAction):
         filtered = {}
 
         if schema is None:
-            for param in self.get_body_type_params():
+            for param in self._get_body_type_params():
                 if 'schema' in param:
                     schema = param['schema']
                     if '$ref' in schema:
+                        reference = schema['$ref']
                         schema = self._lookup(schema['$ref'])
                     break
 
         if schema and 'properties' in schema:
             create_only_props = schema.get('x-createOnly', '')
             for p_key, p_value in schema['properties'].items():
+                key_path = '.'.join([reference.split('/')[-1], p_key])
+
                 if p_key not in data:
+                    utils.debug("Ignore {}, unknown key.".format(key_path))
                     continue
                 if p_value.get('readOnly'):
+                    utils.debug("Ignore {}, read-only key.".format(key_path))
                     continue
+                if filter_createonly and p_key in create_only_props:
+                    utils.debug("Ignore {}, create-only key.".format(key_path))
+                    continue
+
                 if '$ref' in p_value and isinstance(data[p_key], dict):
+                    # recursive filter sub-object
+                    utils.debug("Filter sub-object: {}.".format(
+                        p_value['$ref'])
+                    )
                     filtered[p_key] = self._filter_json_object(
                         data[p_key],
                         filter_createonly=filter_createonly,
+                        reference=p_value['$ref'],
                         schema=self._lookup(p_value['$ref']),
                     )
                 else:
-                    if not (filter_createonly and p_key in create_only_props):
-                        filtered[p_key] = data[p_key]
+                    # add valid key-value
+                    filtered[p_key] = data[p_key]
 
         return filtered
 
