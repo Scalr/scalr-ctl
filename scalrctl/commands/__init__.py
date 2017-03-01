@@ -367,60 +367,54 @@ class Action(BaseAction):
                     response_ref = schema['$ref']
                     return self._lookup(response_ref)
 
-    def _filter_json_object(self, obj, filter_createonly=False):
+    def _filter_json_object(self, data, filter_createonly=False,
+                            schema=None, reference=None):
         """
         Removes immutable parts from JSON object
         before sending it in POST or PATCH.
         """
-        # XXX: make it recursive
-        result = {}
-        createonly_properties = self._list_createonly_properties()
-        mutable_parts = self.mutable_body_parts or \
-            self._list_mutable_body_parts()
+        filtered = {}
 
-        for name, value in obj.items():
-            if filter_createonly and name in createonly_properties:
-                continue
-            elif name in mutable_parts:
-                result[name] = obj[name]
-
-        return result
-
-    def _list_mutable_body_parts(self):
-        """
-        Finds object in yaml spec and determines it's mutable fields
-        to filter user JSON.
-        """
-        # TODO: remove this method
-        mutable = []
-        reference_path = None
-
-        if not self.object_reference:
+        if schema is None:
             for param in self._get_body_type_params():
                 if 'schema' in param:
-                    if '$ref' in param['schema']:
-                        reference_path = param['schema']['$ref']
-                    elif 'properties' in param['schema']:
-                        # ST-98, got object instead of $ref
-                        subparams = param['schema']['properties']
-                        for subparam, description in subparams.items():
-                            if not description.get('readOnly'):
-                                mutable.append(subparam)
-                elif 'readOnly' not in param:
-                    # e.g. POST /{envId}/farms/{farmId}/actions/terminate/
-                    mutable.append(param['name'])
-        else:
-            # XXX: Temporary code, see GlobalVariableDetailEnvelope
-            # or "role-global-variables update"
-            reference_path = self.object_reference
+                    schema = param['schema']
+                    if '$ref' in schema:
+                        reference = schema['$ref']
+                        schema = self._lookup(schema['$ref'])
+                    break
 
-        if reference_path:
-            parts = reference_path.strip('#/').split('/')
-            params = self.raw_spec[parts[0]][parts[1]]['properties']
-            for param, description in params.items():
-                if not description.get('readOnly'):
-                    mutable.append(param)
-        return mutable
+        if schema and 'properties' in schema:
+            create_only_props = schema.get('x-createOnly', '')
+            for p_key, p_value in schema['properties'].items():
+                key_path = '.'.join([reference.split('/')[-1], p_key])
+
+                if p_key not in data:
+                    utils.debug("Ignore {}, unknown key.".format(key_path))
+                    continue
+                if p_value.get('readOnly'):
+                    utils.debug("Ignore {}, read-only key.".format(key_path))
+                    continue
+                if filter_createonly and p_key in create_only_props:
+                    utils.debug("Ignore {}, create-only key.".format(key_path))
+                    continue
+
+                if '$ref' in p_value and isinstance(data[p_key], dict):
+                    # recursive filter sub-object
+                    utils.debug("Filter sub-object: {}.".format(
+                        p_value['$ref'])
+                    )
+                    filtered[p_key] = self._filter_json_object(
+                        data[p_key],
+                        filter_createonly=filter_createonly,
+                        reference=p_value['$ref'],
+                        schema=self._lookup(p_value['$ref']),
+                    )
+                else:
+                    # add valid key-value
+                    filtered[p_key] = data[p_key]
+
+        return filtered
 
     def _list_createonly_properties(self):
         """
