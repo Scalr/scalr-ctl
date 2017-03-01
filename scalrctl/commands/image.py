@@ -28,13 +28,14 @@ class RetrieveImage(commands.Action):
 
 class ReplaceImage(commands.Action):
 
-    epilog = "Example: scalr-ctl image replace --imageID <ID> --newImageID <newID> --deprecateOldImage --scope <SCOPE>"
+    epilog = "Example: scalr-ctl images replace --imageID <ID> --newImageID <newID> --deprecateOldImage --scope <SCOPE>"
 
     post_template = {
         "replaceImageRequest": {"scope": None, "newImage": {"id": None}},
     }
 
     _default_scope = "account"
+    ignored_options = ("stdin",)
 
     def get_options(self):
         hlp = "The ID of a new image"
@@ -47,10 +48,6 @@ class ReplaceImage(commands.Action):
 
         options = [newimageid, deprecate, scope]
         options.extend(super(ReplaceImage, self).get_options())
-        for option in options:
-            #if option.name == "interactive":
-            if option.name == "stdin":
-                options.remove(option)
         return options
 
     def pre(self, *args, **kwargs):

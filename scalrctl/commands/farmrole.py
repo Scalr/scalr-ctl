@@ -7,6 +7,7 @@ from scalrctl import commands
 class LaunchServer(commands.Action):
 
     post_template = {}
+    ignored_options = ("stdin",)
 
     def pre(self, *args, **kwargs):
         """

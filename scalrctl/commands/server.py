@@ -7,11 +7,12 @@ from scalrctl import click
 
 class RebootServer(commands.Action):
 
-    epilog = "Example: scalr-ctl server reboot --serverId <ID> --hard"
+    epilog = "Example: scalr-ctl servers reboot --serverId <ID> --hard"
 
     post_template = {
         "serverRebootOptions": {"hard": True}
     }
+    ignored_options = ("stdin",)
 
     def get_options(self):
         hlp = "Reboot type. By default it does soft reboot unless this \
@@ -38,8 +39,9 @@ class RebootServer(commands.Action):
 
 class ResumeServer(commands.Action):
 
-    epilog = "Example: scalr-ctl server resume --serverId <ID>"
+    epilog = "Example: scalr-ctl servers resume --serverId <ID>"
     post_template = {}
+    ignored_options = ("stdin",)
 
     def pre(self, *args, **kwargs):
         """
@@ -53,7 +55,7 @@ class ResumeServer(commands.Action):
 
 class SuspendServer(commands.Action):
 
-    epilog = "Example: scalr-ctl server suspend  --serverId <ID>"
+    epilog = "Example: scalr-ctl servers suspend  --serverId <ID>"
     post_template = {}
 
     def pre(self, *args, **kwargs):
@@ -68,10 +70,11 @@ class SuspendServer(commands.Action):
 
 class TerminateServer(commands.Action):
 
-    epilog = "Example: scalr-ctl server terminate --serverId <ID> --force"
+    epilog = "Example: scalr-ctl servers terminate --serverId <ID> --force"
     post_template = {
         "serverTerminationOptions": {"force": True}
     }
+    ignored_options = ("stdin",)
 
     def get_options(self):
         hlp = "It is used to terminate the Server immediately ignoring scalr.system.server_terminate_timeout."
@@ -96,10 +99,11 @@ class TerminateServer(commands.Action):
 
 class LaunchServerAlias(commands.Action):
 
-    epilog = "Example: scalr-ctl server launch --farmRoleId <ID>"
+    epilog = "Example: scalr-ctl servers launch --farmRoleId <ID>"
     post_template = {
         "serverLaunchRequest": {"farmRole": None}
     }
+    ignored_options = ("stdin",)
 
     def get_options(self):
         hlp = "Launch a new Server for the specified Farm Role."
