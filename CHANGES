@@ -6,6 +6,18 @@ Changelog on Scalr Wiki: https://scalr-labs.atlassian.net/wiki/display/PUBLIC/Sc
 
 
 
+
+Version 2.0.8
+--------------
+
+Improvements
+
+    ST-207 Redundand commands get-instance-configuration, get-placement-configuration,
+    update-instance-configuration and update-placement-configuration removed.
+
+    ST-208 Filter nested objects
+
+
 Version 2.0.7
 --------------
 
