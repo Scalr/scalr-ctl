@@ -56,7 +56,7 @@
                 "class": "scalrctl.commands.Action",
                 "http-method": "post",
                 "route": "/roles/{roleId}/images/",
-                "epilog": "Example: scalr-ctl global role-image create --roleId <ID> --stdin < myroleimage.json"
+                "epilog": "Example: scalr-ctl global role-images create --roleId <ID> --stdin < myroleimage.json"
             }
         },
         "images": {
@@ -738,7 +738,7 @@
                 "class": "scalrctl.commands.Action",
                 "http-method": "post",
                 "route": "/roles/{roleId}/images/",
-                "epilog": "Example: scalr-ctl account role-image create --roleId <ID> --stdin < myroleimage.json"
+                "epilog": "Example: scalr-ctl account role-images create --roleId <ID> --stdin < myroleimage.json"
             }
         },
         "role-orchestration-rules": {

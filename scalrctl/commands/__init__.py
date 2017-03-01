@@ -387,7 +387,11 @@ class Action(BaseAction):
         if schema and 'properties' in schema:
             create_only_props = schema.get('x-createOnly', '')
             for p_key, p_value in schema['properties'].items():
-                key_path = '.'.join([reference.split('/')[-1], p_key])
+
+                if reference:
+                    key_path = '.'.join([reference.split('/')[-1], p_key])
+                else:
+                    key_path = p_key
 
                 if p_key not in data:
                     utils.debug("Ignore {}, unknown key.".format(key_path))

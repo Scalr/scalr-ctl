@@ -10,9 +10,10 @@ from scalrctl import click
 
 class ExecuteScript(commands.Action):
 
-    epilog = "Example: scalr-ctl script execute --serverId <ID> --scriptId <ID> --blocking --timeout 30"
+    epilog = "Example: scalr-ctl scripts execute --serverId <ID> --scriptId <ID> --blocking --timeout 30"
 
     post_template = {"scriptExecutionRequestObject": {"server": None, "blocking": False, "timeout": None}}
+    ignored_options = ("stdin",)
 
     def get_options(self):
         blocking_hlp = "If it is set Scalr Agent will wait for your Script to finish \
@@ -73,5 +74,5 @@ class ExecuteScript(commands.Action):
 
 class ExecuteScriptVersion(ExecuteScript):
 
-    epilog = "Example: scalr-ctl script-version execute \
+    epilog = "Example: scalr-ctl script-versions execute \
     --serverId <ID> --scriptId <ID> --scriptVersionNumber <num>--blocking --timeout 30"

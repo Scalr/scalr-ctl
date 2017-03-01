@@ -14,6 +14,7 @@ class FarmTerminate(commands.Action):
     post_template = {
         "terminateFarmRequest": {"force": True}
     }
+    ignored_options = ("stdin",)
 
     def get_options(self):
         hlp = "It is used to terminate the Server immediately ignoring scalr.system.server_terminate_timeout."
@@ -40,6 +41,7 @@ class FarmLaunch(commands.Action):
 
     epilog = "Example: scalr-ctl farms launch --farmId <ID>"
     post_template = {}
+    ignored_options = ("stdin",)
 
     def pre(self, *args, **kwargs):
         """
@@ -57,6 +59,7 @@ class FarmClone(commands.Action):
     post_template = {
         "cloneFarmRequest": {"name": ""}
     }
+    ignored_options = ("stdin",)
 
     def get_options(self):
         hlp = "The name of a new Farm."
