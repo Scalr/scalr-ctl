@@ -1321,7 +1321,7 @@
             "class": "scalrctl.commands.Action",
             "http-method": "post",
             "route": "/{envId}/servers/{serverId}/global-variables/",
-            "epilog": "Example: scalr-ctl server-global-variables create --farmId <ID> --stdin < myservergv.json"
+            "epilog": "Example: scalr-ctl server-global-variables create --serverId <ID> --stdin < myservergv.json"
         },
         "delete": {
             "api_level": "user",
@@ -1371,18 +1371,6 @@
             "hidden": true,
             "http-method": "patch",
             "route": "/{envId}/farm-roles/{farmRoleId}/"
-        },
-        "update-instance-configuration": {
-            "api_level": "user",
-            "class": "scalrctl.commands.Action",
-            "http-method": "patch",
-            "route": "/{envId}/farm-roles/{farmRoleId}/instance/"
-        },
-        "update-placement-configuration": {
-            "api_level": "user",
-            "class": "scalrctl.commands.Action",
-            "http-method": "patch",
-            "route": "/{envId}/farm-roles/{farmRoleId}/placement/"
         },
         "update-scaling-configuration": {
             "api_level": "user",
@@ -1436,18 +1424,6 @@
             "hidden": true,
             "http-method": "get",
             "route": "/{envId}/farm-roles/{farmRoleId}/"
-        },
-        "get-instance-configuration": {
-            "api_level": "user",
-            "class": "scalrctl.commands.Action",
-            "http-method": "get",
-            "route": "/{envId}/farm-roles/{farmRoleId}/instance/"
-        },
-        "get-placement-configuration": {
-            "api_level": "user",
-            "class": "scalrctl.commands.Action",
-            "http-method": "get",
-            "route": "/{envId}/farm-roles/{farmRoleId}/placement/"
         },
         "get-scaling-configuration": {
             "api_level": "user",
