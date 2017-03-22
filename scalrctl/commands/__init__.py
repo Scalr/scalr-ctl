@@ -367,6 +367,12 @@ class Action(BaseAction):
                     response_ref = schema['$ref']
                     return self._lookup(response_ref)
 
+    def _list_concrete_types(self, schema):
+        types = []
+        if "x-concreteTypes" in schema:
+            types = [ref_dict['$ref'].split("/")[-1] for ref_dict in schema["x-concreteTypes"]]
+        return types
+
     def _filter_json_object(self, data, filter_createonly=False,
                             schema=None, reference=None):
         """
@@ -374,7 +380,6 @@ class Action(BaseAction):
         before sending it in POST or PATCH.
         """
         filtered = {}
-
         if schema is None:
             for param in self._get_body_type_params():
                 if 'schema' in param:
@@ -383,6 +388,18 @@ class Action(BaseAction):
                         reference = schema['$ref']
                         schema = self._lookup(schema['$ref'])
                     break
+
+        if "discriminator" in schema:
+            discriminator = schema["discriminator"]
+            if discriminator not in data:
+                raise click.ClickException("Provided JSON object is incorrect: "
+                                           "missing required param %s" % schema["discriminator"])
+            elif data[discriminator] not in self._list_concrete_types(schema):
+                raise click.ClickException("Provided JSON object is incorrect: "
+                                           "required param %s has invalid value %s" % (
+                                            schema["discriminator"], data[discriminator]))
+            reference = "#/definitions/%s" % data[discriminator]
+            schema = self._lookup(reference)
 
         if schema and 'properties' in schema:
             create_only_props = schema.get('x-createOnly', '')
