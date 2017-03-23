@@ -52,6 +52,8 @@ class Action(BaseAction):
     post_template = None
     _table_columns = None
 
+    _discriminators = {}
+
     ignored_options = ()
 
     def __init__(self, name, route, http_method, api_level, *args, **kwargs):
@@ -380,6 +382,8 @@ class Action(BaseAction):
         before sending it in POST or PATCH.
         """
         filtered = {}
+
+        # load `schema`
         if schema is None:
             for param in self._get_body_type_params():
                 if 'schema' in param:
@@ -389,18 +393,30 @@ class Action(BaseAction):
                         schema = self._lookup(schema['$ref'])
                     break
 
-        if "discriminator" in schema:
-            discriminator = schema["discriminator"]
-            if discriminator not in data:
-                raise click.ClickException("Provided JSON object is incorrect: "
-                                           "missing required param %s" % schema["discriminator"])
-            elif data[discriminator] not in self._list_concrete_types(schema):
-                raise click.ClickException("Provided JSON object is incorrect: "
-                                           "required param %s has invalid value %s" % (
-                                            schema["discriminator"], data[discriminator]))
-            reference = "#/definitions/%s" % data[discriminator]
+        # load child object as `schema`
+        if 'discriminator' in schema:
+
+            disc_key = schema['discriminator']
+            disk_path = '{}/{}'.format(reference, disc_key)
+            disc_value = data.get(disc_key) or self._discriminators.get(disk_path)
+
+            if not disc_value:
+                raise click.ClickException((
+                    "Provided JSON object is incorrect: missing required param '{}'."
+                ).format(disc_key))
+            elif disc_value not in self._list_concrete_types(schema):
+                raise click.ClickException((
+                    "Provided JSON object is incorrect: required "
+                    "param '{}' has invalid value '{}', must be one of: {}."
+                ).format(disc_key, disc_value, self._list_concrete_types(schema)))
+            else:
+                # save discriminator for current reference/key
+                self._discriminators[disk_path] = disc_value
+
+            reference = '#/definitions/{}'.format(disc_value)
             schema = self._lookup(reference)
 
+        # filter input data by properties of `schema`
         if schema and 'properties' in schema:
             create_only_props = schema.get('x-createOnly', '')
             for p_key, p_value in schema['properties'].items():
@@ -422,9 +438,7 @@ class Action(BaseAction):
 
                 if '$ref' in p_value and isinstance(data[p_key], dict):
                     # recursive filter sub-object
-                    utils.debug("Filter sub-object: {}.".format(
-                        p_value['$ref'])
-                    )
+                    utils.debug("Filter sub-object: {}.".format(p_value['$ref']))
                     filtered[p_key] = self._filter_json_object(
                         data[p_key],
                         filter_createonly=filter_createonly,
