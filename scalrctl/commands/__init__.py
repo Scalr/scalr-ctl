@@ -397,8 +397,8 @@ class Action(BaseAction):
         if 'discriminator' in schema:
 
             disc_key = schema['discriminator']
-            disk_path = '{}/{}'.format(reference, disc_key)
-            disc_value = data.get(disc_key) or self._discriminators.get(disk_path)
+            disc_path = '{}/{}'.format(reference, disc_key)
+            disc_value = data.get(disc_key) or self._discriminators.get(disc_path)
 
             if not disc_value:
                 raise click.ClickException((
@@ -411,7 +411,7 @@ class Action(BaseAction):
                 ).format(disc_key, disc_value, self._list_concrete_types(schema)))
             else:
                 # save discriminator for current reference/key
-                self._discriminators[disk_path] = disc_value
+                self._discriminators[disc_path] = disc_value
 
             reference = '#/definitions/{}'.format(disc_value)
             schema = self._lookup(reference)
