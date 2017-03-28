@@ -6,12 +6,12 @@ Changelog on Scalr Wiki: https://scalr-labs.atlassian.net/wiki/pages/viewpage.ac
 
 
 
-Version 2.0.9
+Version 2.0.10
 --------------
 
 Fixed
 
-    ST-211 Can't create Cloud Credentials
+    ST-211 Can't create/update Cloud Credentials
 
 
 Version 2.0.8
