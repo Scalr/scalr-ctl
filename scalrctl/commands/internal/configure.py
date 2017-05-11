@@ -39,23 +39,27 @@ CONFIGURATIONS = {
             'order': 5,
             'description': 'Scalr environment ID'
         },
+        'accountId': {
+            'order': 6,
+            'description': 'Scalr account ID',
+        },
         'view': {
-            'order': 8,
+            'order': 9,
             'description': 'View mode',
             'enum': ['tree', 'table', 'json']
         },
         'colored_output': {
-            'order': 9,
+            'order': 10,
             'description': 'Colored output'
         },
     },
     'ADMIN': {
         'GLOBAL_SCOPE_API_KEY_ID': {
-            'order': 6,
+            'order': 7,
             'description': 'Scalr admin (global scope) API key ID'
         },
         'GLOBAL_SCOPE_API_SECRET_KEY': {
-            'order': 7,
+            'order': 8,
             'description': 'Scalr admin (global scope) API secret key'
         },
     }
