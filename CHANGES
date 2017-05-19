@@ -8,9 +8,9 @@ Changelog on Scalr Wiki: https://scalr-labs.atlassian.net/wiki/pages/viewpage.ac
 Version 2.0.12
 --------------
 
-New feature
+Improvements
 
-    ST-216 Users v2: DB Design
+    ST-216 Add support for new-style account level API methods
 
 
 Version 2.0.11
