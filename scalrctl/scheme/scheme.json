@@ -885,7 +885,17 @@
                 "http-method": "get",
                 "route": "/teams/{teamId}/"
             }
+        },
+        "webhooks": {
+            "api_level": "account",
+            "group_descr": "Manage Webhooks",
+            "list": {
+                "api_level": "account",
+                "class": "scalrctl.commands.Action",
+                "http-method": "get",
+                "route": "/webhook-endpoints/"
         }
+    }
     },
 
     "cost-centers": {
@@ -2245,5 +2255,16 @@
             "route": "/{envId}/farm-roles/{farmRoleId}/storage/",
             "epilog": "Example: scalr-ctl servers create --farmRoleId <ID> --stdin < mystorage.json"
         }
+    },
+    "webhooks": {
+        "api_level": "user",
+        "group_descr": "Manage Webhooks",
+        "list": {
+            "api_level": "user",
+            "class": "scalrctl.commands.Action",
+            "http-method": "get",
+            "route": "/{envId}/webhook-endpoints/"
+        }
     }
+
 }
