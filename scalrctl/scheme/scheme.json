@@ -610,6 +610,13 @@
                 "http-method": "patch",
                 "route": "/roles/{roleId}/",
                 "epilog": "Example: scalr-ctl account roles update --roleId <ID> --stdin < myupdatedrole.json"
+            },
+            "clone": {
+                "api_level": "account",
+                "class": "scalrctl.commands.role.RoleClone",
+                "http-method": "post",
+                "route": "/roles/{roleId}/actions/clone/",
+                "epilog": "Example: scalr-ctl role clone --roleId <ID> --name MyNewRole"
             }
         },
         "role-categories": {
@@ -1775,6 +1782,20 @@
             "http-method": "patch",
             "route": "/{envId}/roles/{roleId}/",
             "epilog": "Example: scalr-ctl roles update --roleId <ID> --stdin < myupdatedrole.json"
+        },
+        "clone": {
+            "api_level": "user",
+            "class": "scalrctl.commands.role.RoleClone",
+            "http-method": "post",
+            "route": "/{envId}/roles/{roleId}/actions/clone/",
+            "epilog": "Example: scalr-ctl role clone --roleId <ID> --name MyNewRole"
+        },
+        "promote": {
+            "api_level": "user",
+            "class": "scalrctl.commands.role.RolePromote",
+            "http-method": "post",
+            "route": "/{envId}/roles/{roleId}/actions/promote/",
+            "epilog": "Example: scalr-ctl role promote --roleId <ID>"
         }
     },
     "role-categories": {
