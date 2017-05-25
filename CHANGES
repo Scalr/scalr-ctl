@@ -13,7 +13,7 @@ New feature
 
     ST-214 Support role cloning API methods
     ST-217 Support webhook-endpoints list action
-    
+    ST-218 Endpoint with instance type info
 
 Version 2.0.11
 --------------
