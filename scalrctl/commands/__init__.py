@@ -546,6 +546,9 @@ class Action(BaseAction):
         if '{envId}' in uri and not kwargs.get('envId') and settings.envId:
             kwargs['envId'] = settings.envId
 
+        if '{accountId}' in uri and not kwargs.get('accountId') and settings.accountId:
+            kwargs['accountId'] = settings.accountId
+
         if kwargs:
             # filtering in-body and empty params
             uri = self._request_template.format(**kwargs)
@@ -590,7 +593,8 @@ class Action(BaseAction):
         for option in options:
             if self.prompt_for and option.name in self.prompt_for:
                 option.prompt = option.name
-            if option.name == 'envId' and settings.envId:
+            if (option.name == 'envId' and settings.envId) or \
+                    (option.name == 'accountId' and settings.accountId):
                 option.required = False
         return options
 

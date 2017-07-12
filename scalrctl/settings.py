@@ -8,6 +8,8 @@ API_VERSION = "v1beta0"
 
 envId = None
 
+accountId = None
+
 view = "tree"
 
 debug_mode = False

@@ -321,7 +321,7 @@
                 "api_level": "account",
                 "class": "scalrctl.commands.Action",
                 "http-method": "get",
-                "route": "/acl-roles/"
+                "route": "/{accountId}/acl-roles/"
             },
             "group_descr": "Manage ACL Roles"
         },
@@ -331,33 +331,33 @@
                 "api_level": "account",
                 "class": "scalrctl.commands.Action",
                 "http-method": "delete",
-                "route": "/environments/{envId}/clouds/{cloud}/"
+                "route": "/{accountId}/environments/{envId}/clouds/{cloud}/"
             },
             "get": {
                 "api_level": "account",
                 "class": "scalrctl.commands.Action",
                 "http-method": "get",
-                "route": "/environments/{envId}/clouds/{cloud}/"
+                "route": "/{accountId}/environments/{envId}/clouds/{cloud}/"
             },
             "group_descr": "Manage Cloud Providers",
             "list": {
                 "api_level": "account",
                 "class": "scalrctl.commands.Action",
                 "http-method": "get",
-                "route": "/environments/{envId}/clouds/"
+                "route": "/{accountId}/environments/{envId}/clouds/"
             },
             "retrieve": {
                 "api_level": "account",
                 "class": "scalrctl.commands.Action",
                 "hidden": true,
                 "http-method": "get",
-                "route": "/environments/{envId}/clouds/{cloud}/"
+                "route": "/{accountId}/environments/{envId}/clouds/{cloud}/"
             },
             "replace": {
                 "api_level": "account",
                 "class": "scalrctl.commands.Action",
                 "http-method": "post",
-                "route": "/environments/{envId}/clouds/{cloud}/",
+                "route": "/{accountId}/environments/{envId}/clouds/{cloud}/",
                 "epilog": "Example: scalr-ctl account clouds replace --cloud <NAME> --stdin < mycloud.json"
             }
         },
@@ -367,40 +367,40 @@
                 "api_level": "account",
                 "class": "scalrctl.commands.Action",
                 "http-method": "post",
-                "route": "/cloud-credentials/",
+                "route": "/{accountId}/cloud-credentials/",
                 "epilog": "Example: scalr-ctl account cloud-credentials create --stdin < mycredentials.json"
             },
             "delete": {
                 "api_level": "account",
                 "class": "scalrctl.commands.Action",
                 "http-method": "delete",
-                "route": "/cloud-credentials/{cloudCredentialsId}/"
+                "route": "/{accountId}/cloud-credentials/{cloudCredentialsId}/"
             },
             "get": {
                 "api_level": "account",
                 "class": "scalrctl.commands.Action",
                 "http-method": "get",
-                "route": "/cloud-credentials/{cloudCredentialsId}/"
+                "route": "/{accountId}/cloud-credentials/{cloudCredentialsId}/"
             },
             "group_descr": "Manage Cloud Credentials for Account scope",
             "list": {
                 "api_level": "account",
                 "class": "scalrctl.commands.Action",
                 "http-method": "get",
-                "route": "/cloud-credentials/"
+                "route": "/{accountId}/cloud-credentials/"
             },
             "retrieve": {
                 "api_level": "account",
                 "class": "scalrctl.commands.Action",
                 "hidden": true,
                 "http-method": "get",
-                "route": "/cloud-credentials/{cloudCredentialsId}/"
+                "route": "/{accountId}/cloud-credentials/{cloudCredentialsId}/"
             },
             "update": {
                 "api_level": "account",
                 "class": "scalrctl.commands.Action",
                 "http-method": "patch",
-                "route": "/cloud-credentials/{cloudCredentialsId}/",
+                "route": "/{accountId}/cloud-credentials/{cloudCredentialsId}/",
                 "epilog": "Example: scalr-ctl account cloud-credentials update --cloudCredentialsId <ID> --stdin < myupdatedcredentials.json"
             }
         },
@@ -410,34 +410,34 @@
                 "api_level": "account",
                 "class": "scalrctl.commands.Action",
                 "http-method": "post",
-                "route": "/events/",
+                "route": "/{accountId}/events/",
                 "epilog": "Example: scalr-ctl account events create --stdin < myevent.json"
             },
             "delete": {
                 "api_level": "account",
                 "class": "scalrctl.commands.Action",
                 "http-method": "delete",
-                "route": "/events/{eventId}/"
+                "route": "/{accountId}/events/{eventId}/"
             },
             "get": {
                 "api_level": "account",
                 "class": "scalrctl.commands.Action",
                 "http-method": "get",
-                "route": "/events/{eventId}/"
+                "route": "/{accountId}/events/{eventId}/"
             },
             "group_descr": "Manage Events available in the Scalr Account",
             "list": {
                 "api_level": "account",
                 "class": "scalrctl.commands.Action",
                 "http-method": "get",
-                "route": "/events/"
+                "route": "/{accountId}/events/"
             },
             "retrieve": {
                 "api_level": "account",
                 "class": "scalrctl.commands.Action",
                 "hidden": true,
                 "http-method": "get",
-                "route": "/events/{eventId}/"
+                "route": "/{accountId}/events/{eventId}/"
             }
         },
         "images": {
@@ -446,7 +446,7 @@
                 "api_level": "account",
                 "class": "scalrctl.commands.image.ReplaceImage",
                 "http-method": "post",
-                "route": "/images/{imageId}/actions/replace/",
+                "route": "/{accountId}/images/{imageId}/actions/replace/",
                 "epilog": "Example: scalr-ctl images replace --imageID <ID> --newImageID <newID> --deprecateOldImage --scope <SCOPE>"
             },
             "change-attributes": {
@@ -454,38 +454,38 @@
                 "class": "scalrctl.commands.image.ChangeImageAttrs",
                 "hidden": true,
                 "http-method": "patch",
-                "route": "/images/{imageId}/"
+                "route": "/{accountId}/images/{imageId}/"
             },
             "copy": {
                 "api_level": "account",
                 "class": "scalrctl.commands.Action",
                 "http-method": "post",
-                "route": "/images/{imageId}/actions/copy/"
+                "route": "/{accountId}/images/{imageId}/actions/copy/"
             },
             "delete": {
                 "api_level": "account",
                 "class": "scalrctl.commands.Action",
                 "http-method": "delete",
-                "route": "/images/{imageId}/"
+                "route": "/{accountId}/images/{imageId}/"
             },
             "get": {
                 "api_level": "account",
                 "class": "scalrctl.commands.image.RetrieveImage",
                 "http-method": "get",
-                "route": "/images/{imageId}/"
+                "route": "/{accountId}/images/{imageId}/"
             },
             "group_descr": "Manage Images",
             "list": {
                 "api_level": "account",
                 "class": "scalrctl.commands.Action",
                 "http-method": "get",
-                "route": "/images/"
+                "route": "/{accountId}/images/"
             },
             "register": {
                 "api_level": "account",
                 "class": "scalrctl.commands.Action",
                 "http-method": "post",
-                "route": "/images/",
+                "route": "/{accountId}/images/",
                 "epilog": "Example: scalr-ctl account images register --stdin < myimage.json"
             },
             "retrieve": {
@@ -493,13 +493,13 @@
                 "class": "scalrctl.commands.image.RetrieveImage",
                 "hidden": true,
                 "http-method": "get",
-                "route": "/images/{imageId}/"
+                "route": "/{accountId}/images/{imageId}/"
             },
             "update": {
                 "api_level": "account",
                 "class": "scalrctl.commands.image.ChangeImageAttrs",
                 "http-method": "patch",
-                "route": "/images/{imageId}/",
+                "route": "/{accountId}/images/{imageId}/",
                 "epilog": "Example: scalr-ctl account images update --imageId <ID> --stdin < myupdatedimage.json"
             }
         },
@@ -509,33 +509,33 @@
                 "api_level": "account",
                 "class": "scalrctl.commands.Action",
                 "http-method": "post",
-                "route": "/global-variables/",
+                "route": "/{accountId}/global-variables/",
                 "epilog": "Example: scalr-ctl account global-variables create --stdin < mygv.json"
             },
             "delete": {
                 "api_level": "account",
                 "class": "scalrctl.commands.Action",
                 "http-method": "delete",
-                "route": "/global-variables/{globalVariableName}/"
+                "route": "/{accountId}/global-variables/{globalVariableName}/"
             },
             "get": {
                 "api_level": "account",
                 "class": "scalrctl.commands.Action",
                 "http-method": "get",
-                "route": "/global-variables/{globalVariableName}/"
+                "route": "/{accountId}/global-variables/{globalVariableName}/"
             },
             "group_descr": "Manage Global Variables for Roles",
             "list": {
                 "api_level": "account",
                 "class": "scalrctl.commands.Action",
                 "http-method": "get",
-                "route": "/global-variables/"
+                "route": "/{accountId}/global-variables/"
             },
             "update": {
                 "api_level": "account",
                 "class": "scalrctl.commands.role_gv.UpdateRoleGlobalVariable",
                 "http-method": "patch",
-                "route": "/global-variables/{globalVariableName}/",
+                "route": "/{accountId}/global-variables/{globalVariableName}/",
                 "epilog": "Example: scalr-ctl account global-variables update --globalVariableName <NAME> --stdin < myupdatedgv.json"
             }
         },
@@ -545,21 +545,21 @@
                 "api_level": "account",
                 "class": "scalrctl.commands.Action",
                 "http-method": "get",
-                "route": "/os/{osId}/"
+                "route": "/{accountId}/os/{osId}/"
             },
             "group_descr": "Manage supported Operating Systems",
             "list": {
                 "api_level": "account",
                 "class": "scalrctl.commands.Action",
                 "http-method": "get",
-                "route": "/os/"
+                "route": "/{accountId}/os/"
             },
             "retrieve": {
                 "api_level": "account",
                 "class": "scalrctl.commands.Action",
                 "hidden": true,
                 "http-method": "get",
-                "route": "/os/{osId}/"
+                "route": "/{accountId}/os/{osId}/"
             }
         },
         "roles": {
@@ -569,53 +569,53 @@
                 "class": "scalrctl.commands.Action",
                 "hidden": true,
                 "http-method": "patch",
-                "route": "/roles/{roleId}/"
+                "route": "/{accountId}/roles/{roleId}/"
             },
             "create": {
                 "api_level": "account",
                 "class": "scalrctl.commands.Action",
                 "http-method": "post",
-                "route": "/roles/",
+                "route": "/{accountId}/roles/",
                 "epilog": "Example: scalr-ctl account roles create --stdin < myrole.json"
             },
             "delete": {
                 "api_level": "account",
                 "class": "scalrctl.commands.Action",
                 "http-method": "delete",
-                "route": "/roles/{roleId}/"
+                "route": "/{accountId}/roles/{roleId}/"
             },
             "get": {
                 "api_level": "account",
                 "class": "scalrctl.commands.Action",
                 "http-method": "get",
-                "route": "/roles/{roleId}/"
+                "route": "/{accountId}/roles/{roleId}/"
             },
             "group_descr": "Manage Roles",
             "list": {
                 "api_level": "account",
                 "class": "scalrctl.commands.Action",
                 "http-method": "get",
-                "route": "/roles/"
+                "route": "/{accountId}/roles/"
             },
             "retrieve": {
                 "api_level": "account",
                 "class": "scalrctl.commands.Action",
                 "hidden": true,
                 "http-method": "get",
-                "route": "/roles/{roleId}/"
+                "route": "/{accountId}/roles/{roleId}/"
             },
             "update": {
                 "api_level": "account",
                 "class": "scalrctl.commands.Action",
                 "http-method": "patch",
-                "route": "/roles/{roleId}/",
+                "route": "/{accountId}/roles/{roleId}/",
                 "epilog": "Example: scalr-ctl account roles update --roleId <ID> --stdin < myupdatedrole.json"
             },
             "clone": {
                 "api_level": "account",
                 "class": "scalrctl.commands.role.RoleClone",
                 "http-method": "post",
-                "route": "/roles/{roleId}/actions/clone/",
+                "route": "/{accountId}/roles/{roleId}/actions/clone/",
                 "epilog": "Example: scalr-ctl role clone --roleId <ID> --name MyNewRole"
             }
         },
@@ -625,40 +625,40 @@
                 "api_level": "account",
                 "class": "scalrctl.commands.Action",
                 "http-method": "post",
-                "route": "/role-categories/",
+                "route": "/{accountId}/role-categories/",
                 "epilog": "Example: scalr-ctl account role-categories create --stdin < myrolecategory.json"
             },
             "delete": {
                 "api_level": "account",
                 "class": "scalrctl.commands.Action",
                 "http-method": "delete",
-                "route": "/role-categories/{roleCategoryId}/"
+                "route": "/{accountId}/role-categories/{roleCategoryId}/"
             },
             "get": {
                 "api_level": "account",
                 "class": "scalrctl.commands.Action",
                 "http-method": "get",
-                "route": "/role-categories/{roleCategoryId}/"
+                "route": "/{accountId}/role-categories/{roleCategoryId}/"
             },
             "group_descr": "Manage current Role Categories",
             "list": {
                 "api_level": "account",
                 "class": "scalrctl.commands.Action",
                 "http-method": "get",
-                "route": "/role-categories/"
+                "route": "/{accountId}/role-categories/"
             },
             "retrieve": {
                 "api_level": "account",
                 "class": "scalrctl.commands.Action",
                 "hidden": true,
                 "http-method": "get",
-                "route": "/role-categories/{roleCategoryId}/"
+                "route": "/{accountId}/role-categories/{roleCategoryId}/"
             },
             "update": {
                 "api_level": "account",
                 "class": "scalrctl.commands.Action",
                 "http-method": "patch",
-                "route": "/role-categories/{roleCategoryId}/",
+                "route": "/{accountId}/role-categories/{roleCategoryId}/",
                 "epilog": "Example: scalr-ctl account role-categories update --roleCategoryId <ID> --stdin < myupdatedrolecategory.json"
             }
         },
@@ -668,40 +668,40 @@
                 "api_level": "account",
                 "class": "scalrctl.commands.Action",
                 "http-method": "post",
-                "route": "/roles/{roleId}/global-variables/",
+                "route": "/{accountId}/roles/{roleId}/global-variables/",
                 "epilog": "Example: scalr-ctl account role-global-variables create --roleId <ID> --stdin < myrolegv.json"
             },
             "delete": {
                 "api_level": "account",
                 "class": "scalrctl.commands.Action",
                 "http-method": "delete",
-                "route": "/roles/{roleId}/global-variables/{globalVariableName}/"
+                "route": "/{accountId}/roles/{roleId}/global-variables/{globalVariableName}/"
             },
             "get": {
                 "api_level": "account",
                 "class": "scalrctl.commands.Action",
                 "http-method": "get",
-                "route": "/roles/{roleId}/global-variables/{globalVariableName}/"
+                "route": "/{accountId}/roles/{roleId}/global-variables/{globalVariableName}/"
             },
             "group_descr": "Manage Global Variables for Roles",
             "list": {
                 "api_level": "account",
                 "class": "scalrctl.commands.Action",
                 "http-method": "get",
-                "route": "/roles/{roleId}/global-variables/"
+                "route": "/{accountId}/roles/{roleId}/global-variables/"
             },
             "retrieve": {
                 "api_level": "account",
                 "class": "scalrctl.commands.Action",
                 "hidden": true,
                 "http-method": "get",
-                "route": "/roles/{roleId}/global-variables/{globalVariableName}/"
+                "route": "/{accountId}/roles/{roleId}/global-variables/{globalVariableName}/"
             },
             "update": {
                 "api_level": "account",
                 "class": "scalrctl.commands.role_gv.UpdateRoleGlobalVariable",
                 "http-method": "patch",
-                "route": "/roles/{roleId}/global-variables/{globalVariableName}/",
+                "route": "/{accountId}/roles/{roleId}/global-variables/{globalVariableName}/",
                 "epilog": "Example: scalr-ctl account role-global-variables update --roleId <ID> --globalVariableName <NAME> --stdin < myupdatedrolegv.json"
             }
         },
@@ -711,26 +711,26 @@
                 "api_level": "account",
                 "class": "scalrctl.commands.Action",
                 "http-method": "delete",
-                "route": "/roles/{roleId}/images/{imageId}/"
+                "route": "/{accountId}/roles/{roleId}/images/{imageId}/"
             },
             "get": {
                 "api_level": "account",
                 "class": "scalrctl.commands.Action",
                 "http-method": "get",
-                "route": "/roles/{roleId}/images/{imageId}/"
+                "route": "/{accountId}/roles/{roleId}/images/{imageId}/"
             },
             "group_descr": "Manage Images in Roles",
             "list": {
                 "api_level": "account",
                 "class": "scalrctl.commands.Action",
                 "http-method": "get",
-                "route": "/roles/{roleId}/images/"
+                "route": "/{accountId}/roles/{roleId}/images/"
             },
             "replace": {
                 "api_level": "account",
                 "class": "scalrctl.commands.Action",
                 "http-method": "post",
-                "route": "/roles/{roleId}/images/{imageId}/actions/replace/",
+                "route": "/{accountId}/roles/{roleId}/images/{imageId}/actions/replace/",
                 "epilog": "Example: scalr-ctl account role-images replace --roleId <ROLEID> --imageId <ID> --stdin < myrolegv.json"
             },
             "retrieve": {
@@ -738,13 +738,13 @@
                 "class": "scalrctl.commands.Action",
                 "hidden": true,
                 "http-method": "get",
-                "route": "/roles/{roleId}/images/{imageId}/"
+                "route": "/{accountId}/roles/{roleId}/images/{imageId}/"
             },
             "create": {
                 "api_level": "account",
                 "class": "scalrctl.commands.Action",
                 "http-method": "post",
-                "route": "/roles/{roleId}/images/",
+                "route": "/{accountId}/roles/{roleId}/images/",
                 "epilog": "Example: scalr-ctl account role-images create --roleId <ID> --stdin < myroleimage.json"
             }
         },
@@ -754,33 +754,33 @@
                 "api_level": "account",
                 "class": "scalrctl.commands.Action",
                 "http-method": "post",
-                "route": "/roles/{roleId}/orchestration-rules/",
+                "route": "/{accountId}/roles/{roleId}/orchestration-rules/",
                 "epilog": "Example: scalr-ctl account role-orchestration-rules create --roleId <ID> --stdin < myroleorule.json"
             },
             "delete": {
                 "api_level": "account",
                 "class": "scalrctl.commands.Action",
                 "http-method": "delete",
-                "route": "/roles/{roleId}/orchestration-rules/{orchestrationRuleId}/"
+                "route": "/{accountId}/roles/{roleId}/orchestration-rules/{orchestrationRuleId}/"
             },
             "get": {
                 "api_level": "account",
                 "class": "scalrctl.commands.Action",
                 "http-method": "get",
-                "route": "/roles/{roleId}/orchestration-rules/{orchestrationRuleId}/"
+                "route": "/{accountId}/roles/{roleId}/orchestration-rules/{orchestrationRuleId}/"
             },
             "group_descr": "Manage Orchestration Rules",
             "list": {
                 "api_level": "account",
                 "class": "scalrctl.commands.Action",
                 "http-method": "get",
-                "route": "/roles/{roleId}/orchestration-rules/"
+                "route": "/{accountId}/roles/{roleId}/orchestration-rules/"
             },
             "update": {
                 "api_level": "account",
                 "class": "scalrctl.commands.Action",
                 "http-method": "patch",
-                "route": "/roles/{roleId}/orchestration-rules/{orchestrationRuleId}/",
+                "route": "/{accountId}/roles/{roleId}/orchestration-rules/{orchestrationRuleId}/",
                 "epilog": "Example: scalr-ctl account role-orchestration-rules update --roleId <ID> --orchestrationRuleId <ID> --stdin < myupdatedroleorule.json"
             }
         },
@@ -790,33 +790,33 @@
                 "api_level": "account",
                 "class": "scalrctl.commands.Action",
                 "http-method": "post",
-                "route": "/orchestration-rules/",
+                "route": "/{accountId}/orchestration-rules/",
                 "epilog": "Example: scalr-ctl account orchestration-rules create --stdin < myroleorule.json"
             },
             "delete": {
                 "api_level": "account",
                 "class": "scalrctl.commands.Action",
                 "http-method": "delete",
-                "route": "/orchestration-rules/{orchestrationRuleId}/"
+                "route": "/{accountId}/orchestration-rules/{orchestrationRuleId}/"
             },
             "get": {
                 "api_level": "account",
                 "class": "scalrctl.commands.Action",
                 "http-method": "get",
-                "route": "/orchestration-rules/{orchestrationRuleId}/"
+                "route": "/{accountId}/orchestration-rules/{orchestrationRuleId}/"
             },
             "group_descr": "Manage Orchestration Rules",
             "list": {
                 "api_level": "account",
                 "class": "scalrctl.commands.Action",
                 "http-method": "get",
-                "route": "/orchestration-rules/"
+                "route": "/{accountId}/orchestration-rules/"
             },
             "update": {
                 "api_level": "account",
                 "class": "scalrctl.commands.Action",
                 "http-method": "patch",
-                "route": "/orchestration-rules/{orchestrationRuleId}/",
+                "route": "/{accountId}/orchestration-rules/{orchestrationRuleId}/",
                 "epilog": "Example: scalr-ctl account orchestration-rules update --orchestrationRuleId <ID> --stdin < myupdatedroleorule.json"
             }
         },
@@ -826,20 +826,20 @@
                 "api_level": "account",
                 "class": "scalrctl.commands.Action",
                 "http-method": "post",
-                "route": "/environments/{envId}/teams/",
+                "route": "/{accountId}/environments/{envId}/teams/",
                 "epilog": "Example: scalr-ctl account environments add-team --envId <ID> --stdin < myteam.json"
             },
             "remove-team": {
                 "api_level": "account",
                 "class": "scalrctl.commands.Action",
                 "http-method": "delete",
-                "route": "/environments/{envId}/teams/{teamId}/"
+                "route": "/{accountId}/environments/{envId}/teams/{teamId}/"
             },
             "update-team": {
                 "api_level": "account",
                 "class": "scalrctl.commands.Action",
                 "http-method": "patch",
-                "route": "/environments/{envId}/teams/{teamId}/",
+                "route": "/{accountId}/environments/{envId}/teams/{teamId}/",
                 "epilog": "Example: scalr-ctl account environments update-team --teamId <ID> --stdin < myupdatedteam.json"
             },
             "group_descr": "Manage Teams in Environment",
@@ -847,7 +847,7 @@
                 "api_level": "account",
                 "class": "scalrctl.commands.Action",
                 "http-method": "get",
-                "route": "/environments/{envId}/teams/"
+                "route": "/{accountId}/environments/{envId}/teams/"
             }
         },
         "teams": {
@@ -857,33 +857,33 @@
                 "api_level": "account",
                 "class": "scalrctl.commands.Action",
                 "http-method": "post",
-                "route": "/teams/",
+                "route": "/{accountId}/teams/",
                 "epilog": "Example: scalr-ctl account teams create --stdin < myteam.json"
             },
             "list": {
                 "api_level": "account",
                 "class": "scalrctl.commands.Action",
                 "http-method": "get",
-                "route": "/teams/"
+                "route": "/{accountId}/teams/"
             },
             "delete": {
                 "api_level": "account",
                 "class": "scalrctl.commands.Action",
                 "http-method": "delete",
-                "route": "/teams/{teamId}/"
+                "route": "/{accountId}/teams/{teamId}/"
             },
             "update": {
                 "api_level": "account",
                 "class": "scalrctl.commands.Action",
                 "http-method": "patch",
-                "route": "/teams/{teamId}/",
+                "route": "/{accountId}/teams/{teamId}/",
                 "epilog": "Example: scalr-ctl account teams update --teamId <ID> --stdin < myupdatedteam.json"
             },
             "get": {
                 "api_level": "account",
                 "class": "scalrctl.commands.Action",
                 "http-method": "get",
-                "route": "/teams/{teamId}/"
+                "route": "/{accountId}/teams/{teamId}/"
             }
         },
         "webhooks": {
@@ -893,7 +893,7 @@
                 "api_level": "account",
                 "class": "scalrctl.commands.Action",
                 "http-method": "get",
-                "route": "/webhook-endpoints/"
+                "route": "/{accountId}/webhook-endpoints/"
         }
     }
     },

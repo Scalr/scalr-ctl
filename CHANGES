@@ -5,6 +5,17 @@ scalr-ctl Changelog
 Changelog on Scalr Wiki: https://scalr-labs.atlassian.net/wiki/pages/viewpage.action?pageId=109805613
 
 
+Version 2.0.13
+--------------
+
+Improvements
+
+    ST-216 Add support for new-style account level API methods
+
+Fixed
+
+    ST-221 Farm roles > Unable to set Bootstrapping option
+
 
 Version 2.0.12
 --------------
