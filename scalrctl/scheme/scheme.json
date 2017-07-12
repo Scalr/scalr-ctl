@@ -493,7 +493,7 @@
                 "class": "scalrctl.commands.image.RetrieveImage",
                 "hidden": true,
                 "http-method": "get",
-                "route": "/images/{imageId}/"
+                "route": "/{accountId}/images/{imageId}/"
             },
             "update": {
                 "api_level": "account",
@@ -615,7 +615,7 @@
                 "api_level": "account",
                 "class": "scalrctl.commands.role.RoleClone",
                 "http-method": "post",
-                "route": "/roles/{roleId}/actions/clone/",
+                "route": "/{accountId}/roles/{roleId}/actions/clone/",
                 "epilog": "Example: scalr-ctl role clone --roleId <ID> --name MyNewRole"
             }
         },
@@ -893,7 +893,7 @@
                 "api_level": "account",
                 "class": "scalrctl.commands.Action",
                 "http-method": "get",
-                "route": "/webhook-endpoints/"
+                "route": "/{accountId}/webhook-endpoints/"
         }
     }
     },
