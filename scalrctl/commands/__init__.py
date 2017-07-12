@@ -372,8 +372,20 @@ class Action(BaseAction):
     def _list_concrete_types(self, schema):
         types = []
         if "x-concreteTypes" in schema:
-            types = [ref_dict['$ref'].split("/")[-1] for ref_dict in schema["x-concreteTypes"]]
+            for ref_dict in schema["x-concreteTypes"]:
+                ref_link = ref_dict['$ref']
+                types += [link.split("/")[-1] for link in self._list_concrete_types_recursive(ref_link)]
         return types
+
+    def _list_concrete_types_recursive(self, reference):
+        references = []
+        schema = self._lookup(reference)
+        if "x-concreteTypes" not in schema:
+            references.append(reference)
+        else:
+            for ref_dict in schema["x-concreteTypes"]:
+                references += self._list_concrete_types_recursive(ref_dict['$ref'])
+        return references
 
     def _filter_json_object(self, data, filter_createonly=False,
                             schema=None, reference=None):

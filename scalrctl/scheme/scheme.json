@@ -610,6 +610,13 @@
                 "http-method": "patch",
                 "route": "/{accountId}/roles/{roleId}/",
                 "epilog": "Example: scalr-ctl account roles update --roleId <ID> --stdin < myupdatedrole.json"
+            },
+            "clone": {
+                "api_level": "account",
+                "class": "scalrctl.commands.role.RoleClone",
+                "http-method": "post",
+                "route": "/roles/{roleId}/actions/clone/",
+                "epilog": "Example: scalr-ctl role clone --roleId <ID> --name MyNewRole"
             }
         },
         "role-categories": {
@@ -878,7 +885,17 @@
                 "http-method": "get",
                 "route": "/{accountId}/teams/{teamId}/"
             }
+        },
+        "webhooks": {
+            "api_level": "account",
+            "group_descr": "Manage Webhooks",
+            "list": {
+                "api_level": "account",
+                "class": "scalrctl.commands.Action",
+                "http-method": "get",
+                "route": "/webhook-endpoints/"
         }
+    }
     },
 
     "cost-centers": {
@@ -1775,6 +1792,20 @@
             "http-method": "patch",
             "route": "/{envId}/roles/{roleId}/",
             "epilog": "Example: scalr-ctl roles update --roleId <ID> --stdin < myupdatedrole.json"
+        },
+        "clone": {
+            "api_level": "user",
+            "class": "scalrctl.commands.role.RoleClone",
+            "http-method": "post",
+            "route": "/{envId}/roles/{roleId}/actions/clone/",
+            "epilog": "Example: scalr-ctl role clone --roleId <ID> --name MyNewRole"
+        },
+        "promote": {
+            "api_level": "user",
+            "class": "scalrctl.commands.role.RolePromote",
+            "http-method": "post",
+            "route": "/{envId}/roles/{roleId}/actions/promote/",
+            "epilog": "Example: scalr-ctl role promote --roleId <ID>"
         }
     },
     "role-categories": {
@@ -2223,6 +2254,32 @@
             "http-method": "post",
             "route": "/{envId}/farm-roles/{farmRoleId}/storage/",
             "epilog": "Example: scalr-ctl servers create --farmRoleId <ID> --stdin < mystorage.json"
+        }
+    },
+    "webhooks": {
+        "api_level": "user",
+        "group_descr": "Manage Webhooks",
+        "list": {
+            "api_level": "user",
+            "class": "scalrctl.commands.Action",
+            "http-method": "get",
+            "route": "/{envId}/webhook-endpoints/"
+        }
+    },
+    "cloud-locations": {
+        "api_level": "user",
+        "group_descr": "Manage Cloud Locations",
+        "list": {
+            "api_level": "user",
+            "class": "scalrctl.commands.Action",
+            "http-method": "get",
+            "route": "/{envId}/clouds/{cloudPlatform}/cloud-locations/"
+        },
+        "list-instance-types": {
+            "api_level": "user",
+            "class": "scalrctl.commands.Action",
+            "http-method": "get",
+            "route": "/{envId}/clouds/{cloudPlatform}/cloud-locations/{cloudLocation}/instance-types/"
         }
     }
 }
