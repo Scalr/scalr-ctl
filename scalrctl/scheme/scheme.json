@@ -2182,6 +2182,21 @@
             "http-method": "get",
             "route": "/{envId}/servers/{serverId}/"
         },
+        "update": {
+            "api_level": "user",
+            "class": "scalrctl.commands.Action",
+            "http-method": "patch",
+            "route": "/{envId}/servers/{serverId}/",
+            "epilog": "Example: scalr-ctl servers update  --serverId <ID>"
+        },
+        "change-instance-type": {
+            "api_level": "user",
+            "class": "scalrctl.commands.server.ServerChangeInstanceType",
+            "http-method": "patch",
+            "route": "/{envId}/servers/{serverId}/",
+            "epilog": "Example: scalr-ctl change-instance-type --serverId <ID> --instanceType <TYPE>",
+            "hidden": true
+        },
         "group_descr": "Manage Servers",
         "suspend": {
             "api_level": "user",
