@@ -124,3 +124,35 @@ class LaunchServerAlias(commands.Action):
         kv.update(kwargs)
         arguments, kw = super(LaunchServerAlias, self).pre(*args, **kv)
         return arguments, kw
+
+
+class ServerChangeInstanceType(commands.Action):
+
+    epilog = "Example: scalr-ctl servers change-instance-type --serverId <ID> --instanceType <TYPE>"
+    post_template = {
+        "instanceType": {"id": None}
+    }
+    ignored_options = ("stdin",)
+
+    def get_options(self):
+        hlp = """Modify the Instance type of the Server. Server status before this
+        action depends on CloudPlatform: - For EC2 and OpenStack instance type change
+        requires server status "suspended". - For VMware instance type change requires
+        server status "running" or "suspended"."""
+        instance_type = click.Option(('--instanceType', 'instance_type'), required=True, help=hlp)
+        options = [instance_type, ]
+        options.extend(super(ServerChangeInstanceType, self).get_options())
+        return options
+
+
+    def pre(self, *args, **kwargs):
+        """
+        before request is made
+        """
+        instance_type = kwargs.pop("instance_type")
+        post_data = copy.deepcopy(self.post_template)
+        post_data["instanceType"]["id"] = instance_type
+        kv = {"import-data": post_data}
+        kv.update(kwargs)
+        arguments, kw = super(ServerChangeInstanceType, self).pre(*args, **kv)
+        return arguments, kw
