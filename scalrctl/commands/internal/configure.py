@@ -174,5 +174,5 @@ def get_default_account_id(session_data):
     try:
         account_id = session_data["data"]['environments'][0]['accountId']
     except KeyError:
-            account_id = None
+        account_id = None
     return account_id
