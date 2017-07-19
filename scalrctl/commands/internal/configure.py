@@ -2,8 +2,9 @@
 import os
 
 import yaml
+import json
 
-from scalrctl import click, commands, defaults, settings
+from scalrctl import click, commands, defaults, settings, request
 from scalrctl.commands.internal import bash_complete, update
 
 __author__ = 'Dmitriy Korsakov, Sergey Babak'
@@ -117,7 +118,10 @@ def configure(profile=None, admin=False):
 
     for key, value in sorted(values.items(), key=lambda kv: kv[1]['order']):
 
-        default_value = getattr(settings, key)
+        if key == "accountId":
+            default_value = get_default_account_id(get_session_data(conf_data))
+        else:
+            default_value = getattr(settings, key)
 
         desc = value.get('description') or key
         deps = value.get('dependencies')
@@ -153,3 +157,22 @@ def apply_settings(data):
     for key, value in data.items():
         if hasattr(settings, key):
             setattr(settings, key, value)
+
+
+def get_session_data(data):
+    try:
+        api_level = (data['API_KEY_ID'], data['API_SECRET_KEY'])
+        uri = '/api/%s/session/' % data['API_VERSION']
+        raw_result = request.request(method="get", api_level=api_level, request_uri=uri)
+        result = json.loads(raw_result)
+    except:
+        result = {}
+    return result
+
+
+def get_default_account_id(session_data):
+    try:
+        account_id = session_data["data"]['environments'][0]['accountId']
+    except KeyError:
+        account_id = None
+    return account_id

@@ -10,8 +10,9 @@ Version 2.0.13
 
 Improvements
 
-    ST-216 Add support for new-style account level API methods
     ST-222 Update instance type for servers
+    ST-216 Add support for new-style account level API methods
+    ST-224 Backward compatibility for account level API methods
 
 Fixed
 

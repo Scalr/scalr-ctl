@@ -75,16 +75,6 @@ class Action(BaseAction):
                 name=self.name
             )
 
-    def validate(self):
-        """
-        Validate routes for current API scope.
-        """
-        if self.route and self.api_level:
-            spec_path = os.path.join(defaults.CONFIG_DIRECTORY,
-                                     '{}.json'.format(self.api_level))
-            api_routes = json.load(open(spec_path, 'r'))['paths'].keys()
-            assert api_routes and self.route in api_routes, self.name
-
     def _check_arguments(self, **kwargs):
         route_data = self.raw_spec['paths'][self.route]
         if 'parameters' not in route_data:
@@ -613,4 +603,10 @@ class Action(BaseAction):
             spec_path = os.path.join(defaults.CONFIG_DIRECTORY,
                                      '{}.json'.format(self.api_level))
             api_routes = json.load(open(spec_path, 'r'))['paths'].keys()
-            assert api_routes and self.route in api_routes, self.name
+            try:
+                assert api_routes and self.route in api_routes, self.name
+            except AssertionError:  # ST-224
+                if self.api_level == "account":
+                    bc_route = self.route.replace('{accountId}/', '')
+                    assert api_routes and bc_route in api_routes, self.name
+                    self.route = bc_route

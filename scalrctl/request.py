@@ -45,6 +45,9 @@ def _key_pair(api_level='user'):
     """
     Returns key pair(key id and secret key) for specified API scope.
     """
+    # ST-224, when (api_key_id, secret_key) passed instead of api level to access SessionAPI
+    if isinstance(api_level, tuple) and len(api_level) == 2:
+        return api_level[0], api_level[1]
 
     if api_level in ('global', ):
         api_key_id = settings.GLOBAL_SCOPE_API_KEY_ID
