@@ -331,7 +331,21 @@ class Action(BaseAction):
             if 'items' in data else data['$ref']
         response_descr = self._lookup(response_ref)
         properties = response_descr['properties']
-        return sorted(k for k, v in properties.items() if '$ref' not in v)
+
+        column_names = []
+        for k, v in properties.items():
+            if '$ref' not in v:
+                column_names.append(k)
+            else:  # ST-226
+                f_key = self._lookup(v['$ref'])
+                if "properties" in f_key:
+                    if len(f_key["properties"]) == 1:
+                        if "id" in f_key["properties"]:
+                            if "type" in f_key["properties"]["id"]:
+                                if f_key["properties"]["id"]["type"] in ("integer", "string"):
+                                    column_names.append("%s.id" % k)
+
+        return column_names
 
     def _lookup(self, response_ref):
         """

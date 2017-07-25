@@ -5,7 +5,15 @@ scalr-ctl Changelog
 Changelog on Scalr Wiki: https://scalr-labs.atlassian.net/wiki/pages/viewpage.action?pageId=109805613
 
 
-Version 2.0.13
+Version 2.0.15
+--------------
+
+Fixed
+
+    ST-226 "servers list" command lost instanceType column in table view
+
+
+Version 2.0.14
 --------------
 
 Improvements

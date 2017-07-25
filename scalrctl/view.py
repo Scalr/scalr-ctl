@@ -17,6 +17,12 @@ def calc_table(response_json, columns):
                 if name.lower() == item.lower():
                     row.append(block[item])
                     break
+                elif name.lower() == '%s.id' % item.lower():
+                    if 'id' in block[item]:
+                        row.append(block[item]['id'])
+                    else:
+                        row.append('')
+                    break
             else:
                 row.append('')
         if row:
