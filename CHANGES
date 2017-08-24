@@ -5,6 +5,14 @@ scalr-ctl Changelog
 Changelog on Scalr Wiki: https://scalr-labs.atlassian.net/wiki/pages/viewpage.action?pageId=109805613
 
 
+Version 2.0.16
+--------------
+
+Improvements
+
+    ST-229 Support default value for properties
+
+
 Version 2.0.15
 --------------
 

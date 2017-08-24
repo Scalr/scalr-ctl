@@ -4,10 +4,9 @@ __doc__ = 'Manage FarmRoles'
 from scalrctl import commands
 
 
-class LaunchServer(commands.Action):
+class LaunchServer(commands.SimplifiedAction):
 
     post_template = {}
-    ignored_options = ("stdin",)
 
     def pre(self, *args, **kwargs):
         """

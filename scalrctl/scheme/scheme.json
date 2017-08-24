@@ -444,10 +444,10 @@
             "api_level": "account",
             "replace": {
                 "api_level": "account",
-                "class": "scalrctl.commands.image.ReplaceImage",
+                "class": "scalrctl.commands.image.ReplaceImageAccount",
                 "http-method": "post",
                 "route": "/{accountId}/images/{imageId}/actions/replace/",
-                "epilog": "Example: scalr-ctl images replace --imageID <ID> --newImageID <newID> --deprecateOldImage --scope <SCOPE>"
+                "epilog": "Example: scalr-ctl account images replace --imageID <ID> --newImageID <newID> --deprecateOldImage --scope <SCOPE>"
             },
             "change-attributes": {
                 "api_level": "account",
@@ -1286,6 +1286,18 @@
             "http-method": "patch",
             "route": "/{envId}/farms/{farmId}/",
             "epilog": "Example: scalr-ctl farms update --farmId <ID> --stdin < myupdatedfarm.json"
+        },
+        "lock": {
+            "api_level": "user",
+            "class": "scalrctl.commands.farm.FarmLock",
+            "http-method": "post",
+            "route": "/{envId}/farms/{farmId}/actions/lock/"
+        },
+        "unlock": {
+            "api_level": "user",
+            "class": "scalrctl.commands.Action",
+            "http-method": "post",
+            "route": "/{envId}/farms/{farmId}/actions/unlock/"
         }
     },
     "farm-global-variables": {
@@ -1653,7 +1665,14 @@
             "http-method": "patch",
             "route": "/{envId}/images/{imageId}/",
             "epilog": "Example: scalr-ctl images update --imageId <ID> --stdin < updatedimage.json"
-        }
+        },
+        "replace": {
+                "api_level": "user",
+                "class": "scalrctl.commands.image.ReplaceImageUser",
+                "http-method": "post",
+                "route": "/{envId}/images/{imageId}/actions/replace/",
+                "epilog": "Example: scalr-ctl images replace --imageId <ID> --newImageId <newID>"
+            }
     },
     "global-variables": {
             "api_level": "user",
