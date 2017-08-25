@@ -5,12 +5,10 @@ from scalrctl import click
 from scalrctl import commands
 
 
-class Fire(commands.Action):
+class Fire(commands.SimplifiedAction):
     """
     It fires the Custom Event on the Server.
     """
-
-    ignored_options = ('stdin',)
 
     def _get_default_options(self):
         default_options = super(Fire, self)._get_default_options()

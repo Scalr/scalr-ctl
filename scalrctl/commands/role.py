@@ -10,13 +10,12 @@ class ChangeRoleAttrs(commands.Action):
     prompt_for = ["roleId"]
 
 
-class RoleClone(commands.Action):
+class RoleClone(commands.SimplifiedAction):
 
     epilog = "Example: scalr-ctl role clone --roleId <ID> --name MyNewRole"
     post_template = {
         "cloneRoleRequest": {"name": ""}
     }
-    ignored_options = ("stdin",)
 
     def get_options(self):
         hlp = "The name of a new Role."
@@ -39,13 +38,12 @@ class RoleClone(commands.Action):
         return arguments, kw
 
 
-class RolePromote(commands.Action):
+class RolePromote(commands.SimplifiedAction):
 
     epilog = "Example: scalr-ctl role promote --roleId <ID>"
     post_template = {
         "cloneRoleRequest": {"name": ""}
     }
-    ignored_options = ("stdin",)
 
     def get_options(self):
         hlp = "The name of a new Role."
@@ -68,11 +66,10 @@ class RolePromote(commands.Action):
         return arguments, kw
 
 
-class RolePromote(commands.Action):
+class RolePromote(commands.SimplifiedAction):
 
     epilog = "Example: scalr-ctl role promote --roleId <ID>"
     post_template = {}
-    ignored_options = ("stdin",)
 
     def pre(self, *args, **kwargs):
         """

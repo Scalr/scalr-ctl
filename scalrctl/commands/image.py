@@ -2,13 +2,11 @@ __author__ = 'Dmitriy Korsakov'
 __doc__ = 'Image management'
 
 import copy
-import json
 from scalrctl import commands
 from scalrctl import click
 
 
 class ChangeImageAttrs(commands.Action):
-    #mutable_body_parts = ["name"]
     prompt_for = ["imageId"]
 
 
@@ -22,64 +20,82 @@ class RegisterImage(commands.Action):
         return super(RegisterImage, self).pre(*args, **kwargs)
 
 
-class RetrieveImage(commands.Action):
+class RetrieveImage(commands.SimplifiedAction):
     prompt_for = ["imageId"]
 
 
-class ReplaceImage(commands.Action):
-
-    epilog = "Example: scalr-ctl images replace --imageID <ID> --newImageID <newID> --deprecateOldImage --scope <SCOPE>"
+class ReplaceImageUser(commands.SimplifiedAction):
+    epilog = "Example: scalr-ctl images replace --imageID <ID> --newImageID <newID> --deprecateOldImage"
 
     post_template = {
-        "replaceImageRequest": {"scope": None, "newImage": {"id": None}},
+        "replaceImageRequest": {"deprecateOldImage": False, "newImage": {"id": None}},
     }
-
-    _default_scope = "account"
-    ignored_options = ("stdin",)
 
     def get_options(self):
         hlp = "The ID of a new image"
         newimageid = click.Option(('--newImageId', 'newimageid'), required=True, help=hlp)
         deprecation_help = "If the value is true Scalr will mark source Image as deprecated."
-        deprecate = click.Option(('--deprecateOldImage', 'deprecate'), help=deprecation_help, is_flag=True)
-        scope_help = "Make a replacement for all Roles from the selected scopes. "
-        scope_help += "If you choose to make a replacement including lower scope higher scope values will be chosen too"
-        scope = click.Option(('--scope', 'scope'), default=self._default_scope, help=scope_help)
+        deprecate = click.Option(('--deprecateOldImage', 'deprecate'), help=deprecation_help, is_flag=True, default=False)
 
-        options = [newimageid, deprecate, scope]
-        options.extend(super(ReplaceImage, self).get_options())
+        options = [newimageid, deprecate]
+        options.extend(super(ReplaceImageUser, self).get_options())
         return options
 
     def pre(self, *args, **kwargs):
         """
         before request is made
         """
-        newimageid = kwargs.pop("newimageid", None)
         post_data = copy.deepcopy(self.post_template)
+        newimageid = kwargs.pop("newimageid", None)
         post_data["replaceImageRequest"]["newImage"]["id"] = newimageid
-        scope = kwargs.pop("scope")
-        post_data["replaceImageRequest"]["scope"] = scope,
+        deprecate = kwargs.pop("deprecate")
+        post_data["replaceImageRequest"]["deprecateOldImage"] = deprecate
         kv = {"import-data": post_data}
         kv.update(kwargs)
-        arguments, kw = super(ReplaceImage, self).pre(*args, **kv)
+        arguments, kw = super(ReplaceImageUser, self).pre(*args, **kv)
         return arguments, kw
 
-    def post(self, response):
+
+class ReplaceImageAccount(commands.SimplifiedAction):
+    _default_scope = "account"
+
+    epilog = "Example: scalr-ctl account images replace --imageID <ID> --newImageID <newID> --deprecateOldImage --scope <SCOPE>"
+
+    post_template = {
+        "replaceImageRequest": {"deprecateOldImage": False, "scope": None, "newImage": {"id": None}},
+    }
+
+    def get_options(self):
+        hlp = "The ID of a new image"
+        newimageid = click.Option(('--newImageId', 'newimageid'), required=True, help=hlp)
+        deprecation_help = "If the value is true Scalr will mark source Image as deprecated."
+        deprecate = click.Option(('--deprecateOldImage', 'deprecate'), help=deprecation_help, is_flag=True, default=False)
+        scope_help = "Make a replacement for all Roles from the selected scopes. "
+        scope_help += "If you choose to make a replacement including lower scope higher scope values will be chosen too"
+        scope = click.Option(('--scope', 'scope'), default=self._default_scope, help=scope_help)
+        options = [newimageid, deprecate, scope]
+        options.extend(super(ReplaceImageAccount, self).get_options())
+        return options
+
+
+    def pre(self, *args, **kwargs):
         """
-        after request is made
+        before request is made
         """
+        post_data = copy.deepcopy(self.post_template)
+        scope = kwargs.pop("scope")
+        post_data["replaceImageRequest"]["scope"] = scope,
+        newimageid = kwargs.pop("newimageid", None)
+        post_data["replaceImageRequest"]["newImage"]["id"] = newimageid
+        deprecate = kwargs.pop("deprecate")
+        post_data["replaceImageRequest"]["deprecateOldImage"] = deprecate
+        kv = {"import-data": post_data}
+        kv.update(kwargs)
+        arguments, kw = super(ReplaceImageAccount, self).pre(*args, **kv)
+        return arguments, kw
 
-        try:
-            obj = json.loads(response)
-            if "errors" not in obj:
-                #roleid = obj["data"]["role"]["id"]
-                imageid = obj["data"]["newImage"]["id"]
-                click.echo("New image set: %s." % imageid)
-        except:
-            pass
-        return response
 
-
-class ReplaceImageGlobal(ReplaceImage):
-
+class ReplaceImageGlobal(ReplaceImageAccount):
     _default_scope = "scalr"
+
+    epilog = "Example: scalr-ctl global images replace --imageID <ID> --newImageID <newID> --deprecateOldImage --scope <SCOPE>"

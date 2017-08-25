@@ -7,14 +7,13 @@ from scalrctl import commands
 from scalrctl import click
 
 
-class ReplaceRoleImage(commands.Action):
+class ReplaceRoleImage(commands.SimplifiedAction):
 
     epilog = "Example: scalr-ctl role-images replace --roleID <roleID> --imageID <ID> --newImageID <newID>"
 
     post_template = {
         "roleImageObject": {"image": {"id": None}, "role": {"id": None}}
     }
-    ignored_options = ("stdin",)
 
     def get_options(self):
         hlp = "The ID of a new image"
@@ -51,14 +50,13 @@ class ReplaceRoleImage(commands.Action):
         return response
 
 
-class CreateRoleImage(commands.Action):
+class CreateRoleImage(commands.SimplifiedAction):
 
     epilog = "Example: scalr-ctl role-images create --roleID <roleID> --imageID <ID>"
 
     post_template = {
         "roleImageObject": {"image": {"id": None}, "role": {"id": None}}
     }
-    ignored_options = ("stdin",)
 
     def get_options(self):
         hlp = "The ID of a new image"

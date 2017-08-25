@@ -202,7 +202,9 @@ class Action(BaseAction):
         for param in self._get_raw_params():
             option = click.Option(('--{}'.format(param['name']),
                                   param['name']), required=param['required'],
-                                  help=param['description'])
+                                  help=param['description'],
+                                  default=param.get('default'),
+                                  show_default='default' in param)
             options.append(option)
         return options
 
@@ -624,3 +626,7 @@ class Action(BaseAction):
                     bc_route = self.route.replace('{accountId}/', '')
                     assert api_routes and bc_route in api_routes, self.name
                     self.route = bc_route
+
+
+class SimplifiedAction(Action):
+    ignored_options = ('stdin',)

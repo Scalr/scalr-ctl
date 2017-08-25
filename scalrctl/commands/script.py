@@ -8,12 +8,11 @@ from scalrctl import commands
 from scalrctl import click
 
 
-class ExecuteScript(commands.Action):
+class ExecuteScript(commands.SimplifiedAction):
 
     epilog = "Example: scalr-ctl scripts execute --serverId <ID> --scriptId <ID> --blocking --timeout 30"
 
     post_template = {"scriptExecutionRequestObject": {"server": None, "blocking": False, "timeout": None}}
-    ignored_options = ("stdin",)
 
     def get_options(self):
         blocking_hlp = "If it is set Scalr Agent will wait for your Script to finish \
