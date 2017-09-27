@@ -1242,7 +1242,14 @@
             "api_level": "user",
             "class": "scalrctl.commands.Action",
             "http-method": "get",
-            "route": "/{envId}/farms/{farmId/actions}/generate-template/"
+            "route": "/{envId}/farms/{farmId}/actions/generate-template/"
+        },
+        "create-from-template": {
+            "api_level": "user",
+            "class": "scalrctl.commands.farm.FarmCreateFromTemplate",
+            "http-method": "post",
+            "route": "/{envId}/farms/",
+            "epilog": "Example: scalr-ctl farms create-from-template --stdin < mytemplate.json"
         },
         "group_descr": "Manage Farms",
         "launch": {
