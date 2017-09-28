@@ -5,6 +5,16 @@ scalr-ctl Changelog
 Changelog on Scalr Wiki: https://scalr-labs.atlassian.net/wiki/pages/viewpage.action?pageId=109805613
 
 
+
+Version 2.0.17
+--------------
+
+New feature
+
+    ST-232 Add support for Role orchestration update method in Global scope
+
+
+
 Version 2.0.16
 --------------
 
