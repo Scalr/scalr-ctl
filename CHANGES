@@ -12,7 +12,7 @@ Version 2.0.17
 New feature
 
     ST-232 Add support for Role orchestration update method in Global scope
-
+    ST-231 Add support of Orchestration rules on user scope
 
 
 Version 2.0.16
