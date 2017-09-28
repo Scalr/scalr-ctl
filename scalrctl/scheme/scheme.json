@@ -308,6 +308,13 @@
                 "hidden": true,
                 "http-method": "get",
                 "route": "/roles/{roleId}/orchestration-rules/{orchestrationRuleId}/"
+            },
+            "update": {
+                "api_level": "global",
+                "class": "scalrctl.commands.Action",
+                "http-method": "patch",
+                "route": "/roles/{roleId}/orchestration-rules/{orchestrationRuleId}/",
+                "epilog": "Example: scalr-ctl global role-orchestration-rules update --roleId <ID> --orchestrationRuleId <ID> --stdin < newroleor.json"
             }
         }
     },
