@@ -893,6 +893,49 @@
                 "route": "/{accountId}/teams/{teamId}/"
             }
         },
+        "scaling-metrics": {
+            "api_level": "account",
+            "create": {
+                "api_level": "account",
+                "class": "scalrctl.commands.Action",
+                "http-method": "post",
+                "route": "/{accountId}/scaling-metrics/",
+                "epilog": "Example: scalr-ctl account scaling-metrics create --stdin < myscalingmetric.json"
+            },
+            "delete": {
+                "api_level": "account",
+                "class": "scalrctl.commands.Action",
+                "http-method": "delete",
+                "route": "/{accountId}/scaling-metrics/{metricName}/"
+            },
+            "get": {
+                "api_level": "account",
+                "class": "scalrctl.commands.Action",
+                "http-method": "get",
+                "route": "/{accountId}/scaling-metrics/{metricName}/"
+            },
+            "group_descr": "Manage Scaling Metrics",
+            "list": {
+                "api_level": "account",
+                "class": "scalrctl.commands.Action",
+                "http-method": "get",
+                "route": "/{accountId}/scaling-metrics/"
+            },
+            "retrieve": {
+                "api_level": "account",
+                "class": "scalrctl.commands.Action",
+                "hidden": true,
+                "http-method": "get",
+                "route": "/{accountId}/scaling-metrics/{metricName}/"
+            },
+            "update": {
+                "api_level": "account",
+                "class": "scalrctl.commands.Action",
+                "http-method": "patch",
+                "route": "/{accountId}/scaling-metrics/{metricName}/",
+                "epilog": "Example: scalr-ctl account scaling-metrics update --metricName <NAME> --stdin < myupdatedscalingmetric.json"
+            }
+        },
         "webhooks": {
             "api_level": "account",
             "group_descr": "Manage Webhooks",
