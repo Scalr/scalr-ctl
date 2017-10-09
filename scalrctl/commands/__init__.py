@@ -626,6 +626,8 @@ class Action(BaseAction):
                     bc_route = self.route.replace('{accountId}/', '')
                     assert api_routes and bc_route in api_routes, self.name
                     self.route = bc_route
+                else:
+                    raise
 
 
 class SimplifiedAction(Action):
