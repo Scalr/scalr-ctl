@@ -11,6 +11,7 @@ Version 2.0.18
 New feature
 
     ST-233 Allow to define custom scaling metrics on Account scope
+    ST-235 scalr-ctl shows only first error form list
 
 
 Version 2.0.17
