@@ -164,10 +164,22 @@ class Action(BaseAction):
                 utils.debug("Server response: {}".format(str(response)))
                 utils.reraise("Invalid server response")
 
-            if response_json.get('errors'):
-                messages = ['%s: %s' % (error_data.get('code'), error_data['message'])
-                            for error_data in response_json['errors']]
-                error = click.ClickException('\n'.join(messages))
+            errors = response_json.get('errors')
+            if errors:
+                if len(response_json['errors']) == 1:
+                    errcode = '%s:' % errors[0]['code'] if 'code' in errors[0] else ''
+                    template = '\x1b[31m%s\x1b[39m %s' if settings.colored_output else '%s %s'
+                    errmsg = template % (errcode, errors[0]['message'])
+                else:
+                    messages = []
+                    num = 1
+                    for error_data in errors:
+                        errcode = '%s:' % error_data['code'] if 'code' in error_data else ''
+                        template = '\x1b[31mError%s: %s\x1b[39m %s' if settings.colored_output else 'Error%s: %s %s'
+                        messages.append(template % (num, errcode, error_data['message']))
+                        num += 1
+                    errmsg = '\n'+'\n'.join(messages)
+                error = click.ClickException(errmsg)
                 error.code = 1
                 raise error
 
