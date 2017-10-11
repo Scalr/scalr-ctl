@@ -154,6 +154,22 @@ class Action(BaseAction):
         raw_object = click.get_text_stream('stdin').read()
         return json.loads(raw_object)
 
+    def _format_errmsg(self, errors):
+        messages = []
+        num = 1
+        for error_data in errors:
+            err_code = '%s:' % error_data['code'] if 'code' in error_data else ''
+            err_msg = error_data.get('message', '')
+            err_index = '' if len(errors) == 1 else num
+            err_line = 'Error%s: %s %s' % (err_index, err_code, err_msg)
+            if settings.colored_output:
+                err_line = '\x1b[31m%s\x1b[39m' % err_line
+            messages.append(err_line)
+            num += 1
+        result_errmsg = 'scalr-cli action causing error\n'+'\n'.join(messages)
+
+        return result_errmsg
+
     def _format_response(self, response, hidden=False, **kwargs):
         text = None
 
@@ -165,20 +181,9 @@ class Action(BaseAction):
                 utils.reraise("Invalid server response")
 
             errors = response_json.get('errors')
+
             if errors:
-                if len(response_json['errors']) == 1:
-                    errcode = '%s:' % errors[0]['code'] if 'code' in errors[0] else ''
-                    template = '\x1b[31m%s\x1b[39m %s' if settings.colored_output else '%s %s'
-                    errmsg = template % (errcode, errors[0]['message'])
-                else:
-                    messages = []
-                    num = 1
-                    for error_data in errors:
-                        errcode = '%s:' % error_data['code'] if 'code' in error_data else ''
-                        template = '\x1b[31mError%s: %s\x1b[39m %s' if settings.colored_output else 'Error%s: %s %s'
-                        messages.append(template % (num, errcode, error_data['message']))
-                        num += 1
-                    errmsg = '\n'+'\n'.join(messages)
+                errmsg = self._format_errmsg(errors)
                 error = click.ClickException(errmsg)
                 error.code = 1
                 raise error
