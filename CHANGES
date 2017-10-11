@@ -30,6 +30,9 @@ Improvements
 
     ST-229 Support default value for properties
 
+Fixed:
+    ST-234 Menu fails when spec files are outdated
+
 
 Version 2.0.15
 --------------

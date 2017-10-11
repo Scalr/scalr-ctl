@@ -1,10 +1,13 @@
 __author__ = 'Dmitriy Korsakov'
 __doc__ = 'Farm management'
 
+import json
 import copy
 
 from scalrctl import commands
 from scalrctl import click
+
+from scalrctl import request, settings
 
 
 class FarmTerminate(commands.SimplifiedAction):
@@ -111,7 +114,6 @@ class FarmLock(commands.SimplifiedAction):
         options.extend(super(FarmLock, self).get_options())
         return options
 
-
     def pre(self, *args, **kwargs):
         """
         before request is made
@@ -125,3 +127,68 @@ class FarmLock(commands.SimplifiedAction):
         kv.update(kwargs)
         arguments, kw = super(FarmLock, self).pre(*args, **kv)
         return arguments, kw
+
+
+class FarmCreateFromTemplate(commands.Action):
+
+    def pre(self, *args, **kwargs):
+        """
+        before request is made
+        """
+        kwargs = self._apply_arguments(**kwargs)
+        stdin = kwargs.pop('stdin', None)
+        kwargs["FarmTemplate"] = self._read_object() if stdin else self._edit_example()
+        return args, kwargs
+
+    def run(self, *args, **kwargs):
+        """
+        Callback for click subcommand.
+        """
+        hide_output = kwargs.pop('hide_output', False)  # [ST-88]
+        args, kwargs = self.pre(*args, **kwargs)
+
+        uri = self._request_template
+        payload = {}
+        data = {}
+
+        if '{envId}' in uri and not kwargs.get('envId') and settings.envId:
+            kwargs['envId'] = settings.envId
+
+        if kwargs:
+            # filtering in-body and empty params
+            uri = self._request_template.format(**kwargs)
+
+            for key, value in kwargs.items():
+                param = '{{{}}}'.format(key)
+                if value and (param not in self._request_template):
+                    data.update(value)
+
+        if self.dry_run:
+            click.echo('{} {} {} {}'.format(self.http_method, uri,
+                                            payload, data))
+            # returns dummy response
+            return json.dumps({'data': {}, 'meta': {}})
+
+        data = json.dumps(data)
+        raw_response = request.request(self.http_method, self.api_level,
+                                       uri, payload, data)
+        response = self.post(raw_response)
+
+        text = self._format_response(response, hidden=hide_output, **kwargs)
+        if text is not None:
+            click.echo(text)
+
+        return response
+
+    def _edit_example(self):
+        commentary = \
+            '''# The body must be a valid FarmTemplate object.
+#
+# Type your FarmTemplate object below this line. The above text will not be sent to the API server.'''
+        text = click.edit(commentary)
+        if text:
+            raw_object = "".join([line for line in text.splitlines()
+                                  if not line.startswith("#")]).strip()
+        else:
+            raw_object = ""
+        return json.loads(raw_object)
