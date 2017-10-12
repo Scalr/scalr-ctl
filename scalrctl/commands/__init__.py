@@ -10,6 +10,17 @@ from scalrctl import click, request, settings, utils, view, examples, defaults
 __author__ = 'Dmitriy Korsakov'
 
 
+class MultipleClickException(click.ClickException):
+
+    def format_message(self):
+        return '\x1b[31m%s\x1b[39m' % self.message if settings.colored_output else self.message
+
+    def show(self, file=None):
+        if file is None:
+            file = click._compat.get_text_stderr()
+        click.utils.echo('%s' % self.format_message(), file=file)
+
+
 class BaseAction(object):
 
     epilog = None
@@ -160,13 +171,11 @@ class Action(BaseAction):
         for error_data in errors:
             err_code = '%s:' % error_data['code'] if 'code' in error_data else ''
             err_msg = error_data.get('message', '')
-            err_index = '' if len(errors) == 1 else num
-            err_line = 'Error%s: %s %s' % (err_index, err_code, err_msg)
-            if settings.colored_output:
-                err_line = '\x1b[31m%s\x1b[39m' % err_line
+            err_index = ':' if len(errors) == 1 else ' %s:' % num
+            err_line = 'Error%s %s %s' % (err_index, err_code, err_msg)
             messages.append(err_line)
             num += 1
-        result_errmsg = 'scalr-cli action causing error\n'+'\n'.join(messages)
+        result_errmsg = '\n'.join(messages)
 
         return result_errmsg
 
@@ -182,9 +191,28 @@ class Action(BaseAction):
 
             errors = response_json.get('errors')
 
+            errors = [
+                {
+                    'code': 'ServersPerFarmQuotaExceeded',
+                    'message':"Servers per Farm' quota exceeded, the allowable value is 0. Current value is 0 and you are trying to add 1 more. (Platform: AWS)"
+                },
+                {
+                    'code': 'ServersQuotaExceeded',
+                    'message':"'Total servers' quota exceeded, the allowable value is 0. Current value is 0 and you are trying to add 1 more. (Platform: AWS)"
+                },
+                {
+                    'code': 'VcpusQuotaExceeded',
+                    'message':"'vCPUs' quota exceeded, the allowable value is 0. Current value is 0 and you are trying to add 1 more. (Platform: AWS)"
+                },
+                {
+                    'code': 'MemoryQuotaExceeded',
+                    'message':"'Memory, GB' quota exceeded, the allowable value is 0. Current value is 0 and you are trying to add 1.7 more. (Platform: AWS)"
+                }
+            ]
+
             if errors:
                 errmsg = self._format_errmsg(errors)
-                error = click.ClickException(errmsg)
+                error = MultipleClickException(errmsg)
                 error.code = 1
                 raise error
 
