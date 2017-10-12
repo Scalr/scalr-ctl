@@ -191,25 +191,6 @@ class Action(BaseAction):
 
             errors = response_json.get('errors')
 
-            errors = [
-                {
-                    'code': 'ServersPerFarmQuotaExceeded',
-                    'message':"Servers per Farm' quota exceeded, the allowable value is 0. Current value is 0 and you are trying to add 1 more. (Platform: AWS)"
-                },
-                {
-                    'code': 'ServersQuotaExceeded',
-                    'message':"'Total servers' quota exceeded, the allowable value is 0. Current value is 0 and you are trying to add 1 more. (Platform: AWS)"
-                },
-                {
-                    'code': 'VcpusQuotaExceeded',
-                    'message':"'vCPUs' quota exceeded, the allowable value is 0. Current value is 0 and you are trying to add 1 more. (Platform: AWS)"
-                },
-                {
-                    'code': 'MemoryQuotaExceeded',
-                    'message':"'Memory, GB' quota exceeded, the allowable value is 0. Current value is 0 and you are trying to add 1.7 more. (Platform: AWS)"
-                }
-            ]
-
             if errors:
                 errmsg = self._format_errmsg(errors)
                 error = MultipleClickException(errmsg)
