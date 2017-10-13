@@ -10,6 +10,17 @@ from scalrctl import click, request, settings, utils, view, examples, defaults
 __author__ = 'Dmitriy Korsakov'
 
 
+class MultipleClickException(click.ClickException):
+
+    def format_message(self):
+        return '\x1b[31m%s\x1b[39m' % self.message if settings.colored_output else self.message
+
+    def show(self, file=None):
+        if file is None:
+            file = click._compat.get_text_stderr()
+        click.utils.echo('%s' % self.format_message(), file=file)
+
+
 class BaseAction(object):
 
     epilog = None
@@ -154,6 +165,20 @@ class Action(BaseAction):
         raw_object = click.get_text_stream('stdin').read()
         return json.loads(raw_object)
 
+    def _format_errmsg(self, errors):
+        messages = []
+        num = 1
+        for error_data in errors:
+            err_code = '%s:' % error_data['code'] if 'code' in error_data else ''
+            err_msg = error_data.get('message', '')
+            err_index = ':' if len(errors) == 1 else ' %s:' % num
+            err_line = 'Error%s %s %s' % (err_index, err_code, err_msg)
+            messages.append(err_line)
+            num += 1
+        result_errmsg = '\n'.join(messages)
+
+        return result_errmsg
+
     def _format_response(self, response, hidden=False, **kwargs):
         text = None
 
@@ -165,21 +190,10 @@ class Action(BaseAction):
                 utils.reraise("Invalid server response")
 
             errors = response_json.get('errors')
+
             if errors:
-                if len(response_json['errors']) == 1:
-                    errcode = '%s:' % errors[0]['code'] if 'code' in errors[0] else ''
-                    template = '\x1b[31m%s\x1b[39m %s' if settings.colored_output else '%s %s'
-                    errmsg = template % (errcode, errors[0]['message'])
-                else:
-                    messages = []
-                    num = 1
-                    for error_data in errors:
-                        errcode = '%s:' % error_data['code'] if 'code' in error_data else ''
-                        template = '\x1b[31mError%s: %s\x1b[39m %s' if settings.colored_output else 'Error%s: %s %s'
-                        messages.append(template % (num, errcode, error_data['message']))
-                        num += 1
-                    errmsg = '\n'+'\n'.join(messages)
-                error = click.ClickException(errmsg)
+                errmsg = self._format_errmsg(errors)
+                error = MultipleClickException(errmsg)
                 error.code = 1
                 raise error
 
