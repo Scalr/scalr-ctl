@@ -5,6 +5,14 @@ scalr-ctl Changelog
 Changelog on Scalr Wiki: https://scalr-labs.atlassian.net/wiki/pages/viewpage.action?pageId=109805613
 
 
+Version 2.0.19
+--------------
+
+Improvements
+
+    ST-237 Simplify configuration process
+
+
 Version 2.0.18
 --------------
 
@@ -17,6 +25,7 @@ New feature
 Fixed
 
     ST-234 Menu fails when spec files are outdated
+
 
 Version 2.0.17
 --------------
