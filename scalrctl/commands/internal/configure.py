@@ -3,6 +3,9 @@ import os
 
 import yaml
 import json
+import posixpath
+
+from six.moves.urllib import parse
 
 from scalrctl import click, commands, defaults, settings, request
 from scalrctl.commands.internal import bash_complete, update
@@ -12,21 +15,21 @@ __author__ = 'Dmitriy Korsakov, Sergey Babak'
 
 CONFIGURATIONS = {
     'USER': {
-        'API_SCHEME': {
+        'API_HOST': {
             'order': 0,
+            'description': 'Scalr API host'
+        },
+        'API_SCHEME': {
+            'order': 1,
             'description': 'Scalr API scheme',
             'enum': ['http', 'https'],
         },
         'SSL_VERIFY_PEER': {
-            'order': 1,
+            'order': 2,
             'dependencies': {
                 'API_SCHEME': 'https',
             },
             'description': 'SSL verification',
-        },
-        'API_HOST': {
-            'order': 2,
-            'description': 'Scalr API host'
         },
         'API_KEY_ID': {
             'order': 3,
@@ -118,10 +121,10 @@ def configure(profile=None, admin=False):
 
     for key, value in sorted(values.items(), key=lambda kv: kv[1]['order']):
 
-        if key == "accountId":
+        default_value = getattr(settings, key)
+
+        if key == "accountId" and not default_value:
             default_value = get_default_account_id(get_session_data(conf_data))
-        else:
-            default_value = getattr(settings, key)
 
         desc = value.get('description') or key
         deps = value.get('dependencies')
@@ -144,6 +147,17 @@ def configure(profile=None, admin=False):
 
         while not _input():
             continue
+
+        if key == "API_HOST":
+            split_result = parse.urlsplit(conf_data[key])
+            supported_schemas = values['API_SCHEME']['enum']
+            if split_result.scheme and split_result.scheme in supported_schemas:
+                url = split_result.netloc
+                if split_result.path:
+                    url_path = split_result.path[1:] if split_result.path.startswith('/') else split_result.path
+                    url = posixpath.join(url, url_path)
+                conf_data['API_HOST'] = url
+                setattr(settings, 'API_SCHEME', split_result.scheme)
 
     _write_config(conf_path, conf_data)
     click.echo('\nNew config saved to {}\n'.format(conf_path))
