@@ -1,6 +1,8 @@
 __author__ = 'Dmitriy Korsakov'
 __doc__ = 'Server management'
 import copy
+import json
+import time
 from scalrctl import commands
 from scalrctl import click
 
@@ -38,7 +40,7 @@ class RebootServer(commands.SimplifiedAction):
 
 class ResumeServer(commands.SimplifiedAction):
 
-    epilog = "Example: scalr-ctl servers resume --serverId <ID>"
+    epilog = "Example: scalr-ctl servers resume --serverId <ID> --nowait"
     post_template = {}
 
     def pre(self, *args, **kwargs):
@@ -50,11 +52,47 @@ class ResumeServer(commands.SimplifiedAction):
         arguments, kw = super(ResumeServer, self).pre(*args, **kv)
         return arguments, kw
 
+    def get_options(self):
+        nowait_hlp = "Do not wait for server to resume"
+        nowait = click.Option(('--nowait', 'nowait'), is_flag=True, required=False, help=nowait_hlp)
+        options = [nowait, ]
+        options.extend(super(ResumeServer, self).get_options())
+        return options
+
+    def run(self, *args, **kwargs):
+        nowait = kwargs.pop("nowait", False)
+        result = super(ResumeServer, self).run(*args, **kwargs)
+        if not nowait:
+            result_json = json.loads(result)
+            server_id = result_json["data"]["id"]
+            cls = commands.Action
+            action = cls(name=self.name,
+                         route="/{envId}/servers/{serverId}/",
+                         http_method="get",
+                         api_level="user")
+            status = "suspended"
+            click.echo("Waiting for server %s to resume.." % server_id)
+            while status in ("suspended", "resuming"):
+                data = action.run(**{"serverId": server_id, "hide_output": True})
+                data_json = json.loads(data)
+                status = data_json["data"]["status"]
+                time.sleep(1)
+            click.echo("%s resumed." % server_id)
+
+        return result
+
 
 class SuspendServer(commands.SimplifiedAction):
 
-    epilog = "Example: scalr-ctl servers suspend  --serverId <ID>"
+    epilog = "Example: scalr-ctl servers suspend  --serverId <ID> --nowait"
     post_template = {}
+
+    def get_options(self):
+        nowait_hlp = "Do not wait for server to reach 'suspended' state"
+        nowait = click.Option(('--nowait', 'nowait'), is_flag=True, required=False, help=nowait_hlp)
+        options = [nowait, ]
+        options.extend(super(SuspendServer, self).get_options())
+        return options
 
     def pre(self, *args, **kwargs):
         """
@@ -64,6 +102,28 @@ class SuspendServer(commands.SimplifiedAction):
         kv.update(kwargs)
         arguments, kw = super(SuspendServer, self).pre(*args, **kv)
         return arguments, kw
+
+    def run(self, *args, **kwargs):
+        nowait = kwargs.pop("nowait", False)
+        result = super(SuspendServer, self).run(*args, **kwargs)
+        if not nowait:
+            result_json = json.loads(result)
+            server_id = result_json["data"]["id"]
+            cls = commands.Action
+            action = cls(name=self.name,
+                         route="/{envId}/servers/{serverId}/",
+                         http_method="get",
+                         api_level="user")
+            status = "running"
+            click.echo("Waiting for server %s to suspend.." % server_id)
+            while status in ("running", "pending_suspend"):
+                data = action.run(**{"serverId": server_id, "hide_output": True})
+                data_json = json.loads(data)
+                status = data_json["data"]["status"]
+                time.sleep(1)
+            click.echo("%s has been suspended." % server_id)
+
+        return result
 
 
 class TerminateServer(commands.SimplifiedAction):

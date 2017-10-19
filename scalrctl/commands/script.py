@@ -26,7 +26,7 @@ class ExecuteScript(commands.SimplifiedAction):
         timeout = click.Option(('--timeout', 'timeout'), required=False, help=timeout_hlp)
 
         nowait_hlp = "Do not wait for script execution to finish"
-        nowait = click.Option(('--nowait', 'nowait'), required=False, help=nowait_hlp)
+        nowait = click.Option(('--nowait', 'nowait'), is_flag=True, required=False, help=nowait_hlp)
 
         options = [blocking, server_id, timeout, nowait]
         options.extend(super(ExecuteScript, self).get_options())
