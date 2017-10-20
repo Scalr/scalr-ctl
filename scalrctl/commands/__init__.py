@@ -218,9 +218,14 @@ class Action(BaseAction):
         elif self.http_method.upper() == 'DELETE':
             deleted_id = ''
             for param, value in kwargs.items():
-                if 'Id' in param and param != 'envId':
+                if 'Id' in param and param not in ('envId', 'accountId'):
                     deleted_id = value
                     break
+            if not deleted_id:
+                for param, value in kwargs.items():
+                    if 'Name' in param:
+                        deleted_id = value
+                        break
             text = "Deleted {}".format(deleted_id)
         return text
 
