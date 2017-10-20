@@ -22,11 +22,11 @@ New feature
     ST-210 Farm Template compatibility
     ST-233 Allow to define custom scaling metrics on Account scope
     ST-235 scalr-ctl shows only first error form list
-    ST-238 Delete actions return inconsistent messages
 
 Fixed
 
     ST-234 Menu fails when spec files are outdated
+    ST-238 Delete actions return inconsistent messages
 
 
 Version 2.0.17
