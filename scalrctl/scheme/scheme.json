@@ -158,6 +158,42 @@
                 "epilog": "Example: scalr-ctl global global-variables update --globalVariableName <NAME> --stdin < myupdatedgv.json"
             }
         },
+        "global-variables": {
+            "api_level": "global",
+            "create": {
+                "api_level": "global",
+                "class": "scalrctl.commands.Action",
+                "http-method": "post",
+                "route": "/global-variables/",
+                "epilog": "Example: scalr-ctl global global-variables create --stdin < mygv.json"
+            },
+            "delete": {
+                "api_level": "global",
+                "class": "scalrctl.commands.Action",
+                "http-method": "delete",
+                "route": "/global-variables/{globalVariableName}/"
+            },
+            "get": {
+                "api_level": "global",
+                "class": "scalrctl.commands.Action",
+                "http-method": "get",
+                "route": "/global-variables/{globalVariableName}/"
+            },
+            "group_descr": "Manage Global Variables for Roles",
+            "list": {
+                "api_level": "global",
+                "class": "scalrctl.commands.Action",
+                "http-method": "get",
+                "route": "/global-variables/"
+            },
+            "update": {
+                "api_level": "global",
+                "class": "scalrctl.commands.role_gv.UpdateRoleGlobalVariable",
+                "http-method": "patch",
+                "route": "/global-variables/{globalVariableName}/",
+                "epilog": "Example: scalr-ctl global global-variables update --globalVariableName <NAME> --stdin < myupdatedgv.json"
+            }
+        },
         "os": {
             "api_level": "global",
             "get": {
@@ -285,7 +321,7 @@
             },
             "delete": {
                 "api_level": "global",
-                "class": "scalrctl.commands.Action",
+                "class": "scalrctl.commands.role_orule.DeleteRoleOrchestrationRule",
                 "http-method": "delete",
                 "route": "/roles/{roleId}/orchestration-rules/{orchestrationRuleId}/"
             },
@@ -680,7 +716,7 @@
             },
             "delete": {
                 "api_level": "account",
-                "class": "scalrctl.commands.Action",
+                "class": "scalrctl.commands.farm_role_gv.DeleteFarmRoleGlobalVariable",
                 "http-method": "delete",
                 "route": "/{accountId}/roles/{roleId}/global-variables/{globalVariableName}/"
             },
@@ -766,7 +802,7 @@
             },
             "delete": {
                 "api_level": "account",
-                "class": "scalrctl.commands.Action",
+                "class": "scalrctl.commands.role_orule.DeleteRoleOrchestrationRule",
                 "http-method": "delete",
                 "route": "/{accountId}/roles/{roleId}/orchestration-rules/{orchestrationRuleId}/"
             },
@@ -1542,7 +1578,7 @@
         },
         "delete": {
             "api_level": "user",
-            "class": "scalrctl.commands.Action",
+            "class": "scalrctl.commands.farm_role_gv.DeleteFarmRoleGlobalVariable",
             "http-method": "delete",
             "route": "/{envId}/farm-roles/{farmRoleId}/global-variables/{globalVariableName}/"
         },
@@ -1592,7 +1628,7 @@
         },
         "delete": {
             "api_level": "user",
-            "class": "scalrctl.commands.Action",
+            "class": "scalrctl.commands.farm_role_orule.DeleteFarmRoleOrchestrationRule",
             "http-method": "delete",
             "route": "/{envId}/farm-roles/{farmRoleId}/orchestration-rules/{orchestrationRuleId}/"
         },
@@ -1641,7 +1677,7 @@
         },
         "delete": {
             "api_level": "user",
-            "class": "scalrctl.commands.Action",
+            "class": "scalrctl.commands.farm_role_scaling.DeleteFarmRoleScaling",
             "http-method": "delete",
             "route": "/{envId}/farm-roles/{farmRoleId}/scaling/{metricName}/"
         },
@@ -1944,7 +1980,7 @@
         },
         "delete": {
             "api_level": "user",
-            "class": "scalrctl.commands.Action",
+            "class": "scalrctl.commands.farm_role_gv.DeleteFarmRoleGlobalVariable",
             "http-method": "delete",
             "route": "/{envId}/roles/{roleId}/global-variables/{globalVariableName}/"
         },
@@ -2037,7 +2073,7 @@
         },
         "delete": {
             "api_level": "user",
-            "class": "scalrctl.commands.Action",
+            "class": "scalrctl.commands.role_orule.DeleteRoleOrchestrationRule",
             "http-method": "delete",
             "route": "/{envId}/roles/{roleId}/orchestration-rules/{orchestrationRuleId}/"
         },
@@ -2383,7 +2419,7 @@
         },
         "delete": {
             "api_level": "user",
-            "class": "scalrctl.commands.Action",
+            "class": "scalrctl.commands.storage.DeleteStorage",
             "http-method": "delete",
             "route": "/{envId}/farm-roles/{farmRoleId}/storage/{storageConfigurationId}/",
             "epilog": "Example: scalr-ctl storages delete --farmRoleId <FRID> --storageConfigurationId <ID>"

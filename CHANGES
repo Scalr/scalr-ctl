@@ -13,6 +13,11 @@ Improvements
     ST-237 Simplify configuration process
     ST-223 Add option to wait for server to suspend or resume
 
+Fixed
+
+    ST-238 Delete actions return inconsistent messages
+    ST-220 Delete actions with multiple arguments show incorrect results
+
 
 Version 2.0.18
 --------------
