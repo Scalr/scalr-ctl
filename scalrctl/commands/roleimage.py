@@ -77,3 +77,7 @@ class CreateRoleImage(commands.SimplifiedAction):
         kv.update(kwargs)
         arguments, kw = super(CreateRoleImage, self).pre(*args, **kv)
         return arguments, kw
+
+
+class DeleteRoleImage(commands.Action):
+    delete_target = 'imageId'

@@ -27,7 +27,7 @@
             "api_level": "global",
             "delete": {
                 "api_level": "global",
-                "class": "scalrctl.commands.Action",
+                "class": "scalrctl.commands.roleimage.DeleteRoleImage",
                 "http-method": "delete",
                 "route": "/roles/{roleId}/images/{imageId}/"
             },
@@ -716,7 +716,7 @@
             "api_level": "account",
             "delete": {
                 "api_level": "account",
-                "class": "scalrctl.commands.Action",
+                "class": "scalrctl.commands.roleimage.DeleteRoleImage",
                 "http-method": "delete",
                 "route": "/{accountId}/roles/{roleId}/images/{imageId}/"
             },
@@ -1374,7 +1374,7 @@
         },
         "delete": {
             "api_level": "user",
-            "class": "scalrctl.commands.Action",
+            "class": "scalrctl.commands.farm_gv.DeleteFarmGlobalVariable",
             "http-method": "delete",
             "route": "/{envId}/farms/{farmId}/global-variables/{globalVariableName}/"
         },
@@ -1980,7 +1980,7 @@
         "api_level": "user",
         "delete": {
             "api_level": "user",
-            "class": "scalrctl.commands.Action",
+            "class": "scalrctl.commands.roleimage.DeleteRoleImage",
             "http-method": "delete",
             "route": "/{envId}/roles/{roleId}/images/{imageId}/"
         },
