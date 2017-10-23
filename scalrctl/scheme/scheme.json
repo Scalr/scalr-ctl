@@ -158,42 +158,6 @@
                 "epilog": "Example: scalr-ctl global global-variables update --globalVariableName <NAME> --stdin < myupdatedgv.json"
             }
         },
-        "global-variables": {
-            "api_level": "global",
-            "create": {
-                "api_level": "global",
-                "class": "scalrctl.commands.Action",
-                "http-method": "post",
-                "route": "/global-variables/",
-                "epilog": "Example: scalr-ctl global global-variables create --stdin < mygv.json"
-            },
-            "delete": {
-                "api_level": "global",
-                "class": "scalrctl.commands.Action",
-                "http-method": "delete",
-                "route": "/global-variables/{globalVariableName}/"
-            },
-            "get": {
-                "api_level": "global",
-                "class": "scalrctl.commands.Action",
-                "http-method": "get",
-                "route": "/global-variables/{globalVariableName}/"
-            },
-            "group_descr": "Manage Global Variables for Roles",
-            "list": {
-                "api_level": "global",
-                "class": "scalrctl.commands.Action",
-                "http-method": "get",
-                "route": "/global-variables/"
-            },
-            "update": {
-                "api_level": "global",
-                "class": "scalrctl.commands.role_gv.UpdateRoleGlobalVariable",
-                "http-method": "patch",
-                "route": "/global-variables/{globalVariableName}/",
-                "epilog": "Example: scalr-ctl global global-variables update --globalVariableName <NAME> --stdin < myupdatedgv.json"
-            }
-        },
         "os": {
             "api_level": "global",
             "get": {
