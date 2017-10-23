@@ -66,6 +66,7 @@ class Action(BaseAction):
     _discriminators = {}
 
     ignored_options = ()
+    delete_target = None
 
     def __init__(self, name, route, http_method, api_level, *args, **kwargs):
         self.name = name
@@ -216,11 +217,12 @@ class Action(BaseAction):
                 pre = "Page: {} of {}".format(current_page, last_page)
                 click.echo(view.build_table(columns, rows, pre=pre))  # XXX
         elif self.http_method.upper() == 'DELETE':
-            deleted_id = ''
-            for param, value in kwargs.items():
-                if 'Id' in param and param not in ('envId', 'accountId'):
-                    deleted_id = value
-                    break
+            deleted_id = kwargs.get(self.delete_target, '') or ''
+            if not deleted_id:
+                for param, value in kwargs.items():
+                    if 'Id' in param and param not in ('envId', 'accountId'):
+                        deleted_id = value
+                        break
             if not deleted_id:
                 for param, value in kwargs.items():
                     if 'Name' in param:

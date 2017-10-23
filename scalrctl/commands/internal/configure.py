@@ -95,7 +95,8 @@ class ConfigureScalrCTL(commands.BaseAction):
 
     def get_options(self):
         profile_arg = click.Argument(('profile',), required=False)   # [ST-30]
-        admin_opt = click.Option(('--with-global-scope', 'admin'), required=False, is_flag=True)
+        hlp = 'Add API credentials for Global scope'
+        admin_opt = click.Option(('--with-global-scope', 'admin'), required=False, is_flag=True, help=hlp)
         return [profile_arg, admin_opt]
 
 

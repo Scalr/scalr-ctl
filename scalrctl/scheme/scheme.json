@@ -27,7 +27,7 @@
             "api_level": "global",
             "delete": {
                 "api_level": "global",
-                "class": "scalrctl.commands.Action",
+                "class": "scalrctl.commands.roleimage.DeleteRoleImage",
                 "http-method": "delete",
                 "route": "/roles/{roleId}/images/{imageId}/"
             },
@@ -285,7 +285,7 @@
             },
             "delete": {
                 "api_level": "global",
-                "class": "scalrctl.commands.Action",
+                "class": "scalrctl.commands.role_orule.DeleteRoleOrchestrationRule",
                 "http-method": "delete",
                 "route": "/roles/{roleId}/orchestration-rules/{orchestrationRuleId}/"
             },
@@ -680,7 +680,7 @@
             },
             "delete": {
                 "api_level": "account",
-                "class": "scalrctl.commands.Action",
+                "class": "scalrctl.commands.farm_role_gv.DeleteFarmRoleGlobalVariable",
                 "http-method": "delete",
                 "route": "/{accountId}/roles/{roleId}/global-variables/{globalVariableName}/"
             },
@@ -716,7 +716,7 @@
             "api_level": "account",
             "delete": {
                 "api_level": "account",
-                "class": "scalrctl.commands.Action",
+                "class": "scalrctl.commands.roleimage.DeleteRoleImage",
                 "http-method": "delete",
                 "route": "/{accountId}/roles/{roleId}/images/{imageId}/"
             },
@@ -766,7 +766,7 @@
             },
             "delete": {
                 "api_level": "account",
-                "class": "scalrctl.commands.Action",
+                "class": "scalrctl.commands.role_orule.DeleteRoleOrchestrationRule",
                 "http-method": "delete",
                 "route": "/{accountId}/roles/{roleId}/orchestration-rules/{orchestrationRuleId}/"
             },
@@ -1374,7 +1374,7 @@
         },
         "delete": {
             "api_level": "user",
-            "class": "scalrctl.commands.Action",
+            "class": "scalrctl.commands.farm_gv.DeleteFarmGlobalVariable",
             "http-method": "delete",
             "route": "/{envId}/farms/{farmId}/global-variables/{globalVariableName}/"
         },
@@ -1542,7 +1542,7 @@
         },
         "delete": {
             "api_level": "user",
-            "class": "scalrctl.commands.Action",
+            "class": "scalrctl.commands.farm_role_gv.DeleteFarmRoleGlobalVariable",
             "http-method": "delete",
             "route": "/{envId}/farm-roles/{farmRoleId}/global-variables/{globalVariableName}/"
         },
@@ -1592,7 +1592,7 @@
         },
         "delete": {
             "api_level": "user",
-            "class": "scalrctl.commands.Action",
+            "class": "scalrctl.commands.farm_role_orule.DeleteFarmRoleOrchestrationRule",
             "http-method": "delete",
             "route": "/{envId}/farm-roles/{farmRoleId}/orchestration-rules/{orchestrationRuleId}/"
         },
@@ -1641,7 +1641,7 @@
         },
         "delete": {
             "api_level": "user",
-            "class": "scalrctl.commands.Action",
+            "class": "scalrctl.commands.farm_role_scaling.DeleteFarmRoleScaling",
             "http-method": "delete",
             "route": "/{envId}/farm-roles/{farmRoleId}/scaling/{metricName}/"
         },
@@ -1944,7 +1944,7 @@
         },
         "delete": {
             "api_level": "user",
-            "class": "scalrctl.commands.Action",
+            "class": "scalrctl.commands.farm_role_gv.DeleteFarmRoleGlobalVariable",
             "http-method": "delete",
             "route": "/{envId}/roles/{roleId}/global-variables/{globalVariableName}/"
         },
@@ -1980,7 +1980,7 @@
         "api_level": "user",
         "delete": {
             "api_level": "user",
-            "class": "scalrctl.commands.Action",
+            "class": "scalrctl.commands.roleimage.DeleteRoleImage",
             "http-method": "delete",
             "route": "/{envId}/roles/{roleId}/images/{imageId}/"
         },
@@ -2037,7 +2037,7 @@
         },
         "delete": {
             "api_level": "user",
-            "class": "scalrctl.commands.Action",
+            "class": "scalrctl.commands.role_orule.DeleteRoleOrchestrationRule",
             "http-method": "delete",
             "route": "/{envId}/roles/{roleId}/orchestration-rules/{orchestrationRuleId}/"
         },
@@ -2383,7 +2383,7 @@
         },
         "delete": {
             "api_level": "user",
-            "class": "scalrctl.commands.Action",
+            "class": "scalrctl.commands.storage.DeleteStorage",
             "http-method": "delete",
             "route": "/{envId}/farm-roles/{farmRoleId}/storage/{storageConfigurationId}/",
             "epilog": "Example: scalr-ctl storages delete --farmRoleId <FRID> --storageConfigurationId <ID>"

@@ -7,3 +7,6 @@ from scalrctl import commands
 
 class UpdateFarmRoleGlobalVariable(commands.Action):
     prompt_for = ["roleId", "globalVariableName"]
+
+class DeleteFarmRoleGlobalVariable(commands.Action):
+    delete_target = 'globalVariableName'
