@@ -2374,6 +2374,44 @@
             "route": "/{envId}/farm-roles/{farmRoleId}/storage/{storageConfigurationId}/"
         },
         "group_descr": "Manage Storages",
+        "hidden": true,
+        "update": {
+            "api_level": "user",
+            "class": "scalrctl.commands.Action",
+            "http-method": "patch",
+            "route": "/{envId}/farm-roles/{farmRoleId}/storage/{storageConfigurationId}/",
+            "epilog": "Example: scalr-ctl storages update --farmRoleId <FRID> --storageConfigurationId <ID>"
+        },
+        "delete": {
+            "api_level": "user",
+            "class": "scalrctl.commands.storage.DeleteStorage",
+            "http-method": "delete",
+            "route": "/{envId}/farm-roles/{farmRoleId}/storage/{storageConfigurationId}/",
+            "epilog": "Example: scalr-ctl storages delete --farmRoleId <FRID> --storageConfigurationId <ID>"
+        },
+        "create": {
+            "api_level": "user",
+            "class": "scalrctl.commands.Action",
+            "http-method": "post",
+            "route": "/{envId}/farm-roles/{farmRoleId}/storage/",
+            "epilog": "Example: scalr-ctl servers create --farmRoleId <ID> --stdin < mystorage.json"
+        }
+    },
+    "farm-role-storage": {
+        "api_level": "user",
+        "list": {
+            "api_level": "user",
+            "class": "scalrctl.commands.Action",
+            "http-method": "get",
+            "route": "/{envId}/farm-roles/{farmRoleId}/storage/"
+        },
+        "get": {
+            "api_level": "user",
+            "class": "scalrctl.commands.Action",
+            "http-method": "get",
+            "route": "/{envId}/farm-roles/{farmRoleId}/storage/{storageConfigurationId}/"
+        },
+        "group_descr": "Manage Storage",
         "update": {
             "api_level": "user",
             "class": "scalrctl.commands.Action",
