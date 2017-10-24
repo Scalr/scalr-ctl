@@ -56,8 +56,11 @@ class ScalrCLI(click.Group):
         groups = {}
         for cmd_name in self.scheme.keys():
 
-            if cmd_name in ('cmd-group', 'group_descr', 'api_level'):
+            if cmd_name in ('cmd-group', 'group_descr', 'api_level', 'hidden'):
                 continue
+
+            if self.scheme[cmd_name].get('hidden'):
+                continue  # ST-219
 
             if 'cmd-group' in self.scheme[cmd_name]:
                 group_name = self.scheme[cmd_name]['cmd-group']
