@@ -63,7 +63,8 @@ class ExecuteScript(commands.SimplifiedAction):
             status = "running"
             click.echo("Checking script execution status..")
             while status == "running":
-                data = action.run(**{"scriptExecutionId": execution_status_id})
+                data = action.run(**{"scriptExecutionId": execution_status_id,
+                                     "envId": kwargs.get('envId')})
                 data_json = json.loads(data)
                 status = data_json["data"]["status"]
                 time.sleep(1)
