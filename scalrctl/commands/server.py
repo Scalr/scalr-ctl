@@ -73,7 +73,8 @@ class ResumeServer(commands.SimplifiedAction):
             status = "suspended"
             click.echo("Waiting for server %s to resume.." % server_id)
             while status in ("suspended", "resuming"):
-                data = action.run(**{"serverId": server_id, "hide_output": True})
+                data = action.run(**{"serverId": server_id, "hide_output": True,
+                                     "envId": kwargs.get('envId')})
                 data_json = json.loads(data)
                 status = data_json["data"]["status"]
                 time.sleep(1)
@@ -117,7 +118,8 @@ class SuspendServer(commands.SimplifiedAction):
             status = "running"
             click.echo("Waiting for server %s to suspend.." % server_id)
             while status in ("running", "pending_suspend"):
-                data = action.run(**{"serverId": server_id, "hide_output": True})
+                data = action.run(**{"serverId": server_id, "hide_output": True,
+                                     "envId": kwargs.get('envId')})
                 data_json = json.loads(data)
                 status = data_json["data"]["status"]
                 time.sleep(1)

@@ -5,6 +5,14 @@ scalr-ctl Changelog
 Changelog on Scalr Wiki: https://scalr-labs.atlassian.net/wiki/pages/viewpage.action?pageId=109805613
 
 
+Version 2.0.20
+--------------
+
+Fixed
+
+    ST-206 Polling script status fails when 'scripts execute' action executed with --envId option
+
+
 Version 2.0.19
 --------------
 
