@@ -78,7 +78,7 @@ class ResumeServer(commands.SimplifiedAction):
                 data_json = json.loads(data)
                 status = data_json["data"]["status"]
                 time.sleep(1)
-            click.echo("%s resumed." % server_id)
+            click.echo("Server %s resumed." % server_id)
 
         return result
 
@@ -123,25 +123,26 @@ class SuspendServer(commands.SimplifiedAction):
                 data_json = json.loads(data)
                 status = data_json["data"]["status"]
                 time.sleep(1)
-            click.echo("%s has been suspended." % server_id)
+            click.echo("Server %s has been suspended." % server_id)
 
         return result
 
 
 class TerminateServer(commands.SimplifiedAction):
 
-    epilog = "Example: scalr-ctl servers terminate --serverId <ID> --force"
+    epilog = "Example: scalr-ctl servers terminate --serverId <ID> --force --nowait"
     post_template = {
         "serverTerminationOptions": {"force": True}
     }
 
     def get_options(self):
+        nowait_hlp = "Do not wait for server to reach 'terminated' state"
+        nowait = click.Option(('--nowait', 'nowait'), is_flag=True, required=False, help=nowait_hlp)
         hlp = "It is used to terminate the Server immediately ignoring scalr.system.server_terminate_timeout."
         force_terminate = click.Option(('--force', 'force'), is_flag=True, default=False, help=hlp)
-        options = [force_terminate, ]
+        options = [force_terminate, nowait]
         options.extend(super(TerminateServer, self).get_options())
         return options
-
 
     def pre(self, *args, **kwargs):
         """
@@ -154,6 +155,30 @@ class TerminateServer(commands.SimplifiedAction):
         kv.update(kwargs)
         arguments, kw = super(TerminateServer, self).pre(*args, **kv)
         return arguments, kw
+
+    def run(self, *args, **kwargs):
+        nowait = kwargs.pop("nowait", False)
+        result = super(TerminateServer, self).run(*args, **kwargs)
+        if not nowait:
+            result_json = json.loads(result)
+            server_id = result_json["data"]["id"]
+            cls = commands.Action
+            action = cls(name=self.name,
+                         route="/{envId}/servers/{serverId}/",
+                         http_method="get",
+                         api_level="user")
+            status = "running"
+            click.echo("Waiting for server %s to terminate.." % server_id)
+            while status in ("running", "pending_terminate"):
+                data = action.run(**{"serverId": server_id,
+                                     "hide_output": True,
+                                     "envId": kwargs.get('envId')})
+                data_json = json.loads(data)
+                status = data_json["data"]["status"]
+                time.sleep(1)
+            click.echo("Server %s has been terminated." % server_id)
+
+        return result
 
 
 class LaunchServerAlias(commands.SimplifiedAction):
