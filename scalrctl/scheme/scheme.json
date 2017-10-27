@@ -143,7 +143,7 @@
                 "http-method": "get",
                 "route": "/global-variables/{globalVariableName}/"
             },
-            "group_descr": "Manage Global Variables for Roles",
+            "group_descr": "Manage Global Variables",
             "list": {
                 "api_level": "global",
                 "class": "scalrctl.commands.Action",
@@ -531,7 +531,7 @@
                 "http-method": "get",
                 "route": "/{accountId}/global-variables/{globalVariableName}/"
             },
-            "group_descr": "Manage Global Variables for Roles",
+            "group_descr": "Manage Global Variables",
             "list": {
                 "api_level": "account",
                 "class": "scalrctl.commands.Action",
