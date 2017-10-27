@@ -8,7 +8,7 @@ from scalrctl import commands
 from scalrctl import click
 
 
-class ExecuteScript(commands.SimplifiedAction):
+class ExecuteScript(commands.PolledAction):
 
     epilog = "Example: scalr-ctl scripts execute --serverId <ID> --scriptId <ID> --blocking --timeout 30"
 
@@ -60,15 +60,15 @@ class ExecuteScript(commands.SimplifiedAction):
                          route="/{envId}/script-executions/{scriptExecutionId}/",
                          http_method="get",
                          api_level=self.api_level)
-            status = "running"
             click.echo("Checking script execution status..")
-            while status == "running":
-                data = action.run(**{"scriptExecutionId": execution_status_id,
-                                     "envId": kwargs.get('envId')})
-                data_json = json.loads(data)
-                status = data_json["data"]["status"]
-                time.sleep(1)
-
+            self._wait_for_status(poll_dict={'scriptExecutionId': execution_status_id},
+                                  action_obj=action,
+                                  states_to_wait_for=('finished',), hide_output=False)
+            click.echo("Server %s has finished executing script %s [scriptExecutionId %s]." % (
+                kwargs.get('serverId'),
+                kwargs.get('scriptId'),
+                execution_status_id
+            ))
         return result
 
 

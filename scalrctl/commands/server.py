@@ -7,20 +7,22 @@ from scalrctl import commands
 from scalrctl import click
 
 
-class RebootServer(commands.SimplifiedAction):
+class RebootServer(commands.PolledAction):
 
-    epilog = "Example: scalr-ctl servers reboot --serverId <ID> --hard"
+    epilog = "Example: scalr-ctl servers reboot --serverId <ID> --hard --nowait"
 
     post_template = {
         "serverRebootOptions": {"hard": True}
     }
 
     def get_options(self):
+        nowait_hlp = "Do not wait for server to resume after reboot"
+        nowait = click.Option(('--nowait', 'nowait'), is_flag=True, required=False, help=nowait_hlp)
         hlp = "Reboot type. By default it does soft reboot unless this \
         option is set to true. Beware that some types of the instances do \
         not support soft reboot."
         hard_reboot = click.Option(('--hard', 'hard'), is_flag=True, default=False, help=hlp)
-        options = [hard_reboot, ]
+        options = [hard_reboot, nowait]
         options.extend(super(RebootServer, self).get_options())
         return options
 
@@ -37,8 +39,34 @@ class RebootServer(commands.SimplifiedAction):
         arguments, kw = super(RebootServer, self).pre(*args, **kv)
         return arguments, kw
 
+    def run(self, *args, **kwargs):
+        nowait = kwargs.pop("nowait", False)
+        result = super(RebootServer, self).run(*args, **kwargs)
+        if not nowait:
+            result_json = json.loads(result)
+            server_id = result_json["data"]["id"]
+            cls = commands.Action
+            action = cls(name=self.name,
+                         route="/{envId}/servers/{serverId}/",
+                         http_method="get",
+                         api_level="user")
+            click.echo("Waiting for server %s to resume after reboot.." % server_id)
+            self._wait_for_status(poll_dict={'serverId': server_id},
+                                  action_obj=action,
+                                  states_to_wait_for=('rebooting',))
+            self._wait_for_status(poll_dict={'serverId': server_id},
+                                  action_obj=action,
+                                  states_to_wait_for=(None,))
+            click.echo("Server %s has finished reboot process." % server_id)
+        return result
 
-class ResumeServer(commands.SimplifiedAction):
+    def _get_operation_status(self, data_json):
+        list_operations =  data_json["data"].get('operations', [])
+        if list_operations:
+            return list_operations[0]['name']
+
+
+class ResumeServer(commands.PolledAction):
 
     epilog = "Example: scalr-ctl servers resume --serverId <ID> --nowait"
     post_template = {}
@@ -70,20 +98,15 @@ class ResumeServer(commands.SimplifiedAction):
                          route="/{envId}/servers/{serverId}/",
                          http_method="get",
                          api_level="user")
-            status = "suspended"
             click.echo("Waiting for server %s to resume.." % server_id)
-            while status in ("suspended", "resuming"):
-                data = action.run(**{"serverId": server_id, "hide_output": True,
-                                     "envId": kwargs.get('envId')})
-                data_json = json.loads(data)
-                status = data_json["data"]["status"]
-                time.sleep(1)
+            self._wait_for_status(poll_dict={'serverId': server_id},
+                                  action_obj=action,
+                                  states_to_wait_for=('running',))
             click.echo("Server %s resumed." % server_id)
-
         return result
 
 
-class SuspendServer(commands.SimplifiedAction):
+class SuspendServer(commands.PolledAction):
 
     epilog = "Example: scalr-ctl servers suspend  --serverId <ID> --nowait"
     post_template = {}
@@ -115,20 +138,15 @@ class SuspendServer(commands.SimplifiedAction):
                          route="/{envId}/servers/{serverId}/",
                          http_method="get",
                          api_level="user")
-            status = "running"
             click.echo("Waiting for server %s to suspend.." % server_id)
-            while status in ("running", "pending_suspend"):
-                data = action.run(**{"serverId": server_id, "hide_output": True,
-                                     "envId": kwargs.get('envId')})
-                data_json = json.loads(data)
-                status = data_json["data"]["status"]
-                time.sleep(1)
+            self._wait_for_status(poll_dict={'serverId': server_id},
+                                  action_obj=action,
+                                  states_to_wait_for=('suspended',))
             click.echo("Server %s has been suspended." % server_id)
-
         return result
 
 
-class TerminateServer(commands.SimplifiedAction):
+class TerminateServer(commands.PolledAction):
 
     epilog = "Example: scalr-ctl servers terminate --serverId <ID> --force --nowait"
     post_template = {
@@ -167,34 +185,28 @@ class TerminateServer(commands.SimplifiedAction):
                          route="/{envId}/servers/{serverId}/",
                          http_method="get",
                          api_level="user")
-            status = "running"
             click.echo("Waiting for server %s to terminate.." % server_id)
-            while status in ("running", "pending_terminate"):
-                data = action.run(**{"serverId": server_id,
-                                     "hide_output": True,
-                                     "envId": kwargs.get('envId')})
-                data_json = json.loads(data)
-                status = data_json["data"]["status"]
-                time.sleep(1)
-            click.echo("Server %s has been terminated." % server_id)
-
+            self._wait_for_status(poll_dict={'serverId': server_id},
+                                  action_obj=action,
+                                  states_to_wait_for=('terminated',))
         return result
 
 
-class LaunchServerAlias(commands.SimplifiedAction):
+class LaunchServerAlias(commands.PolledAction):
 
-    epilog = "Example: scalr-ctl servers launch --farmRoleId <ID>"
+    epilog = "Example: scalr-ctl servers launch --farmRoleId <ID> --nowait"
     post_template = {
         "serverLaunchRequest": {"farmRole": None}
     }
 
     def get_options(self):
+        nowait_hlp = "Do not wait for server to resume"
+        nowait = click.Option(('--nowait', 'nowait'), is_flag=True, required=False, help=nowait_hlp)
         hlp = "Launch a new Server for the specified Farm Role."
         farm_role_id = click.Option(('--farmRoleId', 'farm_role_id'), required=True, help=hlp)
-        options = [farm_role_id, ]
+        options = [farm_role_id, nowait]
         options.extend(super(LaunchServerAlias, self).get_options())
         return options
-
 
     def pre(self, *args, **kwargs):
         """
@@ -207,6 +219,24 @@ class LaunchServerAlias(commands.SimplifiedAction):
         kv.update(kwargs)
         arguments, kw = super(LaunchServerAlias, self).pre(*args, **kv)
         return arguments, kw
+
+    def run(self, *args, **kwargs):
+        nowait = kwargs.pop("nowait", False)
+        result = super(LaunchServerAlias, self).run(*args, **kwargs)
+        if not nowait:
+            result_json = json.loads(result)
+            server_id = result_json["data"]["id"]
+            cls = commands.Action
+            action = cls(name=self.name,
+                         route="/{envId}/servers/{serverId}/",
+                         http_method="get",
+                         api_level="user")
+            click.echo("Waiting for server %s to launch and bootstrap.." % server_id)
+            self._wait_for_status(poll_dict={'serverId': server_id},
+                                  action_obj=action,
+                                  states_to_wait_for=('running',))
+            click.echo("Server %s has reached 'running' state." % server_id)
+        return result
 
 
 class ServerChangeInstanceType(commands.SimplifiedAction):
