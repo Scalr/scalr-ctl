@@ -9,7 +9,9 @@ Version 2.0.20
 --------------
 
 Improvements
+
     ST-241 Add polling option for 'servers terminate' action
+    ST-244 Implement list action for EventLogEntry and LogEntry
 
 Fixed
 

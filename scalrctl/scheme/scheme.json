@@ -1032,6 +1032,12 @@
             "class": "scalrctl.commands.Action",
             "http-method": "get",
             "route": "/{envId}/event-logs/{eventLogEntryId}/"
+        },
+        "list-logs": {
+            "api_level": "user",
+            "class": "scalrctl.commands.Action",
+            "http-method": "get",
+            "route": "/{envId}/event-logs/"
         }
     },
     "export": {
@@ -2222,6 +2228,12 @@
             "class": "scalrctl.commands.Action",
             "http-method": "get",
             "route": "/{envId}/orchestration-logs/{logEntryId}/"
+        },
+        "list-orchestration-logs": {
+            "api_level": "user",
+            "class": "scalrctl.commands.Action",
+            "http-method": "get",
+            "route": "/{envId}/orchestration-logs/"
         }
     },
     "script-versions": {
