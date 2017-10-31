@@ -51,13 +51,16 @@ class RebootServer(commands.PolledAction):
                          http_method="get",
                          api_level="user")
             click.echo("Waiting for server %s to resume after reboot.." % server_id)
-            self._wait_for_status(poll_dict={'serverId': server_id},
-                                  action_obj=action,
-                                  states_to_wait_for=('rebooting',))
-            self._wait_for_status(poll_dict={'serverId': server_id},
-                                  action_obj=action,
-                                  states_to_wait_for=(None,))
-            click.echo("Server %s has finished reboot process." % server_id)
+            if kwargs.get('hard'):
+                click.echo("Server %s is undergoing hard reboot." % server_id)
+            else:
+                self._wait_for_status(poll_dict={'serverId': server_id},
+                                      action_obj=action,
+                                      states_to_wait_for=('rebooting',))
+                self._wait_for_status(poll_dict={'serverId': server_id},
+                                      action_obj=action,
+                                      states_to_wait_for=(None,))
+                click.echo("Server %s has finished reboot process." % server_id)
         return result
 
     def _get_operation_status(self, data_json):
