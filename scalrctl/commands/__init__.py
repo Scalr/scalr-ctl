@@ -683,13 +683,14 @@ class PolledAction(SimplifiedAction):
         :returns last status, e.g. 'running'
         '''
         status = ''
-        while status not in states_to_wait_for:
-            run_args = {"hide_output": hide_output, "envId": kwargs.get('envId')}
-            run_args.update(poll_dict)
-            data = action_obj.run(**run_args)
-            data_json = json.loads(data)
-            status = self._get_operation_status(data_json)
-            time.sleep(timeout)
+        with utils._spinner():
+            while status not in states_to_wait_for:
+                run_args = {"hide_output": hide_output, "envId": kwargs.get('envId')}
+                run_args.update(poll_dict)
+                data = action_obj.run(**run_args)
+                data_json = json.loads(data)
+                status = self._get_operation_status(data_json)
+                time.sleep(timeout)
         return status
 
     def _get_operation_status(self, data_json):
