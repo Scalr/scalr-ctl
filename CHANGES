@@ -9,7 +9,9 @@ Version 2.0.20
 --------------
 
 Improvements
+
     ST-241 Add polling option for 'servers terminate' action
+    ST-244 Implement list action for EventLogEntry and LogEntry
     ST-246 Show response codes when executing commands with --debug option
 
 Fixed
