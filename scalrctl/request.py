@@ -142,6 +142,10 @@ def request(method, api_level, request_uri, payload=None, data=None):
         )
         result = resp.text
 
+        if settings.debug_mode:
+            click.echo("HTTP Сode: %s" % resp.status_code)
+            click.echo()
+
     except (Exception, BaseException) as e:
         if settings.debug_mode:
             raise
