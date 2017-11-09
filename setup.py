@@ -1,4 +1,5 @@
 import os
+import sys
 
 from distutils.core import setup
 from distutils.command.install import install
@@ -21,6 +22,18 @@ def read(fname):
 
 description = "Scalr-ctl is a command-line interface to your Scalr account"
 
+install_requires=[
+    'prettytable>=0.7.2',
+    'pyyaml>=3.11',
+    'requests>=2.10.0',
+    'six>=1.10.0',
+    'colorama>=0.3.7',
+    'dicttoxml>=1.7.4',
+    ]
+
+# ST-247 fix for SNI support
+if sys.version_info < (2, 7, 9):
+    install_requires.append('pyOpenSSL>=17.3.0')
 
 if __name__ == '__main__':
 
@@ -55,15 +68,7 @@ if __name__ == '__main__':
             '': ['VERSION', 'scheme/scheme.json'],
         },
         data_files=[('', ['scalrctl/scheme/scheme.json', ]), ],
-        install_requires=[
-            'prettytable>=0.7.2',
-            'pyyaml>=3.11',
-            'requests>=2.10.0',
-            'six>=1.10.0',
-            'colorama>=0.3.7',
-            'dicttoxml>=1.7.4',
-            'pyOpenSSL>=17.3.0'
-        ],
+        install_requires=install_requires,
         entry_points='''
             [console_scripts]
             scalr-ctl=scalrctl.app:cli
