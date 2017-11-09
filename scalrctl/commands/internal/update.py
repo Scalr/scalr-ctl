@@ -70,7 +70,7 @@ def _load_yaml_spec(api_level):
             except ImportError:
                 sni_supported = False
             if not sni_supported:
-                errmsg = "Error: Your Python version %s does not support SNI." \
+                errmsg = "\nError: Your Python version %s does not support SNI. " \
                          "This can be resolved by upgrading Python to version 2.7.9 or " \
                          "by installing pyOpenSSL>=17.3.0. Link for further reading: " \
                          "http://docs.python-requests.org/en/master/community/faq/#what-are-hostname-doesn-t-match-errors" \
