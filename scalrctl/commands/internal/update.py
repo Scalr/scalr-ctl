@@ -74,7 +74,7 @@ def _load_yaml_spec(api_level):
                          "This can be resolved by upgrading Python to version 2.7.9 or " \
                          "by installing pyOpenSSL>=17.3.0. Link for further reading: " \
                          "http://docs.python-requests.org/en/master/community/faq/#what-are-hostname-doesn-t-match-errors" \
-                         "If you are having problems installing pyOpenSSL try to upgrade pip first."
+                         " \nIf you are having problems installing pyOpenSSL try to upgrade pip first." % sys.version
                 click.echo(errmsg)
                 sys.exit()
     return resp.text if resp.status_code == 200 else None
