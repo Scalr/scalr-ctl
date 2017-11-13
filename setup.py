@@ -1,4 +1,5 @@
 import os
+import sys
 
 from distutils.core import setup
 from distutils.command.install import install
@@ -20,7 +21,6 @@ def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
 
 description = "Scalr-ctl is a command-line interface to your Scalr account"
-
 
 if __name__ == '__main__':
 
@@ -62,7 +62,7 @@ if __name__ == '__main__':
             'six>=1.10.0',
             'colorama>=0.3.7',
             'dicttoxml>=1.7.4',
-        ],
+            ],
         entry_points='''
             [console_scripts]
             scalr-ctl=scalrctl.app:cli

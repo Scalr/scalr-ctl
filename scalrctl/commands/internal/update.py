@@ -57,7 +57,26 @@ def _load_yaml_spec(api_level):
                                                   settings.API_HOST,
                                                   api_level,
                                                   settings.API_VERSION)
-    resp = requests.get(spec_url, verify=settings.SSL_VERIFY_PEER)
+    try:
+        resp = requests.get(spec_url, verify=settings.SSL_VERIFY_PEER)
+    except requests.exceptions.SSLError as e:
+        import ssl
+        if 'CertificateError' in str(e):
+            sni_supported = None
+            try:
+                from OpenSSL._util import lib as _lib
+                if _lib.Cryptography_HAS_TLSEXT_HOSTNAME:
+                    sni_supported = True
+            except ImportError:
+                sni_supported = False
+            if not sni_supported:
+                errmsg = "\nError: Your Python version %s does not support SNI. " \
+                         "This can be resolved by upgrading Python to version 2.7.9 or " \
+                         "by installing pyOpenSSL>=17.3.0. More info in Requests FAQ: " \
+                         "http://docs.python-requests.org/en/master/community/faq/#what-are-hostname-doesn-t-match-errors" \
+                         " \nIf you are having problems installing pyOpenSSL try to upgrade pip first." % sys.version[:5]
+                click.echo(errmsg)
+                sys.exit()
     return resp.text if resp.status_code == 200 else None
 
 

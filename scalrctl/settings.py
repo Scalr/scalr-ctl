@@ -18,7 +18,7 @@ colored_output = True
 
 API_SCHEME = 'https'
 
-API_HOST = 'my.scalr.net'
+API_HOST = 'my.scalr.com'
 
 SIGNATURE_VERSION = 'V1-HMAC-SHA256'
 
