@@ -69,5 +69,5 @@ def reraise(message):
     debug(traceback.format_exc())
     message = str(message)
     if not settings.debug_mode:
-        message = "{}, use '--debug' option for details.".format(message)
+        message = "{}\nUse '--debug' option for details.".format(message)
     raise exc_class(message)
