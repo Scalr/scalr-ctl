@@ -60,8 +60,14 @@ def debug(msg):
 
 
 def reraise(message):
+    import sys
+    exc_info = sys.exc_info()
+    if isinstance(exc_info[1], click.ClickException):
+        exc_class = exc_info[0]
+    else:
+        exc_class = click.ClickException
     debug(traceback.format_exc())
     message = str(message)
     if not settings.debug_mode:
-        message = "{}, use '--debug' option for details.".format(message)
-    raise click.ClickException(message)
+        message = "{}\nUse '--debug' option for details.".format(message)
+    raise exc_class(message)

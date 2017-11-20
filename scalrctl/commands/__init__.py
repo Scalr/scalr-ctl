@@ -177,7 +177,6 @@ class Action(BaseAction):
             messages.append(err_line)
             num += 1
         result_errmsg = '\n'.join(messages)
-
         return result_errmsg
 
     def _format_response(self, response, hidden=False, **kwargs):
