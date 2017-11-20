@@ -378,7 +378,6 @@ class Action(BaseAction):
                             if "type" in f_key["properties"]["id"]:
                                 if f_key["properties"]["id"]["type"] in ("integer", "string"):
                                     column_names.append("%s.id" % k)
-        print column_names
         return column_names
 
     def _lookup(self, response_ref):
