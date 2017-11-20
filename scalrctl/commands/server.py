@@ -187,6 +187,9 @@ class LaunchServerAlias(commands.SimplifiedAction):
     post_template = {
         "serverLaunchRequest": {"farmRole": None}
     }
+    _table_columns = [u'operations', u'status', u'cloudServerId', u'cloudLocation', u'launchReason',
+                      u'farm.id', u'index', u'hostname', u'farmRole.id', u'privateIp', u'publicIp',
+                      u'id', u'instanceType.id', u'launched', u'cloudPlatform']
 
     def get_options(self):
         hlp = "Launch a new Server for the specified Farm Role."

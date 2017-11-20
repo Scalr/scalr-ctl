@@ -15,6 +15,7 @@ Improvements
 Fixed
 
     ST-242 Update commands show incorrect error messages
+    ST-249 'servers launch' command fails in table view
 
 
 Version 2.0.20
