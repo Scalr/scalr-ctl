@@ -89,7 +89,9 @@ class RoleDeprecate(commands.SimplifiedAction):
     def get_options(self):
         hlp = "The suggested replacement Role foreign key for the current Role."
         replacement = click.Option(('--replacement', 'replacement'), required=False, help=hlp)
-        options = [replacement, ]
+        revert_hlp = "Revert deprecation status or the Role."
+        revert = click.Option(('--revert', 'revert'), is_flag=True, help=hlp)
+        options = [replacement, revert]
         options.extend(super(RoleDeprecate, self).get_options())
         return options
 
@@ -99,9 +101,12 @@ class RoleDeprecate(commands.SimplifiedAction):
         before request is made
         """
         replacement = kwargs.pop("replacement", None)
+        revert = kwargs.pop("revert", False)
         post_data = copy.deepcopy(self.post_template)
         if replacement:
             post_data["deprecateRoleRequest"]["replacement"] = {"id": replacement}
+        if revert:
+            post_data["deprecateRoleRequest"]["deprecate"] = False
         kv = {"import-data": post_data}
         kv.update(kwargs)
         arguments, kw = super(RoleDeprecate, self).pre(*args, **kv)
