@@ -90,7 +90,7 @@ class RoleDeprecate(commands.SimplifiedAction):
         hlp = "The suggested replacement Role foreign key for the current Role."
         replacement = click.Option(('--replacement', 'replacement'), required=False, help=hlp)
         revert_hlp = "Revert deprecation status or the Role."
-        revert = click.Option(('--revert', 'revert'), is_flag=True, help=hlp)
+        revert = click.Option(('--revert', 'revert'), is_flag=True, revert_hlp=hlp)
         options = [replacement, revert]
         options.extend(super(RoleDeprecate, self).get_options())
         return options
