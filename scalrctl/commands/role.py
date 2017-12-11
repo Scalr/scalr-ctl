@@ -87,11 +87,12 @@ class RoleDeprecate(commands.SimplifiedAction):
     post_template = {"deprecateRoleRequest": {"deprecate": True}}
 
     def get_options(self):
-        hlp = "The suggested replacement Role foreign key for the current Role."
+        hlp = "The suggested replacement RoleID for the current Role."
         replacement = click.Option(('--replacement', 'replacement'), required=False, help=hlp)
-        revert_hlp = "Revert deprecation status or the Role."
-        revert = click.Option(('--revert', 'revert'), is_flag=True, revert_hlp=hlp)
-        options = [replacement, revert]
+        state_hlp = "The deprecation state to set on the Role."
+        state = click.Option(
+            ('--state', 'state'), type=click.Choice(['DEPRECATED', 'ACTIVE']), required=True,help=state_hlp)
+        options = [replacement, state]
         options.extend(super(RoleDeprecate, self).get_options())
         return options
 
@@ -101,11 +102,11 @@ class RoleDeprecate(commands.SimplifiedAction):
         before request is made
         """
         replacement = kwargs.pop("replacement", None)
-        revert = kwargs.pop("revert", False)
+        state = kwargs.pop("state")
         post_data = copy.deepcopy(self.post_template)
         if replacement:
             post_data["deprecateRoleRequest"]["replacement"] = {"id": replacement}
-        if revert:
+        if "ACTIVE" == state:
             post_data["deprecateRoleRequest"]["deprecate"] = False
         kv = {"import-data": post_data}
         kv.update(kwargs)
