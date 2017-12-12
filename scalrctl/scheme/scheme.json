@@ -1894,6 +1894,13 @@
             "http-method": "post",
             "route": "/{envId}/roles/{roleId}/actions/promote/",
             "epilog": "Example: scalr-ctl role promote --roleId <ID>"
+        },
+        "deprecate": {
+            "api_level": "user",
+            "class": "scalrctl.commands.role.RoleDeprecate",
+            "http-method": "post",
+            "route": "/{envId}/roles/{roleId}/actions/deprecate/",
+            "epilog": "Example: scalr-ctl role deprecate --roleId <ID>"
         }
     },
     "role-categories": {
