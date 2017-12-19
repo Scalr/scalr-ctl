@@ -16,10 +16,10 @@ class RebootServer(commands.PolledAction):
     }
 
     def get_options(self):
-        nowait_hlp = "Do not wait for server to resume after reboot"
+        nowait_hlp = "Do not wait for server to resume after soft reboot"
         nowait = click.Option(('--nowait', 'nowait'), is_flag=True, required=False, help=nowait_hlp)
-        hlp = "Reboot type. By default it does soft reboot unless this \
-        option is set to true. Beware that some types of the instances do \
+        hlp = "Reboot type. By default the command requests soft reboot unless this \
+        option is present. Beware that some types of the instances do \
         not support soft reboot."
         hard_reboot = click.Option(('--hard', 'hard'), is_flag=True, default=False, help=hlp)
         options = [hard_reboot, nowait]
@@ -42,25 +42,24 @@ class RebootServer(commands.PolledAction):
     def run(self, *args, **kwargs):
         nowait = kwargs.pop("nowait", False)
         result = super(RebootServer, self).run(*args, **kwargs)
-        if not nowait:
-            result_json = json.loads(result)
-            server_id = result_json["data"]["id"]
+        result_json = json.loads(result)
+        server_id = result_json["data"]["id"]
+        if kwargs.get('hard'):
+                click.echo("Server %s is undergoing hard reboot." % server_id)
+        elif not nowait:
             cls = commands.Action
             action = cls(name=self.name,
                          route="/{envId}/servers/{serverId}/",
                          http_method="get",
                          api_level="user")
-            click.echo("Waiting for server %s to resume after reboot.." % server_id)
-            if kwargs.get('hard'):
-                click.echo("Server %s is undergoing hard reboot." % server_id)
-            else:
-                self._wait_for_status(poll_dict={'serverId': server_id},
-                                      action_obj=action,
-                                      states_to_wait_for=('rebooting',))
-                self._wait_for_status(poll_dict={'serverId': server_id},
-                                      action_obj=action,
-                                      states_to_wait_for=(None,))
-                click.echo("Server %s has finished reboot process." % server_id)
+            click.echo("Waiting for server %s to resume after soft reboot.." % server_id)
+            self._wait_for_status(poll_dict={'serverId': server_id},
+                                  action_obj=action,
+                                  states_to_wait_for=('rebooting',))
+            self._wait_for_status(poll_dict={'serverId': server_id},
+                                  action_obj=action,
+                                  states_to_wait_for=(None,))
+            click.echo("Server %s has finished reboot process." % server_id)
         return result
 
     def _get_operation_status(self, data_json):
