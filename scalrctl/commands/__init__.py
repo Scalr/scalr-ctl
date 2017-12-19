@@ -78,6 +78,7 @@ class Action(BaseAction):
 
     def _init(self):
         self.raw_spec = utils.read_spec(self.api_level, ext='json')
+        self.spec = get_spec(self.raw_spec)
 
         if not self.epilog and self.http_method.upper() == 'POST':
             msg = "Example: scalr-ctl {level} {name} < {name}.json"
@@ -139,6 +140,7 @@ class Action(BaseAction):
             return json.dumps(filtered, indent=2)
         except Exception as e:
             utils.reraise(e)
+
 
     def _edit_object(self, *args, **kwargs):
         raw_object = self._get_object(*args, **kwargs)
@@ -320,8 +322,7 @@ class Action(BaseAction):
         return options
 
     def _get_body_type_params(self):
-        route_data = self.raw_spec['paths'][self.route][self.http_method]
-        return [param for param in route_data.get('parameters', '')]
+        return self.spec.get_body_type_params(self.route, self.http_method)
 
     def _get_path_type_params(self):
         route_data = self.raw_spec['paths'][self.route]
@@ -396,15 +397,7 @@ class Action(BaseAction):
 
     @property
     def _result_descr(self):
-        route_data = self.raw_spec['paths'][self.route]
-        responses = route_data[self.http_method]['responses']
-        if '200' in responses:
-            response_200 = responses['200']
-            if 'schema' in response_200:
-                schema = response_200['schema']
-                if '$ref' in schema:
-                    response_ref = schema['$ref']
-                    return self._lookup(response_ref)
+        return self._lookup(self.spec.get_response_ref(self.route, self.http_method))
 
     def _list_concrete_types(self, schema):
         types = []
@@ -518,8 +511,7 @@ class Action(BaseAction):
 
     @property
     def _request_template(self):
-        basepath_uri = self.raw_spec['basePath']
-        return '{}{}'.format(basepath_uri, self.route)
+        return '{}{}'.format(self.spec.base_path, self.route)
 
     def pre(self, *args, **kwargs):
         """
@@ -529,13 +521,11 @@ class Action(BaseAction):
         self._check_arguments(**kwargs)
 
         import_data = kwargs.pop('import-data', {})
-        #interactive = kwargs.pop('interactive', None)
         stdin = kwargs.pop('stdin', None)
         http_method = self.http_method.upper()
 
         if http_method not in ('PATCH', 'POST'):
             return args, kwargs
-
         # prompting for body and then validating it
         for param_name in (p['name'] for p in self._get_body_type_params()):
             try:
@@ -556,7 +546,6 @@ class Action(BaseAction):
                 kwargs[param_name] = json_object
             except ValueError as e:
                 utils.reraise(e)
-
         return args, kwargs
 
     def post(self, response):
@@ -575,7 +564,6 @@ class Action(BaseAction):
         """
         hide_output = kwargs.pop('hide_output', False)  # [ST-88]
         args, kwargs = self.pre(*args, **kwargs)
-
         uri = self._request_template
         payload = {}
         data = {}
@@ -585,7 +573,6 @@ class Action(BaseAction):
 
         if '{accountId}' in uri and not kwargs.get('accountId') and settings.accountId:
             kwargs['accountId'] = settings.accountId
-
         if kwargs:
             # filtering in-body and empty params
             uri = self._request_template.format(**kwargs)
@@ -597,7 +584,6 @@ class Action(BaseAction):
                         payload[key] = value
                     elif body_params and key == body_params[0]['name']:
                         data.update(value)
-
         if self.dry_run:
             click.echo('{} {} {} {}'.format(self.http_method, uri,
                                             payload, data))
@@ -608,7 +594,6 @@ class Action(BaseAction):
         raw_response = request.request(self.http_method, self.api_level,
                                        uri, payload, data)
         response = self.post(raw_response)
-
         text = self._format_response(response, hidden=hide_output, **kwargs)
         if text is not None:
             click.echo(text)
@@ -663,3 +648,59 @@ class Action(BaseAction):
 
 class SimplifiedAction(Action):
     ignored_options = ('stdin',)
+
+
+def get_spec(data):
+    if "openapi" in data:
+        return _OpenAPIv3Spec(data)
+    elif "basePath" in data:
+        return _OpenAPIv2Spec(data)
+    else:
+        raise click.ClickException("Unknown spec format")
+
+
+class _OpenAPIBaseSpec(object):
+
+    def __init__(self, raw_spec):
+        self.raw_spec = raw_spec
+
+class _OpenAPIv2Spec(_OpenAPIBaseSpec):
+    @property
+    def base_path(self):
+        return self.raw_spec["basePath"]
+
+    def get_response_ref(self, route, http_method):
+        route_data = self.raw_spec['paths'][route]
+        responses = route_data[http_method]['responses']
+        if '200' in responses:
+            response_200 = responses['200']
+            if 'schema' in response_200:
+                schema = response_200['schema']
+                if '$ref' in schema:
+                    response_ref = schema['$ref']
+                    return response_ref
+
+    def get_body_type_params(self, route, http_method):
+        route_data = self.raw_spec['paths'][route][http_method]
+        data = [param for param in route_data.get('parameters', '')]
+        return data
+
+class _OpenAPIv3Spec(_OpenAPIBaseSpec):
+    @property
+    def base_path(self):
+        servers = self.raw_spec["servers"]
+        default_server = servers[0]
+        return default_server["url"]
+
+    def get_response_ref(self, route, http_method):
+        responses = self.raw_spec['paths'][route][http_method]['responses']
+        return responses['200']['content']['application/json']['schema']['$ref']
+
+    def get_body_type_params(self, route, http_method):
+        route_data = self.raw_spec['paths'][route][http_method]
+        result = dict()
+        result['schema'] = route_data['requestBody']['content']['application/json']['schema']
+        result['name'] = result['schema']  # ST-236
+        result['required'] = route_data['requestBody'].get('required', False)
+        result['description'] = route_data['requestBody']['description']
+        return result
