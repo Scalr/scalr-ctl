@@ -64,6 +64,12 @@ def debug(msg):
 
 
 def reraise(message):
+    import sys
+    exc_info = sys.exc_info()
+    if isinstance(exc_info[1], click.ClickException):
+        exc_class = exc_info[0]
+    else:
+        exc_class = click.ClickException
     debug(traceback.format_exc())
     message = str(message)
     if not settings.debug_mode:
@@ -97,3 +103,6 @@ class _spinner(object):
     def __exit__(self, type, value, traceback):
         self.event.set()
         self.thread.join()
+
+
+

@@ -1032,6 +1032,12 @@
             "class": "scalrctl.commands.Action",
             "http-method": "get",
             "route": "/{envId}/event-logs/{eventLogEntryId}/"
+        },
+        "list-logs": {
+            "api_level": "user",
+            "class": "scalrctl.commands.Action",
+            "http-method": "get",
+            "route": "/{envId}/event-logs/"
         }
     },
     "export": {
@@ -1888,6 +1894,13 @@
             "http-method": "post",
             "route": "/{envId}/roles/{roleId}/actions/promote/",
             "epilog": "Example: scalr-ctl role promote --roleId <ID>"
+        },
+        "deprecate": {
+            "api_level": "user",
+            "class": "scalrctl.commands.role.RoleDeprecate",
+            "http-method": "post",
+            "route": "/{envId}/roles/{roleId}/actions/deprecate/",
+            "epilog": "Example: scalr-ctl role deprecate --roleId <ID>"
         }
     },
     "role-categories": {
@@ -2222,6 +2235,12 @@
             "class": "scalrctl.commands.Action",
             "http-method": "get",
             "route": "/{envId}/orchestration-logs/{logEntryId}/"
+        },
+        "list-orchestration-logs": {
+            "api_level": "user",
+            "class": "scalrctl.commands.Action",
+            "http-method": "get",
+            "route": "/{envId}/orchestration-logs/"
         }
     },
     "script-versions": {

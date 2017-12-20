@@ -5,12 +5,44 @@ scalr-ctl Changelog
 Changelog on Scalr Wiki: https://scalr-labs.atlassian.net/wiki/pages/viewpage.action?pageId=109805613
 
 
+Version 2.1
+--------------
+
+Improvements
+
+    ST-243 Add polling option for 'servers launch' & 'servers reboot' actions
+    ST-245 Visualize polling of status for long operations
+
+
+Version 2.0.22
+--------------
+
+New feature
+
+    ST-251 Add action for Role deprecation
+
+
+Version 2.0.21
+--------------
+
+Improvements
+
+    ST-247 SNI problem with Python version prior to 2.7.9
+
+Fixed
+
+    ST-242 Update commands show incorrect error messages
+    ST-249 'servers launch' command fails in table view
+
+
 Version 2.0.20
 --------------
 
 Improvements
+
     ST-241 Add polling option for 'servers terminate' action
-    ST-243 Add polling option for 'servers launch' & 'servers reboot' actions
+    ST-244 Implement list action for EventLogEntry and LogEntry
+    ST-246 Show response codes when executing commands with --debug option
 
 Fixed
 

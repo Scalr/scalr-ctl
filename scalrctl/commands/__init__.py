@@ -62,7 +62,7 @@ class Action(BaseAction):
 
     dry_run = False
     post_template = None
-    _table_columns = None
+    _table_columns = []
 
     _discriminators = {}
 
@@ -74,7 +74,6 @@ class Action(BaseAction):
         self.route = route
         self.http_method = http_method
         self.api_level = api_level
-        self._table_columns = []
 
         self._init()
 
@@ -178,7 +177,6 @@ class Action(BaseAction):
             messages.append(err_line)
             num += 1
         result_errmsg = '\n'.join(messages)
-
         return result_errmsg
 
     def _format_response(self, response, hidden=False, **kwargs):
@@ -381,7 +379,6 @@ class Action(BaseAction):
                             if "type" in f_key["properties"]["id"]:
                                 if f_key["properties"]["id"]["type"] in ("integer", "string"):
                                     column_names.append("%s.id" % k)
-
         return column_names
 
     def _lookup(self, response_ref):

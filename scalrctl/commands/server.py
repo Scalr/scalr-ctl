@@ -200,6 +200,9 @@ class LaunchServerAlias(commands.PolledAction):
     post_template = {
         "serverLaunchRequest": {"farmRole": None}
     }
+    _table_columns = [u'operations', u'status', u'cloudServerId', u'cloudLocation', u'launchReason',
+                      u'farm.id', u'index', u'hostname', u'farmRole.id', u'privateIp', u'publicIp',
+                      u'id', u'instanceType.id', u'launched', u'cloudPlatform']
 
     def get_options(self):
         nowait_hlp = "Do not wait for server to resume"

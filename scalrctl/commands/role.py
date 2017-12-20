@@ -79,3 +79,36 @@ class RolePromote(commands.SimplifiedAction):
         kv.update(kwargs)
         arguments, kw = super(RolePromote, self).pre(*args, **kv)
         return arguments, kw
+
+
+class RoleDeprecate(commands.SimplifiedAction):
+
+    epilog = "Example: scalr-ctl role deprecate --roleId <ID> --replacement <newRoleId>"
+    post_template = {"deprecateRoleRequest": {"deprecate": True}}
+
+    def get_options(self):
+        hlp = "The suggested replacement RoleID for the current Role."
+        replacement = click.Option(('--replacement', 'replacement'), required=False, help=hlp)
+        state_hlp = "The deprecation state to set on the Role."
+        state = click.Option(
+            ('--state', 'state'), type=click.Choice(['DEPRECATED', 'ACTIVE']), required=True,help=state_hlp)
+        options = [replacement, state]
+        options.extend(super(RoleDeprecate, self).get_options())
+        return options
+
+
+    def pre(self, *args, **kwargs):
+        """
+        before request is made
+        """
+        replacement = kwargs.pop("replacement", None)
+        state = kwargs.pop("state")
+        post_data = copy.deepcopy(self.post_template)
+        if replacement:
+            post_data["deprecateRoleRequest"]["replacement"] = {"id": replacement}
+        if "ACTIVE" == state:
+            post_data["deprecateRoleRequest"]["deprecate"] = False
+        kv = {"import-data": post_data}
+        kv.update(kwargs)
+        arguments, kw = super(RoleDeprecate, self).pre(*args, **kv)
+        return arguments, kw
