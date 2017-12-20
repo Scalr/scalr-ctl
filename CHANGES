@@ -5,6 +5,15 @@ scalr-ctl Changelog
 Changelog on Scalr Wiki: https://scalr-labs.atlassian.net/wiki/pages/viewpage.action?pageId=109805613
 
 
+Version 2.1
+--------------
+
+Improvements
+
+    ST-243 Add polling option for 'servers launch' & 'servers reboot' actions
+    ST-245 Visualize polling of status for long operations
+
+
 Version 2.0.22
 --------------
 
@@ -47,6 +56,7 @@ Improvements
 
     ST-237 Simplify configuration process
     ST-223 Add option to wait for server to suspend or resume
+    ST-245 Visualize polling of status for long operations
 
 Fixed
 

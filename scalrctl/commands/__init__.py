@@ -2,6 +2,7 @@
 import json
 import re
 import os
+import time
 
 import dicttoxml
 
@@ -663,3 +664,32 @@ class Action(BaseAction):
 
 class SimplifiedAction(Action):
     ignored_options = ('stdin',)
+
+
+class PolledAction(SimplifiedAction):
+
+    def _wait_for_status(self, poll_dict, action_obj, states_to_wait_for, timeout=1, hide_output=True, **kwargs):
+        '''
+
+        :param poll_dict: e.g. {'serverId': b039d8d9-26c2-439d-9b2b-9d7b761b417c}
+        :param action_obj: instance of class Action
+        :param states_to_wait_for: list of states to wait for, e.g. ('running', 'failed')
+        :param timeout: timeout in secons between attempts
+        :param hide_output: when True prints full polling status
+        :param kwargs: the same dict that run() method accepts
+        :returns last status, e.g. 'running'
+        '''
+        status = ''
+        with utils._spinner():
+            while status not in states_to_wait_for:
+                run_args = {"hide_output": hide_output, "envId": kwargs.get('envId')}
+                run_args.update(poll_dict)
+                data = action_obj.run(**run_args)
+                data_json = json.loads(data)
+                status = self._get_operation_status(data_json)
+                time.sleep(timeout)
+        return status
+
+    def _get_operation_status(self, data_json):
+        return data_json["data"]["status"]
+
