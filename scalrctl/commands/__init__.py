@@ -7,6 +7,8 @@ import dicttoxml
 
 from scalrctl import click, request, settings, utils, view, examples, defaults
 
+from six.moves.urllib import parse
+
 __author__ = 'Dmitriy Korsakov'
 
 
@@ -653,7 +655,8 @@ class _OpenAPIBaseSpec(object):
 class _OpenAPIv2Spec(_OpenAPIBaseSpec):
     @property
     def base_path(self):
-        return self.raw_spec["basePath"]
+        r = self.raw_spec["basePath"]
+        return r
 
     def get_response_ref(self, route, http_method):
         route_data = self.raw_spec['paths'][route]
@@ -691,7 +694,9 @@ class _OpenAPIv3Spec(_OpenAPIBaseSpec):
     def base_path(self):
         servers = self.raw_spec["servers"]
         default_server = servers[0]
-        return default_server["url"]
+        result = default_server["url"]
+        split_result = parse.urlsplit(result)
+        return split_result.path
 
     def get_response_ref(self, route, http_method):
         responses = self.raw_spec['paths'][route][http_method]['responses']
@@ -699,7 +704,7 @@ class _OpenAPIv3Spec(_OpenAPIBaseSpec):
 
     def get_body_type_params(self, route, http_method):
         result = []
-        for param in self.raw_spec['paths'][route]['parameters']:
+        for param in self.raw_spec['paths'][route].get('parameters', {}):
             if 'in' in param and 'body' in param['in']:
                 result = dict()
                 result['description'] = param['description']
