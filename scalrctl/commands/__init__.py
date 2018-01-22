@@ -262,7 +262,7 @@ class Action(BaseAction):
             """
 
         if self.http_method.upper() == 'GET':
-            if self._returns_iterable():
+            if self.spec._returns_iterable(self.route):
                 maxres = click.Option(('--max-results', 'maxResults'),
                                       type=int, required=False,
                                       help="Maximum number of records. "
@@ -335,22 +335,8 @@ class Action(BaseAction):
             result.extend(body_params)
         return result
 
-    def _returns_iterable(self):
-        responses = self.raw_spec['paths'][self.route]['get']['responses']
-        if '200' in responses:
-            response_200 = responses['200']
-            if 'schema' in response_200:
-                schema = response_200['schema']
-                if '$ref' in schema:
-                    object_key = schema['$ref'].split('/')[-1]
-                    object_descr = self.raw_spec['components']['schemas'][object_key]  # openapiv3
-                    object_properties = object_descr['properties']
-                    data_structure = object_properties['data']
-                    return 'array' == data_structure.get('type')
-        return False
-
     def _get_available_filters(self):
-        if self._returns_iterable():
+        if self.spec._returns_iterable(self.route):
             data = self._result_descr['properties']['data']
             response_ref = data['items']['$ref']
             response_descr = self._lookup(response_ref)
@@ -685,6 +671,21 @@ class _OpenAPIv2Spec(_OpenAPIBaseSpec):
         data = [param for param in route_data.get('parameters', '')]
         return data
 
+    def _returns_iterable(self, route):
+        responses = self.raw_spec['paths'][route]['get']['responses']
+        if '200' in responses:
+            response_200 = responses['200']
+            if 'schema' in response_200:
+                schema = response_200['schema']
+                if '$ref' in schema:
+                    object_key = schema['$ref'].split('/')[-1]
+                    object_descr = self.raw_spec['definitions'][object_key]  # openapiv3
+                    object_properties = object_descr['properties']
+                    data_structure = object_properties['data']
+                    return 'array' == data_structure.get('type')
+        return False
+
+
 class _OpenAPIv3Spec(_OpenAPIBaseSpec):
     @property
     def base_path(self):
@@ -707,3 +708,17 @@ class _OpenAPIv3Spec(_OpenAPIBaseSpec):
                 result['name'] = param['name']  # ST-236
 
         return result
+
+    def _returns_iterable(self, route):
+        responses = self.raw_spec['paths'][route]['get']['responses']
+        if '200' in responses:
+            response_200 = responses['200']
+            if 'schema' in response_200:
+                schema = response_200['schema']
+                if '$ref' in schema:
+                    object_key = schema['$ref'].split('/')[-1]
+                    object_descr = self.raw_spec['components']['schemas'][object_key]  # openapiv3
+                    object_properties = object_descr['properties']
+                    data_structure = object_properties['data']
+                    return 'array' == data_structure.get('type')
+        return False
