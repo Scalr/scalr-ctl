@@ -343,7 +343,7 @@ class Action(BaseAction):
                 schema = response_200['schema']
                 if '$ref' in schema:
                     object_key = schema['$ref'].split('/')[-1]
-                    object_descr = self.raw_spec['definitions'][object_key]
+                    object_descr = self.raw_spec['components']['schemas'][object_key]  # openapiv3
                     object_properties = object_descr['properties']
                     data_structure = object_properties['data']
                     return 'array' == data_structure.get('type')
@@ -694,13 +694,16 @@ class _OpenAPIv3Spec(_OpenAPIBaseSpec):
 
     def get_response_ref(self, route, http_method):
         responses = self.raw_spec['paths'][route][http_method]['responses']
-        return responses['200']['content']['application/json']['schema']['$ref']
+        return responses['200']['schema']['$ref']
 
     def get_body_type_params(self, route, http_method):
-        route_data = self.raw_spec['paths'][route][http_method]
-        result = dict()
-        result['schema'] = route_data['requestBody']['content']['application/json']['schema']
-        result['name'] = result['schema']  # ST-236
-        result['required'] = route_data['requestBody'].get('required', False)
-        result['description'] = route_data['requestBody']['description']
+        result = []
+        for param in self.raw_spec['paths'][route]['parameters']:
+            if 'in' in param and 'body' in param['in']:
+                result = dict()
+                result['description'] = param['description']
+                result['required'] = param.get('required', False)
+                result['type'] = param['schema']['type']
+                result['name'] = param['name']  # ST-236
+
         return result

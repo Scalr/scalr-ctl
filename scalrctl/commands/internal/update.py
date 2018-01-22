@@ -52,7 +52,7 @@ def _is_spec_exists(api_level, extension):
     return os.path.exists(_get_spec_path(api_level, extension))
 
 
-def _load_yaml_spec(api_level):
+def _fetch_yaml_spec(api_level):
     spec_url = "{0}://{1}/api/{2}.{3}.yml".format(settings.API_SCHEME,
                                                   settings.API_HOST,
                                                   api_level,
@@ -100,7 +100,7 @@ def _update_spec(api_level):
     """
 
     try:
-        yaml_spec_text = _load_yaml_spec(api_level)
+        yaml_spec_text = _fetch_yaml_spec(api_level)
         if not yaml_spec_text:
             raise Exception('Can\'t load spec file')
 
@@ -143,11 +143,11 @@ def is_update_required():
     """
 
     # prevent from running 'update' more than once
-    if 'update' in sys.argv:
+    if 'update' in sys.argv or os.path.exists(os.path.join(defaults.CONFIG_DIRECTORY, ".noupdate")):
         return False
     else:
-        exists = [_is_spec_exists(api, 'yaml') and
-                  _is_spec_exists(api, 'json') for api in defaults.API_LEVELS]
+        exists = [_is_spec_exists(level, 'yaml') and
+                  _is_spec_exists(level, 'json') for level in defaults.API_LEVELS]
         return not all(exists)
 
 
