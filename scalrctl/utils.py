@@ -71,3 +71,10 @@ def reraise(message):
     if not settings.debug_mode:
         message = "{}\nUse '--debug' option for details.".format(message)
     raise exc_class(message)
+
+
+def is_openapi_v3(data):
+    if "openapi" in data:
+        return True
+    elif "basePath" in data:
+        return False

@@ -643,12 +643,10 @@ class SimplifiedAction(Action):
 
 
 def get_spec(data):
-    if "openapi" in data:
+    if utils.is_openapi_v3(data):
         return _OpenAPIv3Spec(data)
-    elif "basePath" in data:
-        return _OpenAPIv2Spec(data)
     else:
-        raise click.ClickException("Unknown spec format")
+        return _OpenAPIv2Spec(data)
 
 
 @six.add_metaclass(abc.ABCMeta)
@@ -678,8 +676,8 @@ class _OpenAPIBaseSpec(object):
 class _OpenAPIv2Spec(_OpenAPIBaseSpec):
     @property
     def base_path(self):
-        r = self.raw_spec["basePath"]
-        return r
+        return self.raw_spec["basePath"]
+
 
     def get_response_ref(self, route, http_method):
         route_data = self.raw_spec['paths'][route]
@@ -705,7 +703,7 @@ class _OpenAPIv2Spec(_OpenAPIBaseSpec):
                 schema = response_200['schema']
                 if '$ref' in schema:
                     object_key = schema['$ref'].split('/')[-1]
-                    object_descr = self.raw_spec['definitions'][object_key]  # openapiv3
+                    object_descr = self.raw_spec['definitions'][object_key]
                     object_properties = object_descr['properties']
                     data_structure = object_properties['data']
                     return 'array' == data_structure.get('type')
@@ -718,8 +716,8 @@ class _OpenAPIv3Spec(_OpenAPIBaseSpec):
         servers = self.raw_spec["servers"]
         default_server = servers[0]
         result = default_server["url"]
-        split_result = parse.urlsplit(result)
-        return split_result.path
+        path = parse.urlsplit(result).path
+        return path
 
     def get_response_ref(self, route, http_method):
         responses = self.raw_spec['paths'][route][http_method]['responses']

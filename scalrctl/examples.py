@@ -3,7 +3,7 @@ import os
 import json
 import re
 
-from scalrctl import click, defaults
+from scalrctl import click, defaults, utils
 
 __author__ = 'Sergey Babak'
 
@@ -36,7 +36,7 @@ def _read_spec(api_level, extension="json"):
 
 def _item_by_ref(spec_data, ref):
     definition = ref.strip('/').split('/')[-1]
-    if "openapi" in spec_data:  #v3
+    if utils.is_openapi_v3():
         return spec_data['components']['schemas'][definition]
     else:
         return spec_data['definitions'][definition]
@@ -69,12 +69,10 @@ def generate_post_data(spec_data, endpoint):
     Generates POST data for specified API endpoint.
     """
 
-    if "openapi" in spec_data:
+    if utils.is_openapi_v3(spec_data):
         return _generate_post_data_v3(spec_data, endpoint)
-    elif "basePath" in spec_data:
-        return _generate_post_data_v2(spec_data, endpoint)
     else:
-        raise click.ClickException("Unknown spec format")
+        return _generate_post_data_v2(spec_data, endpoint)
 
 
 def _generate_post_data_v2(spec_data, endpoint):
@@ -111,12 +109,11 @@ def get_definition(spec_data, endpoint):
     """
     Returns object name by endpoint.
     """
-    if "openapi" in spec_data:
+    if utils.is_openapi_v3(spec_data):
         return _get_definition_v3(spec_data, endpoint)
-    elif "basePath" in spec_data:
-        return _get_definition_v2(spec_data, endpoint)
     else:
-        raise click.ClickException("Unknown spec format")
+        return _get_definition_v2(spec_data, endpoint)
+
 
 def _get_definition_v2(spec_data, endpoint):
     if endpoint in spec_data['paths']:
