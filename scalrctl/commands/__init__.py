@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import json
+import abc
 import re
 import os
 
@@ -7,6 +8,7 @@ import dicttoxml
 
 from scalrctl import click, request, settings, utils, view, examples, defaults
 
+import six
 from six.moves.urllib import parse
 
 __author__ = 'Dmitriy Korsakov'
@@ -79,8 +81,7 @@ class Action(BaseAction):
         self._init()
 
     def _init(self):
-        self.raw_spec = utils.read_spec(self.api_level, ext='json')
-        self.spec = get_spec(self.raw_spec)
+        self.spec = get_spec(utils.read_spec(self.api_level, ext='json'))
 
         if not self.epilog and self.http_method.upper() == 'POST':
             msg = "Example: scalr-ctl {level} {name} < {name}.json"
@@ -90,7 +91,7 @@ class Action(BaseAction):
             )
 
     def _check_arguments(self, **kwargs):
-        route_data = self.raw_spec['paths'][self.route]
+        route_data = self.spec.raw_spec['paths'][self.route]
         if 'parameters' not in route_data:
             return
 
@@ -327,7 +328,7 @@ class Action(BaseAction):
         return self.spec.get_body_type_params(self.route, self.http_method)
 
     def _get_path_type_params(self):
-        route_data = self.raw_spec['paths'][self.route]
+        route_data = self.spec.raw_spec['paths'][self.route]
         return [param for param in route_data.get('parameters', '')]
 
     def _get_raw_params(self):
@@ -376,7 +377,7 @@ class Action(BaseAction):
         """
         if response_ref.startswith('#'):
             paths = response_ref.split('/')[1:]
-            result = self.raw_spec
+            result = self.spec.raw_spec
             for path in paths:
                 if path not in result:
                     return
@@ -385,7 +386,9 @@ class Action(BaseAction):
 
     @property
     def _result_descr(self):
-        return self._lookup(self.spec.get_response_ref(self.route, self.http_method))
+        ref = self.spec.get_response_ref(self.route, self.http_method)
+        if ref:
+            return self._lookup(ref)
 
     def _list_concrete_types(self, schema):
         types = []
@@ -593,7 +596,7 @@ class Action(BaseAction):
         """
         Returns action description.
         """
-        route_data = self.raw_spec['paths'][self.route]
+        route_data = self.spec.raw_spec['paths'][self.route]
         return route_data[self.http_method]['description']
 
     def modify_options(self, options):
@@ -648,10 +651,29 @@ def get_spec(data):
         raise click.ClickException("Unknown spec format")
 
 
+@six.add_metaclass(abc.ABCMeta)
 class _OpenAPIBaseSpec(object):
+    raw_spec = None
 
     def __init__(self, raw_spec):
         self.raw_spec = raw_spec
+
+    @abc.abstractmethod
+    def base_path(self):
+        raise NotImplementedError()
+
+    @abc.abstractmethod
+    def get_response_ref(self, route, http_method):
+        raise NotImplementedError()
+
+    @abc.abstractmethod
+    def get_body_type_params(self, route, http_method):
+        raise NotImplementedError()
+
+    @abc.abstractmethod
+    def _returns_iterable(self, route):
+        raise NotImplementedError()
+
 
 class _OpenAPIv2Spec(_OpenAPIBaseSpec):
     @property

@@ -106,21 +106,6 @@ def _generate_post_data_v3(spec_data, endpoint):
             post_data = {}
         return post_data
 
-'''
-def get_body_type_params(self, route, http_method):
-    result = []
-    route_data = self.raw_spec['paths'][route][http_method]
-    if "requestBody" in route_data:
-        param = {}
-        request_body = route_data['requestBody']
-        raw_block = self._lookup(request_body.get("$ref")) if "$ref" in request_body else request_body
-        param["schema"] = raw_block["content"]['application/json']["schema"]
-        param["required"] = raw_block.get("required")
-        param["description"] = raw_block.get("description")
-        param["name"] = raw_block.get("name", param["schema"]['$ref'].split('/')[-1].lower())
-        result.append(param)
-    return result
-'''
 
 def get_definition(spec_data, endpoint):
     """
