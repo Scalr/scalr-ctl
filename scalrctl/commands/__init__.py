@@ -511,11 +511,12 @@ class Action(BaseAction):
         import_data = kwargs.pop('import-data', {})
         stdin = kwargs.pop('stdin', None)
         http_method = self.http_method.upper()
-
         if http_method not in ('PATCH', 'POST'):
             return args, kwargs
+
         # prompting for body and then validating it
-        for param_name in (p['name'] for p in self._get_body_type_params()):
+        param_names = (p['name'] for p in self._get_body_type_params())
+        for param_name in param_names:
             try:
                 if param_name in import_data:
                     json_object = self._filter_json_object(
@@ -700,26 +701,28 @@ class _OpenAPIv3Spec(_OpenAPIBaseSpec):
 
     def get_response_ref(self, route, http_method):
         responses = self.raw_spec['paths'][route][http_method]['responses']
-        return responses['200']['schema']['$ref']
+        return responses['200']['content']['application/json']['schema']['$ref']
 
     def get_body_type_params(self, route, http_method):
         result = []
-        for param in self.raw_spec['paths'][route].get('parameters', {}):
-            if 'in' in param and 'body' in param['in']:
-                result = dict()
-                result['description'] = param['description']
-                result['required'] = param.get('required', False)
-                result['type'] = param['schema']['type']
-                result['name'] = param['name']  # ST-236
-
+        route_data = self.raw_spec['paths'][route][http_method]
+        if "requestBody" in route_data:
+            param = {}
+            request_body = route_data['requestBody']
+            raw_block = self._lookup(request_body.get("$ref")) if "$ref" in request_body else request_body
+            param["schema"] = raw_block["content"]['application/json']["schema"]
+            param["required"] = raw_block.get("required")
+            param["description"] = raw_block.get("description")
+            param["name"] = raw_block.get("name", param["schema"]['$ref'].split('/')[-1].lower())
+            result.append(param)
         return result
 
     def _returns_iterable(self, route):
         responses = self.raw_spec['paths'][route]['get']['responses']
         if '200' in responses:
             response_200 = responses['200']
-            if 'schema' in response_200:
-                schema = response_200['schema']
+            if 'schema' in response_200["content"]["application/json"]:
+                schema = response_200["content"]["application/json"]["schema"]
                 if '$ref' in schema:
                     object_key = schema['$ref'].split('/')[-1]
                     object_descr = self.raw_spec['components']['schemas'][object_key]  # openapiv3
@@ -727,3 +730,17 @@ class _OpenAPIv3Spec(_OpenAPIBaseSpec):
                     data_structure = object_properties['data']
                     return 'array' == data_structure.get('type')
         return False
+
+    def _lookup(self, response_ref):
+        """
+        Returns document section
+        Example: #/definitions/Image returns Image defenition section.
+        """
+        if response_ref.startswith('#'):
+            paths = response_ref.split('/')[1:]
+            result = self.raw_spec
+            for path in paths:
+                if path not in result:
+                    return
+                result = result[path]
+            return result

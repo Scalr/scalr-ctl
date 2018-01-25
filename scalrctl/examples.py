@@ -35,8 +35,11 @@ def _read_spec(api_level, extension="json"):
 
 
 def _item_by_ref(spec_data, ref):
-    _, _, definition = ref.strip('/').split('/')
-    return spec_data['definitions'][definition]
+    definition = ref.strip('/').split('/')[-1]
+    if "openapi" in spec_data:  #v3
+        return spec_data['components']['schemas'][definition]
+    else:
+        return spec_data['definitions'][definition]
 
 
 def _generate_params(spec_data, schema):
@@ -66,6 +69,15 @@ def generate_post_data(spec_data, endpoint):
     Generates POST data for specified API endpoint.
     """
 
+    if "openapi" in spec_data:
+        return _generate_post_data_v3(spec_data, endpoint)
+    elif "basePath" in spec_data:
+        return _generate_post_data_v2(spec_data, endpoint)
+    else:
+        raise click.ClickException("Unknown spec format")
+
+
+def _generate_post_data_v2(spec_data, endpoint):
     if endpoint in spec_data['paths']:
         params_spec = spec_data['paths'].get(endpoint)
     else:
@@ -80,23 +92,64 @@ def generate_post_data(spec_data, endpoint):
     else:
         raise click.ClickException('POST method for endpoint {} does not exist'
                         .format(endpoint))
-
     return post_data
 
+
+def _generate_post_data_v3(spec_data, endpoint):
+    params_spec = spec_data['paths'].get(endpoint)
+    if 'post' in params_spec:
+        route_data = params_spec['post']
+        if "requestBody" in route_data:
+            schema = route_data["requestBody"]
+            post_data = _generate_params(spec_data, schema)
+        else:
+            post_data = {}
+        return post_data
+
+'''
+def get_body_type_params(self, route, http_method):
+    result = []
+    route_data = self.raw_spec['paths'][route][http_method]
+    if "requestBody" in route_data:
+        param = {}
+        request_body = route_data['requestBody']
+        raw_block = self._lookup(request_body.get("$ref")) if "$ref" in request_body else request_body
+        param["schema"] = raw_block["content"]['application/json']["schema"]
+        param["required"] = raw_block.get("required")
+        param["description"] = raw_block.get("description")
+        param["name"] = raw_block.get("name", param["schema"]['$ref'].split('/')[-1].lower())
+        result.append(param)
+    return result
+'''
 
 def get_definition(spec_data, endpoint):
     """
     Returns object name by endpoint.
     """
+    if "openapi" in spec_data:
+        return _get_definition_v3(spec_data, endpoint)
+    elif "basePath" in spec_data:
+        return _get_definition_v2(spec_data, endpoint)
+    else:
+        raise click.ClickException("Unknown spec format")
 
+def _get_definition_v2(spec_data, endpoint):
     if endpoint in spec_data['paths']:
         endpoint_spec = spec_data['paths'].get(endpoint)
     else:
         raise click.ClickException('API endpoint {} does not found'.format(endpoint))
-
     for param in endpoint_spec['post'].get('parameters', ''):
         if '$ref' in param.get('schema', ''):
-            return param.get('schema')['$ref'].split('/')[-1]
+            result = param.get('schema')['$ref'].split('/')[-1]
+            return result
+
+
+def _get_definition_v3(spec_data, endpoint):
+    route_data = spec_data['paths'][endpoint]["post"]
+    request_body = route_data['requestBody']
+    path = request_body.get("$ref")
+    name = path.split('/')[-1]
+    return name
 
 
 def get_doc_url(api_level, endpoint):
@@ -127,7 +180,6 @@ def create_post_example(api_level, endpoint):
         raise click.ClickException('Invalid API endpoint')
 
     spec_data = json.loads(_read_spec(api_level))
-
     post_data = generate_post_data(spec_data, endpoint)
     object_name = get_definition(spec_data, endpoint)
     doc_url = get_doc_url(api_level, endpoint)
