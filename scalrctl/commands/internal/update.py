@@ -54,9 +54,10 @@ def _is_spec_exists(api_level, extension):
 
 def _fetch_yaml_spec(api_level):
     '''
-    By default openapiv3 specs are downloaded, converted to json and used to make requests.
-    In case old Scalr setup does not support openapiv3 format it will automatically return
-    old openapiv2 spec files instead.
+    openapiv3 spec is fetched by specifying query argument {'version':3}
+    Scalr setups that support openapiv3 will return openapiv3 spec for such request
+    older Scalr setups without such support will ignore this optional argument
+    and return openapiv2 spec files as expected.
     :param api_level: system, user, account, global
     :return:
     '''
