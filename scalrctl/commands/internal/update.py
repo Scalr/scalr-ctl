@@ -66,7 +66,7 @@ def _fetch_yaml_spec(api_level):
                                api_level,
                                settings.API_VERSION)
     try:
-        resp = requests.get(spec_url, params={'version': 3}, verify=settings.SSL_VERIFY_PEER)
+        resp = requests.get(spec_url, params={'openapiv': 3}, verify=settings.SSL_VERIFY_PEER)
     except requests.exceptions.SSLError as e:
         import ssl
         if 'CertificateError' in str(e):
