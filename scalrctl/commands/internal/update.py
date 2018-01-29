@@ -52,11 +52,19 @@ def _is_spec_exists(api_level, extension):
     return os.path.exists(_get_spec_path(api_level, extension))
 
 
-def _fetch_yaml_spec(api_level):
-    spec_url = "{0}://{1}/api/{2}.{3}.yml".format(settings.API_SCHEME,
-                                                  settings.API_HOST,
-                                                  api_level,
-                                                  settings.API_VERSION)
+def _fetch_yaml_spec(api_level, openapiv2=False):
+    '''
+    By default openapiv3 specs are downloaded, converted to json and used to make requests
+    :param api_level: system, user, account, global
+    :param openapiv2: download openapiv2 spec files instead of openapiv3 specs.
+    :return:
+    '''
+    template = "{0}://{1}/api/{2}.{3}.yml" if openapiv2 else "{0}://{1}/api/{2}.{3}-openapiv3.yml"
+
+    spec_url = template.format(settings.API_SCHEME,
+                               settings.API_HOST,
+                               api_level,
+                               settings.API_VERSION)
     try:
         resp = requests.get(spec_url, verify=settings.SSL_VERIFY_PEER)
     except requests.exceptions.SSLError as e:
@@ -102,7 +110,9 @@ def _update_spec(api_level):
     try:
         yaml_spec_text = _fetch_yaml_spec(api_level)
         if not yaml_spec_text:
-            raise Exception('Can\'t load spec file')
+            yaml_spec_text = _fetch_yaml_spec(api_level, openapiv2=True)
+            if not yaml_spec_text:
+                raise Exception('Can\'t load spec file')
 
         try:
             struct = yaml.load(yaml_spec_text)
