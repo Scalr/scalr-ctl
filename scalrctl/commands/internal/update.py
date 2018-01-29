@@ -52,21 +52,20 @@ def _is_spec_exists(api_level, extension):
     return os.path.exists(_get_spec_path(api_level, extension))
 
 
-def _fetch_yaml_spec(api_level, openapiv2=False):
+def _fetch_yaml_spec(api_level):
     '''
-    By default openapiv3 specs are downloaded, converted to json and used to make requests
+    By default openapiv3 specs are downloaded, converted to json and used to make requests.
+    In case old Scalr setup does not support openapiv3 format it will automatically return
+    old openapiv2 spec files instead.
     :param api_level: system, user, account, global
-    :param openapiv2: download openapiv2 spec files instead of openapiv3 specs.
     :return:
     '''
-    template = "{0}://{1}/api/{2}.{3}.yml" if openapiv2 else "{0}://{1}/api/{2}.{3}-openapiv3.yml"
-
-    spec_url = template.format(settings.API_SCHEME,
+    spec_url = "{0}://{1}/api/{2}.{3}.yml".format(settings.API_SCHEME,
                                settings.API_HOST,
                                api_level,
                                settings.API_VERSION)
     try:
-        resp = requests.get(spec_url, verify=settings.SSL_VERIFY_PEER)
+        resp = requests.get(spec_url, params={'version': 3}, verify=settings.SSL_VERIFY_PEER)
     except requests.exceptions.SSLError as e:
         import ssl
         if 'CertificateError' in str(e):
@@ -110,9 +109,7 @@ def _update_spec(api_level):
     try:
         yaml_spec_text = _fetch_yaml_spec(api_level)
         if not yaml_spec_text:
-            yaml_spec_text = _fetch_yaml_spec(api_level, openapiv2=True)
-            if not yaml_spec_text:
-                raise Exception('Can\'t load spec file')
+            raise Exception('Can\'t load spec file')
 
         try:
             struct = yaml.load(yaml_spec_text)
