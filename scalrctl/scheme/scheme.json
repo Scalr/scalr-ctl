@@ -828,6 +828,47 @@
             }
         },
         "environments": {
+
+            "create": {
+                "api_level": "account",
+                "class": "scalrctl.commands.Action",
+                "http-method": "post",
+                "route": "/{accountId}/environments/",
+                "epilog": "Example: scalr-ctl account environment create < myenv.json"
+            },
+            "delete": {
+                "api_level": "account",
+                "class": "scalrctl.commands.Action",
+                "http-method": "delete",
+                "route": "/{accountId}/environments/{envId}/"
+            },
+            "get": {
+                "api_level": "account",
+                "class": "scalrctl.commands.Action",
+                "http-method": "get",
+                "route": "/{accountId}/environments/{envId}/"
+            },
+            "group_descr": "Manage Environments",
+            "list": {
+                "api_level": "account",
+                "class": "scalrctl.commands.Action",
+                "http-method": "get",
+                "route": "/{accountId}/environments/"
+            },
+            "retrieve": {
+                "api_level": "account",
+                "class": "scalrctl.commands.Action",
+                "hidden": true,
+                "http-method": "get",
+                "route": "/{accountId}/environments/{envId}/"
+            },
+            "update": {
+                "api_level": "account",
+                "class": "scalrctl.commands.Action",
+                "http-method": "patch",
+                "route": "/{accountId}/environments/{envId}/"
+            },
+
             "api_level": "account",
             "add-team": {
                 "api_level": "account",
@@ -849,7 +890,6 @@
                 "route": "/{accountId}/environments/{envId}/teams/{teamId}/",
                 "epilog": "Example: scalr-ctl account environments update-team --teamId <ID> --stdin < myupdatedteam.json"
             },
-            "group_descr": "Manage Teams in Environment",
             "list-teams": {
                 "api_level": "account",
                 "class": "scalrctl.commands.Action",
