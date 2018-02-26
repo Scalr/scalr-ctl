@@ -74,11 +74,12 @@ def calc_horizontal_table(response_json, columns):
     rows = []
     data = response_json.get("data", {})
     for column_name in columns:
+        print column_name
         if column_name.lower() in [d.lower() for d in data.keys()]:
             rows.append([column_name, data[column_name]])
-        elif column_name.lower() == ['%s.id' % d.lower() for d in data.keys()]:
-            if 'id' in data[column_name]:
-                rows.append([column_name, data[column_name]['id']])
+        elif column_name.lower() in ['%s.id' % d.lower() for d in data.keys()]:
+            if 'id' in data[column_name[:-3]]:
+                rows.append([column_name, data[column_name[:-3]]['id']])
             else:
                 rows.append([column_name, ''])
     return rows
