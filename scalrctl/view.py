@@ -74,7 +74,6 @@ def calc_horizontal_table(response_json, columns):
     rows = []
     data = response_json.get("data", {})
     for column_name in columns:
-        print column_name
         if column_name.lower() in [d.lower() for d in data.keys()]:
             rows.append([column_name, data[column_name]])
         elif column_name.lower() in ['%s.id' % d.lower() for d in data.keys()]:
