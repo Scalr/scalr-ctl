@@ -8,7 +8,7 @@ import re
 from scalrctl import settings
 
 
-def calc_table(response_json, columns):
+def calc_vertical_table(response_json, columns):
     rows = []
     for block in response_json.get('data', ''):
         row = []
@@ -43,13 +43,16 @@ def calc_table(response_json, columns):
             current_pagenum = int(pagenum_next) - 1
     return rows, current_pagenum, pagenum_last
 
-
-def build_table(field_names, rows, pre=None, post=None):
+def prepare_table():
     table = prettytable.PrettyTable()
     table.align = "l"
     table.right_padding_width = 4
     table.left_padding_width = 1
     table.set_style(prettytable.PLAIN_COLUMNS)
+    return table
+
+def build_vertical_table(field_names, rows, pre=None, post=None):
+    table = prepare_table()
 
     template = '\x1b[1m%s\x1b[0m' if settings.colored_output else "%s"
     table.field_names = [template % field.upper().replace("_", " ") for field in field_names]
@@ -65,6 +68,29 @@ def build_table(field_names, rows, pre=None, post=None):
         body = "%s\n\n%s" % (body, post)
 
     return "\n%s\n" % body
+
+
+def calc_horizontal_table(response_json, columns):
+    rows = []
+    data = response_json.get("data", {})
+    for column_name in columns:
+        if column_name.lower() in [d.lower() for d in data.keys()]:
+            rows.append([column_name, data[column_name]])
+        elif column_name.lower() == ['%s.id' % d.lower() for d in data.keys()]:
+            if 'id' in data[column_name]:
+                rows.append([column_name, data[column_name]['id']])
+            else:
+                rows.append([column_name, ''])
+    return rows
+
+
+def build_horizontal_table(rows):
+    table = prepare_table()
+    template = '\x1b[1m%s\x1b[0m' if settings.colored_output else "%s"
+    table.field_names = [template % "PROPERTY", template % "VALUE"]
+    for row in sorted(rows):
+        table.add_row(row)
+    return table.get_string()
 
 
 def build_tree(data):

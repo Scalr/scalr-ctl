@@ -211,10 +211,15 @@ class Action(BaseAction):
                 click.echo(view.build_tree(data))
             elif settings.view == 'table':
                 columns = self._table_columns or self._get_column_names()
-                rows, current_page, last_page = view.calc_table(response_json,
-                                                                columns)
-                pre = "Page: {} of {}".format(current_page, last_page)
-                click.echo(view.build_table(columns, rows, pre=pre))  # XXX
+                if self._returns_iterable():
+                    rows, current_page, last_page = view.calc_vertical_table(response_json,
+                                                                    columns)
+                    pre = "Page: {} of {}".format(current_page, last_page)
+                    click.echo(view.build_vertical_table(columns, rows, pre=pre))  # XXX
+                else:
+                    click.echo(view.build_horizontal_table(
+                        view.calc_horizontal_table(response_json, columns)))
+
         elif self.http_method.upper() == 'DELETE':
             deleted_id = kwargs.get(self.delete_target, '') or ''
             if not deleted_id:
@@ -336,7 +341,7 @@ class Action(BaseAction):
         return result
 
     def _returns_iterable(self):
-        responses = self.raw_spec['paths'][self.route]['get']['responses']
+        responses = self.raw_spec['paths'][self.route][self.http_method]['responses']
         if '200' in responses:
             response_200 = responses['200']
             if 'schema' in response_200:
@@ -398,7 +403,7 @@ class Action(BaseAction):
     @property
     def _result_descr(self):
         route_data = self.raw_spec['paths'][self.route]
-        responses = route_data[self.http_method]['responses']
+        responses = route_data[self.http_method if self.http_method != 'post' else 'get']['responses']
         if '200' in responses:
             response_200 = responses['200']
             if 'schema' in response_200:
