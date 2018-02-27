@@ -4,6 +4,13 @@ scalr-ctl Changelog
 
 Changelog on Scalr Wiki: https://scalr-labs.atlassian.net/wiki/pages/viewpage.action?pageId=109805613
 
+Version 2.1.2
+--------------
+
+Fixed
+
+    ST-255 'farm-roles create' command fails in table view mode
+
 
 Version 2.1.1
 --------------
