@@ -551,12 +551,16 @@ class Action(BaseAction):
                         filter_createonly=True
                     ) if http_method == 'PATCH' else import_data[param_name]
                 else:
-                    if http_method in ('POST', 'PATCH') and stdin:
-                        json_object = self._read_object()
-                    elif http_method == 'PATCH':
-                        json_object = self._edit_object(*args, **kwargs)
+                    if http_method == 'PATCH':
+                        if stdin:
+                            # XXX: `_get_object` makes additional GET to load all
+                            # discriminator's into `self._discriminators` map
+                            self._get_object(*args, **kwargs)
+                            json_object = self._read_object()
+                        else:
+                            json_object = self._edit_object(*args, **kwargs)
                     elif http_method == 'POST':
-                        json_object = self._edit_example()
+                        json_object = self._read_object() if stdin else self._edit_example()
 
                 json_object = self._filter_json_object(json_object)
                 kwargs[param_name] = json_object
