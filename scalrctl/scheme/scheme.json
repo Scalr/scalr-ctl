@@ -1409,6 +1409,42 @@
             "route": "/{envId}/farms/{farmId}/actions/unlock/"
         }
     },
+    "cloud-services": {
+        "api_level": "user",
+        "list": {
+            "api_level": "user",
+            "class": "scalrctl.commands.Action",
+            "http-method": "get",
+            "route": "/{envId}/farms/{farmId}/cloud-services/"
+        },
+        "get": {
+            "api_level": "user",
+            "class": "scalrctl.commands.Action",
+            "http-method": "get",
+            "route": "/{envId}/farms/{farmId}/cloud-services/{farmCloudServiceLinkId}/"
+        },
+        "edit": {
+            "api_level": "user",
+            "class": "scalrctl.commands.Action",
+            "http-method": "patch",
+            "route": "/{envId}/farms/{farmId}/cloud-services/{farmCloudServiceLinkId}/",
+            "epilog": "Example: scalr-ctl cloud-services edit --farmId <ID> --stdin < mycloudservicelink.json"
+        },
+        "delete": {
+            "api_level": "user",
+            "class": "scalrctl.commands.Action",
+            "http-method": "delete",
+            "route": "/{envId}/farms/{farmId}/cloud-services/{farmCloudServiceLinkId}/"
+        },
+        "group_descr": "Manage Cloud Services",
+        "create": {
+            "api_level": "user",
+            "class": "scalrctl.commands.Action",
+            "http-method": "post",
+            "route": "/{envId}/farms/{farmId}/cloud-services/",
+            "epilog": "Example: scalr-ctl cloud-services create --stdin < mycloudservicelink.json"
+        }
+    },
     "farm-global-variables": {
         "api_level": "user",
         "create": {
