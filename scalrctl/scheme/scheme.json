@@ -1423,12 +1423,12 @@
             "http-method": "get",
             "route": "/{envId}/farms/{farmId}/cloud-services/{farmCloudServiceLinkId}/"
         },
-        "edit": {
+        "update": {
             "api_level": "user",
             "class": "scalrctl.commands.Action",
             "http-method": "patch",
             "route": "/{envId}/farms/{farmId}/cloud-services/{farmCloudServiceLinkId}/",
-            "epilog": "Example: scalr-ctl cloud-services edit --farmId <ID> --stdin < mycloudservicelink.json"
+            "epilog": "Example: scalr-ctl cloud-services update --farmId <ID> --stdin < mycloudservicelink.json"
         },
         "delete": {
             "api_level": "user",
