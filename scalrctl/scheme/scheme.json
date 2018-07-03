@@ -1409,7 +1409,7 @@
             "route": "/{envId}/farms/{farmId}/actions/unlock/"
         }
     },
-    "cloud-services": {
+    "farm-cloud-services": {
         "api_level": "user",
         "list": {
             "api_level": "user",
@@ -1428,7 +1428,7 @@
             "class": "scalrctl.commands.Action",
             "http-method": "patch",
             "route": "/{envId}/farms/{farmId}/cloud-services/{farmCloudServiceLinkId}/",
-            "epilog": "Example: scalr-ctl cloud-services update --farmId <ID> --stdin < mycloudservicelink.json"
+            "epilog": "Example: scalr-ctl farm-cloud-services update --farmId <ID> --stdin < mycloudservicelink.json"
         },
         "delete": {
             "api_level": "user",
@@ -1442,7 +1442,7 @@
             "class": "scalrctl.commands.Action",
             "http-method": "post",
             "route": "/{envId}/farms/{farmId}/cloud-services/",
-            "epilog": "Example: scalr-ctl cloud-services create --stdin < mycloudservicelink.json"
+            "epilog": "Example: scalr-ctl farm-cloud-services create --stdin < mycloudservicelink.json"
         }
     },
     "farm-global-variables": {
