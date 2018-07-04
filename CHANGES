@@ -4,6 +4,22 @@ scalr-ctl Changelog
 
 Changelog on Scalr Wiki: https://scalr-labs.atlassian.net/wiki/pages/viewpage.action?pageId=109805613
 
+Version 2.1.4
+--------------
+
+New feature
+
+    ST-257 Implement CRUD for Cloud Service link
+
+
+Version 2.1.3
+--------------
+
+Fixed
+
+    ST-258 Unable to update FarmRole.cloudFeatures.iamInstanceProfile via --stdin
+
+
 Version 2.1.2
 --------------
 
