@@ -59,6 +59,41 @@
                 "epilog": "Example: scalr-ctl global role-images create --roleId <ID> --stdin < myroleimage.json"
             }
         },
+        "projects": {
+            "api_level": "global",
+            "create": {
+                "api_level": "user",
+                "class": "scalrctl.commands.Action",
+                "http-method": "post",
+                "route": "/projects/",
+                "epilog": "Example: scalr-ctl global projects create --stdin < myproject.json"
+            },
+            "get": {
+                "api_level": "global",
+                "class": "scalrctl.commands.Action",
+                "http-method": "get",
+                "route": "/projects/{projectId}/"
+            },
+            "group_descr": "Manage Projects",
+            "list": {
+                "api_level": "global",
+                "class": "scalrctl.commands.Action",
+                "http-method": "get",
+                "route": "/projects/"
+            },
+            "update": {
+                "api_level": "global",
+                "class": "scalrctl.commands.Action",
+                "http-method": "patch",
+                "route": "/projects/{projectId}/"
+            },
+            "delete": {
+                "api_level": "global",
+                "class": "scalrctl.commands.Action",
+                "http-method": "delete",
+                "route": "/projects/{projectId}/"
+            }
+        },
         "images": {
             "api_level": "global",
             "replace": {
@@ -366,6 +401,41 @@
                 "http-method": "post",
                 "route": "/{accountId}/environments/{envId}/clouds/{cloud}/",
                 "epilog": "Example: scalr-ctl account clouds replace --cloud <NAME> --stdin < mycloud.json"
+            }
+        },
+        "projects": {
+            "api_level": "account",
+            "create": {
+                "api_level": "account",
+                "class": "scalrctl.commands.Action",
+                "http-method": "post",
+                "route": "/{accountId}/projects/",
+                "epilog": "Example: scalr-ctl global projects create --stdin < myproject.json"
+            },
+            "get": {
+                "api_level": "account",
+                "class": "scalrctl.commands.Action",
+                "http-method": "get",
+                "route": "/{accountId}/projects/{projectId}/"
+            },
+            "group_descr": "Manage Projects",
+            "list": {
+                "api_level": "account",
+                "class": "scalrctl.commands.Action",
+                "http-method": "get",
+                "route": "/{accountId}/projects/"
+            },
+            "update": {
+                "api_level": "account",
+                "class": "scalrctl.commands.Action",
+                "http-method": "patch",
+                "route": "/{accountId}/projects/{projectId}/"
+            },
+            "delete": {
+                "api_level": "account",
+                "class": "scalrctl.commands.Action",
+                "http-method": "delete",
+                "route": "/{accountId}/projects/{projectId}/"
             }
         },
         "cloud-credentials": {
@@ -1905,6 +1975,18 @@
             "class": "scalrctl.commands.Action",
             "hidden": true,
             "http-method": "get",
+            "route": "/{envId}/projects/{projectId}/"
+        },
+        "update": {
+            "api_level": "user",
+            "class": "scalrctl.commands.Action",
+            "http-method": "patch",
+            "route": "/{envId}/projects/{projectId}/"
+        },
+        "delete": {
+            "api_level": "user",
+            "class": "scalrctl.commands.Action",
+            "http-method": "delete",
             "route": "/{envId}/projects/{projectId}/"
         }
     },
