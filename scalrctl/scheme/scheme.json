@@ -62,7 +62,7 @@
         "projects": {
             "api_level": "global",
             "create": {
-                "api_level": "user",
+                "api_level": "global",
                 "class": "scalrctl.commands.Action",
                 "http-method": "post",
                 "route": "/projects/",
