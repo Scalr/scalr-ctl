@@ -29,6 +29,24 @@ def read_spec(api_level, ext='json'):
         raise click.ClickException(msg)
 
 
+def read_spec_openapi():
+    """
+    Reads Scalr specification file, json or yaml.
+    """
+
+    spec_path = os.path.join(defaults.CONFIG_DIRECTORY, 'openapi.json')
+
+    if os.path.exists(spec_path):
+        with open(spec_path, 'r') as fp:
+            spec_data = fp.read()
+
+        return json.loads(spec_data)
+    else:
+        msg = "Scalr specification file '{}' does  not exist, " \
+              "try to run 'scalr-ctl update'.".format(spec_path)
+        raise click.ClickException(msg)
+
+
 def read_routes():
     if os.path.exists(defaults.ROUTES_PATH):
         with open(defaults.ROUTES_PATH, 'r') as fp:
@@ -37,8 +55,7 @@ def read_routes():
 
 
 def read_scheme():
-    with open(os.path.join(os.path.dirname(__file__),
-                           'scheme/scheme.json')) as fp:
+    with open(defaults.SCHEME_PATH) as fp:
         return json.load(fp)
 
 
@@ -75,6 +92,8 @@ def reraise(message):
 
 def is_openapi_v3(data):
     if "openapi" in data:
+        print "v3!"
         return True
     elif "basePath" in data:
+        print "v2!"
         return False

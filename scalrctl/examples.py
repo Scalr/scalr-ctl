@@ -36,7 +36,7 @@ def _read_spec(api_level, extension="json"):
 
 def _item_by_ref(spec_data, ref):
     definition = ref.strip('/').split('/')[-1]
-    if utils.is_openapi_v3():
+    if utils.is_openapi_v3(spec_data):
         return spec_data['components']['schemas'][definition]
     else:
         return spec_data['definitions'][definition]

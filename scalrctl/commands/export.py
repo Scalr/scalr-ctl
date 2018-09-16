@@ -39,8 +39,7 @@ class Export(commands.Action):
 
     def _get_relations(self, parent):
 
-        with open(os.path.join(os.path.dirname(__file__),
-                               '../scheme/scheme.json')) as fp:
+        with open(defaults.SCHEME_PATH) as fp:
             scheme = json.load(fp)
 
         data = []

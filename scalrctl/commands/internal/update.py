@@ -52,6 +52,11 @@ def _is_spec_exists(api_level, extension):
     return os.path.exists(_get_spec_path(api_level, extension))
 
 
+def _fetch_openapi_spec():
+    # v2: http://bfb482b26df9.test-env.scalr.com/api/user.v1beta0.yml
+    # v3: http://bfb482b26df9.test-env.scalr.com/api/openapi.v1beta0.yml
+    return _fetch_yaml_spec("openapi")
+
 def _fetch_yaml_spec(api_level):
     '''
     openapiv3 spec is fetched by specifying query argument {'version':3}
@@ -101,12 +106,15 @@ def _write_spec(spec_path, text):
         fp.write(text)
 
 
+def _update_openapi_spec():
+    return _update_spec("openapi")
+
+
 def _update_spec(api_level):
     """
     Downloads yaml spec and converts it to JSON
     Both files are stored in configuration directory.
     """
-
     try:
         yaml_spec_text = _fetch_yaml_spec(api_level)
         if not yaml_spec_text:
@@ -139,7 +147,9 @@ def _update_spec(api_level):
 class UpdateScalrCTL(commands.BaseAction):
 
     def run(self, *args, **kwargs):
-        update()
+        #update_swagger() #production
+        update_openapi()
+
 
     def get_description(self):
         return "Fetch new API specification if available."
@@ -159,7 +169,7 @@ def is_update_required():
         return not all(exists)
 
 
-def update():
+def update_swagger():
     """
     Update spec for all available APIs.
     """
@@ -168,7 +178,7 @@ def update():
 
     for index, api_level in enumerate(defaults.API_LEVELS, 1):
 
-        click.echo('[{}/{}] Updating specifications for {} API ... '
+        click.echo('[{}/{}] Updating specifications for Scalr {} API (Swagger)... '
                    .format(index, amount, api_level), nl=False)
 
         with _spinner():
@@ -178,4 +188,17 @@ def update():
             click.secho('Done', fg='green')
         else:
             click.secho('Failed: {}'.format(fail_reason), fg='red')
+
+
+def update_openapi():
+    click.echo('Updating specification for Scalr API (OpenAPI)... ', nl=False)
+
+    with _spinner():
+        success, fail_reason = _update_openapi_spec()
+
+        if success:
+            click.secho('Done', fg='green')
+        else:
+            click.secho('OpenAPI spec is not available. Trying to fetch SwaggerSpec', fg='yellow')
+            update_swagger()
 

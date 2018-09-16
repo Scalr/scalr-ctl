@@ -13,9 +13,6 @@ from scalrctl.commands.internal import configure, update
 __author__ = 'Dmitriy Korsakov, Sergey Babak'
 
 
-SCHEME_PATH = os.path.join(os.path.dirname(__file__), 'scheme/scheme.json')
-
-
 if not os.path.exists(defaults.CONFIG_DIRECTORY):
     os.makedirs(defaults.CONFIG_DIRECTORY)
 
@@ -24,8 +21,8 @@ if os.path.exists(defaults.CONFIG_PATH):
     configure.apply_settings(config_data)
 
 if update.is_update_required():
-    update.update()  # [ST-53]
-
+    #update.update()  # ST-53
+    update.update_openapi()  # ST-236
 
 def dummy_run():
     raise click.ClickException("Not implemented in current API version")
@@ -37,7 +34,7 @@ class ScalrCLI(click.Group):
         if 'scheme' in attrs:
             self.scheme = attrs.pop('scheme')
         else:
-            with open(SCHEME_PATH) as fp:
+            with open(defaults.SCHEME_PATH) as fp:
                 self.scheme = json.load(fp)
         super(ScalrCLI, self).__init__(name, commands, chain=True, **attrs)
 

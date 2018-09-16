@@ -81,7 +81,12 @@ class Action(BaseAction):
         self._init()
 
     def _init(self):
-        self.spec = get_spec(utils.read_spec(self.api_level, ext='json'))
+        print "defaults.OPENAPI_ENABLED:", defaults.OPENAPI_ENABLED
+        if defaults.OPENAPI_ENABLED:
+            self.spec = get_spec(utils.read_spec_openapi())
+        else:
+            self.spec = get_spec(utils.read_spec(self.api_level, ext='json'))
+
 
         if not self.epilog and self.http_method.upper() == 'POST':
             msg = "Example: scalr-ctl {level} {name} < {name}.json"
@@ -234,17 +239,6 @@ class Action(BaseAction):
             text = "Deleted {}".format(deleted_id)
         return text
 
-    def _get_default_options(self):
-        options = []
-        for param in self._get_raw_params():
-            option = click.Option(('--{}'.format(param['name']),
-                                  param['name']), required=param['required'],
-                                  help=param['description'],
-                                  default=param.get('default'),
-                                  show_default='default' in param)
-            options.append(option)
-        return options
-
     def _get_custom_options(self):
         options = []
 
@@ -324,23 +318,11 @@ class Action(BaseAction):
 
         return options
 
-    def _get_body_type_params(self):
-        return self.spec.get_body_type_params(self.route, self.http_method)
-
-    def _get_path_type_params(self):
-        route_data = self.spec.raw_spec['paths'][self.route]
-        return [param for param in route_data.get('parameters', '')]
-
-    def _get_raw_params(self):
-        result = self._get_path_type_params()
-        if self.http_method.upper() in ('GET', 'DELETE'):
-            body_params = self._get_body_type_params()
-            result.extend(body_params)
-        return result
-
     def _get_available_filters(self):
+        print "route %s _returns_iterable:" % self.route, self.spec._returns_iterable(self.route)
         if self.spec._returns_iterable(self.route):
             data = self._result_descr['properties']['data']
+            print "data:", data
             response_ref = data['items']['$ref']
             response_descr = self._lookup(response_ref)
             if 'x-filterable' in response_descr:
@@ -418,7 +400,7 @@ class Action(BaseAction):
 
         # load `schema`
         if schema is None:
-            for param in self._get_body_type_params():
+            for param in self.spec.get_body_type_params(self.route, self.http_method):
                 if 'schema' in param:
                     schema = param['schema']
                     if '$ref' in schema:
@@ -518,7 +500,7 @@ class Action(BaseAction):
             return args, kwargs
 
         # prompting for body and then validating it
-        param_names = (p['name'] for p in self._get_body_type_params())
+        param_names = (p['name'] for p in self.spec.get_body_type_params(self.route, self.http_method))
         for param_name in param_names:
             try:
                 if param_name in import_data:
@@ -571,7 +553,7 @@ class Action(BaseAction):
             for key, value in kwargs.items():
                 param = '{{{}}}'.format(key)
                 if value and (param not in self._request_template):
-                    body_params = self._get_body_type_params()
+                    body_params = self.spec.get_body_type_params(self.route, self.http_method)
                     if self.http_method.upper() in ('GET', 'DELETE'):
                         payload[key] = value
                     elif body_params and key == body_params[0]['name']:
@@ -616,7 +598,7 @@ class Action(BaseAction):
         """
         Returns action options.
         """
-        options = self._get_default_options() + self._get_custom_options()
+        options = self.spec.get_default_options(self.route, self.http_method) + self._get_custom_options()
         return [opt for opt in options if opt.name not in self.ignored_options]
 
     def validate(self):
@@ -624,8 +606,9 @@ class Action(BaseAction):
         Validate routes for current API scope.
         """
         if self.route and self.api_level:
+            fname = "openapi.json" if defaults.OPENAPI_ENABLED else '{}.json'.format(self.api_level)
             spec_path = os.path.join(defaults.CONFIG_DIRECTORY,
-                                     '{}.json'.format(self.api_level))
+                                     fname)
             api_routes = json.load(open(spec_path, 'r'))['paths'].keys()
             try:
                 assert api_routes and self.route in api_routes, self.name
@@ -669,8 +652,23 @@ class _OpenAPIBaseSpec(object):
         raise NotImplementedError()
 
     @abc.abstractmethod
+    def get_path_type_params(self, route):
+        raise NotImplementedError()
+
+    @abc.abstractmethod
     def _returns_iterable(self, route):
         raise NotImplementedError()
+
+    @abc.abstractmethod
+    def get_default_options(self, route, http_method):
+        raise NotImplementedError()
+
+    def get_raw_params(self, route, http_method):
+        result = self.get_path_type_params(route)
+        if http_method.upper() in ('GET', 'DELETE'):
+            body_params = self.get_body_type_params(route, http_method)
+            result.extend(body_params)
+        return result
 
 
 class _OpenAPIv2Spec(_OpenAPIBaseSpec):
@@ -695,6 +693,11 @@ class _OpenAPIv2Spec(_OpenAPIBaseSpec):
         data = [param for param in route_data.get('parameters', '')]
         return data
 
+    def get_path_type_params(self, route):
+        route_data = self.raw_spec['paths'][route]
+        params = [param for param in route_data.get('parameters', '')]
+        return params
+
     def _returns_iterable(self, route):
         responses = self.raw_spec['paths'][route]['get']['responses']
         if '200' in responses:
@@ -709,6 +712,17 @@ class _OpenAPIv2Spec(_OpenAPIBaseSpec):
                     return 'array' == data_structure.get('type')
         return False
 
+    def get_default_options(self, route, http_method):
+        options = []
+        for param in self.get_raw_params(route, http_method):
+            option = click.Option(('--{}'.format(param['name']),
+                                  param['name']), required=param['required'],
+                                  help=param['description'],
+                                  default=param.get('default'),
+                                  show_default='default' in param)
+            options.append(option)
+        return options
+
 
 class _OpenAPIv3Spec(_OpenAPIBaseSpec):
     @property
@@ -717,11 +731,15 @@ class _OpenAPIv3Spec(_OpenAPIBaseSpec):
         default_server = servers[0]
         result = default_server["url"]
         path = parse.urlsplit(result).path
-        return path
+        return path[:-1]
 
     def get_response_ref(self, route, http_method):
         responses = self.raw_spec['paths'][route][http_method]['responses']
-        return responses['200']['content']['application/json']['schema']['$ref']
+        response_200 = responses['200']
+        if '$ref' in response_200:
+            response_200 = self._lookup(response_200['$ref'])
+        result = response_200['content']['application/json']['schema']['$ref']
+        return result
 
     def get_body_type_params(self, route, http_method):
         result = []
@@ -737,18 +755,31 @@ class _OpenAPIv3Spec(_OpenAPIBaseSpec):
             result.append(param)
         return result
 
+    def get_path_type_params(self, route):
+        route_data = self.raw_spec['paths'][route]
+        params = []
+        for param in route_data.get('parameters', ''):
+            if '$ref' in param:
+                obj = self._lookup(param['$ref'])
+                params.append(obj)
+            else:
+                params.append(param)
+        return params
+
     def _returns_iterable(self, route):
         responses = self.raw_spec['paths'][route]['get']['responses']
         if '200' in responses:
             response_200 = responses['200']
+            if "$ref" in response_200:
+                response_200 = self._lookup(response_200['$ref'])
             if 'schema' in response_200["content"]["application/json"]:
                 schema = response_200["content"]["application/json"]["schema"]
                 if '$ref' in schema:
-                    object_key = schema['$ref'].split('/')[-1]
-                    object_descr = self.raw_spec['components']['schemas'][object_key]  # openapiv3
-                    object_properties = object_descr['properties']
-                    data_structure = object_properties['data']
-                    return 'array' == data_structure.get('type')
+                    schema = self._lookup(schema["$ref"])
+                object_properties = schema['properties']
+                data_structure = object_properties['data']
+                result = 'array' == data_structure.get('type')
+                return result
         return False
 
     def _lookup(self, response_ref):
@@ -764,3 +795,14 @@ class _OpenAPIv3Spec(_OpenAPIBaseSpec):
                     return
                 result = result[path]
             return result
+
+    def get_default_options(self, route, http_method):
+        options = []
+        for param in self.get_raw_params(route, http_method):
+            option = click.Option(('--{}'.format(param['name']),
+                                  param['name']), required=param['required'],
+                                  help=param['description'],
+                                  default=param.get('default'),
+                                  show_default='default' in param)
+            options.append(option)
+        return options

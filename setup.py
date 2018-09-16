@@ -54,7 +54,7 @@ if __name__ == '__main__':
         package_data={
             '': ['VERSION', 'scheme/scheme.json'],
         },
-        data_files=[('', ['scalrctl/scheme/scheme.json', ]), ],
+        data_files=[('', ['scalrctl/scheme/scheme.json', 'scalrctl/scheme/scheme_openapi.json']), ],
         install_requires=[
             'prettytable>=0.7.2',
             'pyyaml>=3.11',
