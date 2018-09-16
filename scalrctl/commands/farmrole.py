@@ -49,6 +49,7 @@ class FarmRoleClone(commands.SimplifiedAction):
         post_data = copy.deepcopy(self.post_template)
         post_data["cloneFarmRoleRequest"]["name"] = name
         if farm_id:
+            post_data["cloneFarmRoleRequest"]["farm"] = {}
             post_data["cloneFarmRoleRequest"]["farm"]["id"] = farm_id
         kv = {"import-data": post_data}
         kv.update(kwargs)
