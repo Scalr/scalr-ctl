@@ -63,8 +63,8 @@ class FarmClone(commands.SimplifiedAction):
 
     def get_options(self):
         hlp = "The name of a new Farm."
-        hard_terminate = click.Option(('--name', 'name'), required=True, help=hlp)
-        options = [hard_terminate, ]
+        name = click.Option(('--name', 'name'), required=True, help=hlp)
+        options = [name, ]
         options.extend(super(FarmClone, self).get_options())
         return options
 

@@ -1533,6 +1533,13 @@
     },
     "farm-roles": {
         "api_level": "user",
+        "clone": {
+            "api_level": "user",
+            "class": "scalrctl.commands.farmrole.FarmRoleClone",
+            "http-method": "post",
+            "route": "/{envId}/farm-roles/{farmRoleId}/actions/clone/",
+            "epilog": "Example: scalr-ctl farm-roles clone --farmRoleId <FarmRoleID> --alias MyClonedFarmRole --farmId <FarmID>"
+        },
         "list-servers": {
             "api_level": "user",
             "class": "scalrctl.commands.Action",
