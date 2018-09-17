@@ -29,6 +29,9 @@ class FarmRoleClone(commands.SimplifiedAction):
         "cloneFarmRoleRequest": {"name": ""}
     }
 
+    _table_columns = [u'alias', u'cloudPlatform', u'farm.id', u'id', u'instanceType.id',
+                      u'role.id']
+
     def get_options(self):
         alias_hlp = "New alias name for the FarmRole being cloned."
         alias = click.Option(('--alias', 'alias'), required=True, help=alias_hlp)
