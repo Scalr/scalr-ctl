@@ -1654,7 +1654,7 @@
             "class": "scalrctl.commands.Action",
             "http-method": "post",
             "route": "/{envId}/farm-roles/{farmRoleId}/actions/import-server/",
-            "epilog": "Example: scalr-ctl farm-roles create --farmRoleId <ID> --stdin < myfarmrole.json"
+            "epilog": "Example: scalr-ctl farm-roles import-server --farmRoleId <ID> --stdin < server.json"
         },
         "launch-server": {
             "api_level": "user",
@@ -1688,6 +1688,19 @@
             "http-method": "patch",
             "route": "/{envId}/farm-roles/{farmRoleId}/",
             "epilog": "Example: scalr-ctl farm-roles update --farmRoleId <ID> --stdin < myupdatedfarmrole.json"
+        },
+        "generate-template": {
+            "api_level": "user",
+            "class": "scalrctl.commands.Action",
+            "http-method": "get",
+            "route": "/{envId}/farm-roles/{farmRoleId}/actions/generate-template/"
+        },
+        "create-from-template": {
+            "api_level": "user",
+            "class": "scalrctl.commands.farm.FarmCreateFromTemplate",
+            "http-method": "post",
+            "route": "/{envId}/farms/{farmId}/farm-roles/",
+            "epilog": "Example: scalr-ctl farm-roles create-from-template --farmId --stdin < mytemplate.json"
         }
     },
     "farm-role-global-variables": {

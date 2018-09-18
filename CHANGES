@@ -4,6 +4,21 @@ scalr-ctl Changelog
 
 Changelog on Scalr Wiki: https://scalr-labs.atlassian.net/wiki/pages/viewpage.action?pageId=109805613
 
+
+Version 2.2
+--------------
+
+New feature
+
+    ST-260 Implement CRUD actions for Projects
+    ST-265 Implement actions for FarmRole templates
+    ST-227 Add support for cloning FarmRole within a Farm
+
+Fixed
+
+    ST-262 scalr-ctl help text incorrect for farm-roles import-server
+
+
 Version 2.1.4
 --------------
 
