@@ -1654,7 +1654,7 @@
             "class": "scalrctl.commands.Action",
             "http-method": "post",
             "route": "/{envId}/farm-roles/{farmRoleId}/actions/import-server/",
-            "epilog": "Example: scalr-ctl farm-roles create --farmRoleId <ID> --stdin < myfarmrole.json"
+            "epilog": "Example: scalr-ctl farm-roles import-server --farmRoleId <ID> --stdin < server.json"
         },
         "launch-server": {
             "api_level": "user",
