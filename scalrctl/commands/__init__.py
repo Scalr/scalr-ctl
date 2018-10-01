@@ -219,7 +219,7 @@ class Action(BaseAction):
                 data = json.dumps(response_json.get('data'))
                 click.echo(view.build_tree(data))
             elif settings.view == 'table':
-                columns = self._table_columns or self._get_column_names()
+                columns = self._table_columns or self.spec.get_column_names(self.route, self.http_method)
                 rows, current_page, last_page = view.calc_table(response_json,
                                                                 columns)
                 pre = "Page: {} of {}".format(current_page, last_page)
@@ -284,7 +284,7 @@ class Action(BaseAction):
                 columns_help = ("Filter columns in table view "
                                 "[--table required]. Example: NAME,SIZE,"
                                 "SCOPE. Available columns: {}."
-                                ).format(', '.join(self._get_column_names()))
+                                ).format(', '.join(self.spec.get_column_names(self.route, self.http_method)))
                 columns = click.Option(('--columns', 'columns'),
                                        required=False, help=columns_help)
                 options.append(columns)
@@ -319,58 +319,17 @@ class Action(BaseAction):
         return options
 
     def _get_available_filters(self):
-        print "route %s _returns_iterable:" % self.route, self.spec._returns_iterable(self.route)
         if self.spec._returns_iterable(self.route):
             data = self._result_descr['properties']['data']
-            print "data:", data
             response_ref = data['items']['$ref']
-            response_descr = self._lookup(response_ref)
+            response_descr = self.spec.lookup(response_ref)
             if 'x-filterable' in response_descr:
                 return response_descr['x-filterable']
         return []
 
-    def _get_column_names(self):
-        data = self._result_descr['properties']['data']
-        # XXX: Inconsistency in swagger spec.
-        # See RoleDetailsResponse vs RoleCategoryListResponse
-        response_ref = data['items']['$ref'] \
-            if 'items' in data else data['$ref']
-        response_descr = self._lookup(response_ref)
-        properties = response_descr['properties']
-
-        column_names = []
-        for k, v in properties.items():
-            if '$ref' not in v:
-                column_names.append(k)
-            else:  # ST-226
-                f_key = self._lookup(v['$ref'])
-                if "properties" in f_key:
-                    if len(f_key["properties"]) == 1:
-                        if "id" in f_key["properties"]:
-                            if "type" in f_key["properties"]["id"]:
-                                if f_key["properties"]["id"]["type"] in ("integer", "string"):
-                                    column_names.append("%s.id" % k)
-        return column_names
-
-    def _lookup(self, response_ref):
-        """
-        Returns document section
-        Example: #/definitions/Image returns Image defenition section.
-        """
-        if response_ref.startswith('#'):
-            paths = response_ref.split('/')[1:]
-            result = self.spec.raw_spec
-            for path in paths:
-                if path not in result:
-                    return
-                result = result[path]
-            return result
-
     @property
     def _result_descr(self):
-        ref = self.spec.get_response_ref(self.route, self.http_method)
-        if ref:
-            return self._lookup(ref)
+        return self.spec.result_descr(self.route, self.http_method)
 
     def _list_concrete_types(self, schema):
         types = []
@@ -382,7 +341,7 @@ class Action(BaseAction):
 
     def _list_concrete_types_recursive(self, reference):
         references = []
-        schema = self._lookup(reference)
+        schema = self.spec.lookup(reference)
         if "x-concreteTypes" not in schema:
             references.append(reference)
         else:
@@ -405,7 +364,7 @@ class Action(BaseAction):
                     schema = param['schema']
                     if '$ref' in schema:
                         reference = schema['$ref']
-                        schema = self._lookup(schema['$ref'])
+                        schema = self.spec.lookup(schema['$ref'])
                     break
 
         # load child object as `schema`
@@ -429,7 +388,7 @@ class Action(BaseAction):
                 self._discriminators[disc_path] = disc_value
 
             reference = '#/definitions/{}'.format(disc_value)
-            schema = self._lookup(reference)
+            schema = self.spec.lookup(reference)
 
         # filter input data by properties of `schema`
         if schema and 'properties' in schema:
@@ -458,7 +417,7 @@ class Action(BaseAction):
                         data[p_key],
                         filter_createonly=filter_createonly,
                         reference=p_value['$ref'],
-                        schema=self._lookup(p_value['$ref']),
+                        schema=self.spec.lookup(p_value['$ref']),
                     )
                 else:
                     # add valid key-value
@@ -479,7 +438,7 @@ class Action(BaseAction):
                 path = data['items']['$ref']
             else:
                 path = data['$ref']
-            obj = self._lookup(path)
+            obj = self.spec.lookup(path)
             return obj['x-createOnly'] if 'x-createOnly' in obj else []
 
     @property
@@ -670,6 +629,25 @@ class _OpenAPIBaseSpec(object):
             result.extend(body_params)
         return result
 
+    def result_descr(self, route, http_method):
+        ref = self.get_response_ref(route, http_method)
+        if ref:
+            return self.lookup(ref)
+
+    def lookup(self, response_ref):
+        """
+        Returns document section
+        Example: #/definitions/Image returns Image defenition section.
+        """
+        if response_ref.startswith('#'):
+            paths = response_ref.split('/')[1:]
+            result = self.raw_spec
+            for path in paths:
+                if path not in result:
+                    return
+                result = result[path]
+            return result
+
 
 class _OpenAPIv2Spec(_OpenAPIBaseSpec):
     @property
@@ -723,6 +701,29 @@ class _OpenAPIv2Spec(_OpenAPIBaseSpec):
             options.append(option)
         return options
 
+    def get_column_names(self, route, http_method):
+        data = self.result_descr(route, http_method)['properties']['data']
+        # XXX: Inconsistency in swagger spec.
+        # See RoleDetailsResponse vs RoleCategoryListResponse
+        response_ref = data['items']['$ref'] \
+            if 'items' in data else data['$ref']
+        response_descr = self.lookup(response_ref)
+        properties = response_descr['properties']
+
+        column_names = []
+        for k, v in properties.items():
+            if '$ref' not in v:
+                column_names.append(k)
+            else:  # ST-226
+                f_key = self.lookup(v['$ref'])
+                if "properties" in f_key:
+                    if len(f_key["properties"]) == 1:
+                        if "id" in f_key["properties"]:
+                            if "type" in f_key["properties"]["id"]:
+                                if f_key["properties"]["id"]["type"] in ("integer", "string"):
+                                    column_names.append("%s.id" % k)
+        return column_names
+
 
 class _OpenAPIv3Spec(_OpenAPIBaseSpec):
     @property
@@ -737,7 +738,7 @@ class _OpenAPIv3Spec(_OpenAPIBaseSpec):
         responses = self.raw_spec['paths'][route][http_method]['responses']
         response_200 = responses['200']
         if '$ref' in response_200:
-            response_200 = self._lookup(response_200['$ref'])
+            response_200 = self.lookup(response_200['$ref'])
         result = response_200['content']['application/json']['schema']['$ref']
         return result
 
@@ -747,7 +748,7 @@ class _OpenAPIv3Spec(_OpenAPIBaseSpec):
         if "requestBody" in route_data:
             param = {}
             request_body = route_data['requestBody']
-            raw_block = self._lookup(request_body.get("$ref")) if "$ref" in request_body else request_body
+            raw_block = self.lookup(request_body.get("$ref")) if "$ref" in request_body else request_body
             param["schema"] = raw_block["content"]['application/json']["schema"]
             param["required"] = raw_block.get("required")
             param["description"] = raw_block.get("description")
@@ -760,7 +761,7 @@ class _OpenAPIv3Spec(_OpenAPIBaseSpec):
         params = []
         for param in route_data.get('parameters', ''):
             if '$ref' in param:
-                obj = self._lookup(param['$ref'])
+                obj = self.lookup(param['$ref'])
                 params.append(obj)
             else:
                 params.append(param)
@@ -771,30 +772,16 @@ class _OpenAPIv3Spec(_OpenAPIBaseSpec):
         if '200' in responses:
             response_200 = responses['200']
             if "$ref" in response_200:
-                response_200 = self._lookup(response_200['$ref'])
+                response_200 = self.lookup(response_200['$ref'])
             if 'schema' in response_200["content"]["application/json"]:
                 schema = response_200["content"]["application/json"]["schema"]
                 if '$ref' in schema:
-                    schema = self._lookup(schema["$ref"])
+                    schema = self.lookup(schema["$ref"])
                 object_properties = schema['properties']
                 data_structure = object_properties['data']
                 result = 'array' == data_structure.get('type')
                 return result
         return False
-
-    def _lookup(self, response_ref):
-        """
-        Returns document section
-        Example: #/definitions/Image returns Image defenition section.
-        """
-        if response_ref.startswith('#'):
-            paths = response_ref.split('/')[1:]
-            result = self.raw_spec
-            for path in paths:
-                if path not in result:
-                    return
-                result = result[path]
-            return result
 
     def get_default_options(self, route, http_method):
         options = []
@@ -806,3 +793,43 @@ class _OpenAPIv3Spec(_OpenAPIBaseSpec):
                                   show_default='default' in param)
             options.append(option)
         return options
+
+    def get_column_names(self, route, http_method):
+        data = self.result_descr(route, http_method)['properties']['data']
+        response_ref = data['items']['$ref'] \
+            if 'items' in data else data['$ref']
+        response_descr = self.lookup(response_ref)
+        if 'allOf' in response_descr:
+            properties = self.merge_properties(response_descr)
+        else:
+            properties = response_descr['properties']
+
+        column_names = []
+        for k, v in properties.items():
+            if '$ref' not in v:
+                column_names.append(k)
+            else:  # ST-226
+                f_key = self.lookup(v['$ref'])
+                if "properties" in f_key:
+                    if len(f_key["properties"]) == 1:
+                        if "id" in f_key["properties"]:
+                            if "type" in f_key["properties"]["id"]:
+                                if f_key["properties"]["id"]["type"] in ("integer", "string"):
+                                    column_names.append("%s.id" % k)
+        return column_names
+
+    def merge_properties(self, data):
+        merged_properties = {}
+        if "allOf" not in data:
+            raise MultipleClickException("Invalid spec data: Cannot merge properties: %s" % data)
+
+        data = data['allOf']
+
+        for item in data:
+            if 'properties' in item:
+                merged_properties.update(item['properties'])
+            elif "$ref" in item:
+                obj = self.lookup(item['$ref'])
+                if 'properties' in obj:
+                    merged_properties.update(obj['properties'])
+        return merged_properties
