@@ -221,7 +221,7 @@ class Action(BaseAction):
                 click.echo(view.build_tree(data))
             elif settings.view == 'table':
                 columns = self._table_columns or self.spec.get_column_names(self.route, self.http_method)
-                if self.spec.returns_iterable():
+                if self.spec.returns_iterable(self.route):
                     rows, current_page, last_page = view.calc_vertical_table(response_json,
                                                                     columns)
                     pre = "Page: {} of {}".format(current_page, last_page)
