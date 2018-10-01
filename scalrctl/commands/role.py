@@ -66,21 +66,6 @@ class RolePromote(commands.SimplifiedAction):
         return arguments, kw
 
 
-class RolePromote(commands.SimplifiedAction):
-
-    epilog = "Example: scalr-ctl role promote --roleId <ID>"
-    post_template = {}
-
-    def pre(self, *args, **kwargs):
-        """
-        before request is made
-        """
-        kv = {"import-data": {}}
-        kv.update(kwargs)
-        arguments, kw = super(RolePromote, self).pre(*args, **kv)
-        return arguments, kw
-
-
 class RoleDeprecate(commands.SimplifiedAction):
 
     epilog = "Example: scalr-ctl role deprecate --roleId <ID> --replacement <newRoleId>"

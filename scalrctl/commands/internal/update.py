@@ -1,46 +1,16 @@
 # -*- coding: utf-8 -*-
 import os
 import sys
-import time
 import json
-import itertools
-import threading
 import traceback
 
 import six
 import yaml
 import requests
 
-from scalrctl import click, defaults, settings, commands
+from scalrctl import click, defaults, settings, commands, utils
 
 __author__ = 'Dmitriy Korsakov, Sergey Babak'
-
-
-class _spinner(object):
-
-    @staticmethod
-    def draw(event):
-        cursor = itertools.cycle('|/-\\')
-        while not event.isSet():
-            sys.stdout.write(next(cursor))
-            sys.stdout.flush()
-            time.sleep(0.1)
-            sys.stdout.write('\b')
-        sys.stdout.write(' ')
-        sys.stdout.flush()
-
-    def __init__(self):
-        self.event = threading.Event()
-        self.thread = threading.Thread(target=_spinner.draw,
-                                       args=(self.event,))
-        self.thread.daemon = True
-
-    def __enter__(self):
-        self.thread.start()
-
-    def __exit__(self, type, value, traceback):
-        self.event.set()
-        self.thread.join()
 
 
 def _get_spec_path(api_level, extension):
@@ -181,7 +151,7 @@ def update_swagger():
         click.echo('[{}/{}] Updating specifications for Scalr {} API (Swagger)... '
                    .format(index, amount, api_level), nl=False)
 
-        with _spinner():
+        with utils._spinner():
             success, fail_reason = _update_spec(api_level)
 
         if success:

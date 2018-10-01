@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
 import os
+import sys
 import json
 import yaml
+import time
+import itertools
+import threading
 import traceback
 
 from scalrctl import click, defaults, settings
@@ -97,3 +101,31 @@ def is_openapi_v3(data):
     elif "basePath" in data:
         print "v2!"
         return False
+
+
+class _spinner(object):
+
+    @staticmethod
+    def draw(event):
+        if settings.colored_output:
+            cursor = itertools.cycle('|/-\\')
+            while not event.isSet():
+                sys.stdout.write(next(cursor))
+                sys.stdout.flush()
+                time.sleep(0.1)
+                sys.stdout.write('\b')
+            sys.stdout.write(' ')
+            sys.stdout.flush()
+
+    def __init__(self):
+        self.event = threading.Event()
+        self.thread = threading.Thread(target=_spinner.draw,
+                                       args=(self.event,))
+        self.thread.daemon = True
+
+    def __enter__(self):
+        self.thread.start()
+
+    def __exit__(self, type, value, traceback):
+        self.event.set()
+        self.thread.join()

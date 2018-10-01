@@ -3,6 +3,7 @@ import json
 import abc
 import re
 import os
+import time
 
 import dicttoxml
 
@@ -220,10 +221,15 @@ class Action(BaseAction):
                 click.echo(view.build_tree(data))
             elif settings.view == 'table':
                 columns = self._table_columns or self.spec.get_column_names(self.route, self.http_method)
-                rows, current_page, last_page = view.calc_table(response_json,
-                                                                columns)
-                pre = "Page: {} of {}".format(current_page, last_page)
-                click.echo(view.build_table(columns, rows, pre=pre))  # XXX
+                if self.spec.returns_iterable():
+                    rows, current_page, last_page = view.calc_vertical_table(response_json,
+                                                                    columns)
+                    pre = "Page: {} of {}".format(current_page, last_page)
+                    click.echo(view.build_vertical_table(columns, rows, pre=pre))  # XXX
+                else:
+                    click.echo(view.build_horizontal_table(
+                        view.calc_horizontal_table(response_json, columns)))
+
         elif self.http_method.upper() == 'DELETE':
             deleted_id = kwargs.get(self.delete_target, '') or ''
             if not deleted_id:
@@ -259,7 +265,7 @@ class Action(BaseAction):
             """
 
         if self.http_method.upper() == 'GET':
-            if self.spec._returns_iterable(self.route):
+            if self.spec.returns_iterable(self.route):
                 maxres = click.Option(('--max-results', 'maxResults'),
                                       type=int, required=False,
                                       help="Maximum number of records. "
@@ -319,7 +325,7 @@ class Action(BaseAction):
         return options
 
     def _get_available_filters(self):
-        if self.spec._returns_iterable(self.route):
+        if self.spec.returns_iterable(self.route):
             data = self._result_descr['properties']['data']
             response_ref = data['items']['$ref']
             response_descr = self.spec.lookup(response_ref)
@@ -468,12 +474,16 @@ class Action(BaseAction):
                         filter_createonly=True
                     ) if http_method == 'PATCH' else import_data[param_name]
                 else:
-                    if http_method in ('POST', 'PATCH') and stdin:
-                        json_object = self._read_object()
-                    elif http_method == 'PATCH':
-                        json_object = self._edit_object(*args, **kwargs)
+                    if http_method == 'PATCH':
+                        if stdin:
+                            # XXX: `_get_object` makes additional GET to load all
+                            # discriminator's into `self._discriminators` map
+                            self._get_object(*args, **kwargs)
+                            json_object = self._read_object()
+                        else:
+                            json_object = self._edit_object(*args, **kwargs)
                     elif http_method == 'POST':
-                        json_object = self._edit_example()
+                        json_object = self._read_object() if stdin else self._edit_example()
 
                 json_object = self._filter_json_object(json_object)
                 kwargs[param_name] = json_object
@@ -615,7 +625,7 @@ class _OpenAPIBaseSpec(object):
         raise NotImplementedError()
 
     @abc.abstractmethod
-    def _returns_iterable(self, route):
+    def returns_iterable(self, route):
         raise NotImplementedError()
 
     @abc.abstractmethod
@@ -654,7 +664,6 @@ class _OpenAPIv2Spec(_OpenAPIBaseSpec):
     def base_path(self):
         return self.raw_spec["basePath"]
 
-
     def get_response_ref(self, route, http_method):
         route_data = self.raw_spec['paths'][route]
         responses = route_data[http_method]['responses']
@@ -676,7 +685,7 @@ class _OpenAPIv2Spec(_OpenAPIBaseSpec):
         params = [param for param in route_data.get('parameters', '')]
         return params
 
-    def _returns_iterable(self, route):
+    def returns_iterable(self, route):
         responses = self.raw_spec['paths'][route]['get']['responses']
         if '200' in responses:
             response_200 = responses['200']
@@ -767,7 +776,7 @@ class _OpenAPIv3Spec(_OpenAPIBaseSpec):
                 params.append(param)
         return params
 
-    def _returns_iterable(self, route):
+    def returns_iterable(self, route):
         responses = self.raw_spec['paths'][route]['get']['responses']
         if '200' in responses:
             response_200 = responses['200']
@@ -833,3 +842,32 @@ class _OpenAPIv3Spec(_OpenAPIBaseSpec):
                 if 'properties' in obj:
                     merged_properties.update(obj['properties'])
         return merged_properties
+
+
+class PolledAction(SimplifiedAction):
+
+    def _wait_for_status(self, poll_dict, action_obj, states_to_wait_for, timeout=1, hide_output=True, **kwargs):
+        '''
+
+        :param poll_dict: e.g. {'serverId': b039d8d9-26c2-439d-9b2b-9d7b761b417c}
+        :param action_obj: instance of class Action
+        :param states_to_wait_for: list of states to wait for, e.g. ('running', 'failed')
+        :param timeout: timeout in secons between attempts
+        :param hide_output: when True prints full polling status
+        :param kwargs: the same dict that run() method accepts
+        :returns last status, e.g. 'running'
+        '''
+        status = ''
+        with utils._spinner():
+            while status not in states_to_wait_for:
+                run_args = {"hide_output": hide_output, "envId": kwargs.get('envId')}
+                run_args.update(poll_dict)
+                data = action_obj.run(**run_args)
+                data_json = json.loads(data)
+                status = self._get_operation_status(data_json)
+                time.sleep(timeout)
+        return status
+
+    def _get_operation_status(self, data_json):
+        return data_json["data"]["status"]
+
