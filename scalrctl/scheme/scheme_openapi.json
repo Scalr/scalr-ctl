@@ -16,6 +16,49 @@
     "global": {
         "group_descr": "All Scalr Global scope commands",
         "cmd-group": "Available scopes",
+        "role-categories": {
+            "api_level": "global",
+            "create": {
+                "api_level": "global",
+                "class": "scalrctl.commands.Action",
+                "http-method": "post",
+                "route": "/global/role-categories/",
+                "epilog": "Example: scalr-ctl global role-categories create --stdin < myrolecategory.json"
+            },
+            "delete": {
+                "api_level": "global",
+                "class": "scalrctl.commands.Action",
+                "http-method": "delete",
+                "route": "/global/role-categories/{roleCategoryId}/"
+            },
+            "get": {
+                "api_level": "global",
+                "class": "scalrctl.commands.Action",
+                "http-method": "get",
+                "route": "/global/role-categories/{roleCategoryId}/"
+            },
+            "group_descr": "Manage current Role Categories",
+            "list": {
+                "api_level": "global",
+                "class": "scalrctl.commands.Action",
+                "http-method": "get",
+                "route": "/global/role-categories/"
+            },
+            "retrieve": {
+                "api_level": "global",
+                "class": "scalrctl.commands.Action",
+                "hidden": true,
+                "http-method": "get",
+                "route": "/global/role-categories/{roleCategoryId}/"
+            },
+            "update": {
+                "api_level": "global",
+                "class": "scalrctl.commands.Action",
+                "http-method": "patch",
+                "route": "/global/role-categories/{roleCategoryId}/",
+                "epilog": "Example: scalr-ctl global role-categories update --roleCategoryId <ID> --stdin < myupdatedrolecategory.json"
+            }
+        },
         "roles": {
             "api_level": "global",
             "create": {
@@ -56,6 +99,49 @@
     "account": {
         "group_descr": "All Scalr Account scope commands",
         "cmd-group": "Available scopes",
+        "role-categories": {
+            "api_level": "account",
+            "create": {
+                "api_level": "account",
+                "class": "scalrctl.commands.Action",
+                "http-method": "post",
+                "route": "/account/{accountId}/role-categories/",
+                "epilog": "Example: scalr-ctl account role-categories create --stdin < myrolecategory.json"
+            },
+            "delete": {
+                "api_level": "account",
+                "class": "scalrctl.commands.Action",
+                "http-method": "delete",
+                "route": "/account/{accountId}/role-categories/{roleCategoryId}/"
+            },
+            "get": {
+                "api_level": "account",
+                "class": "scalrctl.commands.Action",
+                "http-method": "get",
+                "route": "/account/{accountId}/role-categories/{roleCategoryId}/"
+            },
+            "group_descr": "Manage current Role Categories",
+            "list": {
+                "api_level": "account",
+                "class": "scalrctl.commands.Action",
+                "http-method": "get",
+                "route": "/account/{accountId}/role-categories/"
+            },
+            "retrieve": {
+                "api_level": "account",
+                "class": "scalrctl.commands.Action",
+                "hidden": true,
+                "http-method": "get",
+                "route": "/account/{accountId}/role-categories/{roleCategoryId}/"
+            },
+            "update": {
+                "api_level": "account",
+                "class": "scalrctl.commands.Action",
+                "http-method": "patch",
+                "route": "/account/{accountId}/role-categories/{roleCategoryId}/",
+                "epilog": "Example: scalr-ctl account role-categories update --roleCategoryId <ID> --stdin < myupdatedrolecategory.json"
+            }
+        },
         "roles": {
             "api_level": "account",
             "create": {
@@ -98,6 +184,49 @@
                 "route": "/account/{accountId}/roles/{roleId}/actions/clone/",
                 "epilog": "Example: scalr-ctl role clone --roleId <ID> --name MyNewRole"
             }
+        }
+    },
+    "role-categories": {
+        "api_level": "user",
+        "create": {
+            "api_level": "user",
+            "class": "scalrctl.commands.Action",
+            "http-method": "post",
+            "route": "/user/{envId}/role-categories/",
+            "epilog": "Example: scalr-ctl role-categories create --stdin < myrolecategory.json"
+        },
+        "delete": {
+            "api_level": "user",
+            "class": "scalrctl.commands.Action",
+            "http-method": "delete",
+            "route": "/user/{envId}/role-categories/{roleCategoryId}/"
+        },
+        "get": {
+            "api_level": "user",
+            "class": "scalrctl.commands.Action",
+            "http-method": "get",
+            "route": "/user/{envId}/role-categories/{roleCategoryId}/"
+        },
+        "group_descr": "Manage current Role Categories",
+        "list": {
+            "api_level": "user",
+            "class": "scalrctl.commands.Action",
+            "http-method": "get",
+            "route": "/user/{envId}/role-categories/"
+        },
+        "retrieve": {
+            "api_level": "user",
+            "class": "scalrctl.commands.Action",
+            "hidden": true,
+            "http-method": "get",
+            "route": "/user/{envId}/role-categories/{roleCategoryId}/"
+        },
+        "update": {
+            "api_level": "user",
+            "class": "scalrctl.commands.Action",
+            "http-method": "patch",
+            "route": "/user/{envId}/role-categories/{roleCategoryId}/",
+            "epilog": "Example: scalr-ctl role-categories update --roleCategoryId <ID> --stdin < myupdatedrolecategory.json"
         }
     },
     "roles": {
@@ -162,7 +291,7 @@
             "api_level": "user",
             "class": "scalrctl.commands.storage.DeleteStorage",
             "http-method": "delete",
-            "route": "/{envId}/farm-roles/{farmRoleId}/storage/{storageConfigurationId}/",
+            "route": "/user/{envId}/farm-roles/{farmRoleId}/storage/{storageConfigurationId}/",
             "epilog": "Example: scalr-ctl storages delete --farmRoleId <FRID> --storageConfigurationId <ID>"
         },
         "create": {

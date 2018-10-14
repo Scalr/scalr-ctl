@@ -15,6 +15,14 @@ from six.moves.urllib import parse
 __author__ = 'Dmitriy Korsakov'
 
 
+success_codes = {
+    'get': '200',
+    'post': '201',
+    'delete': '204',
+    'patch': '200',
+}
+
+
 class MultipleClickException(click.ClickException):
 
     def format_message(self):
@@ -68,8 +76,6 @@ class Action(BaseAction):
     post_template = None
     _table_columns = []
 
-    _discriminators = {}
-
     ignored_options = ()
     delete_target = None
 
@@ -82,7 +88,7 @@ class Action(BaseAction):
         self._init()
 
     def _init(self):
-        print "defaults.OPENAPI_ENABLED:", defaults.OPENAPI_ENABLED
+        #print "defaults.OPENAPI_ENABLED:", defaults.OPENAPI_ENABLED
         if defaults.OPENAPI_ENABLED:
             self.spec = get_spec(utils.read_spec_openapi())
         else:
@@ -144,8 +150,10 @@ class Action(BaseAction):
             if raw_text is None:
                 return {}
             json_text = json.loads(raw_text)
-            filtered = self._filter_json_object(json_text['data'],
-                                                filter_createonly=True)
+            filtered = self.spec.filter_json_object(json_text['data'],
+                                                    self.route,
+                                                    self.http_method,
+                                                    filter_createonly=True)
             return json.dumps(filtered, indent=2)
         except Exception as e:
             utils.reraise(e)
@@ -189,6 +197,17 @@ class Action(BaseAction):
         result_errmsg = '\n'.join(messages)
         return result_errmsg
 
+    def get_response_type(self, response_dict):
+        obj_type = None
+        data = response_dict['data']
+        if isinstance(data, dict):
+            if 'type' in data:
+                obj_type = data['type']
+        elif isinstance(data, list):
+            if data and data[0]:
+                obj_type = data[0].get('type')
+        return obj_type
+
     def _format_response(self, response, hidden=False, **kwargs):
         text = None
 
@@ -220,8 +239,9 @@ class Action(BaseAction):
                 data = json.dumps(response_json.get('data'))
                 click.echo(view.build_tree(data))
             elif settings.view == 'table':
-                columns = self._table_columns or self.spec.get_column_names(self.route, self.http_method)
-                if self.spec.returns_iterable(self.route):
+                obj_type = self.get_response_type(response_json)
+                columns = self._table_columns or self.spec.get_column_names(self.route, self.http_method, obj_type)
+                if self.spec.returns_iterable(self.route, self.http_method):
                     rows, current_page, last_page = view.calc_vertical_table(response_json,
                                                                     columns)
                     pre = "Page: {} of {}".format(current_page, last_page)
@@ -265,7 +285,7 @@ class Action(BaseAction):
             """
 
         if self.http_method.upper() == 'GET':
-            if self.spec.returns_iterable(self.route):
+            if self.spec.returns_iterable(self.route, self.http_method):
                 maxres = click.Option(('--max-results', 'maxResults'),
                                       type=int, required=False,
                                       help="Maximum number of records. "
@@ -287,10 +307,11 @@ class Action(BaseAction):
                                            required=False, help=filter_help)
                     options.append(filters)
 
-                columns_help = ("Filter columns in table view "
-                                "[--table required]. Example: NAME,SIZE,"
-                                "SCOPE. Available columns: {}."
-                                ).format(', '.join(self.spec.get_column_names(self.route, self.http_method)))
+                columns_help = "Filter columns in table view [--table required]. Example: NAME,SIZE,SCOPE. "
+                column_names = self.spec.get_column_names(self.route, self.http_method)
+                if column_names:
+                    columns_help += "Available columns: %s." % ', '.join(column_names)
+
                 columns = click.Option(('--columns', 'columns'),
                                        required=False, help=columns_help)
                 options.append(columns)
@@ -325,111 +346,21 @@ class Action(BaseAction):
         return options
 
     def _get_available_filters(self):
-        if self.spec.returns_iterable(self.route):
+        filters = []
+        if self.spec.returns_iterable(self.route, self.http_method):
             data = self._result_descr['properties']['data']
+            if "oneOf" in data['items']: #XXX V3!
+                # return self._get_combined_filters(data['items'])
+                return []
             response_ref = data['items']['$ref']
             response_descr = self.spec.lookup(response_ref)
             if 'x-filterable' in response_descr:
-                return response_descr['x-filterable']
-        return []
+                filters = response_descr['x-filterable']
+        return filters
 
     @property
     def _result_descr(self):
         return self.spec.result_descr(self.route, self.http_method)
-
-    def _list_concrete_types(self, schema):
-        types = []
-        if "x-concreteTypes" in schema:
-            for ref_dict in schema["x-concreteTypes"]:
-                ref_link = ref_dict['$ref']
-                types += [link.split("/")[-1] for link in self._list_concrete_types_recursive(ref_link)]
-        return types
-
-    def _list_concrete_types_recursive(self, reference):
-        references = []
-        schema = self.spec.lookup(reference)
-        if "x-concreteTypes" not in schema:
-            references.append(reference)
-        else:
-            for ref_dict in schema["x-concreteTypes"]:
-                references += self._list_concrete_types_recursive(ref_dict['$ref'])
-        return references
-
-    def _filter_json_object(self, data, filter_createonly=False,
-                            schema=None, reference=None):
-        """
-        Removes immutable parts from JSON object
-        before sending it in POST or PATCH.
-        """
-        filtered = {}
-
-        # load `schema`
-        if schema is None:
-            for param in self.spec.get_body_type_params(self.route, self.http_method):
-                if 'schema' in param:
-                    schema = param['schema']
-                    if '$ref' in schema:
-                        reference = schema['$ref']
-                        schema = self.spec.lookup(schema['$ref'])
-                    break
-
-        # load child object as `schema`
-        if 'discriminator' in schema:
-
-            disc_key = schema['discriminator']
-            disc_path = '{}/{}'.format(reference, disc_key)
-            disc_value = data.get(disc_key) or self._discriminators.get(disc_path)
-
-            if not disc_value:
-                raise click.ClickException((
-                    "Provided JSON object is incorrect: missing required param '{}'."
-                ).format(disc_key))
-            elif disc_value not in self._list_concrete_types(schema):
-                raise click.ClickException((
-                    "Provided JSON object is incorrect: required "
-                    "param '{}' has invalid value '{}', must be one of: {}."
-                ).format(disc_key, disc_value, self._list_concrete_types(schema)))
-            else:
-                # save discriminator for current reference/key
-                self._discriminators[disc_path] = disc_value
-
-            reference = '#/definitions/{}'.format(disc_value)
-            schema = self.spec.lookup(reference)
-
-        # filter input data by properties of `schema`
-        if schema and 'properties' in schema:
-            create_only_props = schema.get('x-createOnly', '')
-            for p_key, p_value in schema['properties'].items():
-
-                if reference:
-                    key_path = '.'.join([reference.split('/')[-1], p_key])
-                else:
-                    key_path = p_key
-
-                if p_key not in data:
-                    utils.debug("Ignore {}, unknown key.".format(key_path))
-                    continue
-                if p_value.get('readOnly'):
-                    utils.debug("Ignore {}, read-only key.".format(key_path))
-                    continue
-                if filter_createonly and p_key in create_only_props:
-                    utils.debug("Ignore {}, create-only key.".format(key_path))
-                    continue
-
-                if '$ref' in p_value and isinstance(data[p_key], dict):
-                    # recursive filter sub-object
-                    utils.debug("Filter sub-object: {}.".format(p_value['$ref']))
-                    filtered[p_key] = self._filter_json_object(
-                        data[p_key],
-                        filter_createonly=filter_createonly,
-                        reference=p_value['$ref'],
-                        schema=self.spec.lookup(p_value['$ref']),
-                    )
-                else:
-                    # add valid key-value
-                    filtered[p_key] = data[p_key]
-
-        return filtered
 
     def _list_createonly_properties(self):
         """
@@ -459,18 +390,31 @@ class Action(BaseAction):
         self._check_arguments(**kwargs)
 
         import_data = kwargs.pop('import-data', {})
+        print "import_data:", import_data
         stdin = kwargs.pop('stdin', None)
         http_method = self.http_method.upper()
         if http_method not in ('PATCH', 'POST'):
             return args, kwargs
 
         # prompting for body and then validating it
-        param_names = (p['name'] for p in self.spec.get_body_type_params(self.route, self.http_method))
+        #param_names = [p['name'] for p in self.spec.get_body_type_params(self.route, self.http_method)]
+
+        param_names = []
+        for param_data in self.spec.get_body_type_params(self.route, self.http_method):
+            param_name = param_data['name']
+            if isinstance(param_name, list): # XXX:oneOf
+                param_names.extend(param_name)
+            else:
+                param_names.append(param_name)
+
+        print "param_names:", list(param_names)
         for param_name in param_names:
             try:
                 if param_name in import_data:
-                    json_object = self._filter_json_object(
+                    json_object = self.spec.filter_json_object(
                         import_data[param_name],
+                        self.route,
+                        self.http_method,
                         filter_createonly=True
                     ) if http_method == 'PATCH' else import_data[param_name]
                 else:
@@ -485,7 +429,7 @@ class Action(BaseAction):
                     elif http_method == 'POST':
                         json_object = self._read_object() if stdin else self._edit_example()
 
-                json_object = self._filter_json_object(json_object)
+                json_object = self.spec.filter_json_object(json_object, self.route, self.http_method)
                 kwargs[param_name] = json_object
             except ValueError as e:
                 utils.reraise(e)
@@ -604,6 +548,7 @@ def get_spec(data):
 @six.add_metaclass(abc.ABCMeta)
 class _OpenAPIBaseSpec(object):
     raw_spec = None
+    _discriminators = {}
 
     def __init__(self, raw_spec):
         self.raw_spec = raw_spec
@@ -625,11 +570,20 @@ class _OpenAPIBaseSpec(object):
         raise NotImplementedError()
 
     @abc.abstractmethod
-    def returns_iterable(self, route):
+    def returns_iterable(self, route, http_method):
         raise NotImplementedError()
 
     @abc.abstractmethod
     def get_default_options(self, route, http_method):
+        raise NotImplementedError()
+
+    @abc.abstractmethod
+    def get_column_names(self, route, http_method, obj_type=None):
+        raise NotImplementedError()
+
+    @abc.abstractmethod
+    def filter_json_object(self, data, route, http_method, filter_createonly=False,
+                            schema=None, reference=None):
         raise NotImplementedError()
 
     def get_raw_params(self, route, http_method):
@@ -658,6 +612,34 @@ class _OpenAPIBaseSpec(object):
                 result = result[path]
             return result
 
+    def list_concrete_types(self, schema):
+        types = []
+        if "x-concreteTypes" in schema:
+            for ref_dict in schema["x-concreteTypes"]:
+                ref_link = ref_dict['$ref']
+                types += [link.split("/")[-1] for link in self.list_concrete_types_recursive(ref_link)]
+        return types
+
+    def list_concrete_types_recursive(self, reference):
+        references = []
+        schema = self.lookup(reference)
+        if "x-concreteTypes" not in schema:
+            references.append(reference)
+        else:
+            for ref_dict in schema["x-concreteTypes"]:
+                references += self.list_concrete_types_recursive(ref_dict['$ref'])
+        return references
+
+    def handle_oneof(data, obj_type=None):
+        '''
+        Returns full reference to object if obj_type is present inside oneOf block
+        '''
+        list_typedata = data['oneOf']
+        response_ref = None
+        for type_dict in list_typedata:
+            if '$ref' in type_dict and type_dict['$ref'].split('/')[-1] == obj_type:
+                return type_dict['$ref']
+
 
 class _OpenAPIv2Spec(_OpenAPIBaseSpec):
     @property
@@ -678,6 +660,8 @@ class _OpenAPIv2Spec(_OpenAPIBaseSpec):
     def get_body_type_params(self, route, http_method):
         route_data = self.raw_spec['paths'][route][http_method]
         data = [param for param in route_data.get('parameters', '')]
+        if 'name' in data: #xxx v3 uniformity
+            data['name'] = [data['name'], ]
         return data
 
     def get_path_type_params(self, route):
@@ -685,10 +669,10 @@ class _OpenAPIv2Spec(_OpenAPIBaseSpec):
         params = [param for param in route_data.get('parameters', '')]
         return params
 
-    def returns_iterable(self, route):
+    def returns_iterable(self, route, http_method):
         responses = self.raw_spec['paths'][route]['get']['responses']
         if '200' in responses:
-            response_200 = responses['200']
+            response_200 = responses.get('200')
             if 'schema' in response_200:
                 schema = response_200['schema']
                 if '$ref' in schema:
@@ -710,7 +694,7 @@ class _OpenAPIv2Spec(_OpenAPIBaseSpec):
             options.append(option)
         return options
 
-    def get_column_names(self, route, http_method):
+    def get_column_names(self, route, http_method, obj_type=None):
         data = self.result_descr(route, http_method)['properties']['data']
         # XXX: Inconsistency in swagger spec.
         # See RoleDetailsResponse vs RoleCategoryListResponse
@@ -733,6 +717,92 @@ class _OpenAPIv2Spec(_OpenAPIBaseSpec):
                                     column_names.append("%s.id" % k)
         return column_names
 
+    def filter_json_object(self, data, route, http_method, filter_createonly=False,
+                            schema=None, reference=None):
+        """
+        Removes immutable parts from JSON object
+        before sending it in POST or PATCH.
+        """
+        filtered = {}
+
+        # load `schema`
+        if schema is None:
+            print "SCHEMA IS NONE"
+            for param in self.get_body_type_params(route, http_method):
+                print "param:", param
+                if 'schema' in param:
+                    schema = param['schema']
+                    print "new schema:", schema
+                    if '$ref' in schema:
+                        reference = schema['$ref']
+                        schema = self.lookup(schema['$ref'])
+                        print "total schema:", schema
+                        print "total reference:", reference
+                    break
+
+        # load child object as `schema`
+        if 'discriminator' in schema:
+
+            disc_key = schema['discriminator']
+            print "disc_key:", disc_key
+            disc_path = '{}/{}'.format(reference, disc_key)
+            print "disc_path:", disc_path
+            disc_value = data.get(disc_key) or self._discriminators.get(disc_path)
+            print "disc_value:", disc_value
+
+            if not disc_value:
+                raise click.ClickException((
+                    "Provided JSON object is incorrect: missing required param '{}'."
+                ).format(disc_key))
+            elif disc_value not in self.list_concrete_types(schema):
+                raise click.ClickException((
+                    "Provided JSON object is incorrect: required "
+                    "param '{}' has invalid value '{}', must be one of: {}."
+                ).format(disc_key, disc_value, self.list_concrete_types(schema)))
+            else:
+                # save discriminator for current reference/key
+                self._discriminators[disc_path] = disc_value
+
+            reference = '#/definitions/{}'.format(disc_value)
+            schema = self.lookup(reference)
+
+        # filter input data by properties of `schema`
+        if schema and 'properties' in schema:
+            create_only_props = schema.get('x-createOnly', '')
+            for p_key, p_value in schema['properties'].items():
+
+                if reference:
+                    key_path = '.'.join([reference.split('/')[-1], p_key])
+                else:
+                    key_path = p_key
+
+                if p_key not in data:
+                    utils.debug("Ignore {}, unknown key.".format(key_path))
+                    continue
+                if p_value.get('readOnly'):
+                    utils.debug("Ignore {}, read-only key.".format(key_path))
+                    continue
+                if filter_createonly and p_key in create_only_props:
+                    utils.debug("Ignore {}, create-only key.".format(key_path))
+                    continue
+
+                if '$ref' in p_value and isinstance(data[p_key], dict):
+                    # recursive filter sub-object
+                    utils.debug("Filter sub-object: {}.".format(p_value['$ref']))
+                    filtered[p_key] = self.filter_json_object(
+                        data[p_key],
+                        route,
+                        http_method,
+                        filter_createonly=filter_createonly,
+                        reference=p_value['$ref'],
+                        schema=self.lookup(p_value['$ref']),
+                    )
+                else:
+                    # add valid key-value
+                    filtered[p_key] = data[p_key]
+
+        return filtered
+
 
 class _OpenAPIv3Spec(_OpenAPIBaseSpec):
     @property
@@ -745,13 +815,25 @@ class _OpenAPIv3Spec(_OpenAPIBaseSpec):
 
     def get_response_ref(self, route, http_method):
         responses = self.raw_spec['paths'][route][http_method]['responses']
-        response_200 = responses['200']
+        response_200 = responses.get(success_codes[http_method])
         if '$ref' in response_200:
             response_200 = self.lookup(response_200['$ref'])
         result = response_200['content']['application/json']['schema']['$ref']
         return result
 
     def get_body_type_params(self, route, http_method):
+
+        def list_references_oneOf(data):
+            '''
+            returns a list of full references to objects inside oneOf block
+            '''
+            list_typedata = data['oneOf']
+            list_refs = []
+            for type_dict in list_typedata:
+                if '$ref' in type_dict:
+                    list_refs.append(type_dict['$ref'])
+            return list_refs
+
         result = []
         route_data = self.raw_spec['paths'][route][http_method]
         if "requestBody" in route_data:
@@ -761,8 +843,17 @@ class _OpenAPIv3Spec(_OpenAPIBaseSpec):
             param["schema"] = raw_block["content"]['application/json']["schema"]
             param["required"] = raw_block.get("required")
             param["description"] = raw_block.get("description")
-            param["name"] = raw_block.get("name", param["schema"]['$ref'].split('/')[-1].lower())
+            schema = param["schema"]
+
+            if '$ref' in schema:
+                param["name"] = [raw_block.get("name", schema['$ref'].split('/')[-1].lower()), ]
+            elif 'oneOf' in schema:
+                print "schema", schema
+                param["name"] = [ref.split('/')[-1].lower() for ref in list_references_oneOf(schema)]
+                #raw_block.get("name", schema['$ref'].split('/')[-1].lower())
+
             result.append(param)
+        print "get_body_type_params:", result
         return result
 
     def get_path_type_params(self, route):
@@ -776,10 +867,10 @@ class _OpenAPIv3Spec(_OpenAPIBaseSpec):
                 params.append(param)
         return params
 
-    def returns_iterable(self, route):
+    def returns_iterable(self, route, http_method):
         responses = self.raw_spec['paths'][route]['get']['responses']
-        if '200' in responses:
-            response_200 = responses['200']
+        if success_codes[http_method] in responses:
+            response_200 = responses.get(success_codes[http_method])
             if "$ref" in response_200:
                 response_200 = self.lookup(response_200['$ref'])
             if 'schema' in response_200["content"]["application/json"]:
@@ -803,10 +894,20 @@ class _OpenAPIv3Spec(_OpenAPIBaseSpec):
             options.append(option)
         return options
 
-    def get_column_names(self, route, http_method):
+    def get_column_names(self, route, http_method, obj_type=None):
         data = self.result_descr(route, http_method)['properties']['data']
-        response_ref = data['items']['$ref'] \
-            if 'items' in data else data['$ref']
+        if 'items' in data:
+            items = data['items']
+            if 'oneOf' in items:
+                response_ref = self.handle_oneof(items, obj_type)
+                if not response_ref:
+                    return []
+            else:
+                response_ref = items['$ref']
+        elif '$ref' in data:
+            response_ref = data['$ref']
+        elif 'oneOf' in data:
+            response_ref = self.handle_oneof(data, obj_type)
         response_descr = self.lookup(response_ref)
         if 'allOf' in response_descr:
             properties = self.merge_properties(response_descr)
@@ -842,6 +943,112 @@ class _OpenAPIv3Spec(_OpenAPIBaseSpec):
                 if 'properties' in obj:
                     merged_properties.update(obj['properties'])
         return merged_properties
+
+    def filter_json_object(self, data, route, http_method, filter_createonly=False,
+                            schema=None, reference=None):
+        """
+        Removes immutable parts from JSON object
+        before sending it in POST or PATCH.
+        """
+        filtered = {}
+
+        # load `schema`
+        if schema is None:
+            print "SCHEMA IS NONE"
+            for param in self.get_body_type_params(route, http_method):
+                print "param:", param
+                if 'schema' in param:
+                    schema = param['schema']
+                    print "new schema:", schema
+                    if '$ref' in schema:
+                        reference = schema['$ref']
+                        schema = self.lookup(reference)
+                    elif "oneOf" in schema:  # xxx: v3
+                        print "oneOf in schema!"
+                        print "data:", data
+                        obj_type = data.get("type")
+                        #reference = schema['$ref']
+                        list_references = [block['$ref'] for block in schema['oneOf']]
+                        list_objects = [ref.split('/')[-1] for ref in list_references]
+                        print "list_references:", list_references
+                        print "list_objects:", list_objects
+                        print "obj_type not in list_objects:", obj_type not in list_objects
+                        if obj_type not in list_objects:
+                            raise click.ClickException((
+                                "Provided JSON object is incorrect: required "
+                                "param '{}' has invalid value '{}', must be one of: {}."
+                                ).format(disc_key, disc_value, self.list_concrete_types(schema)))
+                        print "obj_type:", obj_type
+                        schema = self.lookup(reference)
+
+                    else:
+                        print "no ref in schema!"
+                    print "total schema:", schema
+                    print "total reference:", reference
+                    break
+
+        # load child object as `schema`
+        if 'discriminator' in schema:
+
+            disc_key = schema['discriminator']['propertyName'] # v3
+            print "disc_key:", disc_key
+            disc_path = '{}/{}'.format(reference, disc_key)
+            print "disc_path:", disc_path
+            disc_value = data.get(disc_key) or self._discriminators.get(disc_path)
+            print "disc_value:", disc_value
+
+            if not disc_value:
+                raise click.ClickException((
+                    "Provided JSON object is incorrect: missing required param '{}'."
+                ).format(disc_key))
+            elif disc_value not in self.list_concrete_types(schema):
+                raise click.ClickException((
+                    "Provided JSON object is incorrect: required "
+                    "param '{}' has invalid value '{}', must be one of: {}."
+                ).format(disc_key, disc_value, self.list_concrete_types(schema)))
+            else:
+                # save discriminator for current reference/key
+                self._discriminators[disc_path] = disc_value
+
+            reference = '#/definitions/{}'.format(disc_value)
+            schema = self.lookup(reference)
+
+        # filter input data by properties of `schema`
+        if schema and 'properties' in schema:
+            create_only_props = schema.get('x-createOnly', '')
+            for p_key, p_value in schema['properties'].items():
+
+                if reference:
+                    key_path = '.'.join([reference.split('/')[-1], p_key])
+                else:
+                    key_path = p_key
+
+                if p_key not in data:
+                    utils.debug("Ignore {}, unknown key.".format(key_path))
+                    continue
+                if p_value.get('readOnly'):
+                    utils.debug("Ignore {}, read-only key.".format(key_path))
+                    continue
+                if filter_createonly and p_key in create_only_props:
+                    utils.debug("Ignore {}, create-only key.".format(key_path))
+                    continue
+
+                if '$ref' in p_value and isinstance(data[p_key], dict):
+                    # recursive filter sub-object
+                    utils.debug("Filter sub-object: {}.".format(p_value['$ref']))
+                    filtered[p_key] = self.filter_json_object(
+                        data[p_key],
+                        route,
+                        http_method,
+                        filter_createonly=filter_createonly,
+                        reference=p_value['$ref'],
+                        schema=self.lookup(p_value['$ref']),
+                    )
+                else:
+                    # add valid key-value
+                    filtered[p_key] = data[p_key]
+
+        return filtered
 
 
 class PolledAction(SimplifiedAction):

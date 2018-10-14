@@ -163,7 +163,7 @@ def update_swagger():
 def update_openapi():
     click.echo('Updating specification for Scalr API (OpenAPI)... ', nl=False)
 
-    with _spinner():
+    with utils._spinner():
         success, fail_reason = _update_openapi_spec()
 
         if success:

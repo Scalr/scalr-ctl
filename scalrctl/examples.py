@@ -79,7 +79,7 @@ def _generate_post_data_v2(spec_data, endpoint):
     if endpoint in spec_data['paths']:
         params_spec = spec_data['paths'].get(endpoint)
     else:
-        raise click.ClickException('API endpoint {} does not found'.format(endpoint))
+        raise click.ClickException('API endpoint {} not found'.format(endpoint))
 
     if 'post' in params_spec:
         if 'parameters' in params_spec['post']:
