@@ -1054,8 +1054,8 @@
                 "class": "scalrctl.commands.Action",
                 "http-method": "get",
                 "route": "/{accountId}/webhook-endpoints/"
-            }
         }
+    }
     },
 
     "cost-centers": {

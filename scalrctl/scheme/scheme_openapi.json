@@ -16,6 +16,55 @@
     "global": {
         "group_descr": "All Scalr Global scope commands",
         "cmd-group": "Available scopes",
+        "images": {
+            "api_level": "global",
+            "replace": {
+                "api_level": "global",
+                "class": "scalrctl.commands.image.ReplaceImageGlobal",
+                "http-method": "post",
+                "route": "/global/images/{imageId}/actions/replace/",
+                "epilog": "Example: scalr-ctl global images replace --imageId <ID> --newImageId <newID>"
+            },
+            "copy": {
+                "api_level": "global",
+                "class": "scalrctl.commands.Action",
+                "http-method": "post",
+                "route": "/global/images/{imageId}/actions/copy/"
+            },
+            "delete": {
+                "api_level": "global",
+                "class": "scalrctl.commands.Action",
+                "http-method": "delete",
+                "route": "/global/images/{imageId}/"
+            },
+            "get": {
+                "api_level": "global",
+                "class": "scalrctl.commands.image.RetrieveImage",
+                "http-method": "get",
+                "route": "/global/images/{imageId}/"
+            },
+            "group_descr": "Manage Images",
+            "list": {
+                "api_level": "global",
+                "class": "scalrctl.commands.Action",
+                "http-method": "get",
+                "route": "/global/images/"
+            },
+            "register": {
+                "api_level": "global",
+                "class": "scalrctl.commands.Action",
+                "http-method": "post",
+                "route": "/global/images/",
+                "epilog": "Example: scalr-ctl global images register --stdin < myimage.json"
+            },
+            "update": {
+                "api_level": "global",
+                "class": "scalrctl.commands.image.ChangeImageAttrs",
+                "http-method": "patch",
+                "route": "/global/images/{imageId}/",
+                "epilog": "Example: scalr-ctl global images update --imageId <ID> --stdin < myupdatedimage.json"
+            }
+        },
         "global-variables": {
             "api_level": "global",
             "create": {
@@ -115,13 +164,6 @@
                 "http-method": "get",
                 "route": "/global/role-categories/"
             },
-            "retrieve": {
-                "api_level": "global",
-                "class": "scalrctl.commands.Action",
-                "hidden": true,
-                "http-method": "get",
-                "route": "/global/role-categories/{roleCategoryId}/"
-            },
             "update": {
                 "api_level": "global",
                 "class": "scalrctl.commands.Action",
@@ -170,6 +212,55 @@
     "account": {
         "group_descr": "All Scalr Account scope commands",
         "cmd-group": "Available scopes",
+        "images": {
+            "api_level": "account",
+            "replace": {
+                "api_level": "account",
+                "class": "scalrctl.commands.image.ReplaceImageAccount",
+                "http-method": "post",
+                "route": "/account/{accountId}/images/{imageId}/actions/replace/",
+                "epilog": "Example: scalr-ctl account images replace --imageID <ID> --newImageID <newID> --deprecateOldImage --scope <SCOPE>"
+            },
+            "copy": {
+                "api_level": "account",
+                "class": "scalrctl.commands.Action",
+                "http-method": "post",
+                "route": "/account/{accountId}/images/{imageId}/actions/copy/"
+            },
+            "delete": {
+                "api_level": "account",
+                "class": "scalrctl.commands.Action",
+                "http-method": "delete",
+                "route": "/account/{accountId}/images/{imageId}/"
+            },
+            "get": {
+                "api_level": "account",
+                "class": "scalrctl.commands.image.RetrieveImage",
+                "http-method": "get",
+                "route": "/account/{accountId}/images/{imageId}/"
+            },
+            "group_descr": "Manage Images",
+            "list": {
+                "api_level": "account",
+                "class": "scalrctl.commands.Action",
+                "http-method": "get",
+                "route": "/account/{accountId}/images/"
+            },
+            "register": {
+                "api_level": "account",
+                "class": "scalrctl.commands.Action",
+                "http-method": "post",
+                "route": "/account/{accountId}/images/",
+                "epilog": "Example: scalr-ctl account images register --stdin < myimage.json"
+            },
+            "update": {
+                "api_level": "account",
+                "class": "scalrctl.commands.image.ChangeImageAttrs",
+                "http-method": "patch",
+                "route": "/account/{accountId}/images/{imageId}/",
+                "epilog": "Example: scalr-ctl account images update --imageId <ID> --stdin < myupdatedimage.json"
+            }
+        },
         "global-variables": {
             "api_level": "account",
             "create": {
@@ -315,13 +406,6 @@
                 "http-method": "get",
                 "route": "/account/{accountId}/role-categories/"
             },
-            "retrieve": {
-                "api_level": "account",
-                "class": "scalrctl.commands.Action",
-                "hidden": true,
-                "http-method": "get",
-                "route": "/account/{accountId}/role-categories/{roleCategoryId}/"
-            },
             "update": {
                 "api_level": "account",
                 "class": "scalrctl.commands.Action",
@@ -396,13 +480,6 @@
             "http-method": "get",
             "route": "/user/{envId}/projects/"
         },
-        "retrieve": {
-            "api_level": "user",
-            "class": "scalrctl.commands.Action",
-            "hidden": true,
-            "http-method": "get",
-            "route": "/user/{envId}/projects/{projectId}/"
-        },
         "update": {
             "api_level": "user",
             "class": "scalrctl.commands.Action",
@@ -453,13 +530,6 @@
             "class": "scalrctl.commands.Action",
             "http-method": "get",
             "route": "/user/{envId}/role-categories/"
-        },
-        "retrieve": {
-            "api_level": "user",
-            "class": "scalrctl.commands.Action",
-            "hidden": true,
-            "http-method": "get",
-            "route": "/user/{envId}/role-categories/{roleCategoryId}/"
         },
         "update": {
             "api_level": "user",
@@ -648,6 +718,385 @@
             "http-method": "post",
             "route": "/user/{envId}/farm-roles/{farmRoleId}/storage/",
             "epilog": "Example: scalr-ctl servers create --farmRoleId <ID> --stdin < mystorage.json"
+        }
+    },
+    "farms": {
+        "api_level": "user",
+        "list-servers": {
+            "api_level": "user",
+            "class": "scalrctl.commands.Action",
+            "http-method": "get",
+            "route": "/user/{envId}/farms/{farmId}/servers/"
+        },
+        "clone": {
+            "api_level": "user",
+            "class": "scalrctl.commands.farm.FarmClone",
+            "http-method": "post",
+            "route": "/user/{envId}/farms/{farmId}/actions/clone/",
+            "epilog": "Example: scalr-ctl farms clone --farmId <ID> --name MyNewFarm"
+        },
+        "create": {
+            "api_level": "user",
+            "class": "scalrctl.commands.Action",
+            "http-method": "post",
+            "route": "/user/{envId}/farms/",
+            "epilog": "Example: scalr-ctl farms create --stdin < myfarm.json"
+        },
+        "delete": {
+            "api_level": "user",
+            "class": "scalrctl.commands.Action",
+            "http-method": "delete",
+            "route": "/user/{envId}/farms/{farmId}/"
+        },
+        "get": {
+            "api_level": "user",
+            "class": "scalrctl.commands.Action",
+            "http-method": "get",
+            "route": "/user/{envId}/farms/{farmId}/"
+        },
+        "group_descr": "Manage Farms",
+        "launch": {
+            "api_level": "user",
+            "class": "scalrctl.commands.farm.FarmLaunch",
+            "http-method": "post",
+            "route": "/user/{envId}/farms/{farmId}/actions/launch/",
+            "epilog": "Example: scalr-ctl farms launch --farmId <ID>"
+        },
+        "list": {
+            "api_level": "user",
+            "class": "scalrctl.commands.Action",
+            "http-method": "get",
+            "route": "/user/{envId}/farms/"
+        },
+        "terminate": {
+            "api_level": "user",
+            "class": "scalrctl.commands.farm.FarmTerminate",
+            "http-method": "post",
+            "route": "/user/{envId}/farms/{farmId}/actions/terminate/",
+            "epilog": "Example: scalr-ctl farms terminate --farmId <ID> --force"
+        },
+        "suspend": {
+            "api_level": "user",
+            "class": "scalrctl.commands.farm.FarmSuspend",
+            "http-method": "post",
+            "route": "/user/{envId}/farms/{farmId}/actions/suspend/",
+            "epilog": "Example: scalr-ctl farms suspend --farmId <ID>"
+        },
+        "resume": {
+            "api_level": "user",
+            "class": "scalrctl.commands.farm.FarmResume",
+            "http-method": "post",
+            "route": "/user/{envId}/farms/{farmId}/actions/resume/",
+            "epilog": "Example: scalr-ctl farms resume --farmId <ID>"
+        },
+        "update": {
+            "api_level": "user",
+            "class": "scalrctl.commands.Action",
+            "http-method": "patch",
+            "route": "/user/{envId}/farms/{farmId}/",
+            "epilog": "Example: scalr-ctl farms update --farmId <ID> --stdin < myupdatedfarm.json"
+        },
+        "lock": {
+            "api_level": "user",
+            "class": "scalrctl.commands.farm.FarmLock",
+            "http-method": "post",
+            "route": "/user/{envId}/farms/{farmId}/actions/lock/"
+        },
+        "unlock": {
+            "api_level": "user",
+            "class": "scalrctl.commands.Action",
+            "http-method": "post",
+            "route": "/user/{envId}/farms/{farmId}/actions/unlock/"
+        }
+    },
+    "farm-roles": {
+        "api_level": "user",
+        "clone": {
+            "api_level": "user",
+            "class": "scalrctl.commands.farmrole.FarmRoleClone",
+            "http-method": "post",
+            "route": "/user/{envId}/farm-roles/{farmRoleId}/actions/clone/",
+            "epilog": "Example: scalr-ctl farm-roles clone --farmRoleId <FarmRoleID> --alias MyClonedFarmRole --farmId <FarmID>"
+        },
+        "list-servers": {
+            "api_level": "user",
+            "class": "scalrctl.commands.Action",
+            "http-method": "get",
+            "route": "/user/{envId}/farm-roles/{farmRoleId}/servers/"
+        },
+        "update-scaling-configuration": {
+            "api_level": "user",
+            "class": "scalrctl.commands.Action",
+            "http-method": "patch",
+            "route": "/user/{envId}/farm-roles/{farmRoleId}/scaling/"
+        },
+        "create": {
+            "api_level": "user",
+            "class": "scalrctl.commands.Action",
+            "http-method": "post",
+            "route": "/user/{envId}/farms/{farmId}/farm-roles/",
+            "epilog": "Example: scalr-ctl farm-roles create --farmId <ID> --stdin < myfarmrole.json"
+        },
+        "delete": {
+            "api_level": "user",
+            "class": "scalrctl.commands.Action",
+            "http-method": "delete",
+            "route": "/user/{envId}/farm-roles/{farmRoleId}/"
+        },
+        "get": {
+            "api_level": "user",
+            "class": "scalrctl.commands.Action",
+            "http-method": "get",
+            "route": "/user/{envId}/farm-roles/{farmRoleId}/"
+        },
+        "group_descr": "Manage FarmRoles",
+        "import-server": {
+            "api_level": "user",
+            "class": "scalrctl.commands.Action",
+            "http-method": "post",
+            "route": "/user/{envId}/farm-roles/{farmRoleId}/actions/import-server/",
+            "epilog": "Example: scalr-ctl farm-roles import-server --farmRoleId <ID> --stdin < server.json"
+        },
+        "launch-server": {
+            "api_level": "user",
+            "class": "scalrctl.commands.farmrole.LaunchServer",
+            "http-method": "post",
+            "route": "/user/{envId}/farm-roles/{farmRoleId}/servers/",
+            "epilog": "Example: scalr-ctl farm-roles launch-server --farmRoleId <ID>"
+        },
+        "list": {
+            "api_level": "user",
+            "class": "scalrctl.commands.Action",
+            "http-method": "get",
+            "route": "/user/{envId}/farms/{farmId}/farm-roles/"
+        },
+        "get-scaling-configuration": {
+            "api_level": "user",
+            "class": "scalrctl.commands.Action",
+            "http-method": "get",
+            "route": "/user/{envId}/farm-roles/{farmRoleId}/scaling/"
+        },
+        "update": {
+            "api_level": "user",
+            "class": "scalrctl.commands.Action",
+            "http-method": "patch",
+            "route": "/user/{envId}/farm-roles/{farmRoleId}/",
+            "epilog": "Example: scalr-ctl farm-roles update --farmRoleId <ID> --stdin < myupdatedfarmrole.json"
+        },
+        "generate-template": {
+            "api_level": "user",
+            "class": "scalrctl.commands.Action",
+            "http-method": "get",
+            "route": "/user/{envId}/farm-roles/{farmRoleId}/actions/generate-template/"
+        },
+        "create-from-template": {
+            "api_level": "user",
+            "class": "scalrctl.commands.farm.FarmCreateFromTemplate",
+            "http-method": "post",
+            "route": "/user/{envId}/farms/{farmId}/farm-roles/",
+            "epilog": "Example: scalr-ctl farm-roles create-from-template --farmId --stdin < mytemplate.json"
+        }
+    },
+    "images": {
+        "api_level": "user",
+        "copy": {
+            "api_level": "user",
+            "class": "scalrctl.commands.Action",
+            "http-method": "post",
+            "route": "/user/{envId}/images/{imageId}/actions/copy/",
+            "epilog": "Example: scalr-ctl images copy --imageId <ID> < image.json"
+        },
+        "delete": {
+            "api_level": "user",
+            "class": "scalrctl.commands.Action",
+            "http-method": "delete",
+            "route": "/user/{envId}/images/{imageId}/"
+        },
+        "get": {
+            "api_level": "user",
+            "class": "scalrctl.commands.image.RetrieveImage",
+            "http-method": "get",
+            "route": "/user/{envId}/images/{imageId}/"
+        },
+        "group_descr": "Manage Images",
+        "list": {
+            "api_level": "user",
+            "class": "scalrctl.commands.Action",
+            "http-method": "get",
+            "route": "/user/{envId}/images/"
+        },
+        "register": {
+            "api_level": "user",
+            "class": "scalrctl.commands.Action",
+            "http-method": "post",
+            "route": "/user/{envId}/images/",
+            "epilog": "Example: scalr-ctl images register --stdin < image.json"
+        },
+        "update": {
+            "api_level": "user",
+            "class": "scalrctl.commands.image.ChangeImageAttrs",
+            "http-method": "patch",
+            "route": "/user/{envId}/images/{imageId}/",
+            "epilog": "Example: scalr-ctl images update --imageId <ID> --stdin < updatedimage.json"
+        },
+        "replace": {
+                "api_level": "user",
+                "class": "scalrctl.commands.image.ReplaceImageUser",
+                "http-method": "post",
+                "route": "/user/{envId}/images/{imageId}/actions/replace/",
+                "epilog": "Example: scalr-ctl images replace --imageId <ID> --newImageId <newID>"
+            }
+    },
+    "farm-cloud-services": {
+        "api_level": "user",
+        "list": {
+            "api_level": "user",
+            "class": "scalrctl.commands.Action",
+            "http-method": "get",
+            "route": "/user/{envId}/farms/{farmId}/cloud-services/"
+        },
+        "get": {
+            "api_level": "user",
+            "class": "scalrctl.commands.Action",
+            "http-method": "get",
+            "route": "/user/{envId}/farms/{farmId}/cloud-services/{farmCloudServiceLinkId}/"
+        },
+        "update": {
+            "api_level": "user",
+            "class": "scalrctl.commands.Action",
+            "http-method": "patch",
+            "route": "/user/{envId}/farms/{farmId}/cloud-services/{farmCloudServiceLinkId}/",
+            "epilog": "Example: scalr-ctl farm-cloud-services update --farmId <ID> --stdin < mycloudservicelink.json"
+        },
+        "delete": {
+            "api_level": "user",
+            "class": "scalrctl.commands.Action",
+            "http-method": "delete",
+            "route": "/user/{envId}/farms/{farmId}/cloud-services/{farmCloudServiceLinkId}/"
+        },
+        "group_descr": "Manage Cloud Services",
+        "create": {
+            "api_level": "user",
+            "class": "scalrctl.commands.Action",
+            "http-method": "post",
+            "route": "/user/{envId}/farms/{farmId}/cloud-services/",
+            "epilog": "Example: scalr-ctl farm-cloud-services create --stdin < mycloudservicelink.json"
+        }
+    },
+    "scripts": {
+        "api_level": "user",
+        "create": {
+            "api_level": "user",
+            "class": "scalrctl.commands.Action",
+            "http-method": "post",
+            "route": "/user/{envId}/scripts/",
+            "epilog": "Example: scalr-ctl scripts create --stdin < myscript.json"
+        },
+        "delete": {
+            "api_level": "user",
+            "class": "scalrctl.commands.Action",
+            "http-method": "delete",
+            "route": "/user/{envId}/scripts/{scriptId}/"
+        },
+        "get": {
+            "api_level": "user",
+            "class": "scalrctl.commands.Action",
+            "http-method": "get",
+            "route": "/user/{envId}/scripts/{scriptId}/"
+        },
+        "group_descr": "Manage Scripts",
+        "list": {
+            "api_level": "user",
+            "class": "scalrctl.commands.Action",
+            "http-method": "get",
+            "route": "/user/{envId}/scripts/"
+        },
+        "update": {
+            "api_level": "user",
+            "class": "scalrctl.commands.Action",
+            "http-method": "patch",
+            "route": "/user/{envId}/scripts/{scriptId}/",
+            "epilog": "Example: scalr-ctl scripts update --scriptId <ID> --stdin < myupdatedscript.json"
+        },
+        "execute": {
+            "api_level": "user",
+            "class": "scalrctl.commands.script.ExecuteScript",
+            "http-method": "post",
+            "route": "/user/{envId}/scripts/{scriptId}/actions/execute/",
+            "epilog": "Example: scalr-ctl scripts execute --serverId <ID> --scriptId <ID> --blocking --timeout 30"
+        },
+        "status": {
+            "api_level": "user",
+            "class": "scalrctl.commands.Action",
+            "http-method": "get",
+            "route": "/user/{envId}/script-executions/{scriptExecutionId}/"
+        },
+        "get-orchestration-log": {
+            "api_level": "user",
+            "class": "scalrctl.commands.Action",
+            "http-method": "get",
+            "route": "/user/{envId}/orchestration-logs/{logEntryId}/"
+        },
+        "list-orchestration-logs": {
+            "api_level": "user",
+            "class": "scalrctl.commands.Action",
+            "http-method": "get",
+            "route": "/user/{envId}/orchestration-logs/"
+        }
+    },
+    "script-versions": {
+        "api_level": "user",
+        "create": {
+            "api_level": "user",
+            "class": "scalrctl.commands.Action",
+            "http-method": "post",
+            "route": "/user/{envId}/scripts/{scriptId}/script-versions/",
+            "epilog": "Example: scalr-ctl script-versions create --scriptId <ID> --stdin < myscriptversion.json"
+        },
+        "delete": {
+            "api_level": "user",
+            "class": "scalrctl.commands.Action",
+            "http-method": "delete",
+            "route": "/user/{envId}/scripts/{scriptId}/script-versions/{scriptVersionNumber}/"
+        },
+        "get": {
+            "api_level": "user",
+            "class": "scalrctl.commands.Action",
+            "http-method": "get",
+            "route": "/user/{envId}/scripts/{scriptId}/script-versions/{scriptVersionNumber}/"
+        },
+        "group_descr": "Manage Script Versions",
+        "list": {
+            "api_level": "user",
+            "class": "scalrctl.commands.Action",
+            "http-method": "get",
+            "route": "/user/{envId}/scripts/{scriptId}/script-versions/"
+        },
+        "update": {
+            "api_level": "user",
+            "class": "scalrctl.commands.Action",
+            "http-method": "patch",
+            "route": "/user/{envId}/scripts/{scriptId}/script-versions/{scriptVersionNumber}/",
+            "epilog": "Example: scalr-ctl script-versions update --scriptId <ID> --scriptVersionNumber <VERSION> --stdin < myupdatedscriptversion.json"
+        },
+        "execute": {
+            "api_level": "user",
+            "class": "scalrctl.commands.script.ExecuteScriptVersion",
+            "http-method": "post",
+            "route": "/user/{envId}/scripts/{scriptId}/script-versions/{scriptVersionNumber}/actions/execute/",
+            "epilog": "Example: scalr-ctl script-versions execute --serverId <ID> --scriptId <ID> --scriptVersionNumber <num> --blocking --timeout 30"
+        },
+        "status": {
+            "api_level": "user",
+            "class": "scalrctl.commands.Action",
+            "http-method": "get",
+            "route": "/user/{envId}/script-executions/{scriptExecutionId}/"
+        },
+        "get-orchestration-log": {
+            "api_level": "user",
+            "class": "scalrctl.commands.Action",
+            "http-method": "get",
+            "route": "/user/{envId}/orchestration-logs/{logEntryId}/"
         }
     }
 }
