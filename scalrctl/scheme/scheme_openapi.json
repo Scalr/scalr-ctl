@@ -16,6 +16,42 @@
     "global": {
         "group_descr": "All Scalr Global scope commands",
         "cmd-group": "Available scopes",
+        "cloud-credentials": {
+            "api_level": "global",
+            "create": {
+                "api_level": "global",
+                "class": "scalrctl.commands.Action",
+                "http-method": "post",
+                "route": "/global/cloud-credentials/",
+                "epilog": "Example: scalr-ctl global cloud-credentials create --stdin < mycredentials.json"
+            },
+            "delete": {
+                "api_level": "global",
+                "class": "scalrctl.commands.Action",
+                "http-method": "delete",
+                "route": "/global/cloud-credentials/{cloudCredentialsId}/"
+            },
+            "get": {
+                "api_level": "global",
+                "class": "scalrctl.commands.Action",
+                "http-method": "get",
+                "route": "/global/cloud-credentials/{cloudCredentialsId}/"
+            },
+            "group_descr": "Manage Cloud Credentials for Global scope",
+            "list": {
+                "api_level": "global",
+                "class": "scalrctl.commands.Action",
+                "http-method": "get",
+                "route": "/global/cloud-credentials/"
+            },
+            "update": {
+                "api_level": "global",
+                "class": "scalrctl.commands.Action",
+                "http-method": "patch",
+                "route": "/global/cloud-credentials/{cloudCredentialsId}/",
+                "epilog": "Example: scalr-ctl global cloud-credentials update --cloudCredentialsId <ID> --stdin < myupdatedcredentials.json"
+            }
+        },
         "role-orchestration-rules": {
             "api_level": "global",
             "create": {
@@ -248,6 +284,42 @@
     "account": {
         "group_descr": "All Scalr Account scope commands",
         "cmd-group": "Available scopes",
+        "cloud-credentials": {
+            "api_level": "account",
+            "create": {
+                "api_level": "account",
+                "class": "scalrctl.commands.Action",
+                "http-method": "post",
+                "route": "/account/{accountId}/cloud-credentials/",
+                "epilog": "Example: scalr-ctl account cloud-credentials create --stdin < mycredentials.json"
+            },
+            "delete": {
+                "api_level": "account",
+                "class": "scalrctl.commands.Action",
+                "http-method": "delete",
+                "route": "/account/{accountId}/cloud-credentials/{cloudCredentialsId}/"
+            },
+            "get": {
+                "api_level": "account",
+                "class": "scalrctl.commands.Action",
+                "http-method": "get",
+                "route": "/account/{accountId}/cloud-credentials/{cloudCredentialsId}/"
+            },
+            "group_descr": "Manage Cloud Credentials for Account scope",
+            "list": {
+                "api_level": "account",
+                "class": "scalrctl.commands.Action",
+                "http-method": "get",
+                "route": "/account/{accountId}/cloud-credentials/"
+            },
+            "update": {
+                "api_level": "account",
+                "class": "scalrctl.commands.Action",
+                "http-method": "patch",
+                "route": "/account/{accountId}/cloud-credentials/{cloudCredentialsId}/",
+                "epilog": "Example: scalr-ctl account cloud-credentials update --cloudCredentialsId <ID> --stdin < myupdatedcredentials.json"
+            }
+        },
         "role-orchestration-rules": {
             "api_level": "account",
             "create": {
@@ -1321,5 +1393,6 @@
             "route": "/user/{envId}/orchestration-rules/",
             "epilog": "Example: scalr-ctl orchestration-rules create--stdin < myorule.json"
         }
-    }
+    },
+    
 }
