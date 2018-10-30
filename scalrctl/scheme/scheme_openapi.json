@@ -16,6 +16,42 @@
     "global": {
         "group_descr": "All Scalr Global scope commands",
         "cmd-group": "Available scopes",
+        "role-orchestration-rules": {
+            "api_level": "global",
+            "create": {
+                "api_level": "global",
+                "class": "scalrctl.commands.Action",
+                "http-method": "post",
+                "route": "/global/roles/{roleId}/orchestration-rules/",
+                "epilog": "Example: scalr-ctl global role-orchestration-rules create --roleId <ID> --stdin < myroleorule.json"
+            },
+            "delete": {
+                "api_level": "global",
+                "class": "scalrctl.commands.role_orule.DeleteRoleOrchestrationRule",
+                "http-method": "delete",
+                "route": "/global/roles/{roleId}/orchestration-rules/{orchestrationRuleId}/"
+            },
+            "get": {
+                "api_level": "global",
+                "class": "scalrctl.commands.Action",
+                "http-method": "get",
+                "route": "/global/roles/{roleId}/orchestration-rules/{orchestrationRuleId}/"
+            },
+            "group_descr": "Manage Orchestration Rules",
+            "list": {
+                "api_level": "global",
+                "class": "scalrctl.commands.Action",
+                "http-method": "get",
+                "route": "/global/roles/{roleId}/orchestration-rules/"
+            },
+            "update": {
+                "api_level": "global",
+                "class": "scalrctl.commands.Action",
+                "http-method": "patch",
+                "route": "/global/roles/{roleId}/orchestration-rules/{orchestrationRuleId}/",
+                "epilog": "Example: scalr-ctl global role-orchestration-rules update --roleId <ID> --orchestrationRuleId <ID> --stdin < newroleor.json"
+            }
+        },
         "images": {
             "api_level": "global",
             "replace": {
@@ -212,6 +248,78 @@
     "account": {
         "group_descr": "All Scalr Account scope commands",
         "cmd-group": "Available scopes",
+        "role-orchestration-rules": {
+            "api_level": "account",
+            "create": {
+                "api_level": "account",
+                "class": "scalrctl.commands.Action",
+                "http-method": "post",
+                "route": "/account/{accountId}/roles/{roleId}/orchestration-rules/",
+                "epilog": "Example: scalr-ctl account role-orchestration-rules create --roleId <ID> --stdin < myroleorule.json"
+            },
+            "delete": {
+                "api_level": "account",
+                "class": "scalrctl.commands.role_orule.DeleteRoleOrchestrationRule",
+                "http-method": "delete",
+                "route": "/account/{accountId}/roles/{roleId}/orchestration-rules/{orchestrationRuleId}/"
+            },
+            "get": {
+                "api_level": "account",
+                "class": "scalrctl.commands.Action",
+                "http-method": "get",
+                "route": "/account/{accountId}/roles/{roleId}/orchestration-rules/{orchestrationRuleId}/"
+            },
+            "group_descr": "Manage Orchestration Rules",
+            "list": {
+                "api_level": "account",
+                "class": "scalrctl.commands.Action",
+                "http-method": "get",
+                "route": "/account/{accountId}/roles/{roleId}/orchestration-rules/"
+            },
+            "update": {
+                "api_level": "account",
+                "class": "scalrctl.commands.Action",
+                "http-method": "patch",
+                "route": "/account/{accountId}/roles/{roleId}/orchestration-rules/{orchestrationRuleId}/",
+                "epilog": "Example: scalr-ctl account role-orchestration-rules update --roleId <ID> --orchestrationRuleId <ID> --stdin < myupdatedroleorule.json"
+            }
+        },
+        "orchestration-rules": {
+            "api_level": "account",
+            "create": {
+                "api_level": "account",
+                "class": "scalrctl.commands.Action",
+                "http-method": "post",
+                "route": "/account/{accountId}/orchestration-rules/",
+                "epilog": "Example: scalr-ctl account orchestration-rules create --stdin < myroleorule.json"
+            },
+            "delete": {
+                "api_level": "account",
+                "class": "scalrctl.commands.Action",
+                "http-method": "delete",
+                "route": "/account/{accountId}/orchestration-rules/{orchestrationRuleId}/"
+            },
+            "get": {
+                "api_level": "account",
+                "class": "scalrctl.commands.Action",
+                "http-method": "get",
+                "route": "/account/{accountId}/orchestration-rules/{orchestrationRuleId}/"
+            },
+            "group_descr": "Manage Orchestration Rules",
+            "list": {
+                "api_level": "account",
+                "class": "scalrctl.commands.Action",
+                "http-method": "get",
+                "route": "/account/{accountId}/orchestration-rules/"
+            },
+            "update": {
+                "api_level": "account",
+                "class": "scalrctl.commands.Action",
+                "http-method": "patch",
+                "route": "/account/{accountId}/orchestration-rules/{orchestrationRuleId}/",
+                "epilog": "Example: scalr-ctl account orchestration-rules update --orchestrationRuleId <ID> --stdin < myupdatedroleorule.json"
+            }
+        },
         "images": {
             "api_level": "account",
             "replace": {
@@ -1097,6 +1205,121 @@
             "class": "scalrctl.commands.Action",
             "http-method": "get",
             "route": "/user/{envId}/orchestration-logs/{logEntryId}/"
+        }
+    },
+    "farm-role-orchestration-rules": {
+        "api_level": "user",
+        "create": {
+            "api_level": "user",
+            "class": "scalrctl.commands.Action",
+            "http-method": "post",
+            "route": "/user/{envId}/farm-roles/{farmRoleId}/orchestration-rules/",
+            "epilog": "Example: scalr-ctl farm-role-orchestration-rules create --farmRoleId <ID> --stdin < myfarmroleor.json"
+        },
+        "delete": {
+            "api_level": "user",
+            "class": "scalrctl.commands.farm_role_orule.DeleteFarmRoleOrchestrationRule",
+            "http-method": "delete",
+            "route": "/user/{envId}/farm-roles/{farmRoleId}/orchestration-rules/{orchestrationRuleId}/"
+        },
+        "get": {
+            "api_level": "user",
+            "class": "scalrctl.commands.Action",
+            "http-method": "get",
+            "route": "/user/{envId}/farm-roles/{farmRoleId}/orchestration-rules/{orchestrationRuleId}/"
+        },
+        "group_descr": "Manage Orchestration Rules",
+        "list": {
+            "api_level": "user",
+            "class": "scalrctl.commands.Action",
+            "http-method": "get",
+            "route": "/user/{envId}/farm-roles/{farmRoleId}/orchestration-rules/"
+        },
+        "update": {
+            "api_level": "user",
+            "class": "scalrctl.commands.Action",
+            "http-method": "patch",
+            "route": "/user/{envId}/farm-roles/{farmRoleId}/orchestration-rules/{orchestrationRuleId}/",
+            "epilog": "Example: scalr-ctl farm-role-orchestration-rules update --farmRoleId <ID> --orchestrationRuleId <ID> --stdin < myupdatedfarmroleor.json"
+        }
+    },
+    "role-orchestration-rules": {
+        "api_level": "user",
+        "create": {
+            "api_level": "user",
+            "class": "scalrctl.commands.Action",
+            "http-method": "post",
+            "route": "/user/{envId}/roles/{roleId}/orchestration-rules/",
+            "epilog": "Example: scalr-ctl role-orchestration-rules create --roleId <ID> --stdin < myroleor.json"
+        },
+        "delete": {
+            "api_level": "user",
+            "class": "scalrctl.commands.role_orule.DeleteRoleOrchestrationRule",
+            "http-method": "delete",
+            "route": "/user/{envId}/roles/{roleId}/orchestration-rules/{orchestrationRuleId}/"
+        },
+        "get": {
+            "api_level": "user",
+            "class": "scalrctl.commands.Action",
+            "http-method": "get",
+            "route": "/user/{envId}/roles/{roleId}/orchestration-rules/{orchestrationRuleId}/"
+        },
+        "group_descr": "Manage Orchestration Rules",
+        "list": {
+            "api_level": "user",
+            "class": "scalrctl.commands.Action",
+            "http-method": "get",
+            "route": "/user/{envId}/roles/{roleId}/orchestration-rules/"
+        },
+        "update": {
+            "api_level": "user",
+            "class": "scalrctl.commands.Action",
+            "http-method": "patch",
+            "route": "/user/{envId}/roles/{roleId}/orchestration-rules/{orchestrationRuleId}/",
+            "epilog": "Example: scalr-ctl role-orchestration-rules update --roleId <ID> --orchestrationRuleId <ID> --stdin < myupdatedroleor.json"
+        }
+    },
+    "orchestration-rules": {
+        "api_level": "user",
+        "create": {
+            "api_level": "user",
+            "class": "scalrctl.commands.Action",
+            "http-method": "post",
+            "route": "/user/{envId}/orchestration-rules/",
+            "epilog": "Example: scalr-ctl orchestration-rules create --stdin < myroleorule.json"
+        },
+        "delete": {
+            "api_level": "user",
+            "class": "scalrctl.commands.Action",
+            "http-method": "delete",
+            "route": "/user/{envId}/orchestration-rules/{orchestrationRuleId}/"
+        },
+        "get": {
+            "api_level": "user",
+            "class": "scalrctl.commands.Action",
+            "http-method": "get",
+            "route": "/user/{envId}/orchestration-rules/{orchestrationRuleId}/"
+        },
+        "group_descr": "Manage Orchestration Rules",
+        "list": {
+            "api_level": "user",
+            "class": "scalrctl.commands.Action",
+            "http-method": "get",
+            "route": "/user/{envId}/orchestration-rules/"
+        },
+        "update": {
+            "api_level": "user",
+            "class": "scalrctl.commands.Action",
+            "http-method": "patch",
+            "route": "/user/{envId}/orchestration-rules/{orchestrationRuleId}/",
+            "epilog": "Example: scalr-ctl orchestration-rules update --orchestrationRuleId <ID> --stdin < myupdatedorule.json"
+        },
+        "create": {
+            "api_level": "user",
+            "class": "scalrctl.commands.Action",
+            "http-method": "post",
+            "route": "/user/{envId}/orchestration-rules/",
+            "epilog": "Example: scalr-ctl orchestration-rules create--stdin < myorule.json"
         }
     }
 }
