@@ -88,7 +88,6 @@ class Action(BaseAction):
         self._init()
 
     def _init(self):
-        #print "defaults.OPENAPI_ENABLED:", defaults.OPENAPI_ENABLED
         if defaults.OPENAPI_ENABLED:
             self.spec = get_spec(utils.read_spec_openapi())
         else:
@@ -390,7 +389,6 @@ class Action(BaseAction):
         self._check_arguments(**kwargs)
 
         import_data = kwargs.pop('import-data', {})
-        ##print "import_data:", import_data
         stdin = kwargs.pop('stdin', None)
         http_method = self.http_method.upper()
         if http_method not in ('PATCH', 'POST'):
@@ -407,7 +405,6 @@ class Action(BaseAction):
             else:
                 param_names.append(param_name)
 
-        ##print "param_names:", list(param_names)
         for param_name in param_names:
             try:
                 if param_name in import_data:
@@ -727,28 +724,20 @@ class _OpenAPIv2Spec(_OpenAPIBaseSpec):
 
         # load `schema`
         if schema is None:
-            ##print "SCHEMA IS NONE"
             for param in self.get_body_type_params(route, http_method):
-                ##print "param:", param
                 if 'schema' in param:
                     schema = param['schema']
-                    ##print "new schema:", schema
                     if '$ref' in schema:
                         reference = schema['$ref']
                         schema = self.lookup(schema['$ref'])
-                        ##print "total schema:", schema
-                        ##print "total reference:", reference
                     break
 
         # load child object as `schema`
         if 'discriminator' in schema:
 
             disc_key = schema['discriminator']
-            ##print "disc_key:", disc_key
             disc_path = '{}/{}'.format(reference, disc_key)
-            ##print "disc_path:", disc_path
             disc_value = data.get(disc_key) or self._discriminators.get(disc_path)
-            ##print "disc_value:", disc_value
 
             if not disc_value:
                 raise click.ClickException((
@@ -800,7 +789,6 @@ class _OpenAPIv2Spec(_OpenAPIBaseSpec):
                 else:
                     # add valid key-value
                     filtered[p_key] = data[p_key]
-
         return filtered
 
 
@@ -848,12 +836,10 @@ class _OpenAPIv3Spec(_OpenAPIBaseSpec):
             if '$ref' in schema:
                 param["name"] = [raw_block.get("name", schema['$ref'].split('/')[-1].lower()), ]
             elif 'oneOf' in schema:
-                ##print "schema", schema
                 param["name"] = [ref.split('/')[-1].lower() for ref in list_references_oneOf(schema)]
                 #raw_block.get("name", schema['$ref'].split('/')[-1].lower())
 
             result.append(param)
-        ##print "get_body_type_params:", result
         return result
 
     def get_path_type_params(self, route):
@@ -954,48 +940,31 @@ class _OpenAPIv3Spec(_OpenAPIBaseSpec):
 
         # load `schema`
         if schema is None:
-            ##print "SCHEMA IS NONE"
             for param in self.get_body_type_params(route, http_method):
-                ##print "param:", param
                 if 'schema' in param:
                     schema = param['schema']
-                    ##print "new schema:", schema
                     if '$ref' in schema:
                         reference = schema['$ref']
                         schema = self.lookup(reference)
                     elif "oneOf" in schema:  # xxx: v3
-                        ##print "oneOf in schema!"
-                        ##print "data:", data
                         obj_type = data.get("type")
                         #reference = schema['$ref']
                         list_references = [block['$ref'] for block in schema['oneOf']]
                         list_objects = [ref.split('/')[-1] for ref in list_references]
-                        ##print "list_references:", list_references
-                        ##print "list_objects:", list_objects
-                        ##print "obj_type not in list_objects:", obj_type not in list_objects
                         if obj_type not in list_objects:
                             raise click.ClickException((
                                 "Provided JSON object is incorrect: required "
                                 "param '{}' has invalid value '{}', must be one of: {}."
                                 ).format(disc_key, disc_value, self.list_concrete_types(schema)))
-                        ##print "obj_type:", obj_type
                         schema = self.lookup(reference)
-
-                    ##else:
-                        ##print "no ref in schema!"
-                    ##print "total schema:", schema
-                    ##print "total reference:", reference
                     break
 
         # load child object as `schema`
         if 'discriminator' in schema:
 
             disc_key = schema['discriminator']['propertyName'] # v3
-            #print "disc_key:", disc_key
             disc_path = '{}/{}'.format(reference, disc_key)
-            #print "disc_path:", disc_path
             disc_value = data.get(disc_key) or self._discriminators.get(disc_path)
-            #print "disc_value:", disc_value
 
             if not disc_value:
                 raise click.ClickException((
@@ -1047,7 +1016,6 @@ class _OpenAPIv3Spec(_OpenAPIBaseSpec):
                 else:
                     # add valid key-value
                     filtered[p_key] = data[p_key]
-
         return filtered
 
 

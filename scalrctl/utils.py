@@ -96,10 +96,8 @@ def reraise(message):
 
 def is_openapi_v3(data):
     if "openapi" in data:
-        print "v3!"
         return True
     elif "basePath" in data:
-        print "v2!"
         return False
 
 

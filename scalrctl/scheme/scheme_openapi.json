@@ -1393,6 +1393,5 @@
             "route": "/user/{envId}/orchestration-rules/",
             "epilog": "Example: scalr-ctl orchestration-rules create--stdin < myorule.json"
         }
-    },
-    
+    }
 }
