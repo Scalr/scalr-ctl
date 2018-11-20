@@ -5,6 +5,15 @@ scalr-ctl Changelog
 Changelog on Scalr Wiki: https://scalr-labs.atlassian.net/wiki/pages/viewpage.action?pageId=109805613
 
 
+Version 7.12.0
+--------------
+
+New feature
+
+    SCALRCORE-10390 CRUD > Cloud Credentials on global scope
+    SCALRCORE-10392 Implement --no-envelope params for get actions
+
+
 Version 2.2
 --------------
 
