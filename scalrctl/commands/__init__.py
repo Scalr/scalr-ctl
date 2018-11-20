@@ -204,7 +204,8 @@ class Action(BaseAction):
             if not hidden:
                 utils.debug(response_json.get('meta'))
 
-            if self.strip_metadata and settings.view in ('raw', 'json', 'xml') and 'data' in response_json:
+            if self.strip_metadata and self.http_method.upper() == 'GET' and \
+                    settings.view in ('raw', 'json', 'xml') and 'data' in response_json:
                 response_json = response_json['data']
                 response = json.dumps(response_json)
 
