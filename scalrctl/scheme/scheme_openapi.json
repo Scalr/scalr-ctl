@@ -1393,5 +1393,21 @@
             "route": "/user/{envId}/orchestration-rules/",
             "epilog": "Example: scalr-ctl orchestration-rules create--stdin < myorule.json"
         }
+    },
+    "cloud-locations": {
+        "api_level": "user",
+        "group_descr": "Manage Cloud Locations",
+        "list": {
+            "api_level": "user",
+            "class": "scalrctl.commands.Action",
+            "http-method": "get",
+            "route": "/user/{envId}/clouds/{cloudPlatform}/cloud-locations/"
+        },
+        "list-instance-types": {
+            "api_level": "user",
+            "class": "scalrctl.commands.Action",
+            "http-method": "get",
+            "route": "/user/{envId}/clouds/{cloudPlatform}/cloud-locations/{cloudLocation}/instance-types/"
+        }
     }
 }
