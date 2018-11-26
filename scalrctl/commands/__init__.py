@@ -84,6 +84,7 @@ class Action(BaseAction):
         self.route = route
         self.http_method = http_method
         self.api_level = api_level
+        self.strip_metadata = False
 
         self._init()
 
@@ -125,6 +126,9 @@ class Action(BaseAction):
 
         if kwargs.get('columns'):
             self._table_columns = kwargs.pop('columns').split(',')
+
+        if kwargs.pop('strip_metadata', False):
+            self.strip_metadata = True
 
         if kwargs.pop('dryrun', False):
             self.dry_run = True
@@ -228,6 +232,11 @@ class Action(BaseAction):
             if not hidden:
                 utils.debug(response_json.get('meta'))
 
+            if self.strip_metadata and self.http_method.upper() == 'GET' and \
+                    settings.view in ('raw', 'json', 'xml') and 'data' in response_json:  # SCALRCORE-10392
+                response_json = response_json['data']
+                response = json.dumps(response_json)
+
             if hidden:
                 pass
             elif settings.view in ('raw', 'json'):
@@ -321,6 +330,8 @@ class Action(BaseAction):
             json_ = click.Option(('--json', 'transformation'), is_flag=True,
                                  flag_value='raw', default=False,
                                  help="Print raw response")
+            strip_metadata = click.Option(('--no-envelope', 'strip_metadata'), is_flag=True, default=False,
+                               help="Strip server response from all metadata.")
             xml = click.Option(('--xml', 'transformation'), is_flag=True,
                                flag_value='xml', default=False,
                                help="Print response as a XML")
@@ -329,7 +340,7 @@ class Action(BaseAction):
                                 help="Print response as a colored tree")
             nocolor = click.Option(('--nocolor', 'nocolor'), is_flag=True,
                                    default=False, help="Use colors")
-            options += [raw, tree, nocolor, json_, xml]
+            options += [raw, tree, nocolor, json_, xml, strip_metadata]
 
             if self.name not in ('get', 'retrieve'):  # [ST-54] [ST-102]
                 table = click.Option(('--table', 'transformation'),
