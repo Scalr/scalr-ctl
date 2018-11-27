@@ -49,7 +49,7 @@ class RolePromote(commands.SimplifiedAction):
         hlp = "The name of a new Role."
         new_name = click.Option(('--name', 'name'), required=True, help=hlp)
         options = [new_name, ]
-        options.extend(super(RoleClone, self).get_options())
+        options.extend(super(RolePromote, self).get_options())
         return options
 
 
