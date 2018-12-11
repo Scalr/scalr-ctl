@@ -561,12 +561,12 @@
                 "http-method": "get",
                 "route": "/{accountId}/events/"
             },
-            "retrieve": {
+            "update": {
                 "api_level": "account",
                 "class": "scalrctl.commands.Action",
-                "hidden": true,
-                "http-method": "get",
-                "route": "/{accountId}/events/{eventId}/"
+                "http-method": "patch",
+                "route": "/{accountId}/events/{eventId}/",
+                "epilog": "Example: scalr-ctl account events update eventId <ID> --stdin < myupdatedevent.json"
             }
         },
         "images": {
@@ -1128,13 +1128,6 @@
     },
     "events": {
         "api_level": "user",
-        "change-attributes": {
-            "api_level": "user",
-            "class": "scalrctl.commands.Action",
-            "hidden": true,
-            "http-method": "patch",
-            "route": "/{envId}/events/{eventId}/"
-        },
         "create": {
             "api_level": "user",
             "class": "scalrctl.commands.Action",
@@ -1160,13 +1153,6 @@
             "class": "scalrctl.commands.Action",
             "http-method": "get",
             "route": "/{envId}/events/"
-        },
-        "retrieve": {
-            "api_level": "user",
-            "class": "scalrctl.commands.Action",
-            "hidden": true,
-            "http-method": "get",
-            "route": "/{envId}/events/{eventId}/"
         },
         "update": {
             "api_level": "user",

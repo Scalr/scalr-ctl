@@ -336,6 +336,42 @@
                 "route": "/account/{accountId}/cost-centers/"
             }
         },
+        "events": {
+            "api_level": "account",
+            "create": {
+                "api_level": "account",
+                "class": "scalrctl.commands.Action",
+                "http-method": "post",
+                "route": "/account/{accountId}/events/",
+                "epilog": "Example: scalr-ctl account events create --stdin < myevent.json"
+            },
+            "delete": {
+                "api_level": "account",
+                "class": "scalrctl.commands.Action",
+                "http-method": "delete",
+                "route": "/account/{accountId}/events/{eventId}/"
+            },
+            "get": {
+                "api_level": "account",
+                "class": "scalrctl.commands.Action",
+                "http-method": "get",
+                "route": "/account/{accountId}/events/{eventId}/"
+            },
+            "group_descr": "Manage Events available in the Scalr Account",
+            "list": {
+                "api_level": "account",
+                "class": "scalrctl.commands.Action",
+                "http-method": "get",
+                "route": "/account/{accountId}/events/"
+            },
+            "update": {
+                "api_level": "account",
+                "class": "scalrctl.commands.Action",
+                "http-method": "patch",
+                "route": "/account/{accountId}/events/{eventId}/",
+                "epilog": "Example: scalr-ctl account events update eventId <ID> --stdin < myupdatedevent.json"
+            }
+        },
         "role-orchestration-rules": {
             "api_level": "account",
             "create": {
@@ -1440,6 +1476,61 @@
             "class": "scalrctl.commands.Action",
             "http-method": "get",
             "route": "/user/{envId}/cost-centers/"
+        }
+    },
+    "events": {
+        "api_level": "user",
+        "create": {
+            "api_level": "user",
+            "class": "scalrctl.commands.Action",
+            "http-method": "post",
+            "route": "/user/{envId}/events/",
+            "epilog": "Example: scalr-ctl events create --stdin < myevent.json"
+        },
+        "delete": {
+            "api_level": "user",
+            "class": "scalrctl.commands.Action",
+            "http-method": "delete",
+            "route": "/user/{envId}/events/{eventId}/"
+        },
+        "get": {
+            "api_level": "user",
+            "class": "scalrctl.commands.Action",
+            "http-method": "get",
+            "route": "/user/{envId}/events/{eventId}/"
+        },
+        "group_descr": "Manage custom event definitions",
+        "list": {
+            "api_level": "user",
+            "class": "scalrctl.commands.Action",
+            "http-method": "get",
+            "route": "/user/{envId}/events/"
+        },
+        "update": {
+            "api_level": "user",
+            "class": "scalrctl.commands.Action",
+            "http-method": "patch",
+            "route": "/user/{envId}/events/{eventId}/",
+            "epilog": "Example: scalr-ctl events update --eventId <ID> --stdin < myupdatedevent.json"
+        },
+        "fire": {
+            "api_level": "user",
+            "class": "scalrctl.commands.event.Fire",
+            "http-method": "post",
+            "route": "/user/{envId}/events/{eventId}/actions/fire/",
+            "epilog": "Example: scalr-ctl events fire --eventId <ID> --serverId <SERVER_ID>"
+        },
+        "get-log": {
+            "api_level": "user",
+            "class": "scalrctl.commands.Action",
+            "http-method": "get",
+            "route": "/user/{envId}/event-logs/{eventLogEntryId}/"
+        },
+        "list-logs": {
+            "api_level": "user",
+            "class": "scalrctl.commands.Action",
+            "http-method": "get",
+            "route": "/user/{envId}/event-logs/"
         }
     }
 }
