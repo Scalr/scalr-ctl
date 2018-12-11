@@ -403,6 +403,22 @@
             },
             "group_descr": "Manage ACL Roles"
         },
+        "cost-centers": {
+            "api_level": "account",
+            "get": {
+                "api_level": "account",
+                "class": "scalrctl.commands.Action",
+                "http-method": "get",
+                "route": "/{accountId}/cost-centers/{costCenterId}/"
+            },
+            "group_descr": "Manage Cost Centres",
+            "list": {
+                "api_level": "account",
+                "class": "scalrctl.commands.Action",
+                "http-method": "get",
+                "route": "/{accountId}/cost-centers/"
+            }
+        },
         "clouds": {
             "api_level": "account",
             "delete": {
@@ -1108,13 +1124,6 @@
             "class": "scalrctl.commands.Action",
             "http-method": "get",
             "route": "/{envId}/cost-centers/"
-        },
-        "retrieve": {
-            "api_level": "user",
-            "class": "scalrctl.commands.Action",
-            "hidden": true,
-            "http-method": "get",
-            "route": "/{envId}/cost-centers/{costCenterId}/"
         }
     },
     "events": {

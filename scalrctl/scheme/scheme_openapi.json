@@ -320,6 +320,22 @@
                 "epilog": "Example: scalr-ctl account cloud-credentials update --cloudCredentialsId <ID> --stdin < myupdatedcredentials.json"
             }
         },
+        "cost-centers": {
+            "api_level": "account",
+            "get": {
+                "api_level": "account",
+                "class": "scalrctl.commands.Action",
+                "http-method": "get",
+                "route": "/account/{accountId}/cost-centers/{costCenterId}/"
+            },
+            "group_descr": "Manage Cost Centres",
+            "list": {
+                "api_level": "account",
+                "class": "scalrctl.commands.Action",
+                "http-method": "get",
+                "route": "/account/{accountId}/cost-centers/"
+            }
+        },
         "role-orchestration-rules": {
             "api_level": "account",
             "create": {
@@ -1408,6 +1424,22 @@
             "class": "scalrctl.commands.Action",
             "http-method": "get",
             "route": "/user/{envId}/clouds/{cloudPlatform}/cloud-locations/{cloudLocation}/instance-types/"
+        }
+    },
+    "cost-centers": {
+        "api_level": "user",
+        "get": {
+            "api_level": "user",
+            "class": "scalrctl.commands.Action",
+            "http-method": "get",
+            "route": "/user/{envId}/cost-centers/{costCenterId}/"
+        },
+        "group_descr": "Manage Cost Centres",
+        "list": {
+            "api_level": "user",
+            "class": "scalrctl.commands.Action",
+            "http-method": "get",
+            "route": "/user/{envId}/cost-centers/"
         }
     }
 }
