@@ -409,12 +409,9 @@ class Action(BaseAction):
         #param_names = [p['name'] for p in self.spec.get_body_type_params(self.route, self.http_method)]
 
         param_names = []
-        for param_data in self.spec.get_body_type_params(self.route, self.http_method):
-            param_name = param_data['name']
-            if isinstance(param_name, list): # XXX:oneOf
-                param_names.extend(param_name)
-            else:
-                param_names.append(param_name)
+        param_data = self.spec.get_body_type_params(self.route, self.http_method)
+        param_name = param_data['name']
+        param_names.extend(param_name)
 
         for param_name in param_names:
             try:
@@ -477,7 +474,8 @@ class Action(BaseAction):
                     body_params = self.spec.get_body_type_params(self.route, self.http_method)
                     if self.http_method.upper() in ('GET', 'DELETE'):
                         payload[key] = value
-                    elif body_params and key == body_params[0]['name']:
+                    #elif body_params and key == body_params[0]['name']:  # xxx 16.12.18
+                    elif body_params and key in body_params['name']:
                         data.update(value)
         if self.dry_run:
             click.echo('{} {} {} {}'.format(self.http_method, uri,
@@ -597,8 +595,10 @@ class _OpenAPIBaseSpec(object):
     def get_raw_params(self, route, http_method):
         result = self.get_path_type_params(route)
         if http_method.upper() in ('GET', 'DELETE'):
-            body_params = self.get_body_type_params(route, http_method)
-            result.extend(body_params)
+            body_param = self.get_body_type_params(route, http_method)
+            #result.extend(body_params)
+            if body_param:
+                result.append(body_param)
         return result
 
     def result_descr(self, route, http_method):
@@ -638,7 +638,7 @@ class _OpenAPIBaseSpec(object):
                 references += self.list_concrete_types_recursive(ref_dict['$ref'])
         return references
 
-    def handle_oneof(data, obj_type=None):
+    def handle_oneof(self, data, obj_type=None):
         '''
         Returns full reference to object if obj_type is present inside oneOf block
         '''
@@ -667,10 +667,15 @@ class _OpenAPIv2Spec(_OpenAPIBaseSpec):
 
     def get_body_type_params(self, route, http_method):
         route_data = self.raw_spec['paths'][route][http_method]
-        data = [param for param in route_data.get('parameters', '')]
-        if 'name' in data: #xxx v3 uniformity
-            data['name'] = [data['name'], ]
-        return data
+        data = route_data.get('parameters', [])
+        if data:
+            return dict(
+                schema = data[0].get('schema'),
+                required = data[0].get('required'),
+                description = data[0].get('description'),
+                name = [data[0].get('name'),]
+            )
+        return []
 
     def get_path_type_params(self, route):
         route_data = self.raw_spec['paths'][route]
@@ -735,13 +740,13 @@ class _OpenAPIv2Spec(_OpenAPIBaseSpec):
 
         # load `schema`
         if schema is None:
-            for param in self.get_body_type_params(route, http_method):
-                if 'schema' in param:
-                    schema = param['schema']
-                    if '$ref' in schema:
-                        reference = schema['$ref']
-                        schema = self.lookup(schema['$ref'])
-                    break
+            param = self.get_body_type_params(route, http_method)
+            if 'schema' in param:
+                schema = param['schema']
+                if '$ref' in schema:
+                    reference = schema['$ref']
+                    schema = self.lookup(schema['$ref'])
+
 
         # load child object as `schema`
         if 'discriminator' in schema:
@@ -833,7 +838,6 @@ class _OpenAPIv3Spec(_OpenAPIBaseSpec):
                     list_refs.append(type_dict['$ref'])
             return list_refs
 
-        result = []
         route_data = self.raw_spec['paths'][route][http_method]
         if "requestBody" in route_data:
             param = {}
@@ -850,8 +854,8 @@ class _OpenAPIv3Spec(_OpenAPIBaseSpec):
                 param["name"] = [ref.split('/')[-1].lower() for ref in list_references_oneOf(schema)]
                 #raw_block.get("name", schema['$ref'].split('/')[-1].lower())
 
-            result.append(param)
-        return result
+            return param
+        return []
 
     def get_path_type_params(self, route):
         route_data = self.raw_spec['paths'][route]
@@ -951,24 +955,23 @@ class _OpenAPIv3Spec(_OpenAPIBaseSpec):
 
         # load `schema`
         if schema is None:
-            for param in self.get_body_type_params(route, http_method):
-                if 'schema' in param:
-                    schema = param['schema']
-                    if '$ref' in schema:
-                        reference = schema['$ref']
-                        schema = self.lookup(reference)
-                    elif "oneOf" in schema:  # xxx: v3
-                        obj_type = data.get("type")
-                        #reference = schema['$ref']
-                        list_references = [block['$ref'] for block in schema['oneOf']]
-                        list_objects = [ref.split('/')[-1] for ref in list_references]
-                        if obj_type not in list_objects:
-                            raise click.ClickException((
-                                "Provided JSON object is incorrect: required "
-                                "param '{}' has invalid value '{}', must be one of: {}."
-                                ).format(disc_key, disc_value, self.list_concrete_types(schema)))
-                        schema = self.lookup(reference)
-                    break
+            param = self.get_body_type_params(route, http_method)
+            if 'schema' in param:
+                schema = param['schema']
+                if '$ref' in schema:
+                    reference = schema['$ref']
+                    schema = self.lookup(reference)
+                elif "oneOf" in schema:  # xxx: v3
+                    obj_type = data.get("type")
+                    #reference = schema['$ref']
+                    list_references = [block['$ref'] for block in schema['oneOf']]
+                    list_objects = [ref.split('/')[-1] for ref in list_references]
+                    if obj_type not in list_objects:
+                        raise click.ClickException((
+                            "Provided JSON object is incorrect: required "
+                            "param '{}' has invalid value '{}', must be one of: {}."
+                            ).format(disc_key, disc_value, self.list_concrete_types(schema)))
+                    schema = self.lookup(reference)
 
         # load child object as `schema`
         if 'discriminator' in schema:

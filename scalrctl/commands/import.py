@@ -172,7 +172,7 @@ class Import(commands.Action):
                 .format('GET', route)
             raise click.ClickException(msg)
 
-        obj_type = action._get_body_type_params()[0]['name']
+        obj_type = action._get_body_type_params()['name']
         if action.name not in ('role-image',):
             kwargs['import-data'] = {obj_type: obj_data['data']}
 
