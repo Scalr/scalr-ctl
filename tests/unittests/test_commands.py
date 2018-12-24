@@ -11,7 +11,7 @@ if defaults.OPENAPI_ENABLED:
 else:
     spec = commands.get_spec(utils.read_spec("user", ext='json'))
 
-def test_get_body_type_params():
+def _test_get_body_type_params():
     if defaults.OPENAPI_ENABLED:
         route = "/user/{envId}/scripts/{scriptId}/"
     else:
@@ -27,6 +27,16 @@ def test_get_body_type_params():
     if not defaults.OPENAPI_ENABLED:  # XXX
         assert params['name'].endswith('Object')
         assert 'in' in params
+
+def test_merge_all():
+    data = {u'allOf': [{u'$ref': u'#/components/schemas/StorageConfiguration'},
+  {u'properties': {u'template': {u'$ref': u'#/components/schemas/PersistentStorageTemplate'}},
+   u'required': [u'template'],
+   u'type': u'object',
+   u'x-createOnly': [u'type'],
+   u'x-usedIn': [u'/user/{envId}/farm-roles/{farmRoleId}/storage/',
+    u'/user/{envId}/farm-roles/{farmRoleId}/storage/{storageConfigurationId}/']}]}
+    print spec.merge_all(data)
 
 
 

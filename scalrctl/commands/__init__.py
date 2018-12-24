@@ -5,6 +5,9 @@ import re
 import os
 import time
 
+from itertools import chain
+from collections import defaultdict
+
 import dicttoxml
 
 from scalrctl import click, request, settings, utils, view, examples, defaults
@@ -80,6 +83,8 @@ class Action(BaseAction):
     delete_target = None
 
     def __init__(self, name, route, http_method, api_level, *args, **kwargs):
+        print "-------> ACTION created with id %s, name: %s, route: %s, http_method: %s." % (id(self), name, route, http_method)
+
         self.name = name
         self.route = route
         self.http_method = http_method
@@ -145,6 +150,7 @@ class Action(BaseAction):
         return kwargs
 
     def _get_object(self, *args, **kwargs):
+        print "Action %s calls _get_object to create new Action" % id(self)
         try:
             obj = self.__class__(name='get', route=self.route,
                                  http_method='get', api_level=self.api_level)
@@ -163,6 +169,7 @@ class Action(BaseAction):
 
 
     def _edit_object(self, *args, **kwargs):
+        print "Action %s calls _edit_object to create new Action" % id(self)
         raw_object = self._get_object(*args, **kwargs)
         raw_object = click.edit(raw_object)
         if raw_object is None:
@@ -414,6 +421,7 @@ class Action(BaseAction):
         param_names.extend(param_name)
 
         for param_name in param_names:
+            print "param_name:", param_name
             try:
                 if param_name in import_data:
                     json_object = self.spec.filter_json_object(
@@ -425,9 +433,11 @@ class Action(BaseAction):
                 else:
                     if http_method == 'PATCH':
                         if stdin:
+                            print "Action %s about to call additional _get_object() from pre()" % id(self)
                             # XXX: `_get_object` makes additional GET to load all
                             # discriminator's into `self._discriminators` map
                             self._get_object(*args, **kwargs)
+                            print "Action %s has called _get_object from pre()" % id(self)
                             json_object = self._read_object()
                         else:
                             json_object = self._edit_object(*args, **kwargs)
@@ -454,6 +464,7 @@ class Action(BaseAction):
         """
         Callback for click subcommand.
         """
+        print "Action %s called run() with args %s and kwargs: %s. self.http_method: %s " % (id(self), args, kwargs, self.http_method)
         hide_output = kwargs.pop('hide_output', False)  # [ST-88]
         args, kwargs = self.pre(*args, **kwargs)
         uri = self._request_template
@@ -592,6 +603,10 @@ class _OpenAPIBaseSpec(object):
                             schema=None, reference=None):
         raise NotImplementedError()
 
+    @abc.abstractmethod
+    def lookup(self, response_ref):
+        raise NotImplementedError()
+
     def get_raw_params(self, route, http_method):
         result = self.get_path_type_params(route)
         if http_method.upper() in ('GET', 'DELETE'):
@@ -605,20 +620,6 @@ class _OpenAPIBaseSpec(object):
         ref = self.get_response_ref(route, http_method)
         if ref:
             return self.lookup(ref)
-
-    def lookup(self, response_ref):
-        """
-        Returns document section
-        Example: #/definitions/Image returns Image defenition section.
-        """
-        if response_ref.startswith('#'):
-            paths = response_ref.split('/')[1:]
-            result = self.raw_spec
-            for path in paths:
-                if path not in result:
-                    return
-                result = result[path]
-            return result
 
     def list_concrete_types(self, schema):
         types = []
@@ -653,6 +654,20 @@ class _OpenAPIv2Spec(_OpenAPIBaseSpec):
     @property
     def base_path(self):
         return self.raw_spec["basePath"]
+
+    def lookup(self, response_ref):
+        """
+        Returns document section
+        Example: #/definitions/Image returns Image defenition section.
+        """
+        if response_ref.startswith('#'):
+            paths = response_ref.split('/')[1:]
+            result = self.raw_spec
+            for path in paths:
+                if path not in result:
+                    return
+                result = result[path]
+            return result
 
     def get_response_ref(self, route, http_method):
         route_data = self.raw_spec['paths'][route]
@@ -736,6 +751,7 @@ class _OpenAPIv2Spec(_OpenAPIBaseSpec):
         Removes immutable parts from JSON object
         before sending it in POST or PATCH.
         """
+
         filtered = {}
 
         # load `schema`
@@ -747,10 +763,8 @@ class _OpenAPIv2Spec(_OpenAPIBaseSpec):
                     reference = schema['$ref']
                     schema = self.lookup(schema['$ref'])
 
-
         # load child object as `schema`
         if 'discriminator' in schema:
-
             disc_key = schema['discriminator']
             disc_path = '{}/{}'.format(reference, disc_key)
             disc_value = data.get(disc_key) or self._discriminators.get(disc_path)
@@ -775,7 +789,6 @@ class _OpenAPIv2Spec(_OpenAPIBaseSpec):
         if schema and 'properties' in schema:
             create_only_props = schema.get('x-createOnly', '')
             for p_key, p_value in schema['properties'].items():
-
                 if reference:
                     key_path = '.'.join([reference.split('/')[-1], p_key])
                 else:
@@ -817,6 +830,20 @@ class _OpenAPIv3Spec(_OpenAPIBaseSpec):
         path = parse.urlsplit(result).path
         return path[:-1]
 
+    def lookup(self, response_ref):
+        """
+        Returns document section
+        Example: #/definitions/Image returns Image defenition section.
+        """
+        if response_ref.startswith('#'):
+            paths = response_ref.split('/')[1:]
+            result = self.raw_spec
+            for path in paths:
+                if path not in result:
+                    return
+                result = result[path]
+            return result
+
     def get_response_ref(self, route, http_method):
         responses = self.raw_spec['paths'][route][http_method]['responses']
         response_200 = responses.get(success_codes[http_method])
@@ -849,9 +876,11 @@ class _OpenAPIv3Spec(_OpenAPIBaseSpec):
             schema = param["schema"]
 
             if '$ref' in schema:
-                param["name"] = [raw_block.get("name", schema['$ref'].split('/')[-1].lower()), ]
+                #param["name"] = [raw_block.get("name", schema['$ref'].split('/')[-1].lower()), ]    #xxx: 19.12.2018
+                param["name"] = [raw_block.get("name", schema['$ref'].split('/')[-1]), ]
             elif 'oneOf' in schema:
-                param["name"] = [ref.split('/')[-1].lower() for ref in list_references_oneOf(schema)]
+                #param["name"] = [ref.split('/')[-1].lower() for ref in list_references_oneOf(schema)]  #xxx: 19.12.2018
+                param["name"] = [ref.split('/')[-1] for ref in list_references_oneOf(schema)]
                 #raw_block.get("name", schema['$ref'].split('/')[-1].lower())
 
             return param
@@ -911,9 +940,9 @@ class _OpenAPIv3Spec(_OpenAPIBaseSpec):
             response_ref = self.handle_oneof(data, obj_type)
         response_descr = self.lookup(response_ref)
         if 'allOf' in response_descr:
-            properties = self.merge_properties(response_descr)
+            properties = self.merge_all(response_descr).get('properties', {})
         else:
-            properties = response_descr['properties']
+            properties = response_descr.get('properties', {})
 
         column_names = []
         for k, v in properties.items():
@@ -929,21 +958,32 @@ class _OpenAPIv3Spec(_OpenAPIBaseSpec):
                                     column_names.append("%s.id" % k)
         return column_names
 
-    def merge_properties(self, data):
-        merged_properties = {}
+    def merge_all(self, data):
+        merged = {}
+
         if "allOf" not in data:
-            raise MultipleClickException("Invalid spec data: Cannot merge properties: %s" % data)
+            #raise MultipleClickException("Invalid spec data: Cannot merge object scpec block: %s" % data)
+            return data
 
         data = data['allOf']
-
-        for item in data:
-            if 'properties' in item:
-                merged_properties.update(item['properties'])
-            elif "$ref" in item:
-                obj = self.lookup(item['$ref'])
-                if 'properties' in obj:
-                    merged_properties.update(obj['properties'])
-        return merged_properties
+        for block in data:
+            if "$ref" in block:
+                block = self.lookup(block['$ref'])
+            for k, v in block.items():
+                if isinstance(v, list):
+                    if k not in merged:
+                        merged[k] = v
+                    else:
+                        merged[k] += v
+                        merged[k] = list(set(merged[k]))
+                elif isinstance(v, dict):
+                    if k not in merged:
+                        merged[k] = v
+                    else:
+                        merged[k].update(v)
+                else:
+                    merged[k] = v
+        return merged
 
     def filter_json_object(self, data, route, http_method, filter_createonly=False,
                             schema=None, reference=None):
@@ -960,23 +1000,12 @@ class _OpenAPIv3Spec(_OpenAPIBaseSpec):
                 schema = param['schema']
                 if '$ref' in schema:
                     reference = schema['$ref']
-                    schema = self.lookup(reference)
-                elif "oneOf" in schema:  # xxx: v3
-                    obj_type = data.get("type")
-                    #reference = schema['$ref']
-                    list_references = [block['$ref'] for block in schema['oneOf']]
-                    list_objects = [ref.split('/')[-1] for ref in list_references]
-                    if obj_type not in list_objects:
-                        raise click.ClickException((
-                            "Provided JSON object is incorrect: required "
-                            "param '{}' has invalid value '{}', must be one of: {}."
-                            ).format(disc_key, disc_value, self.list_concrete_types(schema)))
-                    schema = self.lookup(reference)
+                    schema = self.lookup(schema['$ref'])
 
         # load child object as `schema`
         if 'discriminator' in schema:
-
-            disc_key = schema['discriminator']['propertyName'] # v3
+            # disc_key = schema['discriminator']
+            disc_key = schema.get("discriminator").get('propertyName')  #
             disc_path = '{}/{}'.format(reference, disc_key)
             disc_value = data.get(disc_key) or self._discriminators.get(disc_path)
 
@@ -984,7 +1013,16 @@ class _OpenAPIv3Spec(_OpenAPIBaseSpec):
                 raise click.ClickException((
                     "Provided JSON object is incorrect: missing required param '{}'."
                 ).format(disc_key))
-            elif disc_value not in self.list_concrete_types(schema):
+
+            #list_references = [block.get('$ref','').split('/')[-1] for block in schema['oneOf']]
+
+            reference = '#/components/schemas/{}'.format(disc_value)
+            schema = self.lookup(reference)
+            if "allOf" in schema:
+                schema = self.merge_all(schema)
+
+            #if not (disc_value not in list_references or disc_value not in self.list_concrete_types(schema)):
+            if disc_value not in self.list_concrete_types(schema):
                 raise click.ClickException((
                     "Provided JSON object is incorrect: required "
                     "param '{}' has invalid value '{}', must be one of: {}."
@@ -993,14 +1031,11 @@ class _OpenAPIv3Spec(_OpenAPIBaseSpec):
                 # save discriminator for current reference/key
                 self._discriminators[disc_path] = disc_value
 
-            reference = '#/definitions/{}'.format(disc_value)
-            schema = self.lookup(reference)
 
         # filter input data by properties of `schema`
         if schema and 'properties' in schema:
             create_only_props = schema.get('x-createOnly', '')
             for p_key, p_value in schema['properties'].items():
-
                 if reference:
                     key_path = '.'.join([reference.split('/')[-1], p_key])
                 else:
@@ -1019,17 +1054,23 @@ class _OpenAPIv3Spec(_OpenAPIBaseSpec):
                 if '$ref' in p_value and isinstance(data[p_key], dict):
                     # recursive filter sub-object
                     utils.debug("Filter sub-object: {}.".format(p_value['$ref']))
+
+                    sub_schema = self.lookup(p_value['$ref'])
+                    if "allOf" in sub_schema:
+                        sub_schema = self.merge_all(sub_schema)
+
                     filtered[p_key] = self.filter_json_object(
                         data[p_key],
                         route,
                         http_method,
                         filter_createonly=filter_createonly,
                         reference=p_value['$ref'],
-                        schema=self.lookup(p_value['$ref']),
+                        schema=sub_schema,
                     )
                 else:
                     # add valid key-value
                     filtered[p_key] = data[p_key]
+        print "result of filtering: ", filtered
         return filtered
 
 
