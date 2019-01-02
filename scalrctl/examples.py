@@ -36,7 +36,14 @@ def _read_spec(api_level, extension="json"):
 
 def _item_by_ref(spec_data, ref):
     definition = ref.strip('/').split('/')[-1]
+    '''
     if utils.is_openapi_v3(spec_data):
+        return spec_data['components']['schemas'][definition]
+    else:
+        return spec_data['definitions'][definition]
+    '''
+    is_openapi_v3 = 'components' in spec_data and 'schemas' in spec_data['components']
+    if is_openapi_v3:
         return spec_data['components']['schemas'][definition]
     else:
         return spec_data['definitions'][definition]
@@ -48,8 +55,13 @@ def _generate_params(spec_data, schema):
     if '$ref' in schema:
         schema = _item_by_ref(spec_data, schema['$ref'])
 
-    if 'properties' in schema:
-        for p_key, p_value in schema['properties'].items():
+    if 'allOf' in schema:
+        properties = utils.merge_all(schema, spec_data).get('properties', {})
+    else:
+        properties = schema.get('properties', {})
+
+    if properties:
+        for p_key, p_value in properties.items():
             if p_value.get('readOnly'):
                 continue
             if '$ref' in p_value:
@@ -68,7 +80,6 @@ def generate_post_data(spec_data, endpoint):
     """
     Generates POST data for specified API endpoint.
     """
-
     if utils.is_openapi_v3(spec_data):
         return _generate_post_data_v3(spec_data, endpoint)
     else:
@@ -76,10 +87,10 @@ def generate_post_data(spec_data, endpoint):
 
 
 def _generate_post_data_v2(spec_data, endpoint):
-    if endpoint in spec_data['paths']:
-        params_spec = spec_data['paths'].get(endpoint)
-    else:
+    if endpoint not in spec_data.get('paths', {}):
         raise click.ClickException('API endpoint {} not found'.format(endpoint))
+
+    params_spec = spec_data['paths'].get(endpoint)
 
     if 'post' in params_spec:
         if 'parameters' in params_spec['post']:
@@ -161,7 +172,13 @@ def create_post_example(api_level, endpoint):
     if endpoint in EXCLUDES:
         raise click.ClickException('Invalid API endpoint')
 
-    spec_data = json.loads(_read_spec(api_level))
+    #spec_data = json.loads(_read_spec(api_level))
+
+    if defaults.OPENAPI_ENABLED:
+        spec_data = utils.read_spec_openapi()
+    else:
+        spec_data = utils.read_spec(api_level, ext='json')
+
     post_data = generate_post_data(spec_data, endpoint)
     object_name = get_definition(spec_data, endpoint)
     doc_url = get_doc_url(api_level, endpoint)

@@ -94,6 +94,7 @@ class Action(BaseAction):
         self._init()
 
     def _init(self):
+        print "[_init] defaults.OPENAPI_ENABLED:", defaults.OPENAPI_ENABLED
         if defaults.OPENAPI_ENABLED:
             self.spec = get_spec(utils.read_spec_openapi())
         else:
@@ -603,9 +604,12 @@ class _OpenAPIBaseSpec(object):
                             schema=None, reference=None):
         raise NotImplementedError()
 
-    @abc.abstractmethod
     def lookup(self, response_ref):
-        raise NotImplementedError()
+        """
+        Returns document section
+        Example: #/definitions/Image returns Image defenition section.
+        """
+        return utils.lookup(response_ref, self.raw_spec)
 
     def get_raw_params(self, route, http_method):
         result = self.get_path_type_params(route)
@@ -654,20 +658,6 @@ class _OpenAPIv2Spec(_OpenAPIBaseSpec):
     @property
     def base_path(self):
         return self.raw_spec["basePath"]
-
-    def lookup(self, response_ref):
-        """
-        Returns document section
-        Example: #/definitions/Image returns Image defenition section.
-        """
-        if response_ref.startswith('#'):
-            paths = response_ref.split('/')[1:]
-            result = self.raw_spec
-            for path in paths:
-                if path not in result:
-                    return
-                result = result[path]
-            return result
 
     def get_response_ref(self, route, http_method):
         route_data = self.raw_spec['paths'][route]
@@ -830,20 +820,6 @@ class _OpenAPIv3Spec(_OpenAPIBaseSpec):
         path = parse.urlsplit(result).path
         return path[:-1]
 
-    def lookup(self, response_ref):
-        """
-        Returns document section
-        Example: #/definitions/Image returns Image defenition section.
-        """
-        if response_ref.startswith('#'):
-            paths = response_ref.split('/')[1:]
-            result = self.raw_spec
-            for path in paths:
-                if path not in result:
-                    return
-                result = result[path]
-            return result
-
     def get_response_ref(self, route, http_method):
         responses = self.raw_spec['paths'][route][http_method]['responses']
         response_200 = responses.get(success_codes[http_method])
@@ -959,31 +935,7 @@ class _OpenAPIv3Spec(_OpenAPIBaseSpec):
         return column_names
 
     def merge_all(self, data):
-        merged = {}
-
-        if "allOf" not in data:
-            #raise MultipleClickException("Invalid spec data: Cannot merge object scpec block: %s" % data)
-            return data
-
-        data = data['allOf']
-        for block in data:
-            if "$ref" in block:
-                block = self.lookup(block['$ref'])
-            for k, v in block.items():
-                if isinstance(v, list):
-                    if k not in merged:
-                        merged[k] = v
-                    else:
-                        merged[k] += v
-                        merged[k] = list(set(merged[k]))
-                elif isinstance(v, dict):
-                    if k not in merged:
-                        merged[k] = v
-                    else:
-                        merged[k].update(v)
-                else:
-                    merged[k] = v
-        return merged
+        return utils.merge_all(data, self.raw_spec)
 
     def filter_json_object(self, data, route, http_method, filter_createonly=False,
                             schema=None, reference=None):

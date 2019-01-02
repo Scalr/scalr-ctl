@@ -101,6 +101,49 @@ def is_openapi_v3(data):
         return False
 
 
+def lookup(response_ref, raw_spec):
+    """
+    Returns document section
+    Example: #/definitions/Image returns Image defenition section.
+    """
+    if response_ref.startswith('#'):
+        paths = response_ref.split('/')[1:]
+        result = raw_spec
+        for path in paths:
+            if path not in result:
+                return
+            result = result[path]
+        return result
+
+
+def merge_all(data, raw_spec):
+    merged = {}
+
+    if "allOf" not in data:
+        #raise MultipleClickException("Invalid spec data: Cannot merge object scpec block: %s" % data)
+        return data
+
+    data = data['allOf']
+    for block in data:
+        if "$ref" in block:
+            block = lookup(block['$ref'], raw_spec)
+        for k, v in block.items():
+            if isinstance(v, list):
+                if k not in merged:
+                    merged[k] = v
+                else:
+                    merged[k] += v
+                    merged[k] = list(set(merged[k]))
+            elif isinstance(v, dict):
+                if k not in merged:
+                    merged[k] = v
+                else:
+                    merged[k].update(v)
+            else:
+                merged[k] = v
+    return merged
+
+
 class _spinner(object):
 
     @staticmethod
