@@ -414,7 +414,13 @@ class Action(BaseAction):
     @property
     def _result_descr(self):
         route_data = self.raw_spec['paths'][self.route]
-        responses = route_data[self.http_method if self.http_method != 'post' else 'get']['responses']
+
+        if self.http_method == 'post':
+            data_block = route_data.get('get', route_data['post'])  # XXX: non-CRUD actions e.g. farm launch
+        else:
+            data_block = route_data[self.http_method]
+
+        responses = data_block['responses']
         if '200' in responses:
             response_200 = responses['200']
             if 'schema' in response_200:
