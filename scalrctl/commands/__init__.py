@@ -83,8 +83,6 @@ class Action(BaseAction):
     delete_target = None
 
     def __init__(self, name, route, http_method, api_level, *args, **kwargs):
-        print "-------> ACTION created with id %s, name: %s, route: %s, http_method: %s." % (id(self), name, route, http_method)
-
         self.name = name
         self.route = route
         self.http_method = http_method
@@ -151,7 +149,6 @@ class Action(BaseAction):
         return kwargs
 
     def _get_object(self, *args, **kwargs):
-        print "Action %s calls _get_object to create new Action" % id(self)
         try:
             obj = self.__class__(name='get', route=self.route,
                                  http_method='get', api_level=self.api_level)
@@ -170,7 +167,6 @@ class Action(BaseAction):
 
 
     def _edit_object(self, *args, **kwargs):
-        print "Action %s calls _edit_object to create new Action" % id(self)
         raw_object = self._get_object(*args, **kwargs)
         raw_object = click.edit(raw_object)
         if raw_object is None:
@@ -193,7 +189,6 @@ class Action(BaseAction):
         Reads JSON object from stdin.
         """
         raw_object = click.get_text_stream('stdin').read()
-        print "raw_object:", raw_object
         return json.loads(raw_object)
 
     def _format_errmsg(self, errors):
@@ -446,7 +441,6 @@ class Action(BaseAction):
                     else:
                         json_object = self._edit_example()
 
-                print "json_object:", json_object
                 json_object = self.spec.filter_json_object(json_object, self.route, self.http_method)
 
                 if len(param_names) == 1: # XXX !!! stupid !!!
@@ -458,37 +452,6 @@ class Action(BaseAction):
             utils.reraise(e)
         return args, kwargs
 
-        """
-        for param_name in param_names:
-            try:
-                if param_name in import_data:
-                    json_object = self.spec.filter_json_object(
-                        import_data[param_name],
-                        self.route,
-                        self.http_method,
-                        filter_createonly=True
-                    ) if http_method == 'PATCH' else import_data[param_name]
-                else:
-                    if http_method == 'PATCH':
-                        if stdin:
-                            # XXX: `_get_object` makes additional GET to load all
-                            # discriminator's into `self._discriminators` map
-                            self._get_object(*args, **kwargs)
-                            json_object = self._read_object()
-                        else:
-                            json_object = self._edit_object(*args, **kwargs)
-                    elif http_method == 'POST':
-                        if stdin:
-                            json_object = self._read_object()
-                        else:
-                            json_object = self._edit_example()
-
-                json_object = self.spec.filter_json_object(json_object, self.route, self.http_method)
-                kwargs[param_name] = json_object
-            except ValueError as e:
-                utils.reraise(e)
-        return args, kwargs
-        """
 
     def post(self, response):
         """
@@ -504,7 +467,6 @@ class Action(BaseAction):
         """
         Callback for click subcommand.
         """
-        print "Action %s called run() with args %s and kwargs: %s. self.http_method: %s " % (id(self), args, kwargs, self.http_method)
         hide_output = kwargs.pop('hide_output', False)  # [ST-88]
         args, kwargs = self.pre(*args, **kwargs)
         uri = self._request_template
@@ -1064,7 +1026,6 @@ class _OpenAPIv3Spec(_OpenAPIBaseSpec):
                 else:
                     # add valid key-value
                     filtered[p_key] = data[p_key]
-        print "result of filtering: ", filtered
         return filtered
 
 
