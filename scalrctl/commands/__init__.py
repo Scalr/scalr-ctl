@@ -662,13 +662,14 @@ class _OpenAPIv2Spec(_OpenAPIBaseSpec):
     def get_response_ref(self, route, http_method):
         route_data = self.raw_spec['paths'][route]
         responses = route_data[http_method]['responses']
-        if '200' in responses:
-            response_200 = responses['200']
-            if 'schema' in response_200:
-                schema = response_200['schema']
-                if '$ref' in schema:
-                    response_ref = schema['$ref']
-                    return response_ref
+        for response_code in ('200', '201'):
+            if response_code in responses:
+                response_200 = responses[response_code]
+                if 'schema' in response_200:
+                    schema = response_200['schema']
+                    if '$ref' in schema:
+                        response_ref = schema['$ref']
+                        return response_ref
 
     def get_body_type_params(self, route, http_method):
         route_data = self.raw_spec['paths'][route][http_method]
@@ -688,18 +689,20 @@ class _OpenAPIv2Spec(_OpenAPIBaseSpec):
         return params
 
     def returns_iterable(self, route, http_method):
-        responses = self.raw_spec['paths'][route]['get']['responses']
-        if '200' in responses:
-            response_200 = responses.get('200')
-            if 'schema' in response_200:
-                schema = response_200['schema']
-                if '$ref' in schema:
-                    object_key = schema['$ref'].split('/')[-1]
-                    object_descr = self.raw_spec['definitions'][object_key]
-                    object_properties = object_descr['properties']
-                    data_structure = object_properties['data']
-                    return 'array' == data_structure.get('type')
-        return False
+        result = False
+        responses = self.raw_spec['paths'][route][http_method]['responses']
+        for code in ('200', '201'):
+            if code in responses:
+                response_200 = responses.get(code)
+                if 'schema' in response_200:
+                    schema = response_200['schema']
+                    if '$ref' in schema:
+                        object_key = schema['$ref'].split('/')[-1]
+                        object_descr = self.raw_spec['definitions'][object_key]
+                        object_properties = object_descr['properties']
+                        data_structure = object_properties['data']
+                        result = 'array' == data_structure.get('type')
+        return result
 
     def get_default_options(self, route, http_method):
         options = []
