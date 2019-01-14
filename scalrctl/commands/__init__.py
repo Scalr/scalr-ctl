@@ -193,6 +193,7 @@ class Action(BaseAction):
         Reads JSON object from stdin.
         """
         raw_object = click.get_text_stream('stdin').read()
+        print "raw_object:", raw_object
         return json.loads(raw_object)
 
     def _format_errmsg(self, errors):
@@ -410,6 +411,7 @@ class Action(BaseAction):
         import_data = kwargs.pop('import-data', {})
         stdin = kwargs.pop('stdin', None)
         http_method = self.http_method.upper()
+
         if http_method not in ('PATCH', 'POST'):
             return args, kwargs
 
@@ -419,10 +421,45 @@ class Action(BaseAction):
         param_names = []
         param_data = self.spec.get_body_type_params(self.route, self.http_method)
         param_name = param_data['name']
-        param_names.extend(param_name)
+        param_names.extend(param_name)  # [u'PersistentStorageConfiguration', u'EphemeralStorageConfiguration', u'RootStorageConfiguration']
 
+        try:
+            if import_data:
+                for param_name in param_names:
+                    if param_name in import_data:
+                        json_object = self.spec.filter_json_object(
+                            import_data[param_name],
+                            self.route,
+                            self.http_method,
+                            filter_createonly=True
+                        ) if http_method == 'PATCH' else import_data[param_name]
+            else:
+                if http_method == 'PATCH':
+                    if stdin:
+                        self._get_object(*args, **kwargs)
+                        json_object = self._read_object()
+                    else:
+                        json_object = self._edit_object(*args, **kwargs)
+                elif http_method == 'POST':
+                    if stdin:
+                        json_object = self._read_object()
+                    else:
+                        json_object = self._edit_example()
+
+                print "json_object:", json_object
+                json_object = self.spec.filter_json_object(json_object, self.route, self.http_method)
+
+                if len(param_names) == 1: # XXX !!! stupid !!!
+                    param_name = param_names[0]
+                else:
+                    param_name = json_object['type']
+                kwargs[param_name] = json_object
+        except ValueError as e:
+            utils.reraise(e)
+        return args, kwargs
+
+        """
         for param_name in param_names:
-            print "param_name:", param_name
             try:
                 if param_name in import_data:
                     json_object = self.spec.filter_json_object(
@@ -434,22 +471,24 @@ class Action(BaseAction):
                 else:
                     if http_method == 'PATCH':
                         if stdin:
-                            print "Action %s about to call additional _get_object() from pre()" % id(self)
                             # XXX: `_get_object` makes additional GET to load all
                             # discriminator's into `self._discriminators` map
                             self._get_object(*args, **kwargs)
-                            print "Action %s has called _get_object from pre()" % id(self)
                             json_object = self._read_object()
                         else:
                             json_object = self._edit_object(*args, **kwargs)
                     elif http_method == 'POST':
-                        json_object = self._read_object() if stdin else self._edit_example()
+                        if stdin:
+                            json_object = self._read_object()
+                        else:
+                            json_object = self._edit_example()
 
                 json_object = self.spec.filter_json_object(json_object, self.route, self.http_method)
                 kwargs[param_name] = json_object
             except ValueError as e:
                 utils.reraise(e)
         return args, kwargs
+        """
 
     def post(self, response):
         """
@@ -662,14 +701,14 @@ class _OpenAPIv2Spec(_OpenAPIBaseSpec):
     def get_response_ref(self, route, http_method):
         route_data = self.raw_spec['paths'][route]
         responses = route_data[http_method]['responses']
-        for response_code in ('200', '201'):
-            if response_code in responses:
-                response_200 = responses[response_code]
-                if 'schema' in response_200:
-                    schema = response_200['schema']
-                    if '$ref' in schema:
-                        response_ref = schema['$ref']
-                        return response_ref
+        response_code = success_codes[http_method]
+        if response_code in responses:
+            response_200 = responses[response_code]
+            if 'schema' in response_200:
+                schema = response_200['schema']
+                if '$ref' in schema:
+                    response_ref = schema['$ref']
+                    return response_ref
 
     def get_body_type_params(self, route, http_method):
         route_data = self.raw_spec['paths'][route][http_method]
@@ -691,17 +730,17 @@ class _OpenAPIv2Spec(_OpenAPIBaseSpec):
     def returns_iterable(self, route, http_method):
         result = False
         responses = self.raw_spec['paths'][route][http_method]['responses']
-        for code in ('200', '201'):
-            if code in responses:
-                response_200 = responses.get(code)
-                if 'schema' in response_200:
-                    schema = response_200['schema']
-                    if '$ref' in schema:
-                        object_key = schema['$ref'].split('/')[-1]
-                        object_descr = self.raw_spec['definitions'][object_key]
-                        object_properties = object_descr['properties']
-                        data_structure = object_properties['data']
-                        result = 'array' == data_structure.get('type')
+        response_code = success_codes[http_method]
+        if response_code in responses:
+            response_200 = responses.get(response_code)
+            if 'schema' in response_200:
+                schema = response_200['schema']
+                if '$ref' in schema:
+                    object_key = schema['$ref'].split('/')[-1]
+                    object_descr = self.raw_spec['definitions'][object_key]
+                    object_properties = object_descr['properties']
+                    data_structure = object_properties['data']
+                    result = 'array' == data_structure.get('type')
         return result
 
     def get_default_options(self, route, http_method):
