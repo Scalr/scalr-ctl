@@ -257,7 +257,7 @@ class Action(BaseAction):
                     rows, current_page, last_page = view.calc_vertical_table(response_json,
                                                                     columns)
                     pre = "Page: {} of {}".format(current_page, last_page)
-                    click.echo(view.build_vertical_table(columns, rows, pre=pre))  # XXX
+                    click.echo(view.build_vertical_table(columns, rows, pre=pre))
                 else:
                     click.echo(view.build_horizontal_table(
                         view.calc_horizontal_table(response_json, columns)))
@@ -363,8 +363,7 @@ class Action(BaseAction):
         filters = []
         if self.spec.returns_iterable(self.route, self.http_method):
             data = self._result_descr['properties']['data']
-            if "oneOf" in data['items']: #XXX V3!
-                # return self._get_combined_filters(data['items'])
+            if "oneOf" in data['items']:
                 return []
             response_ref = data['items']['$ref']
             response_descr = self.spec.lookup(response_ref)
@@ -718,8 +717,6 @@ class _OpenAPIv2Spec(_OpenAPIBaseSpec):
 
     def get_column_names(self, route, http_method, obj_type=None):
         data = self.result_descr(route, http_method)['properties']['data']
-        # XXX: Inconsistency in swagger spec.
-        # See RoleDetailsResponse vs RoleCategoryListResponse
         response_ref = data['items']['$ref'] \
             if 'items' in data else data['$ref']
         response_descr = self.lookup(response_ref)
