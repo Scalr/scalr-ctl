@@ -442,10 +442,16 @@ class Action(BaseAction):
 
                 json_object = self.spec.filter_json_object(json_object, self.route, self.http_method)
 
-                if len(param_names) == 1: # XXX !!! stupid !!!
+                schema = param_data['schema']
+                if '$ref' in schema:
+                    reference = schema['$ref']
+                    schema = self.spec.lookup(schema['$ref'])
+
+                if len(param_names) == 1: # XXX
                     param_name = param_names[0]
-                else:
-                    param_name = json_object['type']
+                elif 'discriminator' in schema:
+                    disc_key = schema.get("discriminator").get('propertyName')
+                    param_name = json_object.get(disc_key)
                 kwargs[param_name] = json_object
         except ValueError as e:
             utils.reraise(e)
