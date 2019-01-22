@@ -92,7 +92,6 @@ class Action(BaseAction):
         self._init()
 
     def _init(self):
-        print "[_init] defaults.OPENAPI_ENABLED:", defaults.OPENAPI_ENABLED
         if defaults.OPENAPI_ENABLED:
             self.spec = get_spec(utils.read_spec_openapi())
         else:
@@ -148,7 +147,7 @@ class Action(BaseAction):
 
         return kwargs
 
-    def _get_object(self, *args, **kwargs):
+    def _get_object_as_text(self, apply_filter=True, *args, **kwargs):
         try:
             obj = self.__class__(name='get', route=self.route,
                                  http_method='get', api_level=self.api_level)
@@ -156,22 +155,16 @@ class Action(BaseAction):
             utils.debug(raw_text)
             if raw_text is None:
                 return {}
-            json_text = json.loads(raw_text)
-            filtered = self.spec.filter_json_object(json_text['data'],
-                                                    self.route,
-                                                    self.http_method,
-                                                    filter_createonly=True)
-            return json.dumps(filtered, indent=2)
+            json_dict = json.loads(raw_text)
+            if apply_filter:
+                filtered = self.spec.filter_json_object(json_dict['data'],
+                                                        self.route,
+                                                        self.http_method,
+                                                        filter_createonly=True)
+                return json.dumps(filtered, indent=2)
+            return json.dumps(json_dict['data'], indent=2)
         except Exception as e:
             utils.reraise(e)
-
-
-    def _edit_object(self, *args, **kwargs):
-        raw_object = self._get_object(*args, **kwargs)
-        raw_object = click.edit(raw_object)
-        if raw_object is None:
-            raise ValueError("No changes in JSON")
-        return json.loads(raw_object)
 
     def _edit_example(self):
         commentary = examples.create_post_example(self.api_level, self.route)
@@ -410,49 +403,69 @@ class Action(BaseAction):
             return args, kwargs
 
         # prompting for body and then validating it
-        #param_names = [p['name'] for p in self.spec.get_body_type_params(self.route, self.http_method)]
 
         param_names = []
         param_data = self.spec.get_body_type_params(self.route, self.http_method)
         param_name = param_data['name']
-        param_names.extend(param_name)  # [u'PersistentStorageConfiguration', u'EphemeralStorageConfiguration', u'RootStorageConfiguration']
+        param_names.extend(param_name)
 
         try:
             if import_data:
                 for param_name in param_names:
                     if param_name in import_data:
-                        json_object = self.spec.filter_json_object(
-                            import_data[param_name],
+                        raw_json_object = import_data[param_name]
+                        filtered_json_object = self.spec.filter_json_object(
+                            raw_json_object,
                             self.route,
                             self.http_method,
                             filter_createonly=True
-                        ) if http_method == 'PATCH' else import_data[param_name]
+                        ) if http_method == 'PATCH' else raw_json_object
             else:
                 if http_method == 'PATCH':
                     if stdin:
-                        self._get_object(*args, **kwargs)
-                        json_object = self._read_object()
+                        self._get_object_as_text(*args, **kwargs)
+                        raw_json_object = self._read_object()
+                        filtered_json_object = self.spec.filter_json_object(raw_json_object,
+                                                                            self.route,
+                                                                            self.http_method)
                     else:
-                        json_object = self._edit_object(*args, **kwargs)
+                        raw_text = self._get_object_as_text(apply_filter=False, *args, **kwargs)
+                        raw_json_object = json.loads(raw_text)
+
+                        filtered_dict = self.spec.filter_json_object(
+                            raw_json_object,
+                            self.route,
+                            self.http_method,
+                            filter_createonly=True)
+                        filtered_text = json.dumps(filtered_dict, indent=2)
+
+                        editor_text = click.edit(filtered_text)
+                        if editor_text is None:
+                            raise ValueError("No changes in JSON")
+                        filtered_json_object = json.loads(editor_text)
+
                 elif http_method == 'POST':
                     if stdin:
-                        json_object = self._read_object()
+                        raw_json_object = self._read_object()
                     else:
-                        json_object = self._edit_example()
+                        raw_json_object = self._edit_example()
 
-                json_object = self.spec.filter_json_object(json_object, self.route, self.http_method)
+                    filtered_json_object = self.spec.filter_json_object(
+                        raw_json_object,
+                        self.route,
+                        self.http_method)
 
-                schema = param_data['schema']
-                if '$ref' in schema:
-                    reference = schema['$ref']
-                    schema = self.spec.lookup(schema['$ref'])
+            schema = param_data['schema']
+            if '$ref' in schema:
+                reference = schema['$ref']
+                schema = self.spec.lookup(schema['$ref'])
 
-                if len(param_names) == 1: # XXX
-                    param_name = param_names[0]
-                elif 'discriminator' in schema:
-                    disc_key = schema.get("discriminator").get('propertyName')
-                    param_name = json_object.get(disc_key)
-                kwargs[param_name] = json_object
+            if len(param_names) == 1: # XXX
+                param_name = param_names[0]
+            elif 'discriminator' in schema:
+                disc_key = schema.get("discriminator").get('propertyName')
+                param_name = raw_json_object.get(disc_key)
+            kwargs[param_name] = filtered_json_object
         except ValueError as e:
             utils.reraise(e)
         return args, kwargs
@@ -492,7 +505,6 @@ class Action(BaseAction):
                     body_params = self.spec.get_body_type_params(self.route, self.http_method)
                     if self.http_method.upper() in ('GET', 'DELETE'):
                         payload[key] = value
-                    #elif body_params and key == body_params[0]['name']:  # xxx 16.12.18
                     elif body_params and key in body_params['name']:
                         data.update(value)
         if self.dry_run:
@@ -621,7 +633,6 @@ class _OpenAPIBaseSpec(object):
         result = self.get_path_type_params(route)
         if http_method.upper() in ('GET', 'DELETE'):
             body_param = self.get_body_type_params(route, http_method)
-            #result.extend(body_params)
             if body_param:
                 result.append(body_param)
         return result
@@ -859,12 +870,9 @@ class _OpenAPIv3Spec(_OpenAPIBaseSpec):
             schema = param["schema"]
 
             if '$ref' in schema:
-                #param["name"] = [raw_block.get("name", schema['$ref'].split('/')[-1].lower()), ]    #xxx: 19.12.2018
                 param["name"] = [raw_block.get("name", schema['$ref'].split('/')[-1]), ]
             elif 'oneOf' in schema:
-                #param["name"] = [ref.split('/')[-1].lower() for ref in list_references_oneOf(schema)]  #xxx: 19.12.2018
                 param["name"] = [ref.split('/')[-1] for ref in list_references_oneOf(schema)]
-                #raw_block.get("name", schema['$ref'].split('/')[-1].lower())
 
             return param
         return []
@@ -963,7 +971,6 @@ class _OpenAPIv3Spec(_OpenAPIBaseSpec):
 
         # load child object as `schema`
         if 'discriminator' in schema:
-            # disc_key = schema['discriminator']
             disc_key = schema.get("discriminator").get('propertyName')  #
             disc_path = '{}/{}'.format(reference, disc_key)
             disc_value = data.get(disc_key) or self._discriminators.get(disc_path)
@@ -973,14 +980,11 @@ class _OpenAPIv3Spec(_OpenAPIBaseSpec):
                     "Provided JSON object is incorrect: missing required param '{}'."
                 ).format(disc_key))
 
-            #list_references = [block.get('$ref','').split('/')[-1] for block in schema['oneOf']]
-
             reference = '#/components/schemas/{}'.format(disc_value)
             schema = self.lookup(reference)
             if "allOf" in schema:
                 schema = self.merge_all(schema)
 
-            #if not (disc_value not in list_references or disc_value not in self.list_concrete_types(schema)):
             if disc_value not in self.list_concrete_types(schema):
                 raise click.ClickException((
                     "Provided JSON object is incorrect: required "
@@ -1041,7 +1045,7 @@ class PolledAction(SimplifiedAction):
         :param action_obj: instance of class Action
         :param states_to_wait_for: list of states to wait for, e.g. ('running', 'failed')
         :param timeout: timeout in secons between attempts
-        :param hide_output: when True prints full polling status
+        :param hide_output: when False prints full polling status
         :param kwargs: the same dict that run() method accepts
         :returns last status, e.g. 'running'
         '''
