@@ -278,6 +278,29 @@
                 "http-method": "patch",
                 "route": "/global/roles/{roleId}/",
                 "epilog": "Example: scalr-ctl global roles update --roleId <ID> --stdin < myupdatedrole.json"
+            },
+            "deprecate": {
+                "api_level": "global",
+                "class": "scalrctl.commands.role.RoleDeprecate",
+                "http-method": "post",
+                "route": "/global/roles/{roleId}/actions/deprecate/",
+                "epilog": "Example: scalr-ctl global roles deprecate --roleId <ID>"
+            }
+        },
+        "os": {
+            "api_level": "global",
+            "get": {
+                "api_level": "global",
+                "class": "scalrctl.commands.Action",
+                "http-method": "get",
+                "route": "/global/os/{osId}/"
+            },
+            "group_descr": "Manage supported Operating Systems",
+            "list": {
+                "api_level": "global",
+                "class": "scalrctl.commands.Action",
+                "http-method": "get",
+                "route": "/global/os/"
             }
         }
     },
@@ -686,7 +709,66 @@
                 "class": "scalrctl.commands.role.RoleClone",
                 "http-method": "post",
                 "route": "/account/{accountId}/roles/{roleId}/actions/clone/",
-                "epilog": "Example: scalr-ctl role clone --roleId <ID> --name MyNewRole"
+                "epilog": "Example: scalr-ctl account roles clone --roleId <ID> --name MyNewRole"
+            },
+            "deprecate": {
+                "api_level": "account",
+                "class": "scalrctl.commands.role.RoleDeprecate",
+                "http-method": "post",
+                "route": "/account/{accountId}/roles/{roleId}/actions/deprecate/",
+                "epilog": "Example: scalr-ctl account roles deprecate --roleId <ID>"
+            }
+        },
+        "os": {
+            "api_level": "account",
+            "get": {
+                "api_level": "account",
+                "class": "scalrctl.commands.Action",
+                "http-method": "get",
+                "route": "/account/{accountId}/os/{osId}/"
+            },
+            "group_descr": "Manage supported Operating Systems",
+            "list": {
+                "api_level": "account",
+                "class": "scalrctl.commands.Action",
+                "http-method": "get",
+                "route": "/account/{accountId}/os/"
+            }
+        },
+        "scaling-metrics": {
+            "api_level": "account",
+            "create": {
+                "api_level": "account",
+                "class": "scalrctl.commands.Action",
+                "http-method": "post",
+                "route": "/account/{accountId}/scaling-metrics/",
+                "epilog": "Example: scalr-ctl account scaling-metrics create --stdin < myscalingmetric.json"
+            },
+            "delete": {
+                "api_level": "account",
+                "class": "scalrctl.commands.Action",
+                "http-method": "delete",
+                "route": "/account/{accountId}/scaling-metrics/{metricName}/"
+            },
+            "get": {
+                "api_level": "account",
+                "class": "scalrctl.commands.Action",
+                "http-method": "get",
+                "route": "/account/{accountId}/scaling-metrics/{metricName}/"
+            },
+            "group_descr": "Manage Scaling Metrics",
+            "list": {
+                "api_level": "account",
+                "class": "scalrctl.commands.Action",
+                "http-method": "get",
+                "route": "/account/{accountId}/scaling-metrics/"
+            },
+            "update": {
+                "api_level": "account",
+                "class": "scalrctl.commands.Action",
+                "http-method": "patch",
+                "route": "/account/{accountId}/scaling-metrics/{metricName}/",
+                "epilog": "Example: scalr-ctl account scaling-metrics update --metricName <NAME> --stdin < myupdatedscalingmetric.json"
             }
         }
     },
@@ -805,6 +887,27 @@
             "http-method": "patch",
             "route": "/user/{envId}/roles/{roleId}/",
             "epilog": "Example: scalr-ctl roles update --roleId <ID> --stdin < myupdatedrole.json"
+        },
+        "clone": {
+            "api_level": "user",
+            "class": "scalrctl.commands.role.RoleClone",
+            "http-method": "post",
+            "route": "/user/{envId}/roles/{roleId}/actions/clone/",
+            "epilog": "Example: scalr-ctl role clone --roleId <ID> --name MyNewRole"
+        },
+        "promote": {
+            "api_level": "user",
+            "class": "scalrctl.commands.role.RolePromote",
+            "http-method": "post",
+            "route": "/user/{envId}/roles/{roleId}/actions/promote/",
+            "epilog": "Example: scalr-ctl role promote --roleId <ID>"
+        },
+        "deprecate": {
+            "api_level": "user",
+            "class": "scalrctl.commands.role.RoleDeprecate",
+            "http-method": "post",
+            "route": "/user/{envId}/roles/{roleId}/actions/deprecate/",
+            "epilog": "Example: scalr-ctl role deprecate --roleId <ID>"
         }
     },
     "server-global-variables": {
@@ -1039,6 +1142,12 @@
             "class": "scalrctl.commands.Action",
             "http-method": "post",
             "route": "/user/{envId}/farms/{farmId}/actions/unlock/"
+        },
+        "generate-template": {
+            "api_level": "user",
+            "class": "scalrctl.commands.Action",
+            "http-method": "get",
+            "route": "/user/{envId}/farms/{farmId}/actions/generate-template/"
         }
     },
     "farm-roles": {
@@ -1531,6 +1640,166 @@
             "class": "scalrctl.commands.Action",
             "http-method": "get",
             "route": "/user/{envId}/event-logs/"
+        }
+    },
+    "os": {
+        "api_level": "user",
+        "get": {
+            "api_level": "user",
+            "class": "scalrctl.commands.Action",
+            "http-method": "get",
+            "route": "/user/{envId}/os/{osId}/"
+        },
+        "group_descr": "Manage supported Operating Systems",
+        "list": {
+            "api_level": "user",
+            "class": "scalrctl.commands.Action",
+            "http-method": "get",
+            "route": "/user/{envId}/os/"
+        }
+    },
+    "scaling-metrics": {
+        "api_level": "user",
+        "create": {
+            "api_level": "user",
+            "class": "scalrctl.commands.Action",
+            "http-method": "post",
+            "route": "/user/{envId}/scaling-metrics/",
+            "epilog": "Example: scalr-ctl scaling-metrics create --stdin < myscalingmetric.json"
+        },
+        "delete": {
+            "api_level": "user",
+            "class": "scalrctl.commands.Action",
+            "http-method": "delete",
+            "route": "/user/{envId}/scaling-metrics/{metricName}/"
+        },
+        "get": {
+            "api_level": "user",
+            "class": "scalrctl.commands.Action",
+            "http-method": "get",
+            "route": "/user/{envId}/scaling-metrics/{metricName}/"
+        },
+        "group_descr": "Manage Scaling Metrics",
+        "list": {
+            "api_level": "user",
+            "class": "scalrctl.commands.Action",
+            "http-method": "get",
+            "route": "/user/{envId}/scaling-metrics/"
+        },
+        "update": {
+            "api_level": "user",
+            "class": "scalrctl.commands.Action",
+            "http-method": "patch",
+            "route": "/user/{envId}/scaling-metrics/{metricName}/",
+            "epilog": "Example: scalr-ctl scaling-metrics update --metricName <NAME> --stdin < myupdatedscalingmetric.json"
+        }
+    },
+    "servers": {
+        "api_level": "user",
+        "list": {
+            "api_level": "user",
+            "class": "scalrctl.commands.Action",
+            "http-method": "get",
+            "route": "/user/{envId}/servers/"
+        },
+        "get": {
+            "api_level": "user",
+            "class": "scalrctl.commands.Action",
+            "http-method": "get",
+            "route": "/user/{envId}/servers/{serverId}/"
+        },
+        "update": {
+            "api_level": "user",
+            "class": "scalrctl.commands.Action",
+            "http-method": "patch",
+            "route": "/user/{envId}/servers/{serverId}/",
+            "epilog": "Example: scalr-ctl servers update  --serverId <ID>"
+        },
+        "change-instance-type": {
+            "api_level": "user",
+            "class": "scalrctl.commands.server.ServerChangeInstanceType",
+            "http-method": "patch",
+            "route": "/user/{envId}/servers/{serverId}/",
+            "epilog": "Example: scalr-ctl change-instance-type --serverId <ID> --instanceType <TYPE>",
+            "hidden": true
+        },
+        "group_descr": "Manage Servers",
+        "suspend": {
+            "api_level": "user",
+            "class": "scalrctl.commands.server.SuspendServer",
+            "http-method": "post",
+            "route": "/user/{envId}/servers/{serverId}/actions/suspend/",
+            "epilog": "Example: scalr-ctl servers suspend  --serverId <ID>"
+        },
+        "terminate": {
+            "api_level": "user",
+            "class": "scalrctl.commands.server.TerminateServer",
+            "http-method": "post",
+            "route": "/user/{envId}/servers/{serverId}/actions/terminate/",
+            "epilog": "Example: scalr-ctl servers terminate --serverId <ID> --force"
+        },
+        "resume": {
+            "api_level": "user",
+            "class": "scalrctl.commands.server.ResumeServer",
+            "http-method": "post",
+            "route": "/user/{envId}/servers/{serverId}/actions/resume/",
+            "epilog": "Example: scalr-ctl servers resume --serverId <ID>"
+        },
+        "reboot": {
+            "api_level": "user",
+            "class": "scalrctl.commands.server.RebootServer",
+            "http-method": "post",
+            "route": "/user/{envId}/servers/{serverId}/actions/reboot/",
+            "epilog": "Example: scalr-ctl servers reboot --serverId <ID> --hard"
+        },
+        "launch": {
+            "api_level": "user",
+            "class": "scalrctl.commands.server.LaunchServerAlias",
+            "http-method": "post",
+            "route": "/user/{envId}/servers/",
+            "epilog": "Example: scalr-ctl servers launch --farmRoleId <ID>"
+        }
+    },
+    "farm-role-scaling": {
+        "api_level": "user",
+        "change-defaults": {
+            "api_level": "user",
+            "class": "scalrctl.commands.Action",
+            "http-method": "patch",
+            "route": "/user/{envId}/farm-roles/{farmRoleId}/scaling/"
+        },
+        "create": {
+            "api_level": "user",
+            "class": "scalrctl.commands.Action",
+            "http-method": "post",
+            "route": "/user/{envId}/farm-roles/{farmRoleId}/scaling/",
+            "epilog": "Example: scalr-ctl farm-role-scaling create --farmRoleId <ID> --stdin < myfarmrolescaling.json"
+        },
+        "delete": {
+            "api_level": "user",
+            "class": "scalrctl.commands.farm_role_scaling.DeleteFarmRoleScaling",
+            "http-method": "delete",
+            "route": "/user/{envId}/farm-roles/{farmRoleId}/scaling/{metricName}/"
+        },
+        "get": {
+            "api_level": "user",
+            "class": "scalrctl.commands.Action",
+            "http-method": "get",
+            "route": "/user/{envId}/farm-roles/{farmRoleId}/scaling/{metricName}/"
+        },
+        "group_descr": "Manage FarmRole Scaling",
+        "list": {
+            "api_level": "user",
+            "class": "scalrctl.commands.Action",
+            "http-method": "get",
+            "route": "/user/{envId}/farm-roles/{farmRoleId}/scaling/"
+        },
+        "update": {
+            "api_level": "user",
+            "class": "scalrctl.commands.Action",
+            "http-method": "patch",
+            "route": "/user/{envId}/farm-roles/{farmRoleId}/scaling/{metricName}/",
+            "epilog": "Example: scalr-ctl farm-role-scaling update --farmRoleId <ID> --metricName <NAME> --stdin < myupdatedfarmrolescaling.json"
         }
     }
 }

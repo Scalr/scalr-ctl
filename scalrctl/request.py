@@ -87,7 +87,6 @@ def request(method, api_level, request_uri, payload=None, data=None):
         ) if payload else ''
 
         body = json.dumps(yaml.safe_load(data)) if data else ''  # XXX
-        print "[REQUEST] method: ", method
         string_to_sign = '\n'.join((
             method.upper(),
             time_iso8601,
