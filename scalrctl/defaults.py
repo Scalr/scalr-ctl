@@ -8,7 +8,6 @@ VERSION = open(os.path.join(os.path.dirname(__file__), "VERSION")).read().strip(
 OPENAPI_ENABLED = os.path.exists(os.path.join(CONFIG_DIRECTORY, 'openapi.json'))
 SCHEME_FNAME = "scheme_openapi.json" if OPENAPI_ENABLED else "scheme.json"
 SCHEME_PATH = os.path.join(os.path.dirname(__file__), 'scheme', SCHEME_FNAME)
-#print "OPENAPI_ENABLED: ", OPENAPI_ENABLED
 API_LEVELS = [
     'user',
     'account',
