@@ -164,8 +164,7 @@ def configure(profile=None, admin=False):
     click.echo('\nNew config saved to {}\n'.format(conf_path))
 
     apply_settings(conf_data)
-    #update.update()
-    update.update_openapi() # ST-236
+    update.update()
     bash_complete.setup_bash_complete()
 
 

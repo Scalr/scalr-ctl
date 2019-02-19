@@ -115,7 +115,7 @@ class UpdateScalrCTL(commands.BaseAction):
 
     def run(self, *args, **kwargs):
         #update_swagger() #production
-        update_openapi()
+        update()
 
 
     def get_description(self):
