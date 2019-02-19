@@ -20,9 +20,8 @@ if os.path.exists(defaults.CONFIG_PATH):
     config_data = yaml.load(open(defaults.CONFIG_PATH, 'r'))
     configure.apply_settings(config_data)
 
-if update.is_update_required():
-    #update.update()  # ST-53
-    update.update_openapi()  # ST-236
+update.update(force=False)
+
 
 def dummy_run():
     raise click.ClickException("Not implemented in current API version")

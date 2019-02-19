@@ -29,11 +29,8 @@ def _fetch_openapi_spec():
 
 def _fetch_yaml_spec(api_level):
     '''
-    openapiv3 spec is fetched by specifying query argument {'version':3}
-    Scalr setups that support openapiv3 will return openapiv3 spec for such request
-    older Scalr setups without such support will ignore this optional argument
-    and return openapiv2 spec files as expected.
-    :param api_level: system, user, account, global
+    Fetch spec file from API server.
+    :param api_level: system, user, account, global, openapi
     :return:
     '''
     spec_url = "{0}://{1}/api/{2}.{3}.yml".format(settings.API_SCHEME,
@@ -41,7 +38,7 @@ def _fetch_yaml_spec(api_level):
                                api_level,
                                settings.API_VERSION)
     try:
-        resp = requests.get(spec_url, params={'openapiv': 3}, verify=settings.SSL_VERIFY_PEER)
+        resp = requests.get(spec_url, verify=settings.SSL_VERIFY_PEER)
     except requests.exceptions.SSLError as e:
         import ssl
         if 'CertificateError' in str(e):
@@ -111,7 +108,7 @@ def _update_spec(api_level):
 
         return True, None
     except Exception as e:
-        return False, e.message or 'Unknown reason'
+        return False, str(e) or 'Unknown reason'
 
 
 class UpdateScalrCTL(commands.BaseAction):
@@ -125,7 +122,7 @@ class UpdateScalrCTL(commands.BaseAction):
         return "Fetch new API specification if available."
 
 
-def is_update_required():
+def is_swagger_update_required():
     """
     Determine if spec update is needed.
     """
@@ -160,7 +157,16 @@ def update_swagger():
             click.secho('Failed: {}'.format(fail_reason), fg='red')
 
 
-def update_openapi():
+def update(force=True):
+    noupdate_flag_path = os.path.join(defaults.CONFIG_DIRECTORY, ".noupdate")
+    if 'update' in sys.argv or os.path.exists(noupdate_flag_path):
+        if force:
+            click.secho('Update is disabled by user. To enable remove %s' % noupdate_flag_path, fg='yellow')
+        return
+
+    if not force and _is_spec_exists('openapi', 'yaml') and _is_spec_exists('openapi', 'yaml'):
+        return
+
     click.echo('Updating specification for Scalr API (OpenAPI)... ', nl=False)
 
     with utils._spinner():
@@ -169,6 +175,7 @@ def update_openapi():
         if success:
             click.secho('Done', fg='green')
         else:
-            click.secho('OpenAPI spec is not available. Trying to fetch SwaggerSpec', fg='yellow')
-            update_swagger()
-
+            click.secho(' OpenAPI spec is not available.', fg='yellow')
+            if force or not is_swagger_update_required():
+                click.secho('Trying to fetch SwaggerSpec', fg='yellow')
+                update_swagger()

@@ -117,10 +117,12 @@ def lookup(response_ref, raw_spec):
 
 
 def merge_all(data, raw_spec):
+    '''
+    Returns merged data from allOf block
+    '''
     merged = {}
 
     if "allOf" not in data:
-        #raise MultipleClickException("Invalid spec data: Cannot merge object scpec block: %s" % data)
         return data
 
     data = data['allOf']

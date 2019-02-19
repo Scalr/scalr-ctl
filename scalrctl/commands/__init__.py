@@ -147,7 +147,7 @@ class Action(BaseAction):
 
         return kwargs
 
-    def _get_object_as_text(self, apply_filter=True, *args, **kwargs):
+    def _get_object_as_text(self, filter_createonly=True, *args, **kwargs):
         try:
             obj = self.__class__(name='get', route=self.route,
                                  http_method='get', api_level=self.api_level)
@@ -156,7 +156,7 @@ class Action(BaseAction):
             if raw_text is None:
                 return {}
             json_dict = json.loads(raw_text)
-            if apply_filter:
+            if filter_createonly:
                 filtered = self.spec.filter_json_object(json_dict['data'],
                                                         self.route,
                                                         self.http_method,
@@ -406,8 +406,9 @@ class Action(BaseAction):
 
         param_names = []
         param_data = self.spec.get_body_type_params(self.route, self.http_method)
-        param_name = param_data['name']
-        param_names.extend(param_name)
+        param_name = param_data.get('name')
+        if param_name: # XXX simplified actions might be affected, testing required
+            param_names.extend(param_name)
 
         try:
             if import_data:
@@ -429,7 +430,7 @@ class Action(BaseAction):
                                                                             self.route,
                                                                             self.http_method)
                     else:
-                        raw_text = self._get_object_as_text(apply_filter=False, *args, **kwargs)
+                        raw_text = self._get_object_as_text(filter_createonly=False, *args, **kwargs)
                         raw_json_object = json.loads(raw_text)
 
                         filtered_dict = self.spec.filter_json_object(
@@ -698,7 +699,7 @@ class _OpenAPIv2Spec(_OpenAPIBaseSpec):
                 description = data[0].get('description'),
                 name = [data[0].get('name'),]
             )
-        return []
+        return {}
 
     def get_path_type_params(self, route):
         route_data = self.raw_spec['paths'][route]
@@ -746,10 +747,8 @@ class _OpenAPIv2Spec(_OpenAPIBaseSpec):
             else:  # ST-226
                 f_key = self.lookup(v['$ref'])
                 if "properties" in f_key:
-                    if len(f_key["properties"]) == 1:
-                        if "id" in f_key["properties"]:
-                            if "type" in f_key["properties"]["id"]:
-                                if f_key["properties"]["id"]["type"] in ("integer", "string"):
+                    if len(f_key["properties"]) == 1 and \
+                            f_key.get("properties", {}).get("id", {}).get("type") in ("integer", "string"):
                                     column_names.append("%s.id" % k)
         return column_names
 
@@ -875,7 +874,7 @@ class _OpenAPIv3Spec(_OpenAPIBaseSpec):
                 param["name"] = [ref.split('/')[-1] for ref in list_references_oneOf(schema)]
 
             return param
-        return []
+        return {}
 
     def get_path_type_params(self, route):
         route_data = self.raw_spec['paths'][route]
