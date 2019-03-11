@@ -57,6 +57,25 @@ def read_config(profile=None):
             return yaml.load(fp)
 
 
+def warning(*messages):
+    """
+    Prints the warning message(s) to stdout.
+
+    :param tuple messages: The list of the warning messages.
+    :rtype: None
+    """
+    color = 'yellow' if settings.colored_output else None
+    for index, message in enumerate(messages or [], start=1):
+        index = index if len(messages) > 1 else None
+        code = message.get('code') or ''
+        text = message.get('message') or ''
+        click.secho("Warning{index} {code} {text}".format(
+            index=' {}:'.format(index) if index else ':',
+            code='{}:'.format(code) if code else '',
+            text=text
+        ), fg=color)
+
+
 def debug(msg):
     if settings.debug_mode:
         click.secho("DEBUG: {}".format(msg),
