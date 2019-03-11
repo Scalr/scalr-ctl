@@ -69,9 +69,9 @@ def warning(*messages):
         index = index if len(messages) > 1 else None
         code = message.get('code') or ''
         text = message.get('message') or ''
-        click.secho("Warning{index} {code} {text}".format(
+        click.secho("Warning{index}{code} {text}".format(
             index=' {}:'.format(index) if index else ':',
-            code='{}:'.format(code) if code else '',
+            code=' {}:'.format(code) if code else '',
             text=text
         ), err=True, fg=color)
 
