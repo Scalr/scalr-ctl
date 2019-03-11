@@ -59,7 +59,7 @@ def read_config(profile=None):
 
 def warning(*messages):
     """
-    Prints the warning message(s) to stdout.
+    Prints the warning message(s) to stderr.
 
     :param tuple messages: The list of the warning messages.
     :rtype: None
@@ -73,7 +73,7 @@ def warning(*messages):
             index=' {}:'.format(index) if index else ':',
             code='{}:'.format(code) if code else '',
             text=text
-        ), fg=color)
+        ), err=True, fg=color)
 
 
 def debug(msg):
