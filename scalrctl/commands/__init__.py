@@ -509,14 +509,23 @@ class Action(BaseAction):
                     continue
 
                 if '$ref' in p_value and isinstance(data[p_key], dict):
-                    # recursive filter sub-object
-                    utils.debug("Filter sub-object: {}.".format(p_value['$ref']))
+                    ref = p_value['$ref']
+                    utils.debug("Filter sub-object: {}.".format(ref))
                     filtered[p_key] = self._filter_json_object(
                         data[p_key],
                         filter_createonly=filter_createonly,
-                        reference=p_value['$ref'],
-                        schema=self._lookup(p_value['$ref']),
-                    )
+                        reference=ref,
+                        schema=self._lookup(ref))
+                elif '$ref' in p_value.get('items', {}) and isinstance(data[p_key], list):
+                    ref = p_value['items']['$ref']
+                    utils.debug("Filter list of sub-objects: {}.".format(ref))
+                    filtered[p_key] = [
+                        self._filter_json_object(
+                            item,
+                            filter_createonly=filter_createonly,
+                            reference=ref,
+                            schema=self._lookup(ref),
+                        ) for item in data[p_key]]
                 else:
                     # add valid key-value
                     filtered[p_key] = data[p_key]
