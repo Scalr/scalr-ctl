@@ -4,6 +4,13 @@ scalr-ctl Changelog
 
 Changelog on Scalr Wiki: https://scalr-labs.atlassian.net/wiki/pages/viewpage.action?pageId=109805613
 
+Version 7.14.0
+--------------
+
+Fixed
+
+    SCALRCORE-11672 CLI > Read-only property is not removed from JSON on farm-role update
+
 
 Version 7.12.2
 --------------
