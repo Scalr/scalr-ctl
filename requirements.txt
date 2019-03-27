@@ -1,6 +1,6 @@
 Click
 prettytable
-pyyaml
+pyyaml<5
 requests
 six
 colorama
