@@ -20,7 +20,7 @@ if not os.path.exists(defaults.CONFIG_DIRECTORY):
     os.makedirs(defaults.CONFIG_DIRECTORY)
 
 if os.path.exists(defaults.CONFIG_PATH):
-    config_data = yaml.load(open(defaults.CONFIG_PATH, 'r'))
+    config_data = yaml.safe_load(open(defaults.CONFIG_PATH, 'r'))
     configure.apply_settings(config_data)
 
 if update.is_update_required():
