@@ -61,7 +61,7 @@ def setup_bash_complete():
             startupfile_content = startupfile_content.rstrip('\n').split('\n')
             startupfile_content = filter(is_not_scalr_line, startupfile_content)
 
-            if len(scalr_configs) > 1:
+            if len([a for a in scalr_configs]) > 1:
                 with open(startup_path, "w") as fp:
                     fp.write('\n'.join(startupfile_content).rstrip('\n') + '\n\n')
                     fp.write('\n'.join(scalr_configs) + '\n')
