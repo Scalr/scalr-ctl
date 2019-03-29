@@ -79,6 +79,8 @@ class Action(BaseAction):
     post_template = None
     _table_columns = []
 
+    _discriminators = {}
+
     ignored_options = ()
     delete_target = None
 
@@ -165,6 +167,13 @@ class Action(BaseAction):
             return json.dumps(json_dict['data'], indent=2)
         except Exception as e:
             utils.reraise(e)
+
+    def _edit_object(self, *args, **kwargs):
+        raw_object = self._get_object(*args, **kwargs)
+        raw_object = click.edit(raw_object)
+        if raw_object is None:
+            raise ValueError("No changes in JSON")
+        return json.loads(raw_object)
 
     def _edit_example(self):
         commentary = examples.create_post_example(self.api_level, self.route)
@@ -270,6 +279,17 @@ class Action(BaseAction):
             text = "Deleted {}".format(deleted_id)
         return text
 
+    def _get_default_options(self):
+        options = []
+        for param in self._get_raw_params():
+            option = click.Option(('--{}'.format(param['name']),
+                                  param['name']), required=param['required'],
+                                  help=param['description'],
+                                  default=param.get('default'),
+                                  show_default='default' in param)
+            options.append(option)
+        return options
+
     def _get_custom_options(self):
         options = []
 
@@ -351,6 +371,35 @@ class Action(BaseAction):
         options.append(debug)
 
         return options
+
+    def _get_body_type_params(self):
+        route_data = self.raw_spec['paths'][self.route][self.http_method]
+        return [param for param in route_data.get('parameters', '')]
+
+    def _get_path_type_params(self):
+        route_data = self.raw_spec['paths'][self.route]
+        return [param for param in route_data.get('parameters', '')]
+
+    def _get_raw_params(self):
+        result = self._get_path_type_params()
+        if self.http_method.upper() in ('GET', 'DELETE'):
+            body_params = self._get_body_type_params()
+            result.extend(body_params)
+        return result
+
+    def _returns_iterable(self):
+        responses = self.raw_spec['paths'][self.route][self.http_method]['responses']
+        if '200' in responses:
+            response_200 = responses['200']
+            if 'schema' in response_200:
+                schema = response_200['schema']
+                if '$ref' in schema:
+                    object_key = schema['$ref'].split('/')[-1]
+                    object_descr = self.raw_spec['definitions'][object_key]
+                    object_properties = object_descr['properties']
+                    data_structure = object_properties['data']
+                    return 'array' == data_structure.get('type')
+        return False
 
     def _get_available_filters(self):
         filters = []
@@ -508,6 +557,7 @@ class Action(BaseAction):
                         payload[key] = value
                     elif body_params and key in body_params['name']:
                         data.update(value)
+
         if self.dry_run:
             click.echo('{} {} {} {}'.format(self.http_method, uri,
                                             payload, data))
