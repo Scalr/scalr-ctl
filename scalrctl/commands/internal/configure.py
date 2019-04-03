@@ -72,7 +72,7 @@ CONFIGURATIONS = {
 
 def _read_config(conf_path):
     if os.path.exists(conf_path):
-        return yaml.load(open(conf_path, 'r'))
+        return yaml.safe_load(open(conf_path, 'r'))
 
 
 def _write_config(conf_path, conf_data):

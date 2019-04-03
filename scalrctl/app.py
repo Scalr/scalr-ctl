@@ -155,7 +155,7 @@ def cli(ctx, key_id, secret_key, config, *args, **kvargs):
                                                    hide_input=True))
     if config:
         if os.path.exists(config):
-            config_data = yaml.load(open(config, 'r'))
+            config_data = yaml.safe_load(open(config, 'r'))
             configure.apply_settings(config_data)
         else:
             msg = 'Configuration file not found: {}'.format(config)

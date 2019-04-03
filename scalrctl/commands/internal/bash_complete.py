@@ -54,14 +54,14 @@ def setup_bash_complete():
             else:
                 export_line = ''
 
-            scalr_configs = filter(None, (comment, export_line, source_line))
+            scalr_configs = tuple(filter(None, (comment, export_line, source_line)))
 
             # removes old scalr configs
             is_not_scalr_line = lambda line: not any(sc == line for sc in scalr_configs)
             startupfile_content = startupfile_content.rstrip('\n').split('\n')
             startupfile_content = filter(is_not_scalr_line, startupfile_content)
 
-            if len([a for a in scalr_configs]) > 1:
+            if len(scalr_configs) > 1:
                 with open(startup_path, "w") as fp:
                     fp.write('\n'.join(startupfile_content).rstrip('\n') + '\n\n')
                     fp.write('\n'.join(scalr_configs) + '\n')

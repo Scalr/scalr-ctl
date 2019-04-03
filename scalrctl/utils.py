@@ -54,7 +54,7 @@ def read_config(profile=None):
 
     if os.path.exists(confpath):
         with open(confpath, 'r') as fp:
-            return yaml.load(fp)
+            return yaml.safe_load(fp)
 
 
 def debug(msg):
