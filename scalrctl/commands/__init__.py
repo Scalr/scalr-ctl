@@ -97,7 +97,7 @@ class Action(BaseAction):
             pattern = param.get('pattern')
             param_name = param.get('name')
             if pattern and param_name and param_name in kwargs:
-                value = kwargs.get(param_name, '').strip()
+                value = str(kwargs.get(param_name, '')).strip()
                 matches = re.match(pattern, value)
                 if not matches:
                     matches = re.search(pattern, value, re.MULTILINE)
