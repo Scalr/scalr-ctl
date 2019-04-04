@@ -5,9 +5,6 @@ import re
 import os
 import time
 
-from itertools import chain
-from collections import defaultdict
-
 import dicttoxml
 
 from scalrctl import click, request, settings, utils, view, examples, defaults
@@ -98,7 +95,6 @@ class Action(BaseAction):
             self.spec = get_spec(utils.read_spec_openapi())
         else:
             self.spec = get_spec(utils.read_spec(self.api_level, ext='json'))
-
 
         if not self.epilog and self.http_method.upper() == 'POST':
             msg = "Example: scalr-ctl {level} {name} < {name}.json"
@@ -458,7 +454,7 @@ class Action(BaseAction):
         param_names = []
         param_data = self.spec.get_body_type_params(self.route, self.http_method)
         param_name = param_data.get('name')
-        if param_name: # XXX simplified actions might be affected, testing required
+        if param_name:  # XXX simplified actions might be affected, testing required
             param_names.extend(param_name)
 
         try:
@@ -509,10 +505,9 @@ class Action(BaseAction):
 
             schema = param_data['schema']
             if '$ref' in schema:
-                reference = schema['$ref']
                 schema = self.spec.lookup(schema['$ref'])
 
-            if len(param_names) == 1: # XXX
+            if len(param_names) == 1:  # XXX
                 param_name = param_names[0]
             elif 'discriminator' in schema:
                 disc_key = schema.get("discriminator").get('propertyName')
@@ -521,7 +516,6 @@ class Action(BaseAction):
         except ValueError as e:
             utils.reraise(e)
         return args, kwargs
-
 
     def post(self, response):
         """
@@ -570,6 +564,8 @@ class Action(BaseAction):
         raw_response = request.request(self.http_method, self.api_level,
                                        uri, payload, data)
         response = self.post(raw_response)
+        # Avoid keywords must be strings
+        kwargs = {str(k): v for k, v in kwargs.items()}
         text = self._format_response(response, hidden=hide_output, **kwargs)
         if text is not None:
             click.echo(text)
@@ -672,7 +668,7 @@ class _OpenAPIBaseSpec(object):
 
     @abc.abstractmethod
     def filter_json_object(self, data, route, http_method, filter_createonly=False,
-                            schema=None, reference=None):
+                           schema=None, reference=None):
         raise NotImplementedError()
 
     def lookup(self, response_ref):
@@ -718,7 +714,6 @@ class _OpenAPIBaseSpec(object):
         Returns full reference to object if obj_type is present inside oneOf block
         '''
         list_typedata = data['oneOf']
-        response_ref = None
         for type_dict in list_typedata:
             if '$ref' in type_dict and type_dict['$ref'].split('/')[-1] == obj_type:
                 return type_dict['$ref']
@@ -746,10 +741,10 @@ class _OpenAPIv2Spec(_OpenAPIBaseSpec):
         data = route_data.get('parameters', [])
         if data:
             return dict(
-                schema = data[0].get('schema'),
-                required = data[0].get('required'),
-                description = data[0].get('description'),
-                name = [data[0].get('name'),]
+                schema=data[0].get('schema'),
+                required=data[0].get('required'),
+                description=data[0].get('description'),
+                name=[data[0].get('name')]
             )
         return {}
 
@@ -805,7 +800,7 @@ class _OpenAPIv2Spec(_OpenAPIBaseSpec):
         return column_names
 
     def filter_json_object(self, data, route, http_method, filter_createonly=False,
-                            schema=None, reference=None):
+                           schema=None, reference=None):
         """
         Removes immutable parts from JSON object
         before sending it in POST or PATCH.
@@ -1045,7 +1040,6 @@ class _OpenAPIv3Spec(_OpenAPIBaseSpec):
                 # save discriminator for current reference/key
                 self._discriminators[disc_path] = disc_value
 
-
         # filter input data by properties of `schema`
         if schema and 'properties' in schema:
             create_only_props = schema.get('x-createOnly', '')
@@ -1113,4 +1107,3 @@ class PolledAction(SimplifiedAction):
 
     def _get_operation_status(self, data_json):
         return data_json["data"]["status"]
-
