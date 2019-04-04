@@ -30,7 +30,7 @@ if six.PY2:
         input.
         """
 
-        if hasattr(query,"items"):
+        if hasattr(query, "items"):
             # mapping objects
             query = query.items()
         else:

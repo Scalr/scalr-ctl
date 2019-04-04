@@ -25,7 +25,6 @@ class FarmTerminate(commands.SimplifiedAction):
         options.extend(super(FarmTerminate, self).get_options())
         return options
 
-
     def pre(self, *args, **kwargs):
         """
         before request is made
@@ -67,7 +66,6 @@ class FarmClone(commands.SimplifiedAction):
         options = [name, ]
         options.extend(super(FarmClone, self).get_options())
         return options
-
 
     def pre(self, *args, **kwargs):
         """

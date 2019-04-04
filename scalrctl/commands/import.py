@@ -2,7 +2,6 @@
 Import Scalr objects.
 """
 import json
-import os
 import pydoc
 
 import yaml

@@ -1,11 +1,10 @@
 """
 Export Scalr objects.
 """
-import os
 import copy
 import datetime
+import functools
 import json
-import pydoc
 
 import yaml
 
@@ -31,9 +30,9 @@ class Export(commands.Action):
     def _get_param(parent, child, key):
         head, _, tail = key.partition('.')
         if head == 'child':
-            return reduce(dict.__getitem__, tail.split('.'), child)
+            return functools.reduce(dict.__getitem__, tail.split('.'), child)
         elif head == 'parent':
-            return reduce(dict.__getitem__, tail.split('.'), parent)
+            return functools.reduce(dict.__getitem__, tail.split('.'), parent)
         else:
             raise click.ClickException("Invalid key: \"{}\"".format(key))
 

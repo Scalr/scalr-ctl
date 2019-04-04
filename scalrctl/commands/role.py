@@ -24,7 +24,6 @@ class RoleClone(commands.SimplifiedAction):
         options.extend(super(RoleClone, self).get_options())
         return options
 
-
     def pre(self, *args, **kwargs):
         """
         before request is made
@@ -52,7 +51,6 @@ class RolePromote(commands.SimplifiedAction):
         options.extend(super(RolePromote, self).get_options())
         return options
 
-
     def pre(self, *args, **kwargs):
         """
         before request is made
@@ -76,11 +74,11 @@ class RoleDeprecate(commands.SimplifiedAction):
         replacement = click.Option(('--replacement', 'replacement'), required=False, help=hlp)
         state_hlp = "The deprecation state to set on the Role."
         state = click.Option(
-            ('--state', 'state'), type=click.Choice(['DEPRECATED', 'ACTIVE']), required=True,help=state_hlp)
+            ('--state', 'state'), type=click.Choice(['DEPRECATED', 'ACTIVE']),
+            required=True, help=state_hlp)
         options = [replacement, state]
         options.extend(super(RoleDeprecate, self).get_options())
         return options
-
 
     def pre(self, *args, **kwargs):
         """

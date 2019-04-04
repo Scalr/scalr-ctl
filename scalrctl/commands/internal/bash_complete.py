@@ -15,13 +15,14 @@ AUTOCOMPLETE_PATH = os.path.join(os.path.expanduser(defaults.CONFIG_DIRECTORY), 
 
 
 def setup_bash_complete():
-    if "nt" == os.name: # Click currently only supports completion for Bash.
+    if "nt" == os.name:  # Click currently only supports completion for Bash.
         return
 
     bashrc_path = os.path.expanduser("~/.bashrc")
     bashprofile_path = os.path.expanduser("~/.bash_profile")
     startup_path = bashprofile_path if os.path.exists(bashprofile_path) else bashrc_path
-    startup_path = click.prompt("Enter path to an rc file to update, or leave blank to use", default=startup_path, err=True)
+    startup_path = click.prompt("Enter path to an rc file to update, or leave blank to use",
+                                default=startup_path, err=True)
     if not os.path.exists(startup_path):
         click.echo("%s not found." % startup_path)
         return
@@ -29,7 +30,8 @@ def setup_bash_complete():
     startupfile_content = open(startup_path, "r").read()
 
     if AUTOCOMPLETE_PATH not in startupfile_content:
-        confirmed = click.confirm("Modify profile to update your $PATH and enable bash completion?", default=True, err=True)
+        confirmed = click.confirm("Modify profile to update your $PATH and enable bash completion?",
+                                  default=True, err=True)
 
         if confirmed:
             with open(AUTOCOMPLETE_PATH, "w") as fp:

@@ -566,6 +566,7 @@ class Action(BaseAction):
         response = self.post(raw_response)
         # Avoid keywords must be strings
         kwargs = {str(k): v for k, v in kwargs.items()}
+        print(self.spec)
         text = self._format_response(response, hidden=hide_output, **kwargs)
         if text is not None:
             click.echo(text)

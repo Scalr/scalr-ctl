@@ -7,7 +7,6 @@ import copy
 from scalrctl import commands
 from scalrctl import click
 
-from scalrctl import request, settings
 from scalrctl.commands import farm
 
 

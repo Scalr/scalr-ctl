@@ -45,7 +45,7 @@ class ReplaceRoleImage(commands.SimplifiedAction):
                 roleid = obj["data"]["role"]["id"]
                 imageid = obj["data"]["image"]["id"]
                 click.echo("Role %s now contains new image %s." % (roleid, imageid))
-        except:
+        except Exception:
             pass
         return response
 

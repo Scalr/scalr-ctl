@@ -27,6 +27,7 @@ def _fetch_openapi_spec():
     # v3: http://bfb482b26df9.test-env.scalr.com/api/openapi.v1beta0.yml
     return _fetch_yaml_spec("openapi")
 
+
 def _fetch_yaml_spec(api_level):
     '''
     Fetch spec file from API server.
@@ -40,7 +41,6 @@ def _fetch_yaml_spec(api_level):
     try:
         resp = requests.get(spec_url, verify=settings.SSL_VERIFY_PEER)
     except requests.exceptions.SSLError as e:
-        import ssl
         if 'CertificateError' in str(e):
             sni_supported = None
             try:
@@ -114,9 +114,8 @@ def _update_spec(api_level):
 class UpdateScalrCTL(commands.BaseAction):
 
     def run(self, *args, **kwargs):
-        #update_swagger() #production
+        # update_swagger() #production
         update()
-
 
     def get_description(self):
         return "Fetch new API specification if available."

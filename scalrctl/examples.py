@@ -165,7 +165,7 @@ def create_post_example(api_level, endpoint):
     if endpoint in EXCLUDES:
         raise click.ClickException('Invalid API endpoint')
 
-    #spec_data = json.loads(_read_spec(api_level))
+    # spec_data = json.loads(_read_spec(api_level))
 
     if defaults.OPENAPI_ENABLED:
         spec_data = utils.read_spec_openapi()
