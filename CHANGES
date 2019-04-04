@@ -4,6 +4,22 @@ scalr-ctl Changelog
 
 Changelog on Scalr Wiki: https://scalr-labs.atlassian.net/wiki/pages/viewpage.action?pageId=109805613
 
+Version 7.14.2
+--------------
+
+Fixed
+
+    SCALRCORE-11672 CLI > YAMLLoadWarning: calling yaml.load() without Loader=... is deprecated
+
+
+Version 7.14.1
+--------------
+
+Fixed
+
+    SCALRCORE-11672 CLI > YAMLLoadWarning: calling yaml.load() without Loader=... is deprecated
+
+
 Version 7.14.0
 --------------
 

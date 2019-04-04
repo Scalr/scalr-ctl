@@ -57,12 +57,12 @@ if __name__ == '__main__':
         data_files=[('', ['scalrctl/scheme/scheme.json', 'scalrctl/scheme/scheme_openapi.json']), ],
         install_requires=[
             'prettytable>=0.7.2',
-            'pyyaml>=3.11',
+            'pyyaml>=3.11,<5',
             'requests>=2.10.0',
             'six>=1.10.0',
             'colorama>=0.3.7',
             'dicttoxml>=1.7.4',
-            ],
+        ],
         entry_points='''
             [console_scripts]
             scalr-ctl=scalrctl.app:cli
