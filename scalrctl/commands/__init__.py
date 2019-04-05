@@ -4,13 +4,13 @@ import abc
 import re
 import os
 import time
-
+import six
+from six.moves.urllib import parse
 import dicttoxml
+
 
 from scalrctl import click, request, settings, utils, view, examples, defaults
 
-import six
-from six.moves.urllib import parse
 
 __author__ = 'Dmitriy Korsakov'
 
@@ -63,7 +63,7 @@ class Action(BaseAction):
 
     # Optional. Some values like GCE imageId
     # cannot be passed through command lines
-    prompt_for = None
+    prompt_for = []
 
     # Temporary. Object definitions in YAML
     # spec are not always correct
@@ -165,13 +165,6 @@ class Action(BaseAction):
             return json.dumps(json_dict['data'], indent=2)
         except Exception as e:
             utils.reraise(e)
-
-    def _edit_object(self, *args, **kwargs):
-        raw_object = self._get_object(*args, **kwargs)
-        raw_object = click.edit(raw_object)
-        if raw_object is None:
-            raise ValueError("No changes in JSON")
-        return json.loads(raw_object)
 
     def _edit_example(self):
         commentary = examples.create_post_example(self.api_level, self.route)
@@ -766,7 +759,7 @@ class _OpenAPIv2Spec(_OpenAPIBaseSpec):
                     object_descr = self.raw_spec['definitions'][object_key]
                     object_properties = object_descr['properties']
                     data_structure = object_properties['data']
-                    result = 'array' == data_structure.get('type')
+                    result = data_structure.get('type') == 'array'
         return result
 
     def get_default_options(self, route, http_method):
@@ -796,7 +789,7 @@ class _OpenAPIv2Spec(_OpenAPIBaseSpec):
                 if "properties" in f_key:
                     if len(f_key["properties"]) == 1 and \
                             f_key.get("properties", {}).get("id", {}).get("type") in ("integer", "string"):
-                                    column_names.append("%s.id" % k)
+                        column_names.append("%s.id" % k)
         return column_names
 
     def filter_json_object(self, data, route, http_method, filter_createonly=False,
@@ -999,7 +992,7 @@ class _OpenAPIv3Spec(_OpenAPIBaseSpec):
         return utils.merge_all(data, self.raw_spec)
 
     def filter_json_object(self, data, route, http_method, filter_createonly=False,
-                            schema=None, reference=None):
+                           schema=None, reference=None):
         """
         Removes immutable parts from JSON object
         before sending it in POST or PATCH.

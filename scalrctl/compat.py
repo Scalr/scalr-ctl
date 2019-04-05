@@ -46,7 +46,7 @@ if six.PY2:
                 # allowed empty dicts that type of behavior probably should be
                 # preserved for consistency
             except TypeError:
-                ty, va, tb = sys.exc_info()
+                _, _, tb = sys.exc_info()
                 six.reraise(TypeError, "not a valid non-string sequence"
                                        "or mapping object", tb)
         l = []
@@ -66,7 +66,7 @@ if six.PY2:
                     # is there a reasonable way to convert to ASCII?
                     # encode generates a string, but "replace" or "ignore"
                     # lose information and "strict" can raise UnicodeError
-                    v = quote_via(v.encode("ASCII","replace"))
+                    v = quote_via(v.encode("ASCII", "replace"))
                     l.append(k + '=' + v)
                 else:
                     try:
@@ -115,7 +115,7 @@ elif six.PY3:
                 # allowed empty dicts that type of behavior probably should be
                 # preserved for consistency
             except TypeError:
-                ty, va, tb = sys.exc_info()
+                _, _, tb = sys.exc_info()
                 raise TypeError("not a valid non-string sequence "
                                 "or mapping object").with_traceback(tb)
 
@@ -148,7 +148,7 @@ elif six.PY3:
                 else:
                     try:
                         # Is this a sufficient test for sequence-ness?
-                        x = len(v)
+                        len(v)
                     except TypeError:
                         # not a sequence
                         v = quote_via(str(v), safe, encoding, errors)

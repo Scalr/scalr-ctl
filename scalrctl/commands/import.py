@@ -229,7 +229,7 @@ class ImportImage(commands.Action):
         if 'imageId' not in kwargs:
             kwargs['image'] = click.termui.prompt("Image object JSON")
 
-        return super(commands.Action, self).pre(*args, **kwargs)
+        return super(ImportImage, self).pre(*args, **kwargs)
 
 
 class UpdateImage(commands.Action):

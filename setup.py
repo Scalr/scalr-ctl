@@ -1,5 +1,4 @@
 import os
-import sys
 
 from distutils.core import setup
 from distutils.command.install import install
@@ -20,14 +19,15 @@ class _install(install):
 def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
 
-description = "Scalr-ctl is a command-line interface to your Scalr account"
+
+DESCRIPTION = "Scalr-ctl is a command-line interface to your Scalr account"
 
 if __name__ == '__main__':
 
     setup(
         name='scalr-ctl',
         version=read("scalrctl/VERSION").strip(),
-        description=description,
+        description=DESCRIPTION,
         author="Scalr Inc.",
         author_email="dmitry@scalr.com",
         url="https://scalr.net",
@@ -43,7 +43,7 @@ if __name__ == '__main__':
             'Environment :: Console',
             'Intended Audience :: System Administrators',
             'Topic :: Utilities'
-            ],
+        ],
         packages=[
             "scalrctl",
             "scalrctl.click",

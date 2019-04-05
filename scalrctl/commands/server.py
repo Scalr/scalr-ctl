@@ -43,7 +43,7 @@ class RebootServer(commands.PolledAction):
         result_json = json.loads(result)
         server_id = result_json["data"]["id"]
         if kwargs.get('hard'):
-                click.echo("Server %s is undergoing hard reboot." % server_id)
+            click.echo("Server %s is undergoing hard reboot." % server_id)
         elif not nowait:
             cls = commands.Action
             action = cls(name=self.name,

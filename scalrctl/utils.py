@@ -81,7 +81,6 @@ def debug(msg):
 
 
 def reraise(message):
-    import sys
     exc_info = sys.exc_info()
     if isinstance(exc_info[1], click.ClickException):
         exc_class = exc_info[0]

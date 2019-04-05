@@ -60,7 +60,7 @@ class RolePromote(commands.SimplifiedAction):
         post_data["cloneRoleRequest"]["name"] = name
         kv = {"import-data": post_data}
         kv.update(kwargs)
-        arguments, kw = super(RoleClone, self).pre(*args, **kv)
+        arguments, kw = super(RolePromote, self).pre(*args, **kv)
         return arguments, kw
 
 

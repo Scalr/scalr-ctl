@@ -15,7 +15,7 @@ AUTOCOMPLETE_PATH = os.path.join(os.path.expanduser(defaults.CONFIG_DIRECTORY), 
 
 
 def setup_bash_complete():
-    if "nt" == os.name:  # Click currently only supports completion for Bash.
+    if os.name == "nt":  # Click currently only supports completion for Bash.
         return
 
     bashrc_path = os.path.expanduser("~/.bashrc")
