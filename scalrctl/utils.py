@@ -1,12 +1,15 @@
+"""
+Module that provides utils for client.
+"""
 # -*- coding: utf-8 -*-
+import itertools
 import os
 import sys
 import json
-import yaml
 import time
-import itertools
 import threading
 import traceback
+import yaml
 
 from scalrctl import click, defaults, settings
 
@@ -19,6 +22,7 @@ def read_spec(api_level, ext='json'):
     spec_path = os.path.join(defaults.CONFIG_DIRECTORY,
                              '{}.{}'.format(api_level, ext))
 
+    # pylint: disable=no-else-return
     if os.path.exists(spec_path):
         with open(spec_path, 'r') as fp:
             spec_data = fp.read()
@@ -40,6 +44,7 @@ def read_spec_openapi():
 
     spec_path = os.path.join(defaults.CONFIG_DIRECTORY, 'openapi.json')
 
+    # pylint: disable=no-else-return
     if os.path.exists(spec_path):
         with open(spec_path, 'r') as fp:
             spec_data = fp.read()
@@ -52,18 +57,27 @@ def read_spec_openapi():
 
 
 def read_routes():
-    if os.path.exists(defaults.ROUTES_PATH):
-        with open(defaults.ROUTES_PATH, 'r') as fp:
+    """
+    Reads routes if exist
+    """
+    if os.path.exists(defaults.ROUTES_PATH):  # pylint: disable=no-member
+        with open(defaults.ROUTES_PATH, 'r') as fp:  # pylint: disable=no-member
             api_routes = fp.read()
         return json.loads(api_routes)
 
 
 def read_scheme():
+    """
+    Reads schema
+    """
     with open(defaults.SCHEME_PATH) as fp:
         return json.load(fp)
 
 
 def read_config(profile=None):
+    """
+    Reads config
+    """
     confpath = os.path.join(
         defaults.CONFIG_DIRECTORY,
         '{}.yaml'.format(profile)
@@ -75,12 +89,18 @@ def read_config(profile=None):
 
 
 def debug(msg):
+    """
+    Debug mode
+    """
     if settings.debug_mode:
         click.secho("DEBUG: {}".format(msg),
                     fg='green' if settings.colored_output else None)
 
 
 def reraise(message):
+    """
+    Reraise error message
+    """
     exc_info = sys.exc_info()
     if isinstance(exc_info[1], click.ClickException):
         exc_class = exc_info[0]
@@ -94,6 +114,10 @@ def reraise(message):
 
 
 def is_openapi_v3(data):
+    """
+    Method for detect openapi3
+    """
+    # pylint: disable=no-else-return
     if "openapi" in data:
         return True
     elif "basePath" in data:
@@ -145,10 +169,16 @@ def merge_all(data, raw_spec):
     return merged
 
 
-class _spinner(object):
+class _spinner(object):  # pylint: disable=useless-object-inheritance
+    """
+    Spinner
+    """
 
     @staticmethod
     def draw(event):
+        """
+        Draw in console
+        """
         if settings.colored_output:
             cursor = itertools.cycle('|/-\\')
             while not event.isSet():
@@ -168,6 +198,6 @@ class _spinner(object):
     def __enter__(self):
         self.thread.start()
 
-    def __exit__(self, type, value, traceback):
+    def __exit__(self, _type, value, _traceback):
         self.event.set()
         self.thread.join()

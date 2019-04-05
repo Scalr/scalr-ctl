@@ -36,8 +36,8 @@ requests_log.propagate = True
 
 
 try:
-    requests.packages.urllib3.disable_warnings()
-except:
+    requests.packages.urllib3.disable_warnings()  # pylint: disable=no-member
+except (Exception, BaseException):
     pass
 
 

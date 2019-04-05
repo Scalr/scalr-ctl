@@ -81,6 +81,7 @@ class Action(BaseAction):
     ignored_options = ()
     delete_target = None
 
+    # pylint: disable=super-init-not-called
     def __init__(self, name, route, http_method, api_level, *args, **kwargs):
         self.name = name
         self.route = route
@@ -364,10 +365,12 @@ class Action(BaseAction):
         return options
 
     def _get_body_type_params(self):
+        # pylint: disable=unsubscriptable-object
         route_data = self.raw_spec['paths'][self.route][self.http_method]
         return [param for param in route_data.get('parameters', '')]
 
     def _get_path_type_params(self):
+        # pylint: disable=unsubscriptable-object
         route_data = self.raw_spec['paths'][self.route]
         return [param for param in route_data.get('parameters', '')]
 
@@ -379,6 +382,7 @@ class Action(BaseAction):
         return result
 
     def _returns_iterable(self):
+        # pylint: disable=unsubscriptable-object
         responses = self.raw_spec['paths'][self.route][self.http_method]['responses']
         if '200' in responses:
             response_200 = responses['200']

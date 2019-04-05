@@ -144,9 +144,8 @@ def cli(ctx, key_id, secret_key, config, *args, **kvargs):
 
     if secret_key:
         settings.API_SECRET_KEY = str(secret_key)
-    elif (settings.API_KEY_ID and settings.API_KEY_ID.strip()
-          and not settings.API_SECRET_KEY
-          and not service_cmd):  # [ST-21]
+    elif (settings.API_KEY_ID and settings.API_KEY_ID.strip() and not
+          settings.API_SECRET_KEY and not service_cmd):  # [ST-21]
         settings.API_SECRET_KEY = str(click.prompt(text='API SECRET KEY',
                                                    hide_input=True))
     if config:
@@ -159,4 +158,5 @@ def cli(ctx, key_id, secret_key, config, *args, **kvargs):
 
 
 if __name__ == '__main__':
+    # pylint: disable=no-value-for-parameter
     cli()

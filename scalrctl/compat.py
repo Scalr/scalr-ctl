@@ -12,19 +12,19 @@ from six.moves.urllib.parse import quote_plus
 try:
     unicode
 except NameError:
-    def _is_unicode(x):
+    def _is_unicode(value):
+        """Returns False if unicode is disabled"""
         return 0
 else:
-    def _is_unicode(x):
-        return isinstance(x, unicode)
+    def _is_unicode(value):
+        """Equal value as unicode"""
+        return isinstance(value, unicode)
 
 if six.PY2:
     def urlencode(query, doseq=0, quote_via=quote_plus):
         """Encode a sequence of two-element tuples or dictionary into a URL query string.
-
         If any values in the query arg are sequences and doseq is true, each
         sequence element is converted to a separate parameter.
-
         If the query arg is a sequence of two-element tuples, the order of the
         parameters in the output will match the order of parameters in the
         input.
@@ -39,7 +39,7 @@ if six.PY2:
             try:
                 # non-sequence items should not work with len()
                 # non-empty strings will fail this
-                if len(query) and not isinstance(query[0], tuple):
+                if query and not isinstance(query[0], tuple):
                     raise TypeError
                 # zero-length sequences of all types will get here and succeed,
                 # but that's a minor nit - since the original implementation
@@ -49,25 +49,25 @@ if six.PY2:
                 _, _, tb = sys.exc_info()
                 six.reraise(TypeError, "not a valid non-string sequence"
                                        "or mapping object", tb)
-        l = []
+        result = []
         if not doseq:
             # preserve old behavior
             for k, v in query:
                 k = quote_via(str(k))
                 v = quote_via(str(v))
-                l.append(k + '=' + v)
+                result.append(k + '=' + v)
         else:
             for k, v in query:
                 k = quote_via(str(k))
                 if isinstance(v, str):
                     v = quote_via(v)
-                    l.append(k + '=' + v)
+                    result.append(k + '=' + v)
                 elif _is_unicode(v):
                     # is there a reasonable way to convert to ASCII?
                     # encode generates a string, but "replace" or "ignore"
                     # lose information and "strict" can raise UnicodeError
                     v = quote_via(v.encode("ASCII", "replace"))
-                    l.append(k + '=' + v)
+                    result.append(k + '=' + v)
                 else:
                     try:
                         # is this a sufficient test for sequence-ness?
@@ -75,12 +75,12 @@ if six.PY2:
                     except TypeError:
                         # not a sequence
                         v = quote_via(str(v))
-                        l.append(k + '=' + v)
+                        result.append(k + '=' + v)
                     else:
                         # loop over the sequence
                         for elt in v:
-                            l.append(k + '=' + quote_via(str(elt)))
-        return '&'.join(l)
+                            result.append(k + '=' + quote_via(str(elt)))
+        return '&'.join(result)
 
 elif six.PY3:
     def urlencode(query, doseq=False, safe='', encoding=None, errors=None,
@@ -108,7 +108,7 @@ elif six.PY3:
             try:
                 # non-sequence items should not work with len()
                 # non-empty strings will fail this
-                if len(query) and not isinstance(query[0], tuple):
+                if query and not isinstance(query[0], tuple):
                     raise TypeError
                 # Zero-length sequences of all types will get here and succeed,
                 # but that's a minor nit.  Since the original implementation
@@ -119,7 +119,7 @@ elif six.PY3:
                 raise TypeError("not a valid non-string sequence "
                                 "or mapping object").with_traceback(tb)
 
-        l = []
+        result = []
         if not doseq:
             for k, v in query:
                 if isinstance(k, bytes):
@@ -131,7 +131,7 @@ elif six.PY3:
                     v = quote_via(v, safe)
                 else:
                     v = quote_via(str(v), safe, encoding, errors)
-                l.append(k + '=' + v)
+                result.append(k + '=' + v)
         else:
             for k, v in query:
                 if isinstance(k, bytes):
@@ -141,10 +141,10 @@ elif six.PY3:
 
                 if isinstance(v, bytes):
                     v = quote_via(v, safe)
-                    l.append(k + '=' + v)
+                    result.append(k + '=' + v)
                 elif isinstance(v, str):
                     v = quote_via(v, safe, encoding, errors)
-                    l.append(k + '=' + v)
+                    result.append(k + '=' + v)
                 else:
                     try:
                         # Is this a sufficient test for sequence-ness?
@@ -152,7 +152,7 @@ elif six.PY3:
                     except TypeError:
                         # not a sequence
                         v = quote_via(str(v), safe, encoding, errors)
-                        l.append(k + '=' + v)
+                        result.append(k + '=' + v)
                     else:
                         # loop over the sequence
                         for elt in v:
@@ -160,5 +160,5 @@ elif six.PY3:
                                 elt = quote_via(elt, safe)
                             else:
                                 elt = quote_via(str(elt), safe, encoding, errors)
-                            l.append(k + '=' + elt)
-        return '&'.join(l)
+                            result.append(k + '=' + elt)
+        return '&'.join(result)

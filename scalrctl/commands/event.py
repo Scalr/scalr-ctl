@@ -10,6 +10,7 @@ class Fire(commands.SimplifiedAction):
     It fires the Custom Event on the Server.
     """
 
+    # pylint: disable=no-member
     def _get_default_options(self):
         default_options = super(Fire, self).spec.get_default_options(self.route, self.http_method)
 
