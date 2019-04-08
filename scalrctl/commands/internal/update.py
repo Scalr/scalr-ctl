@@ -74,6 +74,9 @@ def _write_spec(spec_path, text):
 
 
 def _update_openapi_spec():
+    """
+    Update OpenAPI spec.
+    """
     return _update_spec("openapi")
 
 
@@ -127,6 +130,7 @@ def is_swagger_update_required():
     """
 
     # prevent from running 'update' more than once
+    # pylint: disable=no-else-return
     if 'update' in sys.argv or os.path.exists(os.path.join(defaults.CONFIG_DIRECTORY, ".noupdate")):
         return False
     else:
@@ -157,10 +161,14 @@ def update_swagger():
 
 
 def update(force=True):
+    """
+
+    """
     noupdate_flag_path = os.path.join(defaults.CONFIG_DIRECTORY, ".noupdate")
     if 'update' in sys.argv or os.path.exists(noupdate_flag_path):
         if force:
-            click.secho('Update is disabled by user. To enable remove %s' % noupdate_flag_path, fg='yellow')
+            click.secho('Update is disabled by user. To enable remove %s' % noupdate_flag_path,
+                        fg='yellow')
         return
 
     if not force and _is_spec_exists('openapi', 'yaml') and _is_spec_exists('openapi', 'yaml'):
@@ -169,7 +177,7 @@ def update(force=True):
     click.echo('Updating specification for Scalr API (OpenAPI)... ', nl=False)
 
     with utils._spinner():
-        success, fail_reason = _update_openapi_spec()
+        success, _ = _update_openapi_spec()
 
         if success:
             click.secho('Done', fg='green')

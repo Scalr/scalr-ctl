@@ -80,6 +80,9 @@ def generate_post_data(spec_data, endpoint):
 
 
 def _generate_post_data_v2(spec_data, endpoint):
+    """
+    Generates POST data for OpenAPI2.
+    """
     if endpoint not in spec_data.get('paths', {}):
         raise click.ClickException('API endpoint {} not found'.format(endpoint))
 
@@ -98,7 +101,11 @@ def _generate_post_data_v2(spec_data, endpoint):
 
 
 def _generate_post_data_v3(spec_data, endpoint):
+    """
+    Generates POST data for OpenAPI3.
+    """
     params_spec = spec_data['paths'].get(endpoint)
+    # pylint: disable=no-else-return
     if 'post' in params_spec:
         route_data = params_spec['post']
         if "requestBody" in route_data:
@@ -120,6 +127,9 @@ def get_definition(spec_data, endpoint):
 
 
 def _get_definition_v2(spec_data, endpoint):
+    """
+    Returns definition of OpenAPI2 schema.
+    """
     if endpoint in spec_data['paths']:
         endpoint_spec = spec_data['paths'].get(endpoint)
     else:
@@ -131,6 +141,9 @@ def _get_definition_v2(spec_data, endpoint):
 
 
 def _get_definition_v3(spec_data, endpoint):
+    """
+    Returns definition of OpenAPI3 schema.
+    """
     route_data = spec_data['paths'][endpoint]["post"]
     request_body = route_data['requestBody']
     path = request_body.get("$ref")

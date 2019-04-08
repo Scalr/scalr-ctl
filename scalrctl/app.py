@@ -17,8 +17,8 @@ if not os.path.exists(defaults.CONFIG_DIRECTORY):
     os.makedirs(defaults.CONFIG_DIRECTORY)
 
 if os.path.exists(defaults.CONFIG_PATH):
-    config_data = yaml.safe_load(open(defaults.CONFIG_PATH, 'r'))
-    configure.apply_settings(config_data)
+    CONFIG_DATA = yaml.safe_load(open(defaults.CONFIG_PATH, 'r'))
+    configure.apply_settings(CONFIG_DATA)
 
 update.update(force=False)
 
@@ -150,8 +150,8 @@ def cli(ctx, key_id, secret_key, config, *args, **kvargs):
                                                    hide_input=True))
     if config:
         if os.path.exists(config):
-            config_data = yaml.safe_load(open(config, 'r'))
-            configure.apply_settings(config_data)
+            config_datas = yaml.safe_load(open(config, 'r'))
+            configure.apply_settings(config_datas)
         else:
             msg = 'Configuration file not found: {}'.format(config)
             raise click.ClickException(msg)

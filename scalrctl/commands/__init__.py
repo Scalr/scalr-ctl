@@ -4,8 +4,8 @@ import abc
 import re
 import os
 import time
-import six
 from six.moves.urllib import parse
+import six
 import dicttoxml
 
 
@@ -15,7 +15,7 @@ from scalrctl import click, request, settings, utils, view, examples, defaults
 __author__ = 'Dmitriy Korsakov'
 
 
-success_codes = {
+SUCCESS_CODES = {
     'get': '200',
     'post': '201',
     'delete': '204',
@@ -148,7 +148,11 @@ class Action(BaseAction):
 
         return kwargs
 
-    def _get_object_as_text(self, filter_createonly=True, *args, **kwargs):
+    def _get_object_as_text(self, *args, **kwargs):
+        """
+        Load data as a text.
+        """
+        filter_createonly = kwargs.get('filter_createonly')
         try:
             obj = self.__class__(name='get', route=self.route,
                                  http_method='get', api_level=self.api_level)
@@ -198,7 +202,11 @@ class Action(BaseAction):
         result_errmsg = '\n'.join(messages)
         return result_errmsg
 
-    def get_response_type(self, response_dict):
+    @staticmethod
+    def get_response_type(response_dict):
+        """
+        Get response type.
+        """
         obj_type = None
         data = response_dict['data']
         if isinstance(data, dict):
@@ -246,7 +254,8 @@ class Action(BaseAction):
                 click.echo(view.build_tree(data))
             elif settings.view == 'table':
                 obj_type = self.get_response_type(response_json)
-                columns = self._table_columns or self.spec.get_column_names(self.route, self.http_method, obj_type)
+                columns = self._table_columns or self.spec.get_column_names(self.route, self.http_method,
+                                                                            obj_type)
                 if self.spec.returns_iterable(self.route, self.http_method):
                     rows, current_page, last_page = view.calc_vertical_table(response_json,
                                                                     columns)
@@ -324,7 +333,8 @@ class Action(BaseAction):
                                            required=False, help=filter_help)
                     options.append(filters)
 
-                columns_help = "Filter columns in table view [--table required]. Example: NAME,SIZE,SCOPE. "
+                columns_help = "Filter columns in table view [--table required]. \
+                                Example: NAME,SIZE,SCOPE. "
                 column_names = self.spec.get_column_names(self.route, self.http_method)
                 if column_names:
                     columns_help += "Available columns: %s." % ', '.join(column_names)
@@ -339,7 +349,8 @@ class Action(BaseAction):
             json_ = click.Option(('--json', 'transformation'), is_flag=True,
                                  flag_value='raw', default=False,
                                  help="Print raw response")
-            strip_metadata = click.Option(('--no-envelope', 'strip_metadata'), is_flag=True, default=False,
+            strip_metadata = click.Option(('--no-envelope', 'strip_metadata'),
+                               is_flag=True, default=False,
                                help="Strip server response from all metadata.")
             xml = click.Option(('--xml', 'transformation'), is_flag=True,
                                flag_value='xml', default=False,
@@ -451,7 +462,7 @@ class Action(BaseAction):
         param_names = []
         param_data = self.spec.get_body_type_params(self.route, self.http_method)
         param_name = param_data.get('name')
-        if param_name:  # XXX simplified actions might be affected, testing required
+        if param_name:  # Note simplified actions might be affected, testing required
             param_names.extend(param_name)
 
         try:
@@ -468,13 +479,15 @@ class Action(BaseAction):
             else:
                 if http_method == 'PATCH':
                     if stdin:
+                        kwargs['filter_createonly'] = True
                         self._get_object_as_text(*args, **kwargs)
                         raw_json_object = self._read_object()
                         filtered_json_object = self.spec.filter_json_object(raw_json_object,
                                                                             self.route,
                                                                             self.http_method)
                     else:
-                        raw_text = self._get_object_as_text(filter_createonly=False, *args, **kwargs)
+                        kwargs['filter_createonly'] = False
+                        raw_text = self._get_object_as_text(*args, **kwargs)
                         raw_json_object = json.loads(raw_text)
 
                         filtered_dict = self.spec.filter_json_object(
@@ -724,7 +737,7 @@ class _OpenAPIv2Spec(_OpenAPIBaseSpec):
     def get_response_ref(self, route, http_method):
         route_data = self.raw_spec['paths'][route]
         responses = route_data[http_method]['responses']
-        response_code = success_codes[http_method]
+        response_code = SUCCESS_CODES[http_method]
         if response_code in responses:
             response_200 = responses[response_code]
             if 'schema' in response_200:
@@ -753,7 +766,7 @@ class _OpenAPIv2Spec(_OpenAPIBaseSpec):
     def returns_iterable(self, route, http_method):
         result = False
         responses = self.raw_spec['paths'][route][http_method]['responses']
-        response_code = success_codes[http_method]
+        response_code = SUCCESS_CODES[http_method]
         if response_code in responses:
             response_200 = responses.get(response_code)
             if 'schema' in response_200:
@@ -883,7 +896,7 @@ class _OpenAPIv3Spec(_OpenAPIBaseSpec):
 
     def get_response_ref(self, route, http_method):
         responses = self.raw_spec['paths'][route][http_method]['responses']
-        response_200 = responses.get(success_codes[http_method])
+        response_200 = responses.get(SUCCESS_CODES[http_method])
         if '$ref' in response_200:
             response_200 = self.lookup(response_200['$ref'])
         result = response_200['content']['application/json']['schema']['$ref']
@@ -933,8 +946,8 @@ class _OpenAPIv3Spec(_OpenAPIBaseSpec):
 
     def returns_iterable(self, route, http_method):
         responses = self.raw_spec['paths'][route]['get']['responses']
-        if success_codes[http_method] in responses:
-            response_200 = responses.get(success_codes[http_method])
+        if SUCCESS_CODES[http_method] in responses:
+            response_200 = responses.get(SUCCESS_CODES[http_method])
             if "$ref" in response_200:
                 response_200 = self.lookup(response_200['$ref'])
             if 'schema' in response_200["content"]["application/json"]:

@@ -180,7 +180,7 @@ def get_session_data(data):
         uri = '/api/%s/session/' % data['API_VERSION']
         raw_result = request.request(method="get", api_level=api_level, request_uri=uri)
         result = json.loads(raw_result)
-    except Exception:
+    except (Exception, BaseException):
         result = {}
     return result
 

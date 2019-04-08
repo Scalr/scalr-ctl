@@ -1,11 +1,14 @@
 # -*- coding: utf-8 -*-
+"""
+Test commands
+"""
 
 from scalrctl import defaults, commands, utils
 
 if defaults.OPENAPI_ENABLED:
-    spec = commands.get_spec(utils.read_spec_openapi())
+    SPEC = commands.get_spec(utils.read_spec_openapi())
 else:
-    spec = commands.get_spec(utils.read_spec("user", ext='json'))
+    SPEC = commands.get_spec(utils.read_spec("user", ext='json'))
 
 
 def _test_get_body_type_params():
@@ -13,7 +16,7 @@ def _test_get_body_type_params():
         route = "/user/{envId}/scripts/{scriptId}/"
     else:
         route = "/{envId}/scripts/{scriptId}/"
-    params = spec.get_body_type_params(route, http_method="patch")[0]
+    params = SPEC.get_body_type_params(route, http_method="patch")[0]
     assert 'required' in params
     assert params['required']
     assert 'description' in params
@@ -24,19 +27,23 @@ def _test_get_body_type_params():
         assert params['name'].endswith('Object')
         assert 'in' in params
 
+
 def test_merge_all():
-    data = {u'allOf': [{u'$ref': u'#/components/schemas/StorageConfiguration'},
-                       {u'properties': {u'template': {u'$ref': u'#/components/schemas/PersistentStorageTemplate'}},
-                        u'required': [u'template'],
-                        u'type': u'object',
-                        u'x-createOnly': [u'type'],
-                        u'x-usedIn': [u'/user/{envId}/farm-roles/{farmRoleId}/storage/',
-                                      u'/user/{envId}/farm-roles/{farmRoleId}/storage/{storageConfigurationId}/']}]}
-    pass
+    data = {u'allOf':
+            [{u'$ref': u'#/components/schemas/StorageConfiguration'},
+             {u'properties': {u'template':
+                 {u'$ref': u'#/components/schemas/PersistentStorageTemplate'}},
+              u'required': [u'template'],
+              u'type': u'object',
+              u'x-createOnly': [u'type'],
+              u'x-usedIn':
+              [u'/user/{envId}/farm-roles/{farmRoleId}/storage/',
+               u'/user/{envId}/farm-roles/{farmRoleId}/storage/{storageConfigurationId}/']}]}
+    return data
 
 
 def _test_test():
-    '''    
+    '''
     action = commands.Action(name="update",
                              route="/{envId}/scripts/{scriptId}/",
                              http_method="patch",
