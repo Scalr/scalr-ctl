@@ -254,7 +254,8 @@ class Action(BaseAction):
                 click.echo(view.build_tree(data))
             elif settings.view == 'table':
                 obj_type = self.get_response_type(response_json)
-                columns = self._table_columns or self.spec.get_column_names(self.route, self.http_method,
+                columns = self._table_columns or self.spec.get_column_names(self.route,
+                                                                            self.http_method,
                                                                             obj_type)
                 if self.spec.returns_iterable(self.route, self.http_method):
                     rows, current_page, last_page = view.calc_vertical_table(response_json,
@@ -517,7 +518,7 @@ class Action(BaseAction):
             if '$ref' in schema:
                 schema = self.spec.lookup(schema['$ref'])
 
-            if len(param_names) == 1:  # XXX
+            if len(param_names) == 1:  # Note
                 param_name = param_names[0]
             elif 'discriminator' in schema:
                 disc_key = schema.get("discriminator").get('propertyName')
@@ -606,7 +607,8 @@ class Action(BaseAction):
         """
         Returns action options.
         """
-        options = self.spec.get_default_options(self.route, self.http_method) + self._get_custom_options()
+        options = self.spec.get_default_options(self.route, self.http_method) + \
+                    self._get_custom_options()
         return [opt for opt in options if opt.name not in self.ignored_options]
 
     def validate(self):
@@ -634,6 +636,10 @@ class SimplifiedAction(Action):
 
 
 def get_spec(data):
+    """
+    Get specifications
+    """
+    # pylint: disable=no-else-return
     if utils.is_openapi_v3(data):
         return _OpenAPIv3Spec(data)
     else:
@@ -642,6 +648,9 @@ def get_spec(data):
 
 @six.add_metaclass(abc.ABCMeta)
 class _OpenAPIBaseSpec(object):
+    """
+    General Base specification interface
+    """
     raw_spec = None
     _discriminators = {}
 
@@ -650,35 +659,59 @@ class _OpenAPIBaseSpec(object):
 
     @abc.abstractmethod
     def base_path(self):
+        """
+        Base method for getting path.
+        """
         raise NotImplementedError()
 
     @abc.abstractmethod
     def get_response_ref(self, route, http_method):
+        """
+        Base method for getting response reference.
+        """
         raise NotImplementedError()
 
     @abc.abstractmethod
     def get_body_type_params(self, route, http_method):
+        """
+        Base method for getting body type params.
+        """
         raise NotImplementedError()
 
     @abc.abstractmethod
     def get_path_type_params(self, route):
+        """
+        Base method for getting path type params.
+        """
         raise NotImplementedError()
 
     @abc.abstractmethod
     def returns_iterable(self, route, http_method):
+        """
+        Base method for return iterable.
+        """
         raise NotImplementedError()
 
     @abc.abstractmethod
     def get_default_options(self, route, http_method):
+        """
+        Base method for getting default options.
+        """
         raise NotImplementedError()
 
     @abc.abstractmethod
     def get_column_names(self, route, http_method, obj_type=None):
+        """
+        Base method for getting column names.
+        """
         raise NotImplementedError()
 
     @abc.abstractmethod
     def filter_json_object(self, data, route, http_method, filter_createonly=False,
                            schema=None, reference=None):
+        """
+        Base method for getting json object.
+        """
         raise NotImplementedError()
 
     def lookup(self, response_ref):
@@ -689,6 +722,9 @@ class _OpenAPIBaseSpec(object):
         return utils.lookup(response_ref, self.raw_spec)
 
     def get_raw_params(self, route, http_method):
+        """
+        Return list of body type params.
+        """
         result = self.get_path_type_params(route)
         if http_method.upper() in ('GET', 'DELETE'):
             body_param = self.get_body_type_params(route, http_method)
@@ -697,16 +733,23 @@ class _OpenAPIBaseSpec(object):
         return result
 
     def result_descr(self, route, http_method):
+        """
+        Return document section for reference.
+        """
         ref = self.get_response_ref(route, http_method)
         if ref:
             return self.lookup(ref)
 
     def list_concrete_types(self, schema):
+        """
+        Get document section for reference.
+        """
         types = []
         if "x-concreteTypes" in schema:
             for ref_dict in schema["x-concreteTypes"]:
                 ref_link = ref_dict['$ref']
-                types += [link.split("/")[-1] for link in self.list_concrete_types_recursive(ref_link)]
+                types += [link.split("/")[-1] for link in
+                          self.list_concrete_types_recursive(ref_link)]
         return types
 
     def list_concrete_types_recursive(self, reference):
@@ -730,6 +773,10 @@ class _OpenAPIBaseSpec(object):
 
 
 class _OpenAPIv2Spec(_OpenAPIBaseSpec):
+    """
+    Class for OpenAPI2 Specification.
+    """
+
     @property
     def base_path(self):
         return self.raw_spec["basePath"]
