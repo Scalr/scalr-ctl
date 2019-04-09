@@ -75,7 +75,7 @@ def _update_spec(api_level):
             raise Exception('Can\'t load spec file')
 
         try:
-            struct = yaml.load(yaml_spec_text)
+            struct = yaml.safe_load(yaml_spec_text)
             json_spec_text = json.dumps(struct)
         except (KeyError, TypeError, yaml.YAMLError) as e:
             six.reraise(type(e), "Swagger specification is not valid:\n{}"

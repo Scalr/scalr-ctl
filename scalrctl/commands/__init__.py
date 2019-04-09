@@ -97,8 +97,10 @@ class Action(BaseAction):
             pattern = param.get('pattern')
             param_name = param.get('name')
             if pattern and param_name and param_name in kwargs:
-                value = str(kwargs[param_name])
-                matches = re.match(pattern, value.strip())
+                value = str(kwargs.get(param_name, '')).strip()
+                matches = re.match(pattern, value)
+                if not matches:
+                    matches = re.search(pattern, value, re.MULTILINE)
                 if not matches or len(matches.group()) != len(value):
                     raise click.ClickException("Invalid value for {}"
                                                .format(param_name))
