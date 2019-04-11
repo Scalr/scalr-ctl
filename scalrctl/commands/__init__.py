@@ -228,6 +228,10 @@ class Action(BaseAction):
                 utils.reraise("Invalid server response")
 
             errors = response_json.get('errors')
+            warnings = response_json.get('warnings')  # type: list[dict]
+
+            if warnings:
+                utils.warning(*warnings)
 
             if errors:
                 errmsg = self._format_errmsg(errors)
