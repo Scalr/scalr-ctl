@@ -1,4 +1,7 @@
 # -*- coding: utf-8 -*-
+"""
+General module for commands.
+"""
 import json
 import abc
 import re
@@ -6,7 +9,7 @@ import os
 import time
 from six.moves.urllib import parse
 import six
-import dicttoxml
+import dicttoxml  # pylint: disable=import-error
 
 
 from scalrctl import click, request, settings, utils, view, examples, defaults
@@ -24,40 +27,76 @@ SUCCESS_CODES = {
 
 
 class MultipleClickException(click.ClickException):
+    """
+    Inherite ClickException to create more suitable echo (log).
+    """
 
     def format_message(self):
+        """
+        Prepare format message.
+        """
         return '\x1b[31m%s\x1b[39m' % self.message if settings.colored_output else self.message
 
     def show(self, file=None):
+        """
+        Prepare format message.
+        """
         if file is None:
-            file = click._compat.get_text_stderr()
+            file = click._compat.get_text_stderr()  # pylint: disable=protected-access
         click.utils.echo('%s' % self.format_message(), file=file)
 
 
-class BaseAction(object):
+class BaseAction():
+    """
+    Base class for action.
+    """
 
     epilog = None
 
     def __init__(self, *args, **kwargs):
         pass
 
+    # pylint: disable=no-self-use
     def run(self, *args, **kwargs):
+        """
+        Run definition.
+        """
         pass
 
+    # pylint: disable=no-self-use
     def get_description(self):
+        """
+        Get descriptors of schema
+        """
         return ''
 
+    # pylint: disable=no-self-use
     def modify_options(self, options):
+        """
+        This is the place where command line options can be fixed
+        after they are loaded from yaml spec.
+        """
         return options
 
+    # pylint: disable=no-self-use
     def get_options(self):
+        """
+        Returns action options.
+        """
         return []
 
+    # pylint: disable=no-self-use
     def validate(self):
+        """
+        Validate routes for current API scope.
+        """
         pass
 
 
 class Action(BaseAction):
+    """
+    Action class.
+    """
 
     raw_spec = None
 
@@ -92,6 +131,9 @@ class Action(BaseAction):
         self._init()
 
     def _init(self):
+        """
+        Additional method for initialize parameters.
+        """
         if defaults.OPENAPI_ENABLED:
             self.spec = get_spec(utils.read_spec_openapi())
         else:
@@ -105,6 +147,9 @@ class Action(BaseAction):
             )
 
     def _check_arguments(self, **kwargs):
+        """
+        Checking arguments according to schema.
+        """
         route_data = self.spec.raw_spec['paths'][self.route]
         if 'parameters' not in route_data:
             return
@@ -122,6 +167,9 @@ class Action(BaseAction):
                                                .format(param_name))
 
     def _apply_arguments(self, **kwargs):
+        """
+        Aply arguments according.
+        """
         if kwargs.get('filters'):
             for pair in kwargs.pop('filters').split(','):
                 kv = pair.split('=')
@@ -172,6 +220,9 @@ class Action(BaseAction):
             utils.reraise(e)
 
     def _edit_example(self):
+        """
+        Edit template as an example.
+        """
         commentary = examples.create_post_example(self.api_level, self.route)
         text = click.edit(commentary)
         if text:
@@ -189,7 +240,11 @@ class Action(BaseAction):
         raw_object = click.get_text_stream('stdin').read()
         return json.loads(raw_object)
 
+    # pylint: disable=no-self-use
     def _format_errmsg(self, errors):
+        """
+        Format error message.
+        """
         messages = []
         num = 1
         for error_data in errors:
@@ -218,6 +273,9 @@ class Action(BaseAction):
         return obj_type
 
     def _format_response(self, response, hidden=False, **kwargs):
+        """
+        Format a response.
+        """
         text = None
 
         if response:
@@ -236,14 +294,15 @@ class Action(BaseAction):
             if errors:
                 errmsg = self._format_errmsg(errors)
                 error = MultipleClickException(errmsg)
-                error.code = 1
+                error.code = 1  # pylint: disable=attribute-defined-outside-init
                 raise error
 
             if not hidden:
                 utils.debug(response_json.get('meta'))
 
             if self.strip_metadata and self.http_method.upper() == 'GET' and \
-                    settings.view in ('raw', 'json', 'xml') and 'data' in response_json:  # SCALRCORE-10392
+                    settings.view in ('raw', 'json', 'xml') and \
+               'data' in response_json:  # SCALRCORE-10392
                 response_json = response_json['data']
                 response = json.dumps(response_json)
 
@@ -261,7 +320,7 @@ class Action(BaseAction):
                 columns = self._table_columns or self.spec.get_column_names(self.route,
                                                                             self.http_method,
                                                                             obj_type)
-                if self.spec.returns_iterable(self.route, self.http_method):
+                if self.spec.get_iterable_object(self.route, self.http_method):
                     rows, current_page, last_page = view.calc_vertical_table(response_json,
                                                                     columns)
                     pre = "Page: {} of {}".format(current_page, last_page)
@@ -286,6 +345,9 @@ class Action(BaseAction):
         return text
 
     def _get_default_options(self):
+        """
+        Get default options.
+        """
         options = []
         for param in self._get_raw_params():
             option = click.Option(('--{}'.format(param['name']),
@@ -297,6 +359,9 @@ class Action(BaseAction):
         return options
 
     def _get_custom_options(self):
+        """
+        Get custom options.
+        """
         options = []
 
         if self.http_method.upper() in ('POST', 'PATCH'):
@@ -316,7 +381,7 @@ class Action(BaseAction):
             """
 
         if self.http_method.upper() == 'GET':
-            if self.spec.returns_iterable(self.route, self.http_method):
+            if self.spec.get_iterable_object(self.route, self.http_method):
                 maxres = click.Option(('--max-results', 'maxResults'),
                                       type=int, required=False,
                                       help="Maximum number of records. "
@@ -381,40 +446,37 @@ class Action(BaseAction):
         return options
 
     def _get_body_type_params(self):
+        """
+        Base method for getting body type params.
+        """
         # pylint: disable=unsubscriptable-object
         route_data = self.raw_spec['paths'][self.route][self.http_method]
         return [param for param in route_data.get('parameters', '')]
 
     def _get_path_type_params(self):
+        """
+        Base method for getting path type params.
+        """
         # pylint: disable=unsubscriptable-object
         route_data = self.raw_spec['paths'][self.route]
         return [param for param in route_data.get('parameters', '')]
 
     def _get_raw_params(self):
+        """
+        Get params as a text.
+        """
         result = self._get_path_type_params()
         if self.http_method.upper() in ('GET', 'DELETE'):
             body_params = self._get_body_type_params()
             result.extend(body_params)
         return result
 
-    def _returns_iterable(self):
-        # pylint: disable=unsubscriptable-object
-        responses = self.raw_spec['paths'][self.route][self.http_method]['responses']
-        if '200' in responses:
-            response_200 = responses['200']
-            if 'schema' in response_200:
-                schema = response_200['schema']
-                if '$ref' in schema:
-                    object_key = schema['$ref'].split('/')[-1]
-                    object_descr = self.raw_spec['definitions'][object_key]
-                    object_properties = object_descr['properties']
-                    data_structure = object_properties['data']
-                    return 'array' == data_structure.get('type')
-        return False
-
     def _get_available_filters(self):
+        """
+        Get available filters.
+        """
         filters = []
-        if self.spec.returns_iterable(self.route, self.http_method):
+        if self.spec.get_iterable_object(self.route, self.http_method):
             data = self._result_descr['properties']['data']
             if "oneOf" in data['items']:
                 return []
@@ -426,6 +488,9 @@ class Action(BaseAction):
 
     @property
     def _result_descr(self):
+        """
+        Get document section.
+        """
         return self.spec.result_descr(self.route, self.http_method)
 
     def _list_createonly_properties(self):
@@ -446,6 +511,9 @@ class Action(BaseAction):
 
     @property
     def _request_template(self):
+        """
+        Get template according to base path.
+        """
         return '{}{}'.format(self.spec.base_path, self.route)
 
     def pre(self, *args, **kwargs):
@@ -532,6 +600,7 @@ class Action(BaseAction):
             utils.reraise(e)
         return args, kwargs
 
+    # pylint: disable=no-self-use
     def post(self, response):
         """
         After request is made.
@@ -620,7 +689,8 @@ class Action(BaseAction):
         Validate routes for current API scope.
         """
         if self.route and self.api_level:
-            fname = "openapi.json" if defaults.OPENAPI_ENABLED else '{}.json'.format(self.api_level)
+            fname = "openapi.json" if defaults.OPENAPI_ENABLED else\
+                    '{}.json'.format(self.api_level)
             spec_path = os.path.join(defaults.CONFIG_DIRECTORY,
                                      fname)
             api_routes = json.load(open(spec_path, 'r'))['paths'].keys()
@@ -636,7 +706,10 @@ class Action(BaseAction):
 
 
 class SimplifiedAction(Action):
-    ignored_options = ('stdin',)
+    """
+    Simplified action class.
+    """
+    ignored_options = ('stdin', )  # type: tuple[str]
 
 
 def get_spec(data):
@@ -690,7 +763,7 @@ class _OpenAPIBaseSpec(object):
         raise NotImplementedError()
 
     @abc.abstractmethod
-    def returns_iterable(self, route, http_method):
+    def get_iterable_object(self, route, http_method):
         """
         Base method for return iterable.
         """
@@ -757,6 +830,9 @@ class _OpenAPIBaseSpec(object):
         return types
 
     def list_concrete_types_recursive(self, reference):
+        """
+        Get list of x-concreteTypes values.
+        """
         references = []
         schema = self.lookup(reference)
         if "x-concreteTypes" not in schema:
@@ -766,6 +842,7 @@ class _OpenAPIBaseSpec(object):
                 references += self.list_concrete_types_recursive(ref_dict['$ref'])
         return references
 
+    # pylint: disable=no-self-use
     def handle_oneof(self, data, obj_type=None):
         '''
         Returns full reference to object if obj_type is present inside oneOf block
@@ -783,9 +860,15 @@ class _OpenAPIv2Spec(_OpenAPIBaseSpec):
 
     @property
     def base_path(self):
+        """
+        Get base path for OpenAPI2.
+        """
         return self.raw_spec["basePath"]
 
     def get_response_ref(self, route, http_method):
+        """
+        Get response reference for OpenAPI2.
+        """
         route_data = self.raw_spec['paths'][route]
         responses = route_data[http_method]['responses']
         response_code = SUCCESS_CODES[http_method]
@@ -798,6 +881,9 @@ class _OpenAPIv2Spec(_OpenAPIBaseSpec):
                     return response_ref
 
     def get_body_type_params(self, route, http_method):
+        """
+        Get body type params for OpenAPI2.
+        """
         route_data = self.raw_spec['paths'][route][http_method]
         data = route_data.get('parameters', [])
         if data:
@@ -810,11 +896,17 @@ class _OpenAPIv2Spec(_OpenAPIBaseSpec):
         return {}
 
     def get_path_type_params(self, route):
+        """
+        Get path type params for OpenAPI2.
+        """
         route_data = self.raw_spec['paths'][route]
         params = [param for param in route_data.get('parameters', '')]
         return params
 
-    def returns_iterable(self, route, http_method):
+    def get_iterable_object(self, route, http_method):
+        """
+        Checking object if it is an array.
+        """
         result = False
         responses = self.raw_spec['paths'][route][http_method]['responses']
         response_code = SUCCESS_CODES[http_method]
@@ -831,6 +923,9 @@ class _OpenAPIv2Spec(_OpenAPIBaseSpec):
         return result
 
     def get_default_options(self, route, http_method):
+        """
+        Get default options.
+        """
         options = []
         for param in self.get_raw_params(route, http_method):
             option = click.Option(('--{}'.format(param['name']),
@@ -842,6 +937,9 @@ class _OpenAPIv2Spec(_OpenAPIBaseSpec):
         return options
 
     def get_column_names(self, route, http_method, obj_type=None):
+        """
+        Get columns names.
+        """
         data = self.result_descr(route, http_method)['properties']['data']
         response_ref = data['items']['$ref'] \
             if 'items' in data else data['$ref']
@@ -856,7 +954,8 @@ class _OpenAPIv2Spec(_OpenAPIBaseSpec):
                 f_key = self.lookup(v['$ref'])
                 if "properties" in f_key:
                     if len(f_key["properties"]) == 1 and \
-                            f_key.get("properties", {}).get("id", {}).get("type") in ("integer", "string"):
+                            f_key.get("properties", {}).get("id", {}).get("type") in \
+                       ("integer", "string"):
                         column_names.append("%s.id" % k)
         return column_names
 
@@ -937,8 +1036,15 @@ class _OpenAPIv2Spec(_OpenAPIBaseSpec):
 
 
 class _OpenAPIv3Spec(_OpenAPIBaseSpec):
+    """
+    OpenAPI3 class representation.
+    """
+
     @property
     def base_path(self):
+        """
+        Get base path for OpenAPI3.
+        """
         servers = self.raw_spec["servers"]
         default_server = servers[0]
         result = default_server["url"]
@@ -946,6 +1052,9 @@ class _OpenAPIv3Spec(_OpenAPIBaseSpec):
         return path[:-1]
 
     def get_response_ref(self, route, http_method):
+        """
+        Get response reference for OpenAPI3.
+        """
         responses = self.raw_spec['paths'][route][http_method]['responses']
         response_200 = responses.get(SUCCESS_CODES[http_method])
         if '$ref' in response_200:
@@ -954,8 +1063,11 @@ class _OpenAPIv3Spec(_OpenAPIBaseSpec):
         return result
 
     def get_body_type_params(self, route, http_method):
+        """
+        Get body type of params for OpenAPI3.
+        """
 
-        def list_references_oneOf(data):
+        def list_references_oneof(data):
             '''
             returns a list of full references to objects inside oneOf block
             '''
@@ -970,7 +1082,8 @@ class _OpenAPIv3Spec(_OpenAPIBaseSpec):
         if "requestBody" in route_data:
             param = {}
             request_body = route_data['requestBody']
-            raw_block = self.lookup(request_body.get("$ref")) if "$ref" in request_body else request_body
+            raw_block = self.lookup(request_body.get("$ref")) if "$ref" in \
+                    request_body else request_body
             param["schema"] = raw_block["content"]['application/json']["schema"]
             param["required"] = raw_block.get("required")
             param["description"] = raw_block.get("description")
@@ -979,12 +1092,15 @@ class _OpenAPIv3Spec(_OpenAPIBaseSpec):
             if '$ref' in schema:
                 param["name"] = [raw_block.get("name", schema['$ref'].split('/')[-1]), ]
             elif 'oneOf' in schema:
-                param["name"] = [ref.split('/')[-1] for ref in list_references_oneOf(schema)]
+                param["name"] = [ref.split('/')[-1] for ref in list_references_oneof(schema)]
 
             return param
         return {}
 
     def get_path_type_params(self, route):
+        """
+        Get path type params for OpenAPI3.
+        """
         route_data = self.raw_spec['paths'][route]
         params = []
         for param in route_data.get('parameters', ''):
@@ -995,7 +1111,10 @@ class _OpenAPIv3Spec(_OpenAPIBaseSpec):
                 params.append(param)
         return params
 
-    def returns_iterable(self, route, http_method):
+    def get_iterable_object(self, route, http_method):
+        """
+        Return bool values if values is array.
+        """
         responses = self.raw_spec['paths'][route]['get']['responses']
         if SUCCESS_CODES[http_method] in responses:
             response_200 = responses.get(SUCCESS_CODES[http_method])
@@ -1007,11 +1126,14 @@ class _OpenAPIv3Spec(_OpenAPIBaseSpec):
                     schema = self.lookup(schema["$ref"])
                 object_properties = schema['properties']
                 data_structure = object_properties['data']
-                result = 'array' == data_structure.get('type')
+                result = data_structure.get('type') == 'array'
                 return result
         return False
 
     def get_default_options(self, route, http_method):
+        """
+        Get default options for OpenAPI3.
+        """
         options = []
         for param in self.get_raw_params(route, http_method):
             option = click.Option(('--{}'.format(param['name']),
@@ -1023,6 +1145,9 @@ class _OpenAPIv3Spec(_OpenAPIBaseSpec):
         return options
 
     def get_column_names(self, route, http_method, obj_type=None):
+        """
+        Get column names for determine routes.
+        """
         data = self.result_descr(route, http_method)['properties']['data']
         if 'items' in data:
             items = data['items']
@@ -1038,7 +1163,7 @@ class _OpenAPIv3Spec(_OpenAPIBaseSpec):
             response_ref = self.handle_oneof(data, obj_type)
         response_descr = self.lookup(response_ref)
         if 'allOf' in response_descr:
-            properties = self.merge_all(response_descr).get('properties', {})
+            properties = self._merge_all(response_descr).get('properties', {})
         else:
             properties = response_descr.get('properties', {})
 
@@ -1056,7 +1181,10 @@ class _OpenAPIv3Spec(_OpenAPIBaseSpec):
                                     column_names.append("%s.id" % k)
         return column_names
 
-    def merge_all(self, data):
+    def _merge_all(self, data):
+        """
+        Merge objects into one if 'allOf' in schema.
+        """
         return utils.merge_all(data, self.raw_spec)
 
     def filter_json_object(self, data, route, http_method, filter_createonly=False,
@@ -1090,7 +1218,7 @@ class _OpenAPIv3Spec(_OpenAPIBaseSpec):
             reference = '#/components/schemas/{}'.format(disc_value)
             schema = self.lookup(reference)
             if "allOf" in schema:
-                schema = self.merge_all(schema)
+                schema = self._merge_all(schema)
 
             if disc_value not in self.list_concrete_types(schema):
                 raise click.ClickException((
@@ -1126,7 +1254,7 @@ class _OpenAPIv3Spec(_OpenAPIBaseSpec):
 
                     sub_schema = self.lookup(p_value['$ref'])
                     if "allOf" in sub_schema:
-                        sub_schema = self.merge_all(sub_schema)
+                        sub_schema = self._merge_all(sub_schema)
 
                     filtered[p_key] = self.filter_json_object(
                         data[p_key],
@@ -1143,10 +1271,13 @@ class _OpenAPIv3Spec(_OpenAPIBaseSpec):
 
 
 class PolledAction(SimplifiedAction):
+    """
+    Polled Action class.
+    """
 
-    def _wait_for_status(self, poll_dict, action_obj, states_to_wait_for, timeout=1, hide_output=True, **kwargs):
+    def _wait_for_status(self, poll_dict, action_obj, states_to_wait_for,
+                         timeout=1, hide_output=True, **kwargs):
         '''
-
         :param poll_dict: e.g. {'serverId': b039d8d9-26c2-439d-9b2b-9d7b761b417c}
         :param action_obj: instance of class Action
         :param states_to_wait_for: list of states to wait for, e.g. ('running', 'failed')
@@ -1156,7 +1287,7 @@ class PolledAction(SimplifiedAction):
         :returns last status, e.g. 'running'
         '''
         status = ''
-        with utils._spinner():
+        with utils._spinner():  # pylint: disable=protected-access
             while status not in states_to_wait_for:
                 run_args = {"hide_output": hide_output, "envId": kwargs.get('envId')}
                 run_args.update(poll_dict)
@@ -1167,4 +1298,7 @@ class PolledAction(SimplifiedAction):
         return status
 
     def _get_operation_status(self, data_json):
+        """
+        Get operation status.
+        """
         return data_json["data"]["status"]

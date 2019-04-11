@@ -28,7 +28,7 @@ enable=E,W
 # can either give multiple identifier separated by comma (,) or put this option
 # multiple time (only on the command line, not in the configuration file where
 # it should appear only once).
-disable=unused-argument,wildcard-import,bad-continuation,unicode-builtin,too-many-branches,too-many-nested-blocks,no-absolute-import,inconsistent-return-statements
+disable=unused-argument,wildcard-import,bad-continuation,unicode-builtin,too-many-nested-blocks,no-absolute-import
 # - unused-argument  Common situation with subclassing
 # - wildcard-import  Sometimes useful
 # - disable=bad-continuation  We know better

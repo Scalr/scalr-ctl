@@ -166,7 +166,7 @@ def update(force=True):
     """
     noupdate_flag_path = os.path.join(defaults.CONFIG_DIRECTORY, ".noupdate")
     if 'update' in sys.argv or os.path.exists(noupdate_flag_path):
-        if force:
+        if force and os.path.exists(noupdate_flag_path):
             click.secho('Update is disabled by user. To enable remove %s' % noupdate_flag_path,
                         fg='yellow')
         return
