@@ -4,6 +4,7 @@ General module for commands.
 """
 import json
 import abc
+import typing
 import re
 import os
 import time
@@ -479,7 +480,7 @@ class Action(BaseAction):
         if self.spec.get_iterable_object(self.route, self.http_method):
             data = self._result_descr['properties']['data']
             if "oneOf" in data['items']:
-                return []
+                return filters
             response_ref = data['items']['$ref']
             response_descr = self.spec.lookup(response_ref)
             if 'x-filterable' in response_descr:
@@ -709,10 +710,11 @@ class SimplifiedAction(Action):
     """
     Simplified action class.
     """
-    ignored_options = ('stdin', )  # type: tuple[str]
+    ignored_options = ('stdin', )  # type: typing.Tuple[str]
 
 
 def get_spec(data):
+    # type: (str) -> _OpenAPIBaseSpec
     """
     Get specifications
     """
@@ -729,7 +731,7 @@ class _OpenAPIBaseSpec(object):
     General Base specification interface
     """
     raw_spec = None
-    _discriminators = {}
+    _discriminators = {}  # type: dict
 
     def __init__(self, raw_spec):
         self.raw_spec = raw_spec
@@ -792,6 +794,7 @@ class _OpenAPIBaseSpec(object):
         raise NotImplementedError()
 
     def lookup(self, response_ref):
+        # type: (str) -> str
         """
         Returns document section
         Example: #/definitions/Image returns Image defenition section.
@@ -799,6 +802,7 @@ class _OpenAPIBaseSpec(object):
         return utils.lookup(response_ref, self.raw_spec)
 
     def get_raw_params(self, route, http_method):
+        # type: ('str', 'str') -> typing.List[str]
         """
         Return list of body type params.
         """
@@ -896,6 +900,7 @@ class _OpenAPIv2Spec(_OpenAPIBaseSpec):
         return {}
 
     def get_path_type_params(self, route):
+        # type: (str) -> typing.List[str]
         """
         Get path type params for OpenAPI2.
         """
@@ -959,6 +964,19 @@ class _OpenAPIv2Spec(_OpenAPIBaseSpec):
                         column_names.append("%s.id" % k)
         return column_names
 
+    def _get_schema(self, route, http_method):
+        # type: (str, str) -> str
+        """
+        Get schema from route.
+        """
+        schema = None
+        param = self.get_body_type_params(route, http_method)
+        if 'schema' in param:
+            schema = param['schema']
+            if '$ref' in schema:
+                schema = self.lookup(schema['$ref'])
+        return schema
+
     def filter_json_object(self, data, route, http_method, filter_createonly=False,
                            schema=None, reference=None):
         """
@@ -970,12 +988,7 @@ class _OpenAPIv2Spec(_OpenAPIBaseSpec):
 
         # load `schema`
         if schema is None:
-            param = self.get_body_type_params(route, http_method)
-            if 'schema' in param:
-                schema = param['schema']
-                if '$ref' in schema:
-                    reference = schema['$ref']
-                    schema = self.lookup(schema['$ref'])
+            schema = self._get_schema(route, http_method)
 
         # load child object as `schema`
         if 'discriminator' in schema:
@@ -1098,6 +1111,7 @@ class _OpenAPIv3Spec(_OpenAPIBaseSpec):
         return {}
 
     def get_path_type_params(self, route):
+        # type: (str) -> typing.List[dict]
         """
         Get path type params for OpenAPI3.
         """
@@ -1148,13 +1162,14 @@ class _OpenAPIv3Spec(_OpenAPIBaseSpec):
         """
         Get column names for determine routes.
         """
+        column_names = []
         data = self.result_descr(route, http_method)['properties']['data']
         if 'items' in data:
             items = data['items']
             if 'oneOf' in items:
                 response_ref = self.handle_oneof(items, obj_type)
                 if not response_ref:
-                    return []
+                    return column_names
             else:
                 response_ref = items['$ref']
         elif '$ref' in data:
@@ -1167,18 +1182,15 @@ class _OpenAPIv3Spec(_OpenAPIBaseSpec):
         else:
             properties = response_descr.get('properties', {})
 
-        column_names = []
         for k, v in properties.items():
             if '$ref' not in v:
                 column_names.append(k)
             else:  # ST-226
                 f_key = self.lookup(v['$ref'])
-                if "properties" in f_key:
-                    if len(f_key["properties"]) == 1:
-                        if "id" in f_key["properties"]:
-                            if "type" in f_key["properties"]["id"]:
-                                if f_key["properties"]["id"]["type"] in ("integer", "string"):
-                                    column_names.append("%s.id" % k)
+                if "properties" in f_key and len(f_key["properties"]) == 1 and "id" in\
+                   f_key["properties"] and "type" in f_key["properties"]["id"]:
+                        if f_key["properties"]["id"]["type"] in ("integer", "string"):
+                            column_names.append("%s.id" % k)
         return column_names
 
     def _merge_all(self, data):
@@ -1186,6 +1198,19 @@ class _OpenAPIv3Spec(_OpenAPIBaseSpec):
         Merge objects into one if 'allOf' in schema.
         """
         return utils.merge_all(data, self.raw_spec)
+
+    def _get_schema(self, route, http_method):
+        # type: (str, str) -> str
+        """
+        Get schema from route.
+        """
+        schema = None
+        param = self.get_body_type_params(route, http_method)
+        if 'schema' in param:
+            schema = param['schema']
+            if '$ref' in schema:
+                schema = self.lookup(schema['$ref'])
+        return schema
 
     def filter_json_object(self, data, route, http_method, filter_createonly=False,
                            schema=None, reference=None):
@@ -1197,12 +1222,7 @@ class _OpenAPIv3Spec(_OpenAPIBaseSpec):
 
         # load `schema`
         if schema is None:
-            param = self.get_body_type_params(route, http_method)
-            if 'schema' in param:
-                schema = param['schema']
-                if '$ref' in schema:
-                    reference = schema['$ref']
-                    schema = self.lookup(schema['$ref'])
+            schema = self._get_schema(route, http_method)
 
         # load child object as `schema`
         if 'discriminator' in schema:

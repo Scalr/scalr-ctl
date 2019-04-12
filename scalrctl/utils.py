@@ -3,6 +3,7 @@ Module that provides utils for client.
 """
 # -*- coding: utf-8 -*-
 import itertools
+import typing
 import os
 import sys
 import json
@@ -159,6 +160,7 @@ def lookup(response_ref, raw_spec):
 
 
 def merge_allof(data, raw_spec):
+    # type: (dict, str) -> dict
     """
     Merge objects into one from allOf.
     """
@@ -171,6 +173,7 @@ def merge_allof(data, raw_spec):
 
 
 def merge(block, merged):
+    # type: (dict, dict) -> None
     """
     Merge values in block.
     """
@@ -191,6 +194,7 @@ def merge(block, merged):
 
 
 def merge_anyof(data, raw_spec, object_name):
+    # type: (typing.List[dict], str, str) -> dict
     """
     Merge objects into one from anyOf.
     """
@@ -208,8 +212,10 @@ def merge_anyof(data, raw_spec, object_name):
 
 
 def merge_all(data, raw_spec, object_name=None):
+    # type: (typing.List[dict], str, str) -> dict
     """
-    Returns merged data from allOf block
+    Returns merged data from received block.
+    Uses in v3 specifications.
     """
     if "allOf" in data:
         merged = merge_allof(data['allOf'], raw_spec)
