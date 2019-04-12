@@ -158,33 +158,66 @@ def lookup(response_ref, raw_spec):
         return result
 
 
-def merge_all(data, raw_spec):
-    '''
-    Returns merged data from allOf block
-    '''
+def merge_allof(data, raw_spec):
+    """
+    Merge objects into one from allOf.
+    """
     merged = {}
-
-    if "allOf" not in data:
-        return data
-
-    data = data['allOf']
     for block in data:
         if "$ref" in block:
             block = lookup(block['$ref'], raw_spec)
-        for k, v in block.items():
-            if isinstance(v, list):
-                if k not in merged:
-                    merged[k] = v
-                else:
-                    merged[k] += v
-                    merged[k] = list(set(merged[k]))
-            elif isinstance(v, dict):
-                if k not in merged:
-                    merged[k] = v
-                else:
-                    merged[k].update(v)
-            else:
+        merge(block, merged)
+    return merged
+
+
+def merge(block, merged):
+    """
+    Merge values in block.
+    """
+    for k, v in block.items():
+        if isinstance(v, list):
+            if k not in merged:
                 merged[k] = v
+            else:
+                merged[k] += v
+                merged[k] = list(set(merged[k]))
+        elif isinstance(v, dict):
+            if k not in merged:
+                merged[k] = v
+            else:
+                merged[k].update(v)
+        else:
+            merged[k] = v
+
+
+def merge_anyof(data, raw_spec, object_name):
+    """
+    Merge objects into one from anyOf.
+    """
+    merged = {}
+    data = [a for a in data if a['$ref'].endswith(object_name)]
+    for block in data:
+        if "$ref" in block:
+            block = lookup(block['$ref'], raw_spec)
+            if 'allOf' in block:
+                for value in block['allOf']:
+                    merge(value, merged)
+        else:
+            merge(block, merged)
+    return merged
+
+
+def merge_all(data, raw_spec, object_name=None):
+    """
+    Returns merged data from allOf block
+    """
+    if "allOf" in data:
+        merged = merge_allof(data['allOf'], raw_spec)
+    elif "anyOf" in data:
+        merged = merge_anyof(data['anyOf'], raw_spec, object_name)
+    else:
+        merged = data
+
     return merged
 
 
