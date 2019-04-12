@@ -117,7 +117,6 @@ def _update_spec(api_level):
 class UpdateScalrCTL(commands.BaseAction):
 
     def run(self, *args, **kwargs):
-        # update_swagger() #production
         update()
 
     def get_description(self):
@@ -131,7 +130,8 @@ def is_swagger_update_required():
 
     # prevent from running 'update' more than once
     # pylint: disable=no-else-return
-    if 'update' in sys.argv or os.path.exists(os.path.join(defaults.CONFIG_DIRECTORY, ".noupdate")):
+    if 'update' in sys.argv or 'configure' in sys.argv or\
+       os.path.exists(os.path.join(defaults.CONFIG_DIRECTORY, ".noupdate")):
         return False
     else:
         exists = [_is_spec_exists(level, 'yaml') and
