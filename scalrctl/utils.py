@@ -24,6 +24,173 @@ SUCCESS_CODES = {
 }
 
 
+def get_column_names_v2(data, route, http_method, raw_spec, obj_type=None):
+    # type: (dict, str, str, str) -> typing.List[str]
+    """
+    Compaund column names into list for OpenAPI2
+    """
+    column_names = []
+    response_ref = data['items']['$ref'] \
+        if 'items' in data else data['$ref']
+    response_descr = lookup(response_ref, raw_spec)
+    properties = response_descr['properties']
+
+    for k, v in properties.items():
+        if '$ref' not in v:
+            column_names.append(k)
+        else:  # ST-226
+            f_key = lookup(v['$ref'], raw_spec)
+            if "properties" in f_key:
+                if len(f_key["properties"]) == 1 and \
+                        f_key.get("properties", {}).get("id", {}).get("type") in \
+                   ("integer", "string"):
+                    column_names.append("%s.id" % k)
+    return column_names
+
+
+def get_column_names_v3(data, route, http_method, raw_spec, obj_type=None):
+    # type: (dict, str, str, dict, str) -> typing.List[str]
+    """
+    Compaund column names into list for OpenAPI3
+    """
+    column_names = []
+    if 'items' in data:
+        items = data['items']
+        if 'oneOf' in items:
+            response_ref = handle_oneof(items, obj_type)
+            if not response_ref:
+                return column_names
+        else:
+            response_ref = items['$ref']
+    elif '$ref' in data:
+        response_ref = data['$ref']
+    elif 'oneOf' in data:
+        response_ref = handle_oneof(data, obj_type)
+    response_descr = lookup(response_ref, raw_spec)
+    if 'allOf' in response_descr:
+        properties = merge_all(response_descr).get('properties', {})
+    else:
+        properties = response_descr.get('properties', {})
+
+    for k, v in properties.items():
+        if '$ref' not in v:
+            column_names.append(k)
+        else:  # ST-226
+            f_key = lookup(v['$ref'], raw_spec)
+            if "properties" in f_key and len(f_key["properties"]) == 1 and "id" in\
+               f_key["properties"] and "type" in f_key["properties"]["id"]:
+                    if f_key["properties"]["id"]["type"] in ("integer", "string"):
+                        column_names.append("%s.id" % k)
+    return column_names
+
+
+def check_iterable_v2(responses, route, http_method, raw_spec):
+    # type (dict, str, str, dict) -> boolean
+    """
+    Check data structure it it is ana array for OpenAPI2.
+    """
+    result = False
+    response_code = SUCCESS_CODES[http_method]
+    if response_code in responses:
+        response_200 = responses.get(response_code)
+        if 'schema' in response_200:
+            schema = response_200['schema']
+            if '$ref' in schema:
+                object_key = schema['$ref'].split('/')[-1]
+                object_descr = raw_spec['definitions'][object_key]
+                object_properties = object_descr['properties']
+                data_structure = object_properties['data']
+                result = data_structure.get('type') == 'array'
+    return result
+
+
+def check_iterable_v3(responses, route, http_method, raw_spec):
+    # type (dict, str, str) -> boolean
+    """
+    Check data structure it it is ana array for OpenAPI3.
+    """
+    result = False
+    if SUCCESS_CODES[http_method] in responses:
+        response_200 = responses.get(SUCCESS_CODES[http_method])
+        if "$ref" in response_200:
+            response_200 = lookup(response_200['$ref'], raw_spec)
+        if 'schema' in response_200["content"]["application/json"]:
+            schema = response_200["content"]["application/json"]["schema"]
+            if '$ref' in schema:
+                schema = lookup(schema["$ref"], raw_spec)
+            object_properties = schema['properties']
+            data_structure = object_properties['data']
+            result = data_structure.get('type') == 'array'
+    return result
+
+
+def get_response_ref_v2(raw_spec, route, http_method):
+    # type: (dict, str, str) -> str
+    """
+    Get response reference for OpenAPI2.
+    """
+    response_ref = ''
+    route_data = raw_spec['paths'][route]
+    responses = route_data[http_method]['responses']
+    response_code = SUCCESS_CODES[http_method]
+    if response_code in responses:
+        response_200 = responses[response_code]
+        if 'schema' in response_200:
+            schema = response_200['schema']
+            if '$ref' in schema:
+                response_ref = schema['$ref']
+    return response_ref
+
+
+def get_response_ref_v3(raw_spec, route, http_method):
+    # type: (dict, str, str) -> str
+    """
+    Get response reference for OpenAPI3.
+    """
+    responses = raw_spec['paths'][route][http_method]['responses']
+    response_200 = responses.get(SUCCESS_CODES[http_method])
+    if '$ref' in response_200:
+        response_200 = lookup(response_200['$ref'], raw_spec)
+    result = response_200['content']['application/json']['schema']['$ref']
+    return result
+
+
+def get_body_type_params_v3(raw_spec, route, http_method):
+    # type: (dict, str, str) -> dict
+    """
+    Get body type of params for OpenAPI3.
+    """
+    def list_references_oneof(data):
+        '''
+        returns a list of full references to objects inside oneOf block
+        '''
+        list_typedata = data['oneOf']
+        list_refs = []
+        for type_dict in list_typedata:
+            if '$ref' in type_dict:
+                list_refs.append(type_dict['$ref'])
+        return list_refs
+
+    param = {}
+    route_data = raw_spec['paths'][route][http_method]
+    if "requestBody" in route_data:
+        param = {}
+        request_body = route_data['requestBody']
+        raw_block = lookup(request_body.get("$ref"), raw_spec) if "$ref" in \
+                request_body else request_body
+        param["schema"] = raw_block["content"]['application/json']["schema"]
+        param["required"] = raw_block.get("required")
+        param["description"] = raw_block.get("description")
+        schema = param["schema"]
+
+        if '$ref' in schema:
+            param["name"] = [raw_block.get("name", schema['$ref'].split('/')[-1]), ]
+        elif 'oneOf' in schema:
+            param["name"] = [ref.split('/')[-1] for ref in list_references_oneof(schema)]
+
+    return param
+
+
 def get_spec(data):
     # type: (str) -> OpenAPIBaseSpec
     """

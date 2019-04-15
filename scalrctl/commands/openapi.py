@@ -149,16 +149,8 @@ class OpenAPIv2Spec(OpenAPIBaseSpec):
         """
         Get response reference for OpenAPI2.
         """
-        route_data = self.raw_spec['paths'][route]
-        responses = route_data[http_method]['responses']
-        response_code = utils.SUCCESS_CODES[http_method]
-        if response_code in responses:
-            response_200 = responses[response_code]
-            if 'schema' in response_200:
-                schema = response_200['schema']
-                if '$ref' in schema:
-                    response_ref = schema['$ref']
-                    return response_ref
+        response_ref = utils.get_response_ref_v2(self.raw_spec, route, http_method)
+        return response_ref
 
     def get_body_type_params(self, route, http_method):
         """
@@ -188,19 +180,9 @@ class OpenAPIv2Spec(OpenAPIBaseSpec):
         """
         Checking object if it is an array.
         """
-        result = False
         responses = self.raw_spec['paths'][route][http_method]['responses']
-        response_code = utils.SUCCESS_CODES[http_method]
-        if response_code in responses:
-            response_200 = responses.get(response_code)
-            if 'schema' in response_200:
-                schema = response_200['schema']
-                if '$ref' in schema:
-                    object_key = schema['$ref'].split('/')[-1]
-                    object_descr = self.raw_spec['definitions'][object_key]
-                    object_properties = object_descr['properties']
-                    data_structure = object_properties['data']
-                    result = data_structure.get('type') == 'array'
+        result = utils.check_iterable_v2(responses, route, http_method,
+                                         self.raw_spec)
         return result
 
     def get_default_options(self, route, http_method):
@@ -222,28 +204,14 @@ class OpenAPIv2Spec(OpenAPIBaseSpec):
         Get columns names.
         """
         data = self.result_descr(route, http_method)['properties']['data']
-        response_ref = data['items']['$ref'] \
-            if 'items' in data else data['$ref']
-        response_descr = self.lookup(response_ref)
-        properties = response_descr['properties']
-
-        column_names = []
-        for k, v in properties.items():
-            if '$ref' not in v:
-                column_names.append(k)
-            else:  # ST-226
-                f_key = self.lookup(v['$ref'])
-                if "properties" in f_key:
-                    if len(f_key["properties"]) == 1 and \
-                            f_key.get("properties", {}).get("id", {}).get("type") in \
-                       ("integer", "string"):
-                        column_names.append("%s.id" % k)
+        column_names = utils.get_column_names_v2(data, route, http_method,
+                                                 self.raw_spec, obj_type=obj_type)
         return column_names
 
     def _get_schema(self, route, http_method):
         # type: (str, str) -> str
         """
-        Get schema from route.
+        Get OpenAPI2 schema from route.
         """
         schema = None
         param = self.get_body_type_params(route, http_method)
@@ -344,11 +312,7 @@ class OpenAPIv3Spec(OpenAPIBaseSpec):
         """
         Get response reference for OpenAPI3.
         """
-        responses = self.raw_spec['paths'][route][http_method]['responses']
-        response_200 = responses.get(utils.SUCCESS_CODES[http_method])
-        if '$ref' in response_200:
-            response_200 = self.lookup(response_200['$ref'])
-        result = response_200['content']['application/json']['schema']['$ref']
+        result = utils.get_response_ref_v3(self.raw_spec, route, http_method)
         return result
 
     def get_body_type_params(self, route, http_method):
@@ -356,35 +320,8 @@ class OpenAPIv3Spec(OpenAPIBaseSpec):
         Get body type of params for OpenAPI3.
         """
 
-        def list_references_oneof(data):
-            '''
-            returns a list of full references to objects inside oneOf block
-            '''
-            list_typedata = data['oneOf']
-            list_refs = []
-            for type_dict in list_typedata:
-                if '$ref' in type_dict:
-                    list_refs.append(type_dict['$ref'])
-            return list_refs
-
-        route_data = self.raw_spec['paths'][route][http_method]
-        if "requestBody" in route_data:
-            param = {}
-            request_body = route_data['requestBody']
-            raw_block = self.lookup(request_body.get("$ref")) if "$ref" in \
-                    request_body else request_body
-            param["schema"] = raw_block["content"]['application/json']["schema"]
-            param["required"] = raw_block.get("required")
-            param["description"] = raw_block.get("description")
-            schema = param["schema"]
-
-            if '$ref' in schema:
-                param["name"] = [raw_block.get("name", schema['$ref'].split('/')[-1]), ]
-            elif 'oneOf' in schema:
-                param["name"] = [ref.split('/')[-1] for ref in list_references_oneof(schema)]
-
-            return param
-        return {}
+        param = utils.get_body_type_params_v3(self.raw_spec, route, http_method)
+        return param
 
     def get_path_type_params(self, route):
         # type: (str) -> typing.List[dict]
@@ -403,22 +340,12 @@ class OpenAPIv3Spec(OpenAPIBaseSpec):
 
     def get_iterable_object(self, route, http_method):
         """
-        Return bool values if values is array.
+        Return bool value if column type is array.
         """
         responses = self.raw_spec['paths'][route]['get']['responses']
-        if utils.SUCCESS_CODES[http_method] in responses:
-            response_200 = responses.get(utils.SUCCESS_CODES[http_method])
-            if "$ref" in response_200:
-                response_200 = self.lookup(response_200['$ref'])
-            if 'schema' in response_200["content"]["application/json"]:
-                schema = response_200["content"]["application/json"]["schema"]
-                if '$ref' in schema:
-                    schema = self.lookup(schema["$ref"])
-                object_properties = schema['properties']
-                data_structure = object_properties['data']
-                result = data_structure.get('type') == 'array'
-                return result
-        return False
+        result = utils.check_iterable_v3(responses, route, http_method,
+                                         self.raw_spec)
+        return result
 
     def get_default_options(self, route, http_method):
         """
@@ -438,47 +365,22 @@ class OpenAPIv3Spec(OpenAPIBaseSpec):
         """
         Get column names for determine routes.
         """
-        column_names = []
         data = self.result_descr(route, http_method)['properties']['data']
-        if 'items' in data:
-            items = data['items']
-            if 'oneOf' in items:
-                response_ref = utils.handle_oneof(items, obj_type)
-                if not response_ref:
-                    return column_names
-            else:
-                response_ref = items['$ref']
-        elif '$ref' in data:
-            response_ref = data['$ref']
-        elif 'oneOf' in data:
-            response_ref = utils.handle_oneof(data, obj_type)
-        response_descr = self.lookup(response_ref)
-        if 'allOf' in response_descr:
-            properties = self._merge_all(response_descr).get('properties', {})
-        else:
-            properties = response_descr.get('properties', {})
-
-        for k, v in properties.items():
-            if '$ref' not in v:
-                column_names.append(k)
-            else:  # ST-226
-                f_key = self.lookup(v['$ref'])
-                if "properties" in f_key and len(f_key["properties"]) == 1 and "id" in\
-                   f_key["properties"] and "type" in f_key["properties"]["id"]:
-                        if f_key["properties"]["id"]["type"] in ("integer", "string"):
-                            column_names.append("%s.id" % k)
+        column_names = utils.get_column_names_v3(data, route, http_method,
+                                                 self.raw_spec, obj_type=obj_type)
         return column_names
 
     def _merge_all(self, data):
+        # type: (dict) -> dict
         """
-        Merge objects into one if 'allOf' in schema.
+        Merge objects into one if ['allOf', 'anyOf', ...] in schema.
         """
         return utils.merge_all(data, self.raw_spec)
 
     def _get_schema(self, route, http_method):
         # type: (str, str) -> str
         """
-        Get schema from route.
+        Get OpenAPI3 schema from route.
         """
         schema = None
         param = self.get_body_type_params(route, http_method)
