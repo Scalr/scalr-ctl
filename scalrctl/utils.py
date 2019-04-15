@@ -13,6 +13,38 @@ import traceback
 import yaml
 
 from scalrctl import click, defaults, settings
+from scalrctl.commands.openapi import OpenAPIv2Spec, OpenAPIv3Spec
+
+
+SUCCESS_CODES = {
+    'get': '200',
+    'post': '201',
+    'delete': '204',
+    'patch': '200',
+}
+
+
+def get_spec(data):
+    # type: (str) -> OpenAPIBaseSpec
+    """
+    Get specifications
+    """
+    # pylint: disable=no-else-return
+    if is_openapi_v3(data):
+        return OpenAPIv3Spec(data)
+    else:
+        return OpenAPIv2Spec(data)
+
+
+def handle_oneof(data, obj_type=None):
+    '''
+    Returns full reference to object if obj_type is present inside oneOf block.
+    Using for OpenAPI3 specification.
+    '''
+    list_typedata = data['oneOf']
+    for type_dict in list_typedata:
+        if '$ref' in type_dict and type_dict['$ref'].split('/')[-1] == obj_type:
+            return type_dict['$ref']
 
 
 def read_spec(api_level, ext='json'):
