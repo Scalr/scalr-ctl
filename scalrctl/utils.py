@@ -27,7 +27,7 @@ SUCCESS_CODES = {
 def get_column_names_v2(data, route, http_method, raw_spec, obj_type=None):
     # type: (dict, str, str, str) -> typing.List[str]
     """
-    Compaund column names into list for OpenAPI2
+    Compound column names into list for OpenAPI2
     """
     column_names = []
     response_ref = data['items']['$ref'] \
@@ -51,7 +51,7 @@ def get_column_names_v2(data, route, http_method, raw_spec, obj_type=None):
 def get_column_names_v3(data, route, http_method, raw_spec, obj_type=None):
     # type: (dict, str, str, dict, str) -> typing.List[str]
     """
-    Compaund column names into list for OpenAPI3
+    Compound column names into list for OpenAPI3
     """
     column_names = []
     if 'items' in data:
@@ -187,7 +187,6 @@ def get_body_type_params_v3(raw_spec, route, http_method):
             param["name"] = [raw_block.get("name", schema['$ref'].split('/')[-1]), ]
         elif 'oneOf' in schema:
             param["name"] = [ref.split('/')[-1] for ref in list_references_oneof(schema)]
-
     return param
 
 
