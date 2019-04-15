@@ -13,7 +13,7 @@ import traceback
 import yaml
 
 from scalrctl import click, defaults, settings
-from scalrctl.commands.openapi import OpenAPIv2Spec, OpenAPIv3Spec
+from scalrctl.commands.openapi import OpenAPIv2Spec, OpenAPIv3Spec, OpenAPIBaseSpec
 
 
 SUCCESS_CODES = {
@@ -25,7 +25,7 @@ SUCCESS_CODES = {
 
 
 def get_column_names_v2(data, route, http_method, raw_spec, obj_type=None):
-    # type: (dict, str, str, str) -> typing.List[str]
+    # type: (dict, str, str, dict, str) -> typing.List[str]
     """
     Compound column names into list for OpenAPI2
     """
@@ -53,7 +53,7 @@ def get_column_names_v3(data, route, http_method, raw_spec, obj_type=None):
     """
     Compound column names into list for OpenAPI3
     """
-    column_names = []
+    column_names = []  # type: list
     if 'items' in data:
         items = data['items']
         if 'oneOf' in items:
@@ -68,7 +68,7 @@ def get_column_names_v3(data, route, http_method, raw_spec, obj_type=None):
         response_ref = handle_oneof(data, obj_type)
     response_descr = lookup(response_ref, raw_spec)
     if 'allOf' in response_descr:
-        properties = merge_all(response_descr).get('properties', {})
+        properties = merge_all(response_descr, raw_spec).get('properties', {})
     else:
         properties = response_descr.get('properties', {})
 
@@ -105,7 +105,7 @@ def check_iterable_v2(responses, route, http_method, raw_spec):
 
 
 def check_iterable_v3(responses, route, http_method, raw_spec):
-    # type (dict, str, str) -> boolean
+    # type (dict, str, str, dict) -> bool
     """
     Check data structure it it is ana array for OpenAPI3.
     """
@@ -171,8 +171,8 @@ def get_body_type_params_v3(raw_spec, route, http_method):
                 list_refs.append(type_dict['$ref'])
         return list_refs
 
-    param = {}
-    route_data = raw_spec['paths'][route][http_method]
+    param = {}  # type: dict
+    route_data = raw_spec.get('paths', {}).get(route, {}).get(http_method, {})
     if "requestBody" in route_data:
         param = {}
         request_body = route_data['requestBody']
@@ -358,11 +358,11 @@ def lookup(response_ref, raw_spec):
 
 
 def merge_allof(data, raw_spec):
-    # type: (dict, str) -> dict
+    # type: (dict, dict) -> dict
     """
     Merge objects into one from allOf.
     """
-    merged = {}
+    merged = {}  # type: dict
     for block in data:
         if "$ref" in block:
             block = lookup(block['$ref'], raw_spec)
@@ -371,7 +371,7 @@ def merge_allof(data, raw_spec):
 
 
 def merge(block, merged):
-    # type: (dict, dict) -> None
+    # type: (dict, dict) -> dict
     """
     Merge values in block.
     """
@@ -392,11 +392,11 @@ def merge(block, merged):
 
 
 def merge_anyof(data, raw_spec, object_name):
-    # type: (typing.List[dict], str, str) -> dict
+    # type: (list, dict, typing.Optional[str]) -> dict
     """
     Merge objects into one from anyOf.
     """
-    merged = {}
+    merged = {}  # type: dict
     data = [a for a in data if a['$ref'].endswith(object_name)]
     for block in data:
         if "$ref" in block:
@@ -410,7 +410,7 @@ def merge_anyof(data, raw_spec, object_name):
 
 
 def merge_all(data, raw_spec, object_name=None):
-    # type: (typing.List[dict], str, str) -> dict
+    # type: (dict, dict, str) -> dict
     """
     Returns merged data from received block.
     Uses in v3 specifications.

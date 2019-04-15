@@ -87,11 +87,11 @@ class Action(BaseAction):
     Action class.
     """
 
-    raw_spec = None
+    raw_spec = {}  # type: dict
 
     # Optional. Some values like GCE imageId
     # cannot be passed through command lines
-    prompt_for = []
+    prompt_for = []  # type: list
 
     # Temporary. Object definitions in YAML
     # spec are not always correct
@@ -102,11 +102,11 @@ class Action(BaseAction):
 
     dry_run = False
     post_template = None
-    _table_columns = []
+    _table_columns = []  # type: list
 
-    _discriminators = {}
+    _discriminators = {}  # type: dict
 
-    ignored_options = ()
+    ignored_options = ()  # type: tuple
     delete_target = None
 
     # pylint: disable=super-init-not-called

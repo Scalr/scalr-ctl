@@ -16,8 +16,8 @@ class OpenAPIBaseSpec(object):
     """
     General Base specification interface
     """
-    raw_spec = None
-    _discriminators = {}  # type: dict
+    raw_spec = {}  # type: typing.Dict[typing.Any, typing.Any]
+    _discriminators = {}  # type: typing.Dict[typing.Any, typing.Any]
 
     def __init__(self, raw_spec):
         self.raw_spec = raw_spec
@@ -80,7 +80,7 @@ class OpenAPIBaseSpec(object):
         raise NotImplementedError()
 
     def lookup(self, response_ref):
-        # type: (str) -> str
+        # type: (str) -> dict
         """
         Returns document section
         Example: #/definitions/Image returns Image defenition section.
@@ -172,7 +172,7 @@ class OpenAPIv2Spec(OpenAPIBaseSpec):
         """
         Get path type params for OpenAPI2.
         """
-        route_data = self.raw_spec['paths'][route]
+        route_data = self.raw_spec.get('paths', {}).get(route, {})
         params = [param for param in route_data.get('parameters', '')]
         return params
 
@@ -209,11 +209,11 @@ class OpenAPIv2Spec(OpenAPIBaseSpec):
         return column_names
 
     def _get_schema(self, route, http_method):
-        # type: (str, str) -> str
+        # type: (str, str) -> dict
         """
         Get OpenAPI2 schema from route.
         """
-        schema = None
+        schema = {}  # type: dict
         param = self.get_body_type_params(route, http_method)
         if 'schema' in param:
             schema = param['schema']
@@ -371,18 +371,18 @@ class OpenAPIv3Spec(OpenAPIBaseSpec):
         return column_names
 
     def _merge_all(self, data):
-        # type: (dict) -> dict
+        # type: (typing.List[dict]) -> dict
         """
         Merge objects into one if ['allOf', 'anyOf', ...] in schema.
         """
         return utils.merge_all(data, self.raw_spec)
 
     def _get_schema(self, route, http_method):
-        # type: (str, str) -> str
+        # type: (str, str) -> dict
         """
         Get OpenAPI3 schema from route.
         """
-        schema = None
+        schema = {}  # type: dict
         param = self.get_body_type_params(route, http_method)
         if 'schema' in param:
             schema = param['schema']
