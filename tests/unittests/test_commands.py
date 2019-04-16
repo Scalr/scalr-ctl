@@ -18,7 +18,7 @@ class TestCommands(unittest.TestCase):
     Cover via unittests bases commands.
     """
 
-    def set_up(self):
+    def setUp(self):
         """
         Start up settings
         """

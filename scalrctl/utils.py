@@ -425,7 +425,8 @@ def merge_all(data, raw_spec, object_name=None):
     return merged
 
 
-class _spinner(object):  # pylint: disable=useless-object-inheritance
+# pylint: disable=useless-object-inheritance
+class _spinner(object):
     """
     Spinner
     """
