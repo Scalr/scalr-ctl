@@ -505,6 +505,52 @@ class Action(BaseAction):
         """
         return '{}{}'.format(self.spec.base_path, self.route)
 
+    def prerun_patch(self, stdin, *args, **kwargs):
+        # type: (str, tuple, dict) -> dict
+        """
+        Filter raw objects in patch.
+        """
+        if stdin:
+            kwargs['filter_createonly'] = True
+            self._get_object_as_text(*args, **kwargs)
+            raw_json_object = self._read_object()
+            filtered_json_object = self.spec.filter_json_object(raw_json_object,
+                                                                self.route,
+                                                                self.http_method)
+        else:
+            kwargs['filter_createonly'] = False
+            raw_text = self._get_object_as_text(*args, **kwargs)
+            raw_json_object = json.loads(raw_text)
+
+            filtered_dict = self.spec.filter_json_object(
+                raw_json_object,
+                self.route,
+                self.http_method,
+                filter_createonly=True)
+            filtered_text = json.dumps(filtered_dict, indent=2)
+
+            editor_text = click.edit(filtered_text)
+            if editor_text is None:
+                raise ValueError("No changes in JSON")
+            filtered_json_object = json.loads(editor_text)
+        return filtered_json_object
+
+    def prerun_post(self, stdin):
+        # type: (str) -> dict
+        """
+        Filter raw objects in post.
+        """
+        if stdin:
+            raw_json_object = self._read_object()
+        else:
+            raw_json_object = self._edit_example()
+
+        filtered_json_object = self.spec.filter_json_object(
+            raw_json_object,
+            self.route,
+            self.http_method)
+        return filtered_json_object
+
     def pre(self, *args, **kwargs):
         """
         Before request is made.
@@ -540,40 +586,10 @@ class Action(BaseAction):
                         ) if http_method == 'PATCH' else raw_json_object
             else:
                 if http_method == 'PATCH':
-                    if stdin:
-                        kwargs['filter_createonly'] = True
-                        self._get_object_as_text(*args, **kwargs)
-                        raw_json_object = self._read_object()
-                        filtered_json_object = self.spec.filter_json_object(raw_json_object,
-                                                                            self.route,
-                                                                            self.http_method)
-                    else:
-                        kwargs['filter_createonly'] = False
-                        raw_text = self._get_object_as_text(*args, **kwargs)
-                        raw_json_object = json.loads(raw_text)
-
-                        filtered_dict = self.spec.filter_json_object(
-                            raw_json_object,
-                            self.route,
-                            self.http_method,
-                            filter_createonly=True)
-                        filtered_text = json.dumps(filtered_dict, indent=2)
-
-                        editor_text = click.edit(filtered_text)
-                        if editor_text is None:
-                            raise ValueError("No changes in JSON")
-                        filtered_json_object = json.loads(editor_text)
+                    filtered_json_object = self.prerun_patch(stdin, *args, **kwargs)
 
                 elif http_method == 'POST':
-                    if stdin:
-                        raw_json_object = self._read_object()
-                    else:
-                        raw_json_object = self._edit_example()
-
-                    filtered_json_object = self.spec.filter_json_object(
-                        raw_json_object,
-                        self.route,
-                        self.http_method)
+                    filtered_json_object = self.prerun_post(stdin)
 
             schema = param_data['schema']
             if '$ref' in schema:
