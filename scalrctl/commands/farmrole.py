@@ -1,7 +1,6 @@
 __author__ = 'Dmitriy Korsakov'
 __doc__ = 'Manage FarmRoles'
 
-import json
 import copy
 
 from scalrctl import commands

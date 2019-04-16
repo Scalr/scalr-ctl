@@ -6,7 +6,7 @@ import json
 import re
 import os
 import time
-import typing
+import typing  # pylint: disable=unused-import
 import dicttoxml  # pylint: disable=import-error
 
 from scalrctl import click, request, settings, utils, view, examples, defaults

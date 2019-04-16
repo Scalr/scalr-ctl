@@ -23,8 +23,11 @@ def _is_spec_exists(api_level, extension):
 
 
 def _fetch_openapi_spec():
+    """
+    Fetch specifications
     # v2: http://bfb482b26df9.test-env.scalr.com/api/user.v1beta0.yml
     # v3: http://bfb482b26df9.test-env.scalr.com/api/openapi.v1beta0.yml
+    """
     return _fetch_yaml_spec("openapi")
 
 

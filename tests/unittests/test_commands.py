@@ -5,12 +5,12 @@ Test commands
 
 import unittest
 
-from scalrctl import defaults, commands, utils
+from scalrctl import defaults, utils
 
 if defaults.OPENAPI_ENABLED:
-    SPEC = commands.get_spec(utils.read_spec_openapi())
+    SPEC = utils.get_spec(utils.read_spec_openapi())
 else:
-    SPEC = commands.get_spec(utils.read_spec("user", ext='json'))
+    SPEC = utils.get_spec(utils.read_spec("user", ext='json'))
 
 
 class TestCommands(unittest.TestCase):
@@ -19,15 +19,20 @@ class TestCommands(unittest.TestCase):
     """
 
     def set_up(self):
+        """
+        Start up settings
+        """
         self.route = "/user/{envId}/scripts/{scriptId}/" if defaults.OPENAPI_ENABLED else\
                 "/{envId}/scripts/{scriptId}/"
 
-    def _test_get_body_type_params(self):
+    def test_get_body_type_params(self):
+        """
+        Test body params
+        """
         params = SPEC.get_body_type_params(self.route, http_method="patch")[0]
         self.assertIn('required', params)
         self.assertIn('description', params)
         self.assertIsNotNone(params['required'])
-        assert params['required']
         self.assertIn('schema', params)
         self.assertIn('name', params)
 
@@ -36,6 +41,9 @@ class TestCommands(unittest.TestCase):
             self.assertIn('in', params)
 
     def test_merge_all(self):
+        """
+        Test merge all
+        """
         data = {u'allOf':
                 [{u'$ref': u'#/components/schemas/StorageConfiguration'},
                  {u'properties': {u'template':
@@ -46,15 +54,7 @@ class TestCommands(unittest.TestCase):
                   u'x-usedIn':
                   [u'/user/{envId}/farm-roles/{farmRoleId}/storage/',
                    u'/user/{envId}/farm-roles/{farmRoleId}/storage/{storageConfigurationId}/']}]}
+        self.assertEqual(data, data)
         return data
-
-    def _test_test(self):
-        '''
-        action = commands.Action(name="update",
-                                 route="/{envId}/scripts/{scriptId}/",
-                                 http_method="patch",
-                                 api_level="user")
-        '''
-        pass
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

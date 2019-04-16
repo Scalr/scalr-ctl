@@ -25,27 +25,34 @@ SUCCESS_CODES = {
 }
 
 
-def get_column_names_v2(data, route, http_method, raw_spec, obj_type=None):
-    # type: (dict, str, str, dict, str) -> typing.List[str]
+def get_col_name_from_prop(properties, raw_spec):
     """
-    Compound column names into list for OpenAPI2
+    Compound column names from properties.
     """
     column_names = []
-    response_ref = data['items']['$ref'] \
-        if 'items' in data else data['$ref']
-    response_descr = lookup(response_ref, raw_spec)
-    properties = response_descr['properties']
-
     for k, v in properties.items():
         if '$ref' not in v:
             column_names.append(k)
         else:  # ST-226
             f_key = lookup(v['$ref'], raw_spec)
-            if "properties" in f_key:
-                if len(f_key["properties"]) == 1 and \
-                        f_key.get("properties", {}).get("id", {}).get("type") in \
-                   ("integer", "string"):
-                    column_names.append("%s.id" % k)
+            if "properties" in f_key and len(f_key["properties"]) == 1 and \
+               f_key.get("properties", {}).get("id", {}).get("type") in \
+               ("integer", "string"):
+                column_names.append("%s.id" % k)
+    return column_names
+
+
+def get_column_names_v2(data, route, http_method, raw_spec, obj_type=None):
+    # type: (dict, str, str, dict, str) -> typing.List[str]
+    """
+    Compound column names into list for OpenAPI2
+    """
+    response_ref = data['items']['$ref'] \
+        if 'items' in data else data['$ref']
+    response_descr = lookup(response_ref, raw_spec)
+    properties = response_descr['properties']
+    column_names = get_col_name_from_prop(properties, raw_spec)
+
     return column_names
 
 
@@ -54,13 +61,12 @@ def get_column_names_v3(data, route, http_method, raw_spec, obj_type=None):
     """
     Compound column names into list for OpenAPI3
     """
-    column_names = []  # type: list
     if 'items' in data:
         items = data['items']
         if 'oneOf' in items:
             response_ref = handle_oneof(items, obj_type)
             if not response_ref:
-                return column_names
+                return []
         else:
             response_ref = items['$ref']
     elif '$ref' in data:
@@ -73,15 +79,7 @@ def get_column_names_v3(data, route, http_method, raw_spec, obj_type=None):
     else:
         properties = response_descr.get('properties', {})
 
-    for k, v in properties.items():
-        if '$ref' not in v:
-            column_names.append(k)
-        else:  # ST-226
-            f_key = lookup(v['$ref'], raw_spec)
-            if "properties" in f_key and len(f_key["properties"]) == 1 and "id" in\
-               f_key["properties"] and "type" in f_key["properties"]["id"]:
-                if f_key["properties"]["id"]["type"] in ("integer", "string"):
-                    column_names.append("%s.id" % k)
+    column_names = get_col_name_from_prop(properties, raw_spec)
     return column_names
 
 
