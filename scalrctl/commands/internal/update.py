@@ -162,7 +162,7 @@ def update_swagger():
 
 def update(force=True):
     """
-
+    Update CLI.
     """
     noupdate_flag_path = os.path.join(defaults.CONFIG_DIRECTORY, ".noupdate")
     if 'update' in sys.argv or os.path.exists(noupdate_flag_path):
@@ -176,7 +176,7 @@ def update(force=True):
 
     click.echo('Updating specification for Scalr API (OpenAPI)... ', nl=False)
 
-    with utils._spinner():
+    with utils._spinner():  # pylint: disable=protected-access
         success, _ = _update_openapi_spec()
 
         if success:

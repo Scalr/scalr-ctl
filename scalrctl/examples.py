@@ -25,6 +25,9 @@ DEFAULTS = {
 
 
 def _read_spec(api_level, extension="json"):
+    """
+    Read spec from file.
+    """
     text = None
     spec_path = os.path.join(defaults.CONFIG_DIRECTORY,
                              '{}.{}'.format(api_level, extension))
@@ -35,14 +38,19 @@ def _read_spec(api_level, extension="json"):
 
 
 def _item_by_ref(spec_data, ref):
+    """
+    Get correct defenition via specification (OpenAPI2 or OpenAPI3).
+    """
     definition = ref.strip('/').split('/')[-1]
     if utils.is_openapi_v3(spec_data):
         return spec_data['components']['schemas'][definition]
-    else:
-        return spec_data['definitions'][definition]
+    return spec_data['definitions'][definition]
 
 
 def _generate_params(spec_data, schema, object_name=None):
+    """
+    Parsing datas and create valid params.
+    """
     params = {}
 
     if '$ref' in schema:
@@ -84,8 +92,7 @@ def generate_post_data(spec_data, endpoint, object_name=None):
     """
     if utils.is_openapi_v3(spec_data):
         return _generate_post_data_v3(spec_data, endpoint, object_name=object_name)
-    else:
-        return _generate_post_data_v2(spec_data, endpoint)
+    return _generate_post_data_v2(spec_data, endpoint)
 
 
 def _generate_post_data_v2(spec_data, endpoint):
@@ -135,14 +142,14 @@ def get_definition(spec_data, endpoint):
     """
     if utils.is_openapi_v3(spec_data):
         return _get_definition_v3(spec_data, endpoint)
-    else:
-        return _get_definition_v2(spec_data, endpoint)
+    return _get_definition_v2(spec_data, endpoint)
 
 
 def _get_definition_v2(spec_data, endpoint):
     """
     Returns definition of OpenAPI2 schema.
     """
+    result = ''
     if endpoint in spec_data['paths']:
         endpoint_spec = spec_data['paths'].get(endpoint)
     else:
@@ -150,7 +157,7 @@ def _get_definition_v2(spec_data, endpoint):
     for param in endpoint_spec['post'].get('parameters', ''):
         if '$ref' in param.get('schema', ''):
             result = param.get('schema')['$ref'].split('/')[-1]
-            return result
+    return result
 
 
 def _get_definition_v3(spec_data, endpoint):

@@ -3,7 +3,7 @@ Module that provides utils for client.
 """
 # -*- coding: utf-8 -*-
 import itertools
-import typing
+import typing  # pylint: disable=unused-import
 import os
 import sys
 import json
@@ -13,6 +13,7 @@ import traceback
 import yaml
 
 from scalrctl import click, defaults, settings
+# pylint: disable=unused-import
 from scalrctl.commands.openapi import OpenAPIv2Spec, OpenAPIv3Spec, OpenAPIBaseSpec
 
 
@@ -79,8 +80,8 @@ def get_column_names_v3(data, route, http_method, raw_spec, obj_type=None):
             f_key = lookup(v['$ref'], raw_spec)
             if "properties" in f_key and len(f_key["properties"]) == 1 and "id" in\
                f_key["properties"] and "type" in f_key["properties"]["id"]:
-                    if f_key["properties"]["id"]["type"] in ("integer", "string"):
-                        column_names.append("%s.id" % k)
+                if f_key["properties"]["id"]["type"] in ("integer", "string"):
+                    column_names.append("%s.id" % k)
     return column_names
 
 
@@ -198,8 +199,7 @@ def get_spec(data):
     # pylint: disable=no-else-return
     if is_openapi_v3(data):
         return OpenAPIv3Spec(data)
-    else:
-        return OpenAPIv2Spec(data)
+    return OpenAPIv2Spec(data)
 
 
 def handle_oneof(data, obj_type=None):
@@ -207,10 +207,12 @@ def handle_oneof(data, obj_type=None):
     Returns full reference to object if obj_type is present inside oneOf block.
     Using for OpenAPI3 specification.
     '''
+    oneof_ref = None
     list_typedata = data['oneOf']
     for type_dict in list_typedata:
         if '$ref' in type_dict and type_dict['$ref'].split('/')[-1] == obj_type:
-            return type_dict['$ref']
+            oneof_ref = type_dict['$ref']
+    return oneof_ref
 
 
 def read_spec(api_level, ext='json'):
@@ -335,11 +337,9 @@ def is_openapi_v3(data):
     """
     Method for detect openapi3
     """
-    # pylint: disable=no-else-return
     if "openapi" in data:
         return True
-    elif "basePath" in data:
-        return False
+    return False
 
 
 def lookup(response_ref, raw_spec):
@@ -347,6 +347,7 @@ def lookup(response_ref, raw_spec):
     Returns document section
     Example: #/definitions/Image returns Image defenition section.
     """
+    result = None
     if response_ref.startswith('#'):
         paths = response_ref.split('/')[1:]
         result = raw_spec
@@ -354,7 +355,7 @@ def lookup(response_ref, raw_spec):
             if path not in result:
                 return
             result = result[path]
-        return result
+    return result
 
 
 def merge_allof(data, raw_spec):

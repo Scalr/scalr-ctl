@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
-import os
 
-import yaml
 import json
+import os
 import posixpath
+import yaml
 
 from six.moves.urllib import parse
 
@@ -155,7 +155,8 @@ def configure(profile=None, admin=False):
             if split_result.scheme and split_result.scheme in supported_schemas:
                 url = split_result.netloc
                 if split_result.path:
-                    url_path = split_result.path[1:] if split_result.path.startswith('/') else split_result.path
+                    url_path = split_result.path[1:] if split_result.path.startswith('/')\
+                        else split_result.path
                     url = posixpath.join(url, url_path)
                 conf_data['API_HOST'] = url
                 setattr(settings, 'API_SCHEME', split_result.scheme)
@@ -180,7 +181,7 @@ def get_session_data(data):
         uri = '/api/%s/session/' % data['API_VERSION']
         raw_result = request.request(method="get", api_level=api_level, request_uri=uri)
         result = json.loads(raw_result)
-    except (Exception, BaseException):
+    except (Exception, BaseException):  # pylint: disable=W0703
         result = {}
     return result
 

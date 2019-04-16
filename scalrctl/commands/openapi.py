@@ -3,7 +3,7 @@
 OpenAPI core classes
 """
 import abc
-import typing
+import typing  # pylint: disable=unused-import
 
 from six.moves.urllib import parse
 import six
@@ -254,10 +254,8 @@ class OpenAPIv2Spec(OpenAPIBaseSpec):
         Removes immutable parts from JSON object
         before sending it in POST or PATCH.
         """
-
         filtered = {}
 
-        # load `schema`
         if schema is None:
             schema = self._get_schema(route, http_method)
 
