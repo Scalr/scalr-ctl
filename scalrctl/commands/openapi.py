@@ -221,20 +221,11 @@ class OpenAPIv2Spec(OpenAPIBaseSpec):
                 schema = self.lookup(schema['$ref'])
         return schema
 
-    def filter_json_object(self, data, route, http_method, filter_createonly=False,
-                           schema=None, reference=None):
+    def _prepare_discr_schema(self, schema, reference, data):
+        # type: (dict, str, dict) -> dict
         """
-        Removes immutable parts from JSON object
-        before sending it in POST or PATCH.
+        Get schema if discriminator exists
         """
-
-        filtered = {}
-
-        # load `schema`
-        if schema is None:
-            schema = self._get_schema(route, http_method)
-
-        # load child object as `schema`
         if 'discriminator' in schema:
             disc_key = schema['discriminator']
             disc_path = '{}/{}'.format(reference, disc_key)
@@ -255,6 +246,23 @@ class OpenAPIv2Spec(OpenAPIBaseSpec):
 
             reference = '#/definitions/{}'.format(disc_value)
             schema = self.lookup(reference)
+        return schema
+
+    def filter_json_object(self, data, route, http_method, filter_createonly=False,
+                           schema=None, reference=None):
+        """
+        Removes immutable parts from JSON object
+        before sending it in POST or PATCH.
+        """
+
+        filtered = {}
+
+        # load `schema`
+        if schema is None:
+            schema = self._get_schema(route, http_method)
+
+        # load child object as `schema`
+        schema = self._prepare_discr_schema(schema, reference, data)
 
         # filter input data by properties of `schema`
         if schema and 'properties' in schema:
@@ -371,7 +379,7 @@ class OpenAPIv3Spec(OpenAPIBaseSpec):
         return column_names
 
     def _merge_all(self, data):
-        # type: (typing.List[dict]) -> dict
+        # type: (dict) -> dict
         """
         Merge objects into one if ['allOf', 'anyOf', ...] in schema.
         """
@@ -390,21 +398,13 @@ class OpenAPIv3Spec(OpenAPIBaseSpec):
                 schema = self.lookup(schema['$ref'])
         return schema
 
-    def filter_json_object(self, data, route, http_method, filter_createonly=False,
-                           schema=None, reference=None):
+    def _prepare_discr_schema(self, schema, reference, data):
+        # type: (dict, str, dict) -> dict
         """
-        Removes immutable parts from JSON object
-        before sending it in POST or PATCH.
+        Get schema if discriminator exists
         """
-        filtered = {}
-
-        # load `schema`
-        if schema is None:
-            schema = self._get_schema(route, http_method)
-
-        # load child object as `schema`
         if 'discriminator' in schema:
-            disc_key = schema.get("discriminator").get('propertyName')  #
+            disc_key = schema.get("discriminator", {}).get('propertyName')  #
             disc_path = '{}/{}'.format(reference, disc_key)
             disc_value = data.get(disc_key) or self._discriminators.get(disc_path)
 
@@ -426,6 +426,22 @@ class OpenAPIv3Spec(OpenAPIBaseSpec):
             else:
                 # save discriminator for current reference/key
                 self._discriminators[disc_path] = disc_value
+        return schema
+
+    def filter_json_object(self, data, route, http_method, filter_createonly=False,
+                           schema=None, reference=None):
+        """
+        Removes immutable parts from JSON object
+        before sending it in POST or PATCH.
+        """
+        filtered = {}
+
+        # load `schema`
+        if schema is None:
+            schema = self._get_schema(route, http_method)
+
+        # load child object as `schema`
+        schema = self._prepare_discr_schema(schema, reference, data)
 
         # filter input data by properties of `schema`
         if schema and 'properties' in schema:
