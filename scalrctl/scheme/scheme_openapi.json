@@ -1546,13 +1546,6 @@
             "http-method": "patch",
             "route": "/user/{envId}/orchestration-rules/{orchestrationRuleId}/",
             "epilog": "Example: scalr-ctl orchestration-rules update --orchestrationRuleId <ID> --stdin < myupdatedorule.json"
-        },
-        "create": {
-            "api_level": "user",
-            "class": "scalrctl.commands.Action",
-            "http-method": "post",
-            "route": "/user/{envId}/orchestration-rules/",
-            "epilog": "Example: scalr-ctl orchestration-rules create--stdin < myorule.json"
         }
     },
     "cloud-locations": {

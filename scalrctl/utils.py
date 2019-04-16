@@ -351,7 +351,8 @@ def lookup(response_ref, raw_spec):
         result = raw_spec
         for path in paths:
             if path not in result:
-                return
+                result = None
+                break
             result = result[path]
     return result
 
