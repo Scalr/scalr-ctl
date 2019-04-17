@@ -11,7 +11,6 @@ import six
 from scalrctl import click, utils
 
 
-# pylint: disable=useless-object-inheritance
 @six.add_metaclass(abc.ABCMeta)
 class OpenAPIBaseSpec(object):
     """
