@@ -11,6 +11,17 @@ import six
 from scalrctl import click, utils
 
 
+def get_spec(data):
+    # type: (str) -> OpenAPIBaseSpec
+    """
+    Get specifications
+    """
+    # pylint: disable=no-else-return
+    if utils.is_openapi_v3(data):
+        return OpenAPIv3Spec(data)
+    return OpenAPIv2Spec(data)
+
+
 @six.add_metaclass(abc.ABCMeta)
 class OpenAPIBaseSpec(object):
     """

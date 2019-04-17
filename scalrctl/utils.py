@@ -189,17 +189,6 @@ def get_body_type_params_v3(raw_spec, route, http_method):
     return param
 
 
-def get_spec(data):
-    # type: (str) -> openapi.OpenAPIBaseSpec
-    """
-    Get specifications
-    """
-    # pylint: disable=no-else-return
-    if is_openapi_v3(data):
-        return openapi.OpenAPIv3Spec(data)
-    return openapi.OpenAPIv2Spec(data)
-
-
 def handle_oneof(data, obj_type=None):
     '''
     Returns full reference to object if obj_type is present inside oneOf block.

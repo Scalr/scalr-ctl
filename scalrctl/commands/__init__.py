@@ -10,6 +10,7 @@ import typing  # pylint: disable=unused-import
 import dicttoxml  # pylint: disable=import-error
 
 from scalrctl import click, request, settings, utils, view, examples, defaults
+from scalrctl.commands import openapi
 
 
 __author__ = 'Dmitriy Korsakov'
@@ -124,9 +125,9 @@ class Action(BaseAction):
         Additional method for initialize parameters.
         """
         if defaults.OPENAPI_ENABLED:
-            self.spec = utils.get_spec(utils.read_spec_openapi())
+            self.spec = openapi.get_spec(utils.read_spec_openapi())
         else:
-            self.spec = utils.get_spec(utils.read_spec(self.api_level, ext='json'))
+            self.spec = openapi.get_spec(utils.read_spec(self.api_level, ext='json'))
 
         if not self.epilog and self.http_method.upper() == 'POST':
             msg = "Example: scalr-ctl {level} {name} < {name}.json"
@@ -309,7 +310,7 @@ class Action(BaseAction):
                 columns = self._table_columns or self.spec.get_column_names(self.route,
                                                                             self.http_method,
                                                                             obj_type)
-                if self.spec.get_iterable_object(self.route, self.http_method):
+                if self.spec.is_iterable_object(self.route, self.http_method):
                     rows, current_page, last_page = view.calc_vertical_table(response_json,
                                                                     columns)
                     pre = "Page: {} of {}".format(current_page, last_page)
@@ -370,7 +371,7 @@ class Action(BaseAction):
             """
 
         if self.http_method.upper() == 'GET':
-            if self.spec.get_iterable_object(self.route, self.http_method):
+            if self.spec.is_iterable_object(self.route, self.http_method):
                 maxres = click.Option(('--max-results', 'maxResults'),
                                       type=int, required=False,
                                       help="Maximum number of records. "
@@ -465,7 +466,7 @@ class Action(BaseAction):
         Get available filters.
         """
         filters = []
-        if self.spec.get_iterable_object(self.route, self.http_method):
+        if self.spec.is_iterable_object(self.route, self.http_method):
             data = self._result_descr['properties']['data']
             if "oneOf" in data['items']:
                 return filters
