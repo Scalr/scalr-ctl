@@ -51,7 +51,7 @@ class OpenAPIBaseSpec(object):
         raise NotImplementedError()
 
     @abc.abstractmethod
-    def get_iterable_object(self, route, http_method):
+    def is_iterable_object(self, route, http_method):
         """
         Base method for return iterable.
         """
@@ -176,7 +176,7 @@ class OpenAPIv2Spec(OpenAPIBaseSpec):
         params = [param for param in route_data.get('parameters', '')]
         return params
 
-    def get_iterable_object(self, route, http_method):
+    def is_iterable_object(self, route, http_method):
         """
         Checking object if it is an array.
         """
@@ -344,7 +344,7 @@ class OpenAPIv3Spec(OpenAPIBaseSpec):
                 params.append(param)
         return params
 
-    def get_iterable_object(self, route, http_method):
+    def is_iterable_object(self, route, http_method):
         """
         Return bool value if column type is array.
         """

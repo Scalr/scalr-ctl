@@ -157,7 +157,7 @@ class Action(BaseAction):
 
     def _apply_arguments(self, **kwargs):
         """
-        Aply arguments according.
+        Apply arguments according to incomming params.
         """
         if kwargs.get('filters'):
             for pair in kwargs.pop('filters').split(','):
@@ -734,7 +734,7 @@ class PolledAction(SimplifiedAction):
         :returns last status, e.g. 'running'
         '''
         status = ''
-        with utils._spinner():  # pylint: disable=protected-access
+        with utils.Spinner():
             while status not in states_to_wait_for:
                 run_args = {"hide_output": hide_output, "envId": kwargs.get('envId')}
                 run_args.update(poll_dict)

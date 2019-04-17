@@ -63,6 +63,7 @@ if __name__ == '__main__':
             'six>=1.10.0',
             'colorama>=0.3.7',
             'dicttoxml>=1.7.4',
+            'typing>=3.6.6',
         ],
         entry_points='''
             [console_scripts]

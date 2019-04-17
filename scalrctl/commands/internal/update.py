@@ -154,7 +154,7 @@ def update_swagger():
         click.echo('[{}/{}] Updating specifications for Scalr {} API (Swagger)... '
                    .format(index, amount, api_level), nl=False)
 
-        with utils._spinner():
+        with utils.Spinner():
             success, fail_reason = _update_spec(api_level)
 
         if success:
@@ -181,7 +181,7 @@ def update(force=True):
 
     click.echo('Updating specification for Scalr API (OpenAPI)... ', nl=False)
 
-    with utils._spinner():  # pylint: disable=protected-access
+    with utils.Spinner():
         success, _ = _update_openapi_spec()
 
         if success:

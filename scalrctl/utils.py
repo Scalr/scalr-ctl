@@ -425,7 +425,7 @@ def merge_all(data, raw_spec, object_name=None):
     return merged
 
 
-class _spinner(object):
+class Spinner(object):
     """
     Spinner
     """
@@ -447,7 +447,7 @@ class _spinner(object):
 
     def __init__(self):
         self.event = threading.Event()
-        self.thread = threading.Thread(target=_spinner.draw,
+        self.thread = threading.Thread(target=Spinner.draw,
                                        args=(self.event,))
         self.thread.daemon = True
 
