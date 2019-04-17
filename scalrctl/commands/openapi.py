@@ -426,8 +426,8 @@ class OpenAPIv3Spec(OpenAPIBaseSpec):
                 self._discriminators[disc_path] = disc_value
         return schema
 
-    def _get_object_by_properties(self, filtered, schema, reference, data, filter_createonly,
-                                 route, http_method):
+    def _get_object_by_properties(self, filtered, schema, reference, data,
+                                  filter_createonly, route, http_method):
         # type: (dict, dict, str, dict, bool, str, str) -> dict
         """
         Get object through properties.
@@ -492,8 +492,8 @@ class OpenAPIv3Spec(OpenAPIBaseSpec):
         elif 'allOf' in schema:
             sub_schema = self._merge_all(schema)
             if sub_schema.get('properties'):
-                self._get_object_by_properties(filtered, sub_schema, reference, data, filter_createonly,
-                                               route, http_method)
+                self._get_object_by_properties(filtered, sub_schema, reference, data,
+                                               filter_createonly, route, http_method)
         return filtered
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

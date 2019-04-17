@@ -14,7 +14,7 @@ import yaml
 
 from scalrctl import click, defaults, settings
 # pylint: disable=unused-import
-from scalrctl.commands.openapi import OpenAPIv2Spec, OpenAPIv3Spec, OpenAPIBaseSpec
+from scalrctl.commands import openapi
 
 
 SUCCESS_CODES = {
@@ -190,14 +190,14 @@ def get_body_type_params_v3(raw_spec, route, http_method):
 
 
 def get_spec(data):
-    # type: (str) -> OpenAPIBaseSpec
+    # type: (str) -> openapi.OpenAPIBaseSpec
     """
     Get specifications
     """
     # pylint: disable=no-else-return
     if is_openapi_v3(data):
-        return OpenAPIv3Spec(data)
-    return OpenAPIv2Spec(data)
+        return openapi.OpenAPIv3Spec(data)
+    return openapi.OpenAPIv2Spec(data)
 
 
 def handle_oneof(data, obj_type=None):
