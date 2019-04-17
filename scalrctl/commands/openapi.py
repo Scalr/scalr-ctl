@@ -427,6 +427,50 @@ class OpenAPIv3Spec(OpenAPIBaseSpec):
                 self._discriminators[disc_path] = disc_value
         return schema
 
+    def _get_object_by_properties(self, filtered, schema, reference, data, filter_createonly,
+                                 route, http_method):
+        # type: (dict, dict, str, dict, bool, str, str) -> dict
+        """
+        Get object through properties.
+        """
+        create_only_props = schema.get('x-createOnly', '')
+        for p_key, p_value in schema['properties'].items():
+            if reference:
+                key_path = '.'.join([reference.split('/')[-1], p_key])
+            else:
+                key_path = p_key
+
+            if p_key not in data:
+                utils.debug("Ignore {}, unknown key.".format(key_path))
+                continue
+            if p_value.get('readOnly'):
+                utils.debug("Ignore {}, read-only key.".format(key_path))
+                continue
+            if filter_createonly and p_key in create_only_props:
+                utils.debug("Ignore {}, create-only key.".format(key_path))
+                continue
+
+            if '$ref' in p_value and isinstance(data[p_key], dict):
+                # recursive filter sub-object
+                utils.debug("Filter sub-object: {}.".format(p_value['$ref']))
+
+                sub_schema = self.lookup(p_value['$ref'])
+                if "allOf" in sub_schema:
+                    sub_schema = self._merge_all(sub_schema)
+
+                filtered[p_key] = self.filter_json_object(
+                    data[p_key],
+                    route,
+                    http_method,
+                    filter_createonly=filter_createonly,
+                    reference=p_value['$ref'],
+                    schema=sub_schema,
+                )
+            else:
+                # add valid key-value
+                filtered[p_key] = data[p_key]
+        return filtered
+
     def filter_json_object(self, data, route, http_method, filter_createonly=False,
                            schema=None, reference=None):
         """
@@ -444,42 +488,13 @@ class OpenAPIv3Spec(OpenAPIBaseSpec):
 
         # filter input data by properties of `schema`
         if schema and 'properties' in schema:
-            create_only_props = schema.get('x-createOnly', '')
-            for p_key, p_value in schema['properties'].items():
-                if reference:
-                    key_path = '.'.join([reference.split('/')[-1], p_key])
-                else:
-                    key_path = p_key
-
-                if p_key not in data:
-                    utils.debug("Ignore {}, unknown key.".format(key_path))
-                    continue
-                if p_value.get('readOnly'):
-                    utils.debug("Ignore {}, read-only key.".format(key_path))
-                    continue
-                if filter_createonly and p_key in create_only_props:
-                    utils.debug("Ignore {}, create-only key.".format(key_path))
-                    continue
-
-                if '$ref' in p_value and isinstance(data[p_key], dict):
-                    # recursive filter sub-object
-                    utils.debug("Filter sub-object: {}.".format(p_value['$ref']))
-
-                    sub_schema = self.lookup(p_value['$ref'])
-                    if "allOf" in sub_schema:
-                        sub_schema = self._merge_all(sub_schema)
-
-                    filtered[p_key] = self.filter_json_object(
-                        data[p_key],
-                        route,
-                        http_method,
-                        filter_createonly=filter_createonly,
-                        reference=p_value['$ref'],
-                        schema=sub_schema,
-                    )
-                else:
-                    # add valid key-value
-                    filtered[p_key] = data[p_key]
+            self._get_object_by_properties(filtered, schema, reference, data, filter_createonly,
+                                           route, http_method)
+        elif 'allOf' in schema:
+            sub_schema = self._merge_all(schema)
+            if sub_schema.get('properties'):
+                self._get_object_by_properties(filtered, sub_schema, reference, data, filter_createonly,
+                                               route, http_method)
         return filtered
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
