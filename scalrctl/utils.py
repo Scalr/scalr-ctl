@@ -1,7 +1,7 @@
+# -*- coding: utf-8 -*-
 """
 Module that provides utils for client.
 """
-# -*- coding: utf-8 -*-
 import itertools
 import typing  # pylint: disable=unused-import
 import os
