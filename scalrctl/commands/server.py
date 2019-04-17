@@ -2,7 +2,6 @@ __author__ = 'Dmitriy Korsakov'
 __doc__ = 'Server management'
 import copy
 import json
-import time
 from scalrctl import commands
 from scalrctl import click
 
@@ -26,7 +25,6 @@ class RebootServer(commands.PolledAction):
         options.extend(super(RebootServer, self).get_options())
         return options
 
-
     def pre(self, *args, **kwargs):
         """
         before request is made
@@ -45,7 +43,7 @@ class RebootServer(commands.PolledAction):
         result_json = json.loads(result)
         server_id = result_json["data"]["id"]
         if kwargs.get('hard'):
-                click.echo("Server %s is undergoing hard reboot." % server_id)
+            click.echo("Server %s is undergoing hard reboot." % server_id)
         elif not nowait:
             cls = commands.Action
             action = cls(name=self.name,
@@ -63,7 +61,7 @@ class RebootServer(commands.PolledAction):
         return result
 
     def _get_operation_status(self, data_json):
-        list_operations =  data_json["data"].get('operations', [])
+        list_operations = data_json["data"].get('operations', [])
         if list_operations:
             return list_operations[0]['name']
 
@@ -260,7 +258,6 @@ class ServerChangeInstanceType(commands.SimplifiedAction):
         options = [instance_type, ]
         options.extend(super(ServerChangeInstanceType, self).get_options())
         return options
-
 
     def pre(self, *args, **kwargs):
         """

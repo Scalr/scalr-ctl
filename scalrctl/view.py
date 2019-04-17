@@ -18,7 +18,7 @@ def calc_vertical_table(response_json, columns):
                     row.append(block[item])
                     break
                 elif name.lower() == '%s.id' % item.lower():
-                    if 'id' in block[item]:
+                    if block[item] and 'id' in block[item]:
                         row.append(block[item]['id'])
                     else:
                         row.append('')
@@ -43,6 +43,7 @@ def calc_vertical_table(response_json, columns):
             current_pagenum = int(pagenum_next) - 1
     return rows, current_pagenum, pagenum_last
 
+
 def prepare_table():
     table = prettytable.PrettyTable()
     table.align = "l"
@@ -50,6 +51,7 @@ def prepare_table():
     table.left_padding_width = 1
     table.set_style(prettytable.PLAIN_COLUMNS)
     return table
+
 
 def build_vertical_table(field_names, rows, pre=None, post=None):
     table = prepare_table()

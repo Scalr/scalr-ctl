@@ -13,7 +13,7 @@ class ChangeImageAttrs(commands.Action):
 class RegisterImage(commands.Action):
 
     def pre(self, *args, **kwargs):
-        #XXX: this code does not work yet!
+        # XXX: this code does not work yet!
         if 'imageId' not in kwargs:
             kwargs["image"] = click.termui.prompt("Image object JSON")
 
@@ -76,7 +76,6 @@ class ReplaceImageAccount(commands.SimplifiedAction):
         options = [newimageid, deprecate, scope]
         options.extend(super(ReplaceImageAccount, self).get_options())
         return options
-
 
     def pre(self, *args, **kwargs):
         """

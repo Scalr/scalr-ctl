@@ -28,7 +28,7 @@ enable=E,W
 # can either give multiple identifier separated by comma (,) or put this option
 # multiple time (only on the command line, not in the configuration file where
 # it should appear only once).
-disable=unused-argument,wildcard-import,bad-continuation  
+disable=unused-argument,wildcard-import,bad-continuation,unicode-builtin,too-many-nested-blocks,no-absolute-import
 # - unused-argument  Common situation with subclassing
 # - wildcard-import  Sometimes useful
 # - disable=bad-continuation  We know better
@@ -187,7 +187,7 @@ max-args=10
 ignored-argument-names=_.*
 
 # Maximum number of locals for function / method body
-max-locals=12
+max-locals=15
 
 # Maximum number of return / yield for function / method body
 max-returns=6

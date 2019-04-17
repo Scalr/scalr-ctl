@@ -1,57 +1,98 @@
 # -*- coding: utf-8 -*-
+"""
+General module for commands.
+"""
 import json
 import re
 import os
 import time
-
-import dicttoxml
+import typing  # pylint: disable=unused-import
+import dicttoxml  # pylint: disable=import-error
 
 from scalrctl import click, request, settings, utils, view, examples, defaults
+from scalrctl.commands import openapi
+
 
 __author__ = 'Dmitriy Korsakov'
 
 
 class MultipleClickException(click.ClickException):
+    """
+    Inherite ClickException to create more suitable echo (log).
+    """
 
     def format_message(self):
+        """
+        Prepare format message.
+        """
         return '\x1b[31m%s\x1b[39m' % self.message if settings.colored_output else self.message
 
     def show(self, file=None):
+        """
+        Prepare format message.
+        """
         if file is None:
-            file = click._compat.get_text_stderr()
+            file = click._compat.get_text_stderr()  # pylint: disable=protected-access
         click.utils.echo('%s' % self.format_message(), file=file)
 
 
 class BaseAction(object):
+    """
+    Base class for action.
+    """
 
     epilog = None
 
     def __init__(self, *args, **kwargs):
         pass
 
+    # pylint: disable=no-self-use
     def run(self, *args, **kwargs):
+        """
+        Run definition.
+        """
         pass
 
+    # pylint: disable=no-self-use
     def get_description(self):
+        """
+        Get descriptors of schema
+        """
         return ''
 
+    # pylint: disable=no-self-use
     def modify_options(self, options):
+        """
+        This is the place where command line options can be fixed
+        after they are loaded from yaml spec.
+        """
         return options
 
+    # pylint: disable=no-self-use
     def get_options(self):
+        """
+        Returns action options.
+        """
         return []
 
+    # pylint: disable=no-self-use
     def validate(self):
+        """
+        Validate routes for current API scope.
+        """
         pass
 
 
 class Action(BaseAction):
+    """
+    Action class.
+    """
 
-    raw_spec = None
+    raw_spec = {}  # type: dict
 
     # Optional. Some values like GCE imageId
     # cannot be passed through command lines
-    prompt_for = None
+    prompt_for = []  # type: list
 
     # Temporary. Object definitions in YAML
     # spec are not always correct
@@ -62,13 +103,14 @@ class Action(BaseAction):
 
     dry_run = False
     post_template = None
-    _table_columns = []
+    _table_columns = []  # type: list
 
-    _discriminators = {}
+    _discriminators = {}  # type: dict
 
-    ignored_options = ()
+    ignored_options = ()  # type: tuple
     delete_target = None
 
+    # pylint: disable=super-init-not-called
     def __init__(self, name, route, http_method, api_level, *args, **kwargs):
         self.name = name
         self.route = route
@@ -79,7 +121,13 @@ class Action(BaseAction):
         self._init()
 
     def _init(self):
-        self.raw_spec = utils.read_spec(self.api_level, ext='json')
+        """
+        Additional method for initialize parameters.
+        """
+        if defaults.OPENAPI_ENABLED:
+            self.spec = openapi.get_spec(utils.read_spec_openapi())
+        else:
+            self.spec = openapi.get_spec(utils.read_spec(self.api_level, ext='json'))
 
         if not self.epilog and self.http_method.upper() == 'POST':
             msg = "Example: scalr-ctl {level} {name} < {name}.json"
@@ -89,7 +137,10 @@ class Action(BaseAction):
             )
 
     def _check_arguments(self, **kwargs):
-        route_data = self.raw_spec['paths'][self.route]
+        """
+        Checking arguments according to schema.
+        """
+        route_data = self.spec.raw_spec['paths'][self.route]
         if 'parameters' not in route_data:
             return
 
@@ -106,6 +157,9 @@ class Action(BaseAction):
                                                .format(param_name))
 
     def _apply_arguments(self, **kwargs):
+        """
+        Apply arguments according to incomming params.
+        """
         if kwargs.get('filters'):
             for pair in kwargs.pop('filters').split(','):
                 kv = pair.split('=')
@@ -132,7 +186,11 @@ class Action(BaseAction):
 
         return kwargs
 
-    def _get_object(self, *args, **kwargs):
+    def _get_object_as_text(self, *args, **kwargs):
+        """
+        Load data as a text.
+        """
+        filter_createonly = kwargs.get('filter_createonly')
         try:
             obj = self.__class__(name='get', route=self.route,
                                  http_method='get', api_level=self.api_level)
@@ -140,21 +198,21 @@ class Action(BaseAction):
             utils.debug(raw_text)
             if raw_text is None:
                 return {}
-            json_text = json.loads(raw_text)
-            filtered = self._filter_json_object(json_text['data'],
-                                                filter_createonly=True)
-            return json.dumps(filtered, indent=2)
+            json_dict = json.loads(raw_text)
+            if filter_createonly:
+                filtered = self.spec.filter_json_object(json_dict['data'],
+                                                        self.route,
+                                                        self.http_method,
+                                                        filter_createonly=True)
+                return json.dumps(filtered, indent=2)
+            return json.dumps(json_dict['data'], indent=2)
         except Exception as e:
             utils.reraise(e)
 
-    def _edit_object(self, *args, **kwargs):
-        raw_object = self._get_object(*args, **kwargs)
-        raw_object = click.edit(raw_object)
-        if raw_object is None:
-            raise ValueError("No changes in JSON")
-        return json.loads(raw_object)
-
     def _edit_example(self):
+        """
+        Edit template as an example.
+        """
         commentary = examples.create_post_example(self.api_level, self.route)
         text = click.edit(commentary)
         if text:
@@ -172,7 +230,11 @@ class Action(BaseAction):
         raw_object = click.get_text_stream('stdin').read()
         return json.loads(raw_object)
 
+    # pylint: disable=no-self-use
     def _format_errmsg(self, errors):
+        """
+        Format error message.
+        """
         messages = []
         num = 1
         for error_data in errors:
@@ -185,7 +247,25 @@ class Action(BaseAction):
         result_errmsg = '\n'.join(messages)
         return result_errmsg
 
+    @staticmethod
+    def get_response_type(response_dict):
+        """
+        Get response type.
+        """
+        obj_type = None
+        data = response_dict['data']
+        if isinstance(data, dict):
+            if 'type' in data:
+                obj_type = data['type']
+        elif isinstance(data, list):
+            if data and data[0]:
+                obj_type = data[0].get('type')
+        return obj_type
+
     def _format_response(self, response, hidden=False, **kwargs):
+        """
+        Format a response.
+        """
         text = None
 
         if response:
@@ -204,14 +284,15 @@ class Action(BaseAction):
             if errors:
                 errmsg = self._format_errmsg(errors)
                 error = MultipleClickException(errmsg)
-                error.code = 1
+                error.code = 1  # pylint: disable=attribute-defined-outside-init
                 raise error
 
             if not hidden:
                 utils.debug(response_json.get('meta'))
 
             if self.strip_metadata and self.http_method.upper() == 'GET' and \
-                    settings.view in ('raw', 'json', 'xml') and 'data' in response_json:  # SCALRCORE-10392
+                    settings.view in ('raw', 'json', 'xml') and \
+               'data' in response_json:  # SCALRCORE-10392
                 response_json = response_json['data']
                 response = json.dumps(response_json)
 
@@ -225,12 +306,15 @@ class Action(BaseAction):
                 data = json.dumps(response_json.get('data'))
                 click.echo(view.build_tree(data))
             elif settings.view == 'table':
-                columns = self._table_columns or self._get_column_names()
-                if self._returns_iterable():
+                obj_type = self.get_response_type(response_json)
+                columns = self._table_columns or self.spec.get_column_names(self.route,
+                                                                            self.http_method,
+                                                                            obj_type)
+                if self.spec.is_iterable_object(self.route, self.http_method):
                     rows, current_page, last_page = view.calc_vertical_table(response_json,
                                                                     columns)
                     pre = "Page: {} of {}".format(current_page, last_page)
-                    click.echo(view.build_vertical_table(columns, rows, pre=pre))  # XXX
+                    click.echo(view.build_vertical_table(columns, rows, pre=pre))
                 else:
                     click.echo(view.build_horizontal_table(
                         view.calc_horizontal_table(response_json, columns)))
@@ -251,6 +335,9 @@ class Action(BaseAction):
         return text
 
     def _get_default_options(self):
+        """
+        Get default options.
+        """
         options = []
         for param in self._get_raw_params():
             option = click.Option(('--{}'.format(param['name']),
@@ -262,6 +349,9 @@ class Action(BaseAction):
         return options
 
     def _get_custom_options(self):
+        """
+        Get custom options.
+        """
         options = []
 
         if self.http_method.upper() in ('POST', 'PATCH'):
@@ -281,7 +371,7 @@ class Action(BaseAction):
             """
 
         if self.http_method.upper() == 'GET':
-            if self._returns_iterable():
+            if self.spec.is_iterable_object(self.route, self.http_method):
                 maxres = click.Option(('--max-results', 'maxResults'),
                                       type=int, required=False,
                                       help="Maximum number of records. "
@@ -303,10 +393,12 @@ class Action(BaseAction):
                                            required=False, help=filter_help)
                     options.append(filters)
 
-                columns_help = ("Filter columns in table view "
-                                "[--table required]. Example: NAME,SIZE,"
-                                "SCOPE. Available columns: {}."
-                                ).format(', '.join(self._get_column_names()))
+                columns_help = "Filter columns in table view [--table required]. \
+                                Example: NAME,SIZE,SCOPE. "
+                column_names = self.spec.get_column_names(self.route, self.http_method)
+                if column_names:
+                    columns_help += "Available columns: %s." % ', '.join(column_names)
+
                 columns = click.Option(('--columns', 'columns'),
                                        required=False, help=columns_help)
                 options.append(columns)
@@ -317,7 +409,8 @@ class Action(BaseAction):
             json_ = click.Option(('--json', 'transformation'), is_flag=True,
                                  flag_value='raw', default=False,
                                  help="Print raw response")
-            strip_metadata = click.Option(('--no-envelope', 'strip_metadata'), is_flag=True, default=False,
+            strip_metadata = click.Option(('--no-envelope', 'strip_metadata'),
+                               is_flag=True, default=False,
                                help="Strip server response from all metadata.")
             xml = click.Option(('--xml', 'transformation'), is_flag=True,
                                flag_value='xml', default=False,
@@ -343,200 +436,52 @@ class Action(BaseAction):
         return options
 
     def _get_body_type_params(self):
+        """
+        Base method for getting body type params.
+        """
+        # pylint: disable=unsubscriptable-object
         route_data = self.raw_spec['paths'][self.route][self.http_method]
         return [param for param in route_data.get('parameters', '')]
 
     def _get_path_type_params(self):
+        """
+        Base method for getting path type params.
+        """
+        # pylint: disable=unsubscriptable-object
         route_data = self.raw_spec['paths'][self.route]
         return [param for param in route_data.get('parameters', '')]
 
     def _get_raw_params(self):
+        """
+        Get params as a text.
+        """
         result = self._get_path_type_params()
         if self.http_method.upper() in ('GET', 'DELETE'):
             body_params = self._get_body_type_params()
             result.extend(body_params)
         return result
 
-    def _returns_iterable(self):
-        responses = self.raw_spec['paths'][self.route][self.http_method]['responses']
-        if '200' in responses:
-            response_200 = responses['200']
-            if 'schema' in response_200:
-                schema = response_200['schema']
-                if '$ref' in schema:
-                    object_key = schema['$ref'].split('/')[-1]
-                    object_descr = self.raw_spec['definitions'][object_key]
-                    object_properties = object_descr['properties']
-                    data_structure = object_properties['data']
-                    return 'array' == data_structure.get('type')
-        return False
-
     def _get_available_filters(self):
-        if self._returns_iterable():
+        """
+        Get available filters.
+        """
+        filters = []
+        if self.spec.is_iterable_object(self.route, self.http_method):
             data = self._result_descr['properties']['data']
+            if "oneOf" in data['items']:
+                return filters
             response_ref = data['items']['$ref']
-            response_descr = self._lookup(response_ref)
+            response_descr = self.spec.lookup(response_ref)
             if 'x-filterable' in response_descr:
-                return response_descr['x-filterable']
-        return []
-
-    def _get_column_names(self):
-        data = self._result_descr['properties']['data']
-        # XXX: Inconsistency in swagger spec.
-        # See RoleDetailsResponse vs RoleCategoryListResponse
-        response_ref = data['items']['$ref'] \
-            if 'items' in data else data['$ref']
-        response_descr = self._lookup(response_ref)
-        properties = response_descr['properties']
-
-        column_names = []
-        for k, v in properties.items():
-            if '$ref' not in v:
-                column_names.append(k)
-            else:  # ST-226
-                f_key = self._lookup(v['$ref'])
-                if "properties" in f_key:
-                    if len(f_key["properties"]) == 1:
-                        if "id" in f_key["properties"]:
-                            if "type" in f_key["properties"]["id"]:
-                                if f_key["properties"]["id"]["type"] in ("integer", "string"):
-                                    column_names.append("%s.id" % k)
-        return column_names
-
-    def _lookup(self, response_ref):
-        """
-        Returns document section
-        Example: #/definitions/Image returns Image defenition section.
-        """
-        if response_ref.startswith('#'):
-            paths = response_ref.split('/')[1:]
-            result = self.raw_spec
-            for path in paths:
-                if path not in result:
-                    return
-                result = result[path]
-            return result
+                filters = response_descr['x-filterable']
+        return filters
 
     @property
     def _result_descr(self):
-        route_data = self.raw_spec['paths'][self.route]
-
-        if self.http_method == 'post':
-            data_block = route_data.get('get', route_data['post'])  # XXX: non-CRUD actions e.g. farm launch
-        else:
-            data_block = route_data[self.http_method]
-
-        responses = data_block['responses']
-        if '200' in responses:
-            response_200 = responses['200']
-            if 'schema' in response_200:
-                schema = response_200['schema']
-                if '$ref' in schema:
-                    response_ref = schema['$ref']
-                    return self._lookup(response_ref)
-
-    def _list_concrete_types(self, schema):
-        types = []
-        if "x-concreteTypes" in schema:
-            for ref_dict in schema["x-concreteTypes"]:
-                ref_link = ref_dict['$ref']
-                types += [link.split("/")[-1] for link in self._list_concrete_types_recursive(ref_link)]
-        return types
-
-    def _list_concrete_types_recursive(self, reference):
-        references = []
-        schema = self._lookup(reference)
-        if "x-concreteTypes" not in schema:
-            references.append(reference)
-        else:
-            for ref_dict in schema["x-concreteTypes"]:
-                references += self._list_concrete_types_recursive(ref_dict['$ref'])
-        return references
-
-    def _filter_json_object(self, data, filter_createonly=False,
-                            schema=None, reference=None):
         """
-        Removes immutable parts from JSON object
-        before sending it in POST or PATCH.
+        Get document section.
         """
-        filtered = {}
-
-        # load `schema`
-        if schema is None:
-            for param in self._get_body_type_params():
-                if 'schema' in param:
-                    schema = param['schema']
-                    if '$ref' in schema:
-                        reference = schema['$ref']
-                        schema = self._lookup(schema['$ref'])
-                    break
-
-        # load child object as `schema`
-        if 'discriminator' in schema:
-
-            disc_key = schema['discriminator']
-            disc_path = '{}/{}'.format(reference, disc_key)
-            disc_value = data.get(disc_key) or self._discriminators.get(disc_path)
-
-            if not disc_value:
-                raise click.ClickException((
-                    "Provided JSON object is incorrect: missing required param '{}'."
-                ).format(disc_key))
-            elif disc_value not in self._list_concrete_types(schema):
-                raise click.ClickException((
-                    "Provided JSON object is incorrect: required "
-                    "param '{}' has invalid value '{}', must be one of: {}."
-                ).format(disc_key, disc_value, self._list_concrete_types(schema)))
-            else:
-                # save discriminator for current reference/key
-                self._discriminators[disc_path] = disc_value
-
-            reference = '#/definitions/{}'.format(disc_value)
-            schema = self._lookup(reference)
-
-        # filter input data by properties of `schema`
-        if schema and 'properties' in schema:
-            create_only_props = schema.get('x-createOnly', '')
-            for p_key, p_value in schema['properties'].items():
-
-                if reference:
-                    key_path = '.'.join([reference.split('/')[-1], p_key])
-                else:
-                    key_path = p_key
-
-                if p_key not in data:
-                    utils.debug("Ignore {}, unknown key.".format(key_path))
-                    continue
-                if p_value.get('readOnly'):
-                    utils.debug("Ignore {}, read-only key.".format(key_path))
-                    continue
-                if filter_createonly and p_key in create_only_props:
-                    utils.debug("Ignore {}, create-only key.".format(key_path))
-                    continue
-
-                if '$ref' in p_value and isinstance(data[p_key], dict):
-                    ref = p_value['$ref']
-                    utils.debug("Filter sub-object: {}.".format(ref))
-                    filtered[p_key] = self._filter_json_object(
-                        data[p_key],
-                        filter_createonly=filter_createonly,
-                        reference=ref,
-                        schema=self._lookup(ref))
-                elif '$ref' in p_value.get('items', {}) and isinstance(data[p_key], list):
-                    ref = p_value['items']['$ref']
-                    utils.debug("Filter list of sub-objects: {}.".format(ref))
-                    filtered[p_key] = [
-                        self._filter_json_object(
-                            item,
-                            filter_createonly=filter_createonly,
-                            reference=ref,
-                            schema=self._lookup(ref),
-                        ) for item in data[p_key]]
-                else:
-                    # add valid key-value
-                    filtered[p_key] = data[p_key]
-
-        return filtered
+        return self.spec.result_descr(self.route, self.http_method)
 
     def _list_createonly_properties(self):
         """
@@ -551,13 +496,61 @@ class Action(BaseAction):
                 path = data['items']['$ref']
             else:
                 path = data['$ref']
-            obj = self._lookup(path)
+            obj = self.spec.lookup(path)
             return obj['x-createOnly'] if 'x-createOnly' in obj else []
 
     @property
     def _request_template(self):
-        basepath_uri = self.raw_spec['basePath']
-        return '{}{}'.format(basepath_uri, self.route)
+        """
+        Get template according to base path.
+        """
+        return '{}{}'.format(self.spec.base_path, self.route)
+
+    def prerun_patch(self, stdin, *args, **kwargs):
+        # type: (str, tuple, dict) -> dict
+        """
+        Filter raw objects in patch.
+        """
+        if stdin:
+            kwargs['filter_createonly'] = True
+            self._get_object_as_text(*args, **kwargs)
+            raw_json_object = self._read_object()
+            filtered_json_object = self.spec.filter_json_object(raw_json_object,
+                                                                self.route,
+                                                                self.http_method)
+        else:
+            kwargs['filter_createonly'] = False
+            raw_text = self._get_object_as_text(*args, **kwargs)
+            raw_json_object = json.loads(raw_text)
+
+            filtered_dict = self.spec.filter_json_object(
+                raw_json_object,
+                self.route,
+                self.http_method,
+                filter_createonly=True)
+            filtered_text = json.dumps(filtered_dict, indent=2)
+
+            editor_text = click.edit(filtered_text)
+            if editor_text is None:
+                raise ValueError("No changes in JSON")
+            filtered_json_object = json.loads(editor_text)
+        return filtered_json_object
+
+    def prerun_post(self, stdin):
+        # type: (str) -> dict
+        """
+        Filter raw objects in post.
+        """
+        if stdin:
+            raw_json_object = self._read_object()
+        else:
+            raw_json_object = self._edit_example()
+
+        filtered_json_object = self.spec.filter_json_object(
+            raw_json_object,
+            self.route,
+            self.http_method)
+        return filtered_json_object
 
     def pre(self, *args, **kwargs):
         """
@@ -567,7 +560,6 @@ class Action(BaseAction):
         self._check_arguments(**kwargs)
 
         import_data = kwargs.pop('import-data', {})
-        #interactive = kwargs.pop('interactive', None)
         stdin = kwargs.pop('stdin', None)
         http_method = self.http_method.upper()
 
@@ -575,32 +567,46 @@ class Action(BaseAction):
             return args, kwargs
 
         # prompting for body and then validating it
-        for param_name in (p['name'] for p in self._get_body_type_params()):
-            try:
-                if param_name in import_data:
-                    json_object = self._filter_json_object(
-                        import_data[param_name],
-                        filter_createonly=True
-                    ) if http_method == 'PATCH' else import_data[param_name]
-                else:
-                    if http_method == 'PATCH':
-                        if stdin:
-                            # XXX: `_get_object` makes additional GET to load all
-                            # discriminator's into `self._discriminators` map
-                            self._get_object(*args, **kwargs)
-                            json_object = self._read_object()
-                        else:
-                            json_object = self._edit_object(*args, **kwargs)
-                    elif http_method == 'POST':
-                        json_object = self._read_object() if stdin else self._edit_example()
 
-                json_object = self._filter_json_object(json_object)
-                kwargs[param_name] = json_object
-            except ValueError as e:
-                utils.reraise(e)
+        param_names = []
+        param_data = self.spec.get_body_type_params(self.route, self.http_method)
+        param_name = param_data.get('name')
+        if param_name:  # Note simplified actions might be affected, testing required
+            param_names.extend(param_name)
 
+        try:
+            if import_data:
+                for param_name in param_names:
+                    if param_name in import_data:
+                        raw_json_object = import_data[param_name]
+                        filtered_json_object = self.spec.filter_json_object(
+                            raw_json_object,
+                            self.route,
+                            self.http_method,
+                            filter_createonly=True
+                        ) if http_method == 'PATCH' else raw_json_object
+            else:
+                if http_method == 'PATCH':
+                    filtered_json_object = self.prerun_patch(stdin, *args, **kwargs)
+
+                elif http_method == 'POST':
+                    filtered_json_object = self.prerun_post(stdin)
+
+            schema = param_data['schema']
+            if '$ref' in schema:
+                schema = self.spec.lookup(schema['$ref'])
+
+            if len(param_names) == 1:  # Note
+                param_name = param_names[0]
+            elif 'discriminator' in schema:
+                disc_key = schema.get("discriminator").get('propertyName')
+                param_name = raw_json_object.get(disc_key)
+            kwargs[param_name] = filtered_json_object
+        except ValueError as e:
+            utils.reraise(e)
         return args, kwargs
 
+    # pylint: disable=no-self-use
     def post(self, response):
         """
         After request is made.
@@ -617,7 +623,6 @@ class Action(BaseAction):
         """
         hide_output = kwargs.pop('hide_output', False)  # [ST-88]
         args, kwargs = self.pre(*args, **kwargs)
-
         uri = self._request_template
         payload = {}
         data = {}
@@ -627,17 +632,16 @@ class Action(BaseAction):
 
         if '{accountId}' in uri and not kwargs.get('accountId') and settings.accountId:
             kwargs['accountId'] = settings.accountId
-
         if kwargs:
             # filtering in-body and empty params
             uri = self._request_template.format(**kwargs)
             for key, value in kwargs.items():
                 param = '{{{}}}'.format(key)
                 if value and (param not in self._request_template):
-                    body_params = self._get_body_type_params()
+                    body_params = self.spec.get_body_type_params(self.route, self.http_method)
                     if self.http_method.upper() in ('GET', 'DELETE'):
                         payload[key] = value
-                    elif body_params and key == body_params[0]['name']:
+                    elif body_params and key in body_params['name']:
                         data.update(value)
 
         if self.dry_run:
@@ -650,7 +654,8 @@ class Action(BaseAction):
         raw_response = request.request(self.http_method, self.api_level,
                                        uri, payload, data)
         response = self.post(raw_response)
-
+        # Avoid keywords must be strings
+        kwargs = {str(k): v for k, v in kwargs.items()}
         text = self._format_response(response, hidden=hide_output, **kwargs)
         if text is not None:
             click.echo(text)
@@ -661,7 +666,7 @@ class Action(BaseAction):
         """
         Returns action description.
         """
-        route_data = self.raw_spec['paths'][self.route]
+        route_data = self.spec.raw_spec['paths'][self.route]
         return route_data[self.http_method]['description']
 
     def modify_options(self, options):
@@ -681,7 +686,8 @@ class Action(BaseAction):
         """
         Returns action options.
         """
-        options = self._get_default_options() + self._get_custom_options()
+        options = self.spec.get_default_options(self.route, self.http_method) + \
+                    self._get_custom_options()
         return [opt for opt in options if opt.name not in self.ignored_options]
 
     def validate(self):
@@ -689,8 +695,10 @@ class Action(BaseAction):
         Validate routes for current API scope.
         """
         if self.route and self.api_level:
+            fname = "openapi.json" if defaults.OPENAPI_ENABLED else\
+                    '{}.json'.format(self.api_level)
             spec_path = os.path.join(defaults.CONFIG_DIRECTORY,
-                                     '{}.json'.format(self.api_level))
+                                     fname)
             api_routes = json.load(open(spec_path, 'r'))['paths'].keys()
             try:
                 assert api_routes and self.route in api_routes, self.name
@@ -704,24 +712,30 @@ class Action(BaseAction):
 
 
 class SimplifiedAction(Action):
-    ignored_options = ('stdin',)
+    """
+    Simplified action class.
+    """
+    ignored_options = ('stdin', )  # type: typing.Tuple[str]
 
 
 class PolledAction(SimplifiedAction):
+    """
+    Polled Action class.
+    """
 
-    def _wait_for_status(self, poll_dict, action_obj, states_to_wait_for, timeout=1, hide_output=True, **kwargs):
+    def _wait_for_status(self, poll_dict, action_obj, states_to_wait_for,
+                         timeout=1, hide_output=True, **kwargs):
         '''
-
         :param poll_dict: e.g. {'serverId': b039d8d9-26c2-439d-9b2b-9d7b761b417c}
         :param action_obj: instance of class Action
         :param states_to_wait_for: list of states to wait for, e.g. ('running', 'failed')
         :param timeout: timeout in secons between attempts
-        :param hide_output: when True prints full polling status
+        :param hide_output: when False prints full polling status
         :param kwargs: the same dict that run() method accepts
         :returns last status, e.g. 'running'
         '''
         status = ''
-        with utils._spinner():
+        with utils.Spinner():
             while status not in states_to_wait_for:
                 run_args = {"hide_output": hide_output, "envId": kwargs.get('envId')}
                 run_args.update(poll_dict)
@@ -732,5 +746,7 @@ class PolledAction(SimplifiedAction):
         return status
 
     def _get_operation_status(self, data_json):
+        """
+        Get operation status.
+        """
         return data_json["data"]["status"]
-

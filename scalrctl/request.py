@@ -36,8 +36,8 @@ requests_log.propagate = True
 
 
 try:
-    requests.packages.urllib3.disable_warnings()
-except:
+    requests.packages.urllib3.disable_warnings()  # pylint: disable=no-member
+except (Exception, BaseException):  # pylint: disable=W0703
     pass
 
 
@@ -87,7 +87,6 @@ def request(method, api_level, request_uri, payload=None, data=None):
         ) if payload else ''
 
         body = json.dumps(yaml.safe_load(data)) if data else ''  # XXX
-
         string_to_sign = '\n'.join((
             method.upper(),
             time_iso8601,

@@ -1,13 +1,11 @@
 __author__ = 'Dmitriy Korsakov'
 __doc__ = 'Manage FarmRoles'
 
-import json
 import copy
 
 from scalrctl import commands
 from scalrctl import click
 
-from scalrctl import request, settings
 from scalrctl.commands import farm
 
 
@@ -74,16 +72,3 @@ class FarmRoleCreateFromTemplate(farm.FarmCreateFromTemplate):
         stdin = kwargs.pop('stdin', None)
         kwargs["FarmRoleTemplate"] = self._read_object() if stdin else self._edit_example()
         return args, kwargs
-
-    def _edit_example(self):
-        commentary = \
-            '''# The body must be a valid FarmRoleTemplate object.
-#
-# Type your FarmRoleTemplate object below this line. The above text will not be sent to the API server.'''
-        text = click.edit(commentary)
-        if text:
-            raw_object = "".join([line for line in text.splitlines()
-                                  if not line.startswith("#")]).strip()
-        else:
-            raw_object = ""
-        return json.loads(raw_object)

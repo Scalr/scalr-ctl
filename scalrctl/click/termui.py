@@ -97,7 +97,7 @@ def prompt(text, default=None, hide_input=False,
         try:
             result = value_proc(value)
         except UsageError as e:
-            echo('Error: %s' % e.message, err=err)
+            echo('Error: %s' % str(e), err=err)
             continue
         if not confirmation_prompt:
             return result

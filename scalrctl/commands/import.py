@@ -2,7 +2,6 @@
 Import Scalr objects.
 """
 import json
-import os
 import pydoc
 
 import yaml
@@ -172,7 +171,7 @@ class Import(commands.Action):
                 .format('GET', route)
             raise click.ClickException(msg)
 
-        obj_type = action._get_body_type_params()[0]['name']
+        obj_type = action._get_body_type_params()['name']  # pylint: disable=protected-access
         if action.name not in ('role-image',):
             kwargs['import-data'] = {obj_type: obj_data['data']}
 
@@ -230,7 +229,7 @@ class ImportImage(commands.Action):
         if 'imageId' not in kwargs:
             kwargs['image'] = click.termui.prompt("Image object JSON")
 
-        return super(commands.Action, self).pre(*args, **kwargs)
+        return super(ImportImage, self).pre(*args, **kwargs)
 
 
 class UpdateImage(commands.Action):

@@ -1,5 +1,4 @@
 import os
-import sys
 
 from distutils.core import setup
 from distutils.command.install import install
@@ -20,14 +19,15 @@ class _install(install):
 def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
 
-description = "Scalr-ctl is a command-line interface to your Scalr account"
+
+DESCRIPTION = "Scalr-ctl is a command-line interface to your Scalr account"
 
 if __name__ == '__main__':
 
     setup(
         name='scalr-ctl',
         version=read("scalrctl/VERSION").strip(),
-        description=description,
+        description=DESCRIPTION,
         author="Scalr Inc.",
         author_email="dmitry@scalr.com",
         url="https://scalr.net",
@@ -44,7 +44,7 @@ if __name__ == '__main__':
             'Environment :: Console',
             'Intended Audience :: System Administrators',
             'Topic :: Utilities'
-            ],
+        ],
         packages=[
             "scalrctl",
             "scalrctl.click",
@@ -55,7 +55,7 @@ if __name__ == '__main__':
         package_data={
             '': ['VERSION', 'scheme/scheme.json'],
         },
-        data_files=[('', ['scalrctl/scheme/scheme.json', ]), ],
+        data_files=[('', ['scalrctl/scheme/scheme.json', 'scalrctl/scheme/scheme_openapi.json']), ],
         install_requires=[
             'prettytable>=0.7.2',
             'pyyaml>=3.11,<5',
@@ -63,6 +63,7 @@ if __name__ == '__main__':
             'six>=1.10.0',
             'colorama>=0.3.7',
             'dicttoxml>=1.7.4',
+            'typing>=3.6.6',
         ],
         entry_points='''
             [console_scripts]

@@ -13,18 +13,14 @@ from scalrctl.commands.internal import configure, update
 __author__ = 'Dmitriy Korsakov, Sergey Babak'
 
 
-SCHEME_PATH = os.path.join(os.path.dirname(__file__), 'scheme/scheme.json')
-
-
 if not os.path.exists(defaults.CONFIG_DIRECTORY):
     os.makedirs(defaults.CONFIG_DIRECTORY)
 
 if os.path.exists(defaults.CONFIG_PATH):
-    config_data = yaml.safe_load(open(defaults.CONFIG_PATH, 'r'))
-    configure.apply_settings(config_data)
+    CONFIG_DATA = yaml.safe_load(open(defaults.CONFIG_PATH, 'r'))
+    configure.apply_settings(CONFIG_DATA)
 
-if update.is_update_required():
-    update.update()  # [ST-53]
+update.update(force=False)
 
 
 def dummy_run():
@@ -37,7 +33,7 @@ class ScalrCLI(click.Group):
         if 'scheme' in attrs:
             self.scheme = attrs.pop('scheme')
         else:
-            with open(SCHEME_PATH) as fp:
+            with open(defaults.SCHEME_PATH) as fp:
                 self.scheme = json.load(fp)
         super(ScalrCLI, self).__init__(name, commands, chain=True, **attrs)
 
@@ -148,19 +144,19 @@ def cli(ctx, key_id, secret_key, config, *args, **kvargs):
 
     if secret_key:
         settings.API_SECRET_KEY = str(secret_key)
-    elif (settings.API_KEY_ID and settings.API_KEY_ID.strip()
-          and not settings.API_SECRET_KEY
-          and not service_cmd):  # [ST-21]
+    elif (settings.API_KEY_ID and settings.API_KEY_ID.strip() and not
+          settings.API_SECRET_KEY and not service_cmd):  # [ST-21]
         settings.API_SECRET_KEY = str(click.prompt(text='API SECRET KEY',
                                                    hide_input=True))
     if config:
         if os.path.exists(config):
-            config_data = yaml.safe_load(open(config, 'r'))
-            configure.apply_settings(config_data)
+            config_datas = yaml.safe_load(open(config, 'r'))
+            configure.apply_settings(config_datas)
         else:
             msg = 'Configuration file not found: {}'.format(config)
             raise click.ClickException(msg)
 
 
 if __name__ == '__main__':
+    # pylint: disable=no-value-for-parameter
     cli()

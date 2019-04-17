@@ -2,7 +2,6 @@ __author__ = 'Dmitriy Korsakov'
 __doc__ = 'Server management'
 import copy
 import json
-import time
 
 from scalrctl import commands
 from scalrctl import click
@@ -31,7 +30,6 @@ class ExecuteScript(commands.PolledAction):
         options = [blocking, server_id, timeout, nowait]
         options.extend(super(ExecuteScript, self).get_options())
         return options
-
 
     def pre(self, *args, **kwargs):
         """
