@@ -12,28 +12,32 @@ from scalrctl import click, defaults, settings, commands, utils
 
 __author__ = 'Dmitriy Korsakov, Sergey Babak'
 
+NOUPDATE_FLAG_PATH = os.path.join(defaults.CONFIG_DIRECTORY, '.noupdate')
+
 
 def _get_spec_path(api_level, extension):
+    """
+    Return path of determine specification.
+
+    :rtype: str
+    """
     return os.path.join(defaults.CONFIG_DIRECTORY,
                         '{}.{}'.format(api_level, extension))
 
 
 def _is_spec_exists(api_level, extension):
+    """
+    Check if specifications path exist.
+
+    :rtype: bool
+    """
     return os.path.exists(_get_spec_path(api_level, extension))
-
-
-def _fetch_openapi_spec():
-    """
-    Fetch specifications
-    # v2: http://bfb482b26df9.test-env.scalr.com/api/user.v1beta0.yml
-    # v3: http://bfb482b26df9.test-env.scalr.com/api/openapi.v1beta0.yml
-    """
-    return _fetch_yaml_spec("openapi")
 
 
 def _fetch_yaml_spec(api_level):
     '''
     Fetch spec file from API server.
+
     :param api_level: system, user, account, global, openapi
     :return:
     '''
@@ -64,6 +68,12 @@ def _fetch_yaml_spec(api_level):
 
 
 def _read_spec(spec_path):
+    """
+    Read specification via determine path.
+
+    :param str spec_path: path to specification
+    :rtype str
+    """
     text = None
     if os.path.exists(spec_path):
         with open(spec_path, "r") as fp:
@@ -72,15 +82,15 @@ def _read_spec(spec_path):
 
 
 def _write_spec(spec_path, text):
+    """
+    Write data into specification.
+
+    :param str spec_path: path to specification
+    :param str text:
+    :rtype:
+    """
     with open(spec_path, "w") as fp:
         fp.write(text)
-
-
-def _update_openapi_spec():
-    """
-    Update OpenAPI spec.
-    """
-    return _update_spec("openapi")
 
 
 def _update_spec(api_level):
@@ -126,65 +136,104 @@ class UpdateScalrCTL(commands.BaseAction):
         return "Fetch new API specification if available."
 
 
-def is_swagger_update_required():
+def _check_update():
     """
-    Determine if spec update is needed.
-    """
+    Check if update is needed.
 
-    # prevent from running 'update' more than once
-    # pylint: disable=no-else-return
-    if 'update' in sys.argv or 'configure' in sys.argv or\
-       os.path.exists(os.path.join(defaults.CONFIG_DIRECTORY, ".noupdate")):
+    :rtype: bool
+    """
+    if 'update' in sys.argv or 'configure' in sys.argv or os.path.exists(NOUPDATE_FLAG_PATH):
         return False
-    else:
-        exists = [_is_spec_exists(level, 'yaml') and
-                  _is_spec_exists(level, 'json') for level in defaults.API_LEVELS]
-        return not all(exists)
+    return True
 
 
-def update_swagger():
+def _is_openapi_v2_update_required():
     """
-    Update spec for all available APIs.
+    Determine if OpenAPI v2 update is needed.
+
+    :rtype: bool
     """
+    # prevent from running 'update' more than once
+    if not _check_update():
+        return False
+    return not all(
+        _is_spec_exists(level, 'yaml') and _is_spec_exists(level, 'json')
+        for level in defaults.API_LEVELS)
 
-    amount = len(defaults.API_LEVELS)
 
+def _is_openapi_v3_update_required():
+    """
+    Determine if OpenAPI v3 update is needed.
+
+    :rtype: bool
+    """
+    # prevent from running 'update' more than once
+    if not _check_update():
+        return False
+    return not (_is_spec_exists('openapi', 'yaml') and _is_spec_exists('openapi', 'json'))
+
+
+def _is_openapi_update_required():
+    """
+    Determine if OpenAPI specification update is needed.
+
+    :rtype: bool
+    """
+    return _is_openapi_v3_update_required() or _is_openapi_v2_update_required()
+
+
+def _update_openapi_v2():
+    """
+    Update OpenAPI v2 specification.
+
+    :return bool: `True` if spec has been updated successfully, otherwise `False`.
+    """
+    any_failed = False
     for index, api_level in enumerate(defaults.API_LEVELS, 1):
-
-        click.echo('[{}/{}] Updating specifications for Scalr {} API (Swagger)... '
-                   .format(index, amount, api_level), nl=False)
-
+        click.echo((
+            "[{}/{}] Updating specifications for Scalr {} API (Swagger)..."
+        ).format(index, len(defaults.API_LEVELS), api_level), nl=False)
         with utils.Spinner():
             success, fail_reason = _update_spec(api_level)
-
         if success:
-            click.secho('Done', fg='green')
+            click.secho("Done", fg='green')
         else:
-            click.secho('Failed: {}'.format(fail_reason), fg='red')
+            click.secho("Failed: {}".format(fail_reason), fg='red')
+            any_failed = True
+    return not any_failed
+
+
+def _update_openapi_v3():
+    """
+    Update OpenAPI v3 specification.
+
+    :return bool: `True` if spec has been updated successfully, otherwise `False`.
+    """
+    click.echo("Updating specification for Scalr API (OpenAPI)... ", nl=False)
+    with utils.Spinner():
+        success, fail_reason = _update_spec("openapi")
+    if success:
+        click.secho("Done", fg='green')
+        return True
+    click.secho("Failed: {}".format(fail_reason), fg='red')
+    return False
 
 
 def update(force=True):
     """
-    Update CLI.
-    """
-    noupdate_flag_path = os.path.join(defaults.CONFIG_DIRECTORY, ".noupdate")
-    if 'update' in sys.argv or os.path.exists(noupdate_flag_path):
-        if force and os.path.exists(noupdate_flag_path):
-            click.secho('Update is disabled by user. To enable remove %s' % noupdate_flag_path,
-                        fg='yellow')
+    Update OpenAPI v3 or/and v2 specification (json and yaml).
 
-    if not force:
+    :param bool force: Update specification forcefully (default=True).
+    """
+    if os.path.exists(NOUPDATE_FLAG_PATH):
+        if force:
+            click.secho((
+                "Update is disabled by user. To enable remove {path}"
+            ).format(path=NOUPDATE_FLAG_PATH), fg='yellow')
+        return
+    if not _is_openapi_update_required() and not force:
         return
 
-    click.echo('Updating specification for Scalr API (OpenAPI)... ', nl=False)
-
-    with utils.Spinner():
-        success, _ = _update_openapi_spec()
-
-        if success:
-            click.secho('Done', fg='green')
-        else:
-            click.secho(' OpenAPI spec is not available.', fg='yellow')
-            if force or not is_swagger_update_required():
-                click.secho('Trying to fetch SwaggerSpec', fg='yellow')
-                update_swagger()
+    if not _update_openapi_v3():
+        click.secho("OpenAPI spec is not available.", fg='yellow')
+        _update_openapi_v2()
