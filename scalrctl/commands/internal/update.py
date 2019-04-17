@@ -168,13 +168,15 @@ def update(force=True):
     Update CLI.
     """
     noupdate_flag_path = os.path.join(defaults.CONFIG_DIRECTORY, ".noupdate")
+    openapi_exist = _is_spec_exists('openapi', 'yaml') and _is_spec_exists('openapi', 'json')
     if 'update' in sys.argv or os.path.exists(noupdate_flag_path):
         if force and os.path.exists(noupdate_flag_path):
             click.secho('Update is disabled by user. To enable remove %s' % noupdate_flag_path,
                         fg='yellow')
-        return
+        if openapi_exist:
+            return
 
-    if not force and _is_spec_exists('openapi', 'yaml') and _is_spec_exists('openapi', 'yaml'):
+    if not force and openapi_exist:
         return
 
     click.echo('Updating specification for Scalr API (OpenAPI)... ', nl=False)
