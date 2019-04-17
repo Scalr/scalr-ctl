@@ -13,8 +13,6 @@ import traceback
 import yaml
 
 from scalrctl import click, defaults, settings
-# pylint: disable=unused-import
-from scalrctl.commands import openapi
 
 
 SUCCESS_CODES = {
