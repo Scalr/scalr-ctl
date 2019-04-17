@@ -36,7 +36,7 @@ class MultipleClickException(click.ClickException):
         click.utils.echo('%s' % self.format_message(), file=file)
 
 
-class BaseAction():
+class BaseAction(object):
     """
     Base class for action.
     """
