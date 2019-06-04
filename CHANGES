@@ -4,6 +4,13 @@ scalr-ctl Changelog
 
 Changelog on Scalr Wiki: https://scalr-labs.atlassian.net/wiki/pages/viewpage.action?pageId=109805613
 
+Version 7.15.1
+--------------
+
+Fixed
+
+    setup.py fails with "No such file or directory" error
+
 Version 7.15.0
 --------------
 
