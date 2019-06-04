@@ -1,0 +1,27 @@
+  scalr-ctl is a command-line interface to your Scalr account
+
+
+  Version 1.0 works with the new Scalr JSON API.
+
+Install:
+
+  $ pip install scalr-ctl
+
+
+Configure:
+
+  $ scalr-ctl configure
+
+
+Use:
+
+  $ scalr-ctl --help
+
+  $ scalr-ctl <tab> <tab>
+
+
+Update:
+
+  $ pip install --upgrade scalr-ctl
+
+  $ scalr-ctl update

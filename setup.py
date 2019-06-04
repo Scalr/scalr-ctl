@@ -33,8 +33,7 @@ if __name__ == '__main__':
         url="https://scalr.net",
         license="Apache-2",
         platforms="any",
-        long_description=read('README.md'),
-        long_description_content_type='text/markdown',
+        long_description=read('README'),
         classifiers=[
             'Programming Language :: Python',
             'Programming Language :: Python :: 2',
