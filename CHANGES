@@ -4,6 +4,18 @@ scalr-ctl Changelog
 
 Changelog on Scalr Wiki: https://scalr-labs.atlassian.net/wiki/pages/viewpage.action?pageId=109805613
 
+Version 7.15.0
+--------------
+
+New feature
+
+    SCALRCORE-10412 Add support for "warnings" property in API response
+
+Fixed
+
+    SCALRCORE-12249 Improve scalr-ctl configure when API URL is behind a proxy.
+    SCALRCORE-10413 UPDATE commands fail in non-interactive mode
+
 Version 7.14.2
 --------------
 
