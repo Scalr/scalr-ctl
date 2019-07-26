@@ -13,6 +13,10 @@ from scalrctl import click, defaults, settings, commands, utils
 __author__ = 'Dmitriy Korsakov, Sergey Babak'
 
 
+class StatusCodeException(Exception):
+    pass
+
+
 def _get_spec_path(api_level, extension):
     return os.path.join(defaults.CONFIG_DIRECTORY,
                         '{}.{}'.format(api_level, extension))
@@ -29,7 +33,9 @@ def _load_yaml_spec(api_level):
                                                   settings.API_VERSION)
     try:
         resp = requests.get(spec_url, verify=settings.SSL_VERIFY_PEER)
-        return resp.text if resp.status_code == 200 else None
+        if resp.status_code == 200:
+            return resp.text
+        raise StatusCodeException(resp.status_code)
     except requests.exceptions.SSLError as e:
         import ssl
         if 'CertificateError' in str(e):
@@ -48,7 +54,7 @@ def _load_yaml_spec(api_level):
                          " \nIf you are having problems installing pyOpenSSL try to upgrade pip first." % sys.version[:5]
                 click.echo(errmsg)
                 sys.exit()
-        return None
+        raise
 
 
 def _read_spec(spec_path):
@@ -71,9 +77,12 @@ def _update_spec(api_level):
     """
 
     try:
-        yaml_spec_text = _load_yaml_spec(api_level)
-        if not yaml_spec_text:
-            raise Exception('Can\'t load spec file')
+        try:
+            yaml_spec_text = _load_yaml_spec(api_level)
+        except StatusCodeException as e:
+            raise Exception('Can\'t load spec file: error {}'.format(str(e)))
+        except requests.exceptions.SSLError as e:
+            raise Exception('Can\'t load spec file: {}'.format(str(e) or 'Unknown reason'))
 
         try:
             struct = yaml.safe_load(yaml_spec_text)
