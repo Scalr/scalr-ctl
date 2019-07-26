@@ -29,6 +29,7 @@ def _load_yaml_spec(api_level):
                                                   settings.API_VERSION)
     try:
         resp = requests.get(spec_url, verify=settings.SSL_VERIFY_PEER)
+        return resp.text if resp.status_code == 200 else None
     except requests.exceptions.SSLError as e:
         import ssl
         if 'CertificateError' in str(e):
@@ -47,7 +48,7 @@ def _load_yaml_spec(api_level):
                          " \nIf you are having problems installing pyOpenSSL try to upgrade pip first." % sys.version[:5]
                 click.echo(errmsg)
                 sys.exit()
-    return resp.text if resp.status_code == 200 else None
+        return None
 
 
 def _read_spec(spec_path):
@@ -95,7 +96,7 @@ def _update_spec(api_level):
 
         return True, None
     except Exception as e:
-        return False, e.message or 'Unknown reason'
+        return False, str(e) or 'Unknown reason'
 
 
 class UpdateScalrCTL(commands.BaseAction):
