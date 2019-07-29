@@ -13,10 +13,6 @@ from scalrctl import click, defaults, settings, commands, utils
 __author__ = 'Dmitriy Korsakov, Sergey Babak'
 
 
-class StatusCodeException(Exception):
-    pass
-
-
 def _get_spec_path(api_level, extension):
     return os.path.join(defaults.CONFIG_DIRECTORY,
                         '{}.{}'.format(api_level, extension))
