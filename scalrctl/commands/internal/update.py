@@ -81,8 +81,8 @@ def _update_spec(api_level):
             yaml_spec_text = _load_yaml_spec(api_level)
         except StatusCodeException as e:
             raise Exception('Can\'t load spec file: error {}'.format(str(e)))
-        except requests.exceptions.SSLError as e:
-            raise Exception('Can\'t load spec file: {}'.format(str(e) or 'Unknown reason'))
+        except requests.exceptions.SSLError:
+            raise Exception('Can\'t load spec file: an SSL error occurred.')
 
         try:
             struct = yaml.safe_load(yaml_spec_text)
