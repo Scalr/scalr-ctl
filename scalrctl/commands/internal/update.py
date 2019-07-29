@@ -33,9 +33,9 @@ def _load_yaml_spec(api_level):
                                                   settings.API_VERSION)
     try:
         resp = requests.get(spec_url, verify=settings.SSL_VERIFY_PEER)
-        if resp.status_code == 200:
-            return resp.text
-        raise StatusCodeException(resp.status_code)
+        resp.raise_for_status()
+        if resp.status_code != requests.codes.ok:
+            raise requests.exceptions.HTTPError("Expected code: 200, got: {}".format(resp.status_code))
     except requests.exceptions.SSLError as e:
         import ssl
         if 'CertificateError' in str(e):
@@ -79,10 +79,8 @@ def _update_spec(api_level):
     try:
         try:
             yaml_spec_text = _load_yaml_spec(api_level)
-        except StatusCodeException as e:
-            raise Exception('Can\'t load spec file. An HTTP error occurred: {}.'.format(str(e)))
-        except requests.exceptions.SSLError:
-            raise Exception('Can\'t load spec file. An SSL error occurred.')
+        except requests.exceptions.RequestException as e:
+            raise Exception("Can\'t load spec file. Request failed. {}".format(str(e)))
 
         try:
             struct = yaml.safe_load(yaml_spec_text)
