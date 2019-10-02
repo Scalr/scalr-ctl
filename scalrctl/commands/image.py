@@ -70,7 +70,7 @@ class ReplaceImageAccount(commands.SimplifiedAction):
         newimageid = click.Option(('--newImageId', 'newimageid'), required=True, help=hlp)
         deprecation_help = "If the value is true Scalr will mark source Image as deprecated."
         deprecate = click.Option(('--deprecateOldImage', 'deprecate'), help=deprecation_help, is_flag=True, default=False)
-        scope_help = "Make a replacement for all Roles from the selected scopes. "
+        scope_help = "Make a replacement for all Roles from the selected scopes. Comma-separated list. "
         scope_help += "If you choose to make a replacement including lower scope higher scope values will be chosen too"
         scope = click.Option(('--scope', 'scope'), default=self._default_scope, help=scope_help)
         options = [newimageid, deprecate, scope]
@@ -84,7 +84,7 @@ class ReplaceImageAccount(commands.SimplifiedAction):
         """
         post_data = copy.deepcopy(self.post_template)
         scope = kwargs.pop("scope")
-        post_data["replaceImageRequest"]["scope"] = scope,
+        post_data["replaceImageRequest"]["scope"] = scope.replace(' ', '').split(',')
         newimageid = kwargs.pop("newimageid", None)
         post_data["replaceImageRequest"]["newImage"]["id"] = newimageid
         deprecate = kwargs.pop("deprecate")
