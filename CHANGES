@@ -4,6 +4,14 @@ scalr-ctl Changelog
 
 Changelog on Scalr Wiki: https://scalr-labs.atlassian.net/wiki/pages/viewpage.action?pageId=109805613
 
+Version 7.16.0
+--------------
+
+Fixed
+
+    Error when running "scalr-ctl configure"
+    Invalid scope options in "scalr-ctl account images replace"
+
 Version 7.15.1
 --------------
 
@@ -351,8 +359,8 @@ New feature
     ST-187 Add support for Account Orchestration Rule endpoint
     ST-189 Replace Image for all Roles of specified Scope
     ST-186 Use the same Team with different ACL per Environment
-    
-    
+
+
 Version 1.0.55
 --------------
 
