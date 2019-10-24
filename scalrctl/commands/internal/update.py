@@ -30,10 +30,10 @@ def _load_yaml_spec(api_level):
     try:
         resp = requests.get(spec_url, verify=settings.SSL_VERIFY_PEER)
         resp.raise_for_status()
-        if resp.status_code != requests.codes.ok:
-            raise requests.exceptions.HTTPError("Expected code: {}, got: {}".format(
-                requests.codes.ok, resp.status_code)
-            )
+        if resp.status_code != 200:
+            raise requests.exceptions.HTTPError(
+                "Expected code: 200, got: {}".format(resp.status_code))
+        return resp.text
     except requests.exceptions.SSLError as e:
         import ssl
         if 'CertificateError' in str(e):
