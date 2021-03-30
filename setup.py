@@ -57,7 +57,7 @@ if __name__ == '__main__':
         data_files=[('', ['scalrctl/scheme/scheme.json', ]), ],
         install_requires=[
             'prettytable>=0.7.2',
-            'pyyaml>=3.11,<5',
+            'pyyaml>=5.4',
             'requests>=2.10.0',
             'six>=1.10.0',
             'colorama>=0.3.7',
